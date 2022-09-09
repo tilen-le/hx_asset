@@ -48,7 +48,10 @@
             <groupId>com.hexing</groupId>
             <artifactId>it-framework</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.hexing</groupId>
+            <artifactId>it-asset</artifactId>
+        </dependency>
         <!-- 定时任务-->
         <dependency>
             <groupId>com.hexing</groupId>

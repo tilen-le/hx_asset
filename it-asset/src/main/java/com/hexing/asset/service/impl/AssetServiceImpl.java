@@ -32,7 +32,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public Asset selectAssetByAssetId(Long assetId)
     {
-        return assetMapper.selectAssetByAssetId(assetId);
+        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        return assetMapper.selectById(assetId);
     }
 
     /**

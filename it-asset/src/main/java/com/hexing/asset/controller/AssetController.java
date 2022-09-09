@@ -69,9 +69,10 @@ public class AssetController extends BaseController {
      * 获取资产表详细信息
      */
     @PreAuthorize("@ss.hasPermi('asset:asset:query')")
-    @GetMapping(value = "/{assetId}")
-    public AjaxResult getInfo(@PathVariable("assetId") Long assetId) {
-        return AjaxResult.success(assetService.selectAssetByAssetId(assetId));
+    @GetMapping(value = "/getInfo")
+    public AjaxResult getInfo(Long assetId) {
+        Asset asset = assetService.selectAssetByAssetId(assetId);
+        return AjaxResult.success(asset);
     }
 
     /**

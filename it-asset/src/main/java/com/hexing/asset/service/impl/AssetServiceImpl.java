@@ -2,6 +2,7 @@ package com.hexing.asset.service.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,9 +42,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 资产表
      */
     @Override
-    public List<Asset> selectAssetList(Asset asset)
+    public List<Asset> selectAssetList()
     {
-        return assetMapper.selectAssetList(asset);
+        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        return assetMapper.selectList(wrapper);
     }
 
     /**
@@ -94,5 +96,18 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public int deleteAssetByAssetId(Long assetId)
     {
         return assetMapper.deleteAssetByAssetId(assetId);
+    }
+
+    /**
+     * TODO 资产信息导入
+     *
+     * @param assetList 资产信息列表
+     * @param isUpdateSupport 是否存在则覆盖
+     * @param operName 操作人姓名
+     * @return
+     */
+    @Override
+    public String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName) {
+        return null;
     }
 }

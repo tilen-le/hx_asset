@@ -1,14 +1,15 @@
 package com.hexing.asset.domain;
 
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import com.hexing.common.annotation.Excel;
+import com.hexing.common.core.domain.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.hexing.common.core.domain.BaseEntity;
+
+import java.util.Date;
 
 /**
  * 资产表对象 asset
@@ -24,26 +25,35 @@ public class Asset extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 资产id */
+    @TableId(type= IdType.AUTO)
     private Long assetId;
 
+    /** 公司代码 */
+    @Excel(name = "*公司代码")         /*  ”*“表示通过excel导入时该字段必填  */
+    private String companyCode;
+
+    /** 公司代码描述 */
+    @Excel(name = "*公司代码描述")
+    private String companyName;
+
     /** 固定资产名称 */
-    @Excel(name = "固定资产名称")
+    @Excel(name = "*固定资产名称")
     private String assetName;
 
     /** 平台资产编号 */
-    @Excel(name = "平台资产编号")
+    @Excel(name = "平台资产编号", type= Excel.Type.EXPORT)
     private String assetCode;
 
     /** 财务资产编号 */
-    @Excel(name = "财务资产编号")
+    @Excel(name = "*财务资产编号")
     private String financialAssetCode;
 
     /** 保管人工号（老工号） */
-    @Excel(name = "保管人工号", readConverterExp = "老=工号")
+    @Excel(name = "保管人工号")
     private String responsiblePersonNo;
 
     /** 资产分类描述 */
-    @Excel(name = "资产分类描述")
+    @Excel(name = "*资产分类描述")
     private String category;
 
     /** 资产状态描述 */
@@ -63,46 +73,42 @@ public class Asset extends BaseEntity
     private String measure;
 
     /** 采购人（工号） */
-    @Excel(name = "采购人", readConverterExp = "工=号")
+    @Excel(name = "采购人")
     private String buyer;
 
     /** 采购日期 */
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "采购日期", width = 30, dateFormat = "yyyy-MM-dd")
+    @Excel(name = "采购日期", width = 30, dateFormat = "yyyy/MM/dd")
     private Date buyDate;
 
+    /** 资产总价值 */
+    @Excel(name = "*资产总价值")
+    private Double totalValue;
+
     /** 净值 */
-    @Excel(name = "净值")
-    private Long netWorth;
+    @Excel(name = "*净值")
+    private Double netWorth;
 
     /** 保修期（月） */
-    @Excel(name = "保修期", readConverterExp = "月=")
+    @Excel(name = "保修期（月）")
     private Integer warranty;
 
     /** 预计使用寿命（月） */
-    @Excel(name = "预计使用寿命", readConverterExp = "月=")
+    @Excel(name = "预计使用寿命（月）")
     private Integer canUseMonths;
 
     /** 预计使用寿命（年） */
-    @Excel(name = "预计使用寿命", readConverterExp = "年=")
+    @Excel(name = "预计使用寿命（年）")
     private Integer canUseYears;
 
     /** 资本化日期/资产价值录入日期 */
     @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "资本化日期/资产价值录入日期", width = 30, dateFormat = "yyyy-MM-dd")
+    @Excel(name = "*资本化日期/资产价值录入日期", width = 30, dateFormat = "yyyy/MM/dd")
     private Date capitalizationDate;
 
     /** 资产原值币制 */
     @Excel(name = "资产原值币制")
     private String monetaryUnit;
-
-    /** 公司代码 */
-    @Excel(name = "公司代码")
-    private String companyCode;
-
-    /** 公司代码描述 */
-    @Excel(name = "公司代码描述")
-    private String companyName;
 
     /** 存放地点 */
     @Excel(name = "存放地点")
@@ -121,7 +127,7 @@ public class Asset extends BaseEntity
     private String brand;
 
     /** 成本中心（编号） */
-    @Excel(name = "成本中心", readConverterExp = "编=号")
+    @Excel(name = "成本中心")
     private String costCenter;
 
     /** 成本中心描述 */
@@ -129,7 +135,7 @@ public class Asset extends BaseEntity
     private String costCenterName;
 
     /** 管理部门描述 */
-    @Excel(name = "管理部门描述")
+    @Excel(name = "*管理部门描述")
     private String manageDept;
 
     /** 合同单号 */
@@ -137,7 +143,7 @@ public class Asset extends BaseEntity
     private String contractNo;
 
     /** 申请人（工号） */
-    @Excel(name = "申请人", readConverterExp = "工=号")
+    @Excel(name = "申请人")
     private String proposer;
 
     /** 资产使用场景 */

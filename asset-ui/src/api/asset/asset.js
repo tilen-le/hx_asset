@@ -36,9 +36,9 @@ export function updateAsset(data) {
 }
 
 // 删除资产表
-export function delAsset(assetId) {
+export function delAsset(assetCode) {
   return request({
-    url: '/asset/' + assetId,
+    url: '/asset/' + assetCode,
     method: 'delete'
   })
 }

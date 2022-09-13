@@ -284,7 +284,7 @@ export default {
         // 设置上传的请求头部
         headers: { Authorization: "Bearer " + getToken() },
         // 上传的地址
-        url: process.env.VUE_APP_BASE_API + "/asset/asset/importData"
+        url: process.env.VUE_APP_BASE_API + "/asset/importData"
       },
       // 表单参数
       form: {},

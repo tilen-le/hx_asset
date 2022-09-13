@@ -104,9 +104,9 @@ public class AssetController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('asset:asset:remove')")
     @Log(title = "资产表", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{assetIds}")
-    public AjaxResult remove(@PathVariable List<String> assetIds) {
-        return toAjax(assetService.removeByIds(assetIds));
+    @DeleteMapping("/{assetCodes}")
+    public AjaxResult remove(@PathVariable List<String> assetCodes) {
+        return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
     }
 
     /**

@@ -172,6 +172,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetMapper.deleteAssetByAssetId(assetId);
     }
 
+    @Override
+    public int deleteAssetByAssetCodes(List<String> assetCodes) {
+        return assetMapper.delete(new QueryWrapper<Asset>().in("asset_code", assetCodes));
+    }
+
     /**
      * TODO 资产信息导入
      *

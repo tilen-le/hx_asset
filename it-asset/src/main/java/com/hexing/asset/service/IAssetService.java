@@ -64,6 +64,11 @@ public interface IAssetService extends IService<Asset>
     public int deleteAssetByAssetId(Long assetId);
 
     /**
+     * 根据平台资产编号删除资产信息
+     */
+    int deleteAssetByAssetCodes(List<String> assetCodes);
+
+    /**
      * 资产信息导入
      *
      * @param assetList 资产信息列表

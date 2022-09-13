@@ -12,7 +12,7 @@ export function listAsset(query) {
 // 查询资产表详细
 export function getAsset(assetId) {
   return request({
-    url: '/asset' + assetId,
+    url: '/asset/getInfo?assetId=' + assetId,
     method: 'get'
   })
 }
@@ -29,7 +29,7 @@ export function addAsset(data) {
 // 修改资产表
 export function updateAsset(data) {
   return request({
-    url: '/asset',
+    url: '/asset/update',
     method: 'put',
     data: data
   })

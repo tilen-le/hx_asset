@@ -49,7 +49,6 @@
 
     <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="资产id" align="center" prop="assetId" />
       <el-table-column label="固定资产名称" align="center" prop="assetName" />
       <el-table-column label="平台资产编号" align="center" prop="assetCode" />
       <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" />

@@ -19,9 +19,9 @@ import java.util.Date;
  * @date 2022-09-08
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Accessors(chain = true)
-public class Asset extends BaseEntity
+public class Asset
 {
     private static final long serialVersionUID = 1L;
 
@@ -30,7 +30,7 @@ public class Asset extends BaseEntity
     private Long assetId;
 
     /** 公司代码 */
-    @Excel(name = "*公司代码")         /*  ”*“表示通过excel导入时该字段必填  */
+    @Excel(name = "*公司代码")         /*  name属性值前缀”*“表示通过excel导入时该字段为必填字段  */
     private String companyCode;
 
     /** 公司代码描述 */
@@ -155,5 +155,18 @@ public class Asset extends BaseEntity
     @Excel(name = "备注")
     private String comment;
 
+    /** 创建者 */
+    private String createBy;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+
+    /** 更新者 */
+    private String updateBy;
+
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
 
 }

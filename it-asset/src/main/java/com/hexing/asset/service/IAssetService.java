@@ -1,6 +1,8 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+
+import cn.hutool.json.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.common.core.domain.entity.SysUser;
@@ -24,10 +26,18 @@ public interface IAssetService extends IService<Asset>
     /**
      * 查询资产表列表
      *
-     * @param asset 资产表
+     * @param
      * @return 资产表集合
      */
     public List<Asset> selectAssetList();
+
+    /**
+     * 查询资产表列表通过管理部门和资产code
+     *
+     * @param
+     * @return 资产表集合
+     */
+    String getAssetsByAssetCodes(JSONObject params);
 
     /**
      * 新增资产表

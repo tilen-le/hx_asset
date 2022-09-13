@@ -5,7 +5,10 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -64,14 +67,64 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public Asset selectAssetByAssetId(Long assetId)
     {
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         return assetMapper.selectById(assetId);
+    }
+
+    @Override
+    public String getAssetsByAssetCodes(JSONObject params)
+    {
+        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        Asset asset =new Asset();
+        wrapper.setEntity(asset);
+
+        JSONObject R = new JSONObject();
+        JSONObject result = new JSONObject();
+        try {
+            List<Asset> assets = new ArrayList<>();
+            String assetCode = params.getStr("assetCode");
+            if (StringUtils.isBlank(assetCode)) {
+                result.put("code", "500");
+                result.put("msg", "平台资产编号为空");
+                return result.toString();
+            }
+            // 资产编号1;资产编号2;... 的情况
+            if (assetCode.contains(";")) {
+                String[] assetCodes = assetCode.split(";");
+                assets = new ArrayList<>();
+                for (String code : assetCodes) {
+                    String fdDeptDescription = params.getStr("manageDept");
+                    if (StringUtils.isNotBlank(fdDeptDescription)) {
+                        wrapper.getEntity().setManageDept(fdDeptDescription);
+                    }
+                    wrapper.getEntity().setAssetCode(code);
+                    assets.add(assetMapper.selectOne(wrapper));
+                }
+                result.put("assets", assets);
+                R.put("result", result);
+                return R.toString();
+            }else{
+                String manageDept = params.getStr("manageDept");
+                if (StringUtils.isNotBlank(manageDept)) {
+                    wrapper.getEntity().setManageDept(manageDept);
+                }
+                wrapper.getEntity().setAssetCode(assetCode);
+                assets.add(assetMapper.selectOne(wrapper));
+                result.put("assets", assets);
+                R.put("result", result);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+
+        }
+        return R.toString();
+
     }
 
     /**
      * 查询资产表列表
      *
-     * @param asset 资产表
+     * @param
      * @return 资产表
      */
     @Override

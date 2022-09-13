@@ -2,7 +2,9 @@ package com.hexing.asset.service.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
 import com.hexing.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,7 +45,8 @@ public class AssetProcessCountingTaskServiceImpl extends ServiceImpl<AssetProces
     @Override
     public List<AssetProcessCountingTask> selectAssetProcessCountingTaskList(AssetProcessCountingTask assetProcessCountingTask)
     {
-        return assetProcessCountingTaskMapper.selectAssetProcessCountingTaskList(assetProcessCountingTask);
+        QueryWrapper<AssetProcessCountingTask> wrapper = new QueryWrapper<>();
+        return assetProcessCountingTaskMapper.selectList(wrapper);
     }
 
     /**
@@ -56,7 +59,7 @@ public class AssetProcessCountingTaskServiceImpl extends ServiceImpl<AssetProces
     public int insertAssetProcessCountingTask(AssetProcessCountingTask assetProcessCountingTask)
     {
         assetProcessCountingTask.setCreateTime(DateUtils.getNowDate());
-        return assetProcessCountingTaskMapper.insertAssetProcessCountingTask(assetProcessCountingTask);
+        return assetProcessCountingTaskMapper.insert(assetProcessCountingTask);
     }
 
     /**

@@ -1,21 +1,16 @@
 package com.hexing.asset.controller;
 
-import cn.hutool.json.JSONObject;
-import com.hexing.asset.domain.AssetCountingTask;
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.vo.AssetCountingTaskVO;
 import com.hexing.asset.service.IAssetCountingTaskService;
 import com.hexing.asset.service.IAssetService;
-import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Date;
 
 /**
  * 开放给钉钉端的rest接口
@@ -42,7 +37,8 @@ public class DingTalkAssetController extends BaseController {
      * 新增盘点任务
      */
     @PostMapping("/createCountingTask")
-    public AjaxResult createCountingTask(@RequestBody AssetCountingTaskVO vo) {
+    public AjaxResult createCountingTask(@RequestBody JSONObject params) {
+        AssetCountingTaskVO vo = params.getObject("data", AssetCountingTaskVO.class);
         return toAjax(assetCountingTaskService.insertAssetCountingTask(vo));
     }
 

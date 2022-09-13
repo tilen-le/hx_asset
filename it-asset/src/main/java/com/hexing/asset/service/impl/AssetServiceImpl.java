@@ -1,33 +1,24 @@
 package com.hexing.asset.service.impl;
 
-import java.lang.reflect.InvocationTargetException;
+import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
+import com.hexing.asset.mapper.AssetMapper;
+import com.hexing.asset.service.IAssetService;
+import com.hexing.common.core.domain.entity.SysDictData;
+import com.hexing.common.exception.ServiceException;
+import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.StringUtils;
+import com.hexing.system.mapper.SysDictDataMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.ArrayList;
-import java.util.List;
-
-import cn.hutool.json.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.common.core.domain.entity.SysDictData;
-import com.hexing.common.exception.ServiceException;
-import com.hexing.common.utils.DateUtils;
-import com.hexing.common.utils.SecurityUtils;
-import com.hexing.common.utils.StringUtils;
-import com.hexing.framework.web.domain.server.Sys;
-import com.hexing.system.mapper.SysDictDataMapper;
-import com.hexing.system.service.ISysDictDataService;
-import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import com.hexing.asset.mapper.AssetMapper;
-import com.hexing.asset.domain.Asset;
-import com.hexing.asset.service.IAssetService;
-
-import javax.swing.text.html.Option;
 
 /**
  * 资产表Service业务层处理
@@ -81,7 +72,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         JSONObject result = new JSONObject();
         try {
             List<Asset> assets = new ArrayList<>();
-            String assetCode = params.getStr("assetCode");
+            String assetCode = params.getString("assetCode");
             if (StringUtils.isBlank(assetCode)) {
                 result.put("code", "500");
                 result.put("msg", "平台资产编号为空");
@@ -92,7 +83,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String[] assetCodes = assetCode.split(";");
                 assets = new ArrayList<>();
                 for (String code : assetCodes) {
-                    String fdDeptDescription = params.getStr("manageDept");
+                    String fdDeptDescription = params.getString("manageDept");
                     if (StringUtils.isNotBlank(fdDeptDescription)) {
                         wrapper.getEntity().setManageDept(fdDeptDescription);
                     }
@@ -103,7 +94,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 R.put("result", result);
                 return R.toString();
             }else{
-                String manageDept = params.getStr("manageDept");
+                String manageDept = params.getString("manageDept");
                 if (StringUtils.isNotBlank(manageDept)) {
                     wrapper.getEntity().setManageDept(manageDept);
                 }

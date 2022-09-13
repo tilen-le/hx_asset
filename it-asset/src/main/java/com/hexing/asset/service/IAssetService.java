@@ -2,7 +2,7 @@ package com.hexing.asset.service;
 
 import java.util.List;
 
-import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.common.core.domain.entity.SysUser;

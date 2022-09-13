@@ -26,11 +26,11 @@ public class Asset
     private static final long serialVersionUID = 1L;
 
     /** 资产id */
-    @TableId(type= IdType.AUTO)
-    private Long assetId;
+    @TableId(type= IdType.UUID)
+    private String assetId;
 
     /** 公司代码 */
-    @Excel(name = "*公司代码")         /*  name属性值前缀”*“表示通过excel导入时该字段为必填字段  */
+    @Excel(name = "*公司代码")         /*  name属性值中，前缀”*“表示通过excel导入时该字段必填  */
     private String companyCode;
 
     /** 公司代码描述 */
@@ -140,7 +140,7 @@ public class Asset
     private String manageDept;
 
     /** 合同单号 */
-    @Excel(name = "合同单号")
+    @Excel(name = "合同单号", type= Excel.Type.EXPORT)
     private String contractNo;
 
     /** 申请人（工号） */

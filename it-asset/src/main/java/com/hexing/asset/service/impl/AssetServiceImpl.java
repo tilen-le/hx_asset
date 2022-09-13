@@ -108,18 +108,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     /**
-     * 批量删除资产表
-     *
-     * @param assetIds 需要删除的资产表主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetByAssetIds(Long[] assetIds)
-    {
-        return assetMapper.deleteAssetByAssetIds(assetIds);
-    }
-
-    /**
      * 删除资产表信息
      *
      * @param assetId 资产表主键
@@ -144,16 +132,18 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (StringUtils.isNull(assetList) || assetList.size() == 0) {
             throw new ServiceException("导入资产数据不能为空！");
         }
+        int totalNum = 0;
         int successNum = 0;
         int failureNum = 0;
-        StringBuilder successMsg = new StringBuilder();
-        StringBuilder failureMsg = new StringBuilder();
-        for (Asset asset : assetList) {
+        StringBuilder message = new StringBuilder();
+        for (int i = 0; i < assetList.size(); i++) {
+            Asset asset = assetList.get(i);
             try {
                 String requiredFieldLeftUnfilled = checkRequiredFields(asset);
                 if (requiredFieldLeftUnfilled != null) {
+                    totalNum++;
                     failureNum++;
-                    failureMsg.append("<br/>" + failureNum + "、必填字段：" + requiredFieldLeftUnfilled + " 未填写");
+                    message.append("<br/><font color=\"red\">" + totalNum + "、" + "错误：第 " + (i + 2) + " 行的必填字段：" + requiredFieldLeftUnfilled + " 未填写</font>");
                     continue;
                 }
                 QueryWrapper<Asset> queryWrapper = new QueryWrapper<>();
@@ -166,33 +156,42 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     asset.setCreateBy(operName);
                     asset.setCreateTime(new Date());
                     assetMapper.insert(asset);
+                    totalNum++;
                     successNum++;
-                    successMsg.append("<br/>" + successNum + "、资产： " + asset.getAssetName() + " 导入成功，资产编码为：" + assetCode);
+                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
                 } else if (isUpdateSupport) {
                     UpdateWrapper<Asset> updateWrapper = new UpdateWrapper<>();
                     updateWrapper.eq(FINANCIAL_ASSET_CODE, asset.getFinancialAssetCode())
                             .eq(COMPANY_CODE, asset.getCompanyCode());
                     asset.setUpdateBy(operName);
                     asset.setUpdateTime(new Date());
-                    assetMapper.update(asset, updateWrapper);
-                    successNum++;
-                    successMsg.append("<br/>" + successNum + "、平台资产编号为： " + asset.getAssetCode() + " 的资产更新成功");
+                    int update = assetMapper.update(asset, updateWrapper);
+                    if (update > 0) {
+                        totalNum++;
+                        successNum++;
+                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新成功");
+                    } else {
+                        totalNum++;
+                        failureNum++;
+                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新失败");
+                    }
                 }
             } catch (Exception e) {
+                totalNum++;
                 failureNum++;
-                String msg = "<br/>" + failureNum + "、资产 " + asset.getAssetName() + " 导入失败：";
-                failureMsg.append(msg + e.getMessage());
+                String msg = "<br/>" + totalNum + "、资产 " + asset.getAssetName() + " 导入失败：";
+                message.append(msg + e.getMessage());
                 log.error(msg, e);
             }
         }
-        if (failureNum > 0) {
-            failureMsg.insert(0, "很抱歉，导入失败！共 " + failureNum + " 条数据，错误如下：");
-            throw new ServiceException(failureMsg.toString());
+        if (failureNum > 0 && successNum == 0) {
+            message.insert(0, "很抱歉，导入失败！错误如下：");
+            throw new ServiceException(message.toString());
         }
         else {
-            successMsg.insert(0, "恭喜您，数据已全部导入成功！共 " + successNum + " 条，数据如下：");
+            message.insert(0, "数据导入成功！共 "+totalNum+" 条，成功导入 " + successNum + " 条，出错 "+failureNum +" 条，数据如下：");
         }
-        return successMsg.toString();
+        return message.toString();
     }
 
     /**
@@ -213,7 +212,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         for (SysDictData dictData : assetImportRequiredFieldDictDataList) {
             String fieldName = dictData.getDictValue();
             String getMethodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-            String value = (String) clazz.getMethod(getMethodName).invoke(asset);
+            String value = clazz.getMethod(getMethodName).invoke(asset).toString();
             if (StringUtils.isEmpty(value)) {
                 return dictData.getDictLabel();
             }
@@ -256,7 +255,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         if (!yearAssetCountMap.containsKey(capitalizationDateCode)) {
             QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-            wrapper.apply("asset_code" + "like {0}", "%" + capitalizationDateCode + "____" );
+            wrapper.apply("asset_code" + " like {0}", "%" + capitalizationDateCode + "____" );
             List<Asset> assetList = assetMapper.selectList(wrapper);
             List<String> assetCodeList = assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList());
             if (assetCodeList == null || assetCodeList.size() == 0) {

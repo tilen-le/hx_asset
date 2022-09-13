@@ -46,14 +46,6 @@ public interface IAssetService extends IService<Asset>
     public int updateAsset(Asset asset);
 
     /**
-     * 批量删除资产表
-     *
-     * @param assetIds 需要删除的资产表主键集合
-     * @return 结果
-     */
-    public int deleteAssetByAssetIds(Long[] assetIds);
-
-    /**
      * 删除资产表信息
      *
      * @param assetId 资产表主键

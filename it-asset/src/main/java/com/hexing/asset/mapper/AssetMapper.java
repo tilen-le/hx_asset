@@ -54,11 +54,4 @@ public interface AssetMapper extends BaseMapper<Asset>
      */
     public int deleteAssetByAssetId(Long assetId);
 
-    /**
-     * 批量删除资产表
-     *
-     * @param assetIds 需要删除的数据主键集合
-     * @return 结果
-     */
-    public int deleteAssetByAssetIds(Long[] assetIds);
 }

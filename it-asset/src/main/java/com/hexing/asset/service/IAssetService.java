@@ -21,7 +21,7 @@ public interface IAssetService extends IService<Asset>
      * @param assetId 资产表主键
      * @return 资产表
      */
-    public Asset selectAssetByAssetId(Long assetId);
+    public Asset selectAssetByAssetId(String assetId);
 
     /**
      * 查询资产表列表

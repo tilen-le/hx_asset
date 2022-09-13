@@ -83,7 +83,7 @@ public class AssetController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('asset:asset:query')")
     @GetMapping(value = "/getInfo")
-    public AjaxResult getInfo(Long assetId) {
+    public AjaxResult getInfo(String assetId) {
         Asset asset = assetService.selectAssetByAssetId(assetId);
         return AjaxResult.success(asset);
     }

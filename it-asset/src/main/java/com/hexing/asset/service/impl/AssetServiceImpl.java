@@ -65,7 +65,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 资产表
      */
     @Override
-    public Asset selectAssetByAssetId(Long assetId)
+    public Asset selectAssetByAssetId(String assetId)
     {
         return assetMapper.selectById(assetId);
     }

@@ -1,6 +1,9 @@
 package com.hexing.asset.domain;
 
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -24,6 +27,7 @@ public class AssetCountingTask extends BaseEntity
     private static final long serialVersionUID = 1L;
 
     /** 盘点任务id */
+    @TableId(type = IdType.UUID)
     private String taskId;
 
     /** 盘点任务编码 */

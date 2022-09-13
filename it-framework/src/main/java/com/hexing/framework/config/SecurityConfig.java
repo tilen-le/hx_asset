@@ -117,6 +117,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
                 .antMatchers("/external/**").anonymous()
                 .antMatchers("/test/**").anonymous()
                 .antMatchers("/asset/**").permitAll()
+                .antMatchers("/api/dingtalk/asset/**").permitAll()
 
                 // 除上面外的所有请求全部需要鉴权认证
                 .anyRequest().authenticated()

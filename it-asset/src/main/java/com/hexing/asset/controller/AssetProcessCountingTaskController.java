@@ -73,10 +73,12 @@ public class AssetProcessCountingTaskController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('asset:task:add')")
     @Log(title = "资产盘点任务流程", businessType = BusinessType.INSERT)
-    @PostMapping
+    @PostMapping(value = "/add")
     public AjaxResult add(@RequestBody AssetProcessCountingTask assetProcessCountingTask)
     {
-        return toAjax(assetProcessCountingTaskService.insertAssetProcessCountingTask(assetProcessCountingTask));
+        System.out.println("assetProcessCountingTask: "+assetProcessCountingTask.toString());
+        int i = assetProcessCountingTaskService.insertAssetProcessCountingTask(assetProcessCountingTask);
+        return toAjax(i);
     }
 
     /**

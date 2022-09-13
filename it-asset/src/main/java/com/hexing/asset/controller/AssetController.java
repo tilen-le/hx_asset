@@ -1,12 +1,14 @@
 package com.hexing.asset.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import cn.hutool.json.JSONObject;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.utils.ServletUtils;
+import com.hexing.common.utils.StringUtils;
 import com.hexing.framework.web.service.TokenService;
-import org.aspectj.weaver.patterns.ITokenSource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,6 +53,17 @@ public class AssetController extends BaseController {
         startPage();
         List<Asset> list = assetService.selectAssetList();
         return getDataTable(list);
+    }
+
+    /**
+     * 通过资产编码，管理部门获取资产信息
+     */
+    @PreAuthorize("@ss.hasPermi('asset:asset:getAssetsByAssetCodes')")
+    @GetMapping(value = "/getAssetsByAssetCodes")
+    public AjaxResult getAssetsByAssetCodes(@RequestBody JSONObject params) {
+        logger.info("--------调用getAssetsByAssetCodes接口");
+        String a = assetService.getAssetsByAssetCodes(params);
+        return AjaxResult.success(a);
     }
 
     /**

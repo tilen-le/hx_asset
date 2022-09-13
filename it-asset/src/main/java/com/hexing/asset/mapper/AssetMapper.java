@@ -39,14 +39,6 @@ public interface AssetMapper extends BaseMapper<Asset>
     public int insertAsset(Asset asset);
 
     /**
-     * 修改资产表
-     *
-     * @param asset 资产表
-     * @return 结果
-     */
-    public int updateAsset(Asset asset);
-
-    /**
      * 删除资产表
      *
      * @param assetId 资产表主键

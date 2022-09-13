@@ -57,13 +57,13 @@ public class AssetController extends BaseController {
      * 导出资产表列表
      */
 //    @PreAuthorize("@ss.hasPermi('asset:asset:export')")
-//    @Log(title = "资产表", businessType = BusinessType.EXPORT)
-//    @GetMapping("/export")
-//    public AjaxResult export(Asset asset) {
-//        List<Asset> list = assetService.selectAssetList(asset);
-//        ExcelUtil<Asset> util = new ExcelUtil<Asset>(Asset.class);
-//        return util.exportExcel(list, "资产表数据");
-//    }
+    @Log(title = "资产表", businessType = BusinessType.EXPORT)
+    @GetMapping("/export")
+    public AjaxResult export(Asset asset) {
+        List<Asset> list = assetService.selectAssetList();
+        ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
+        return util.exportExcel(list, "固定资产数据");
+    }
 
     /**
      * 获取资产表详细信息
@@ -90,13 +90,15 @@ public class AssetController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('asset:asset:edit')")
     @Log(title = "资产表", businessType = BusinessType.UPDATE)
-    @PutMapping
+    @PutMapping("/update")
     public AjaxResult edit(@RequestBody Asset asset) {
         return toAjax(assetService.updateAsset(asset));
     }
 
     /**
      * 删除资产表
+     *
+     * @editor 80015306
      */
     @PreAuthorize("@ss.hasPermi('asset:asset:remove')")
     @Log(title = "资产表", businessType = BusinessType.DELETE)
@@ -105,6 +107,9 @@ public class AssetController extends BaseController {
         return toAjax(assetService.removeByIds(assetIds));
     }
 
+    /**
+     * 资产导入
+     */
     @Log(title = "资产信息导入", businessType = BusinessType.IMPORT)
     @PostMapping("/importData")
     public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception {
@@ -116,6 +121,9 @@ public class AssetController extends BaseController {
         return AjaxResult.success(message);
     }
 
+    /**
+     * 资产导入模板下载
+     */
     @GetMapping("/importTemplate")
     public AjaxResult importTemplate() {
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);

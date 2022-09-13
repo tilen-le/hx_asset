@@ -104,7 +104,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public int updateAsset(Asset asset)
     {
         asset.setUpdateTime(DateUtils.getNowDate());
-        return assetMapper.updateAsset(asset);
+        return assetMapper.updateById(asset);
     }
 
     /**

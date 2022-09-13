@@ -20,9 +20,9 @@ import com.hexing.common.core.domain.BaseEntity;
  * @date 2022-09-13
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Accessors(chain = true)
-public class AssetCountingTask extends BaseEntity
+public class AssetCountingTask
 {
     private static final long serialVersionUID = 1L;
 
@@ -44,15 +44,15 @@ public class AssetCountingTask extends BaseEntity
 
     /** 已盘点资产数 */
     @Excel(name = "已盘点资产数")
-    private Long assetCounted;
+    private Integer assetCounted;
 
     /** 待盘点资产数 */
     @Excel(name = "待盘点资产数")
-    private Long assetNotCounted;
+    private Integer assetNotCounted;
 
     /** 异常资产数目 */
     @Excel(name = "异常资产数目")
-    private Long assetAbnormal;
+    private Integer assetAbnormal;
 
     /** 盘点开始时间 */
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -68,5 +68,7 @@ public class AssetCountingTask extends BaseEntity
     @Excel(name = "盘点状态")
     private String status;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
 
 }

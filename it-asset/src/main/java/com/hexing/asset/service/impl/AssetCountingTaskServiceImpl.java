@@ -1,11 +1,18 @@
 package com.hexing.asset.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetCountingTask;
+import com.hexing.asset.domain.vo.AssetCountingTaskVO;
 import com.hexing.asset.mapper.AssetCountingTaskMapper;
+import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetCountingTaskService;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +27,8 @@ public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskM
 {
     @Autowired
     private AssetCountingTaskMapper assetCountingTaskMapper;
+    @Autowired
+    private AssetMapper assetMapper;
 
     /**
      * 查询盘点任务
@@ -47,14 +56,25 @@ public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskM
 
     /**
      * 新增盘点任务
-     *
-     * @param assetCountingTask 盘点任务
-     * @return 结果
      */
     @Override
-    public int insertAssetCountingTask(AssetCountingTask assetCountingTask)
+    public int insertAssetCountingTask(AssetCountingTaskVO vo)
     {
-        return assetCountingTaskMapper.insertAssetCountingTask(assetCountingTask);
+        AssetCountingTask task = new AssetCountingTask();
+        BeanUtils.copyProperties(vo, task);
+
+        // 统计待盘点资产总数
+        task.setAssetCounted(0);   /* 已盘点资产数 */
+        task.setAssetAbnormal(0);  /* 异常资产数目 */
+
+        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        wrapper.in("responsible_person_code", vo.getResponsiblePersonCodes());
+        Integer assetNotCounted = assetMapper.selectCount(wrapper);
+        task.setAssetNotCounted(assetNotCounted);   /* 待盘点资产数 */
+
+        task.setCreateTime(new Date());
+
+        return assetCountingTaskMapper.insert(task);
     }
 
     /**

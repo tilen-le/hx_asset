@@ -51,7 +51,7 @@
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="固定资产名称" align="center" prop="assetName" />
       <el-table-column label="平台资产编号" align="center" prop="assetCode" />
-      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="100"/>
+      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="100" />
       <el-table-column label="保管人工号" align="center" prop="responsiblePersonNo" width="100" />
       <el-table-column label="资产分类描述" align="center" prop="category" />
       <el-table-column label="资产状态描述" align="center" prop="assetStatus" />
@@ -243,6 +243,8 @@ export default {
       exportLoading: false,
       // 选中数组
       ids: [],
+      // 删除用
+      assetCodes: [],
       // 非单个禁用
       single: true,
       // 非多个禁用
@@ -362,6 +364,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.assetId)
+      this.assetCodes = selection.map(item => item.assetCode)
       this.single = selection.length !== 1
       this.multiple = !selection.length
     },
@@ -404,9 +407,9 @@ export default {
     //QWER
     /** 删除按钮操作 */
     handleDelete(row) {
-      const assetCode = row.assetCode;
-      this.$modal.confirm('是否确认删除平台资产编号为"' + assetCode + '"的数据项？').then(function () {
-        return delAsset(assetCode);
+      const assetCodes = row.assetCode || this.assetCodes;
+      this.$modal.confirm('是否确认删除平台资产编号为"' + assetCodes + '"的数据项？').then(function () {
+        return delAsset(assetCodes);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");

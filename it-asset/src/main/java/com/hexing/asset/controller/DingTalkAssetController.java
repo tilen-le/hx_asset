@@ -39,7 +39,7 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 获取人员信息
+     * 获取人员资产信息
      */
     @PostMapping(value = "/getAssets")
     public JSONObject getAssets(@RequestBody JSONObject params) {

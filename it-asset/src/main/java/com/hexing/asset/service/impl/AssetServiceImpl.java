@@ -141,12 +141,15 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * 根据人员查询资产
      */
     @Override
-    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode)
+    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode,String manageDept)
     {
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         Asset asset =new Asset();
         wrapper.setEntity(asset);
         wrapper.getEntity().setResponsiblePersonCode(responsiblePersonCode);
+        if (StringUtils.isNotBlank(manageDept)){
+            wrapper.getEntity().setManageDept(manageDept);
+        }
         return assetMapper.selectList(wrapper);
     }
 
@@ -211,7 +214,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             }
             SysDept sysDept = sysDeptService.selectDeptById(sysUser.getDeptId());
             R.put("department",sysDept.getDeptName());
-            List<Asset> assets = selectAssetByResponsiblePerson(userId);
+            String manageDept = params.getString("manageDept");
+            List<Asset> assets = selectAssetByResponsiblePerson(userId,manageDept);
             List<JSONObject> assetsList =new ArrayList<>();
             if (assets!=null){
                 for (int i = 0; i < assets.size(); i++) {

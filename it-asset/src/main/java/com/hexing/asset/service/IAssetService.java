@@ -46,7 +46,7 @@ public interface IAssetService extends IService<Asset>
      */
     String getAssetsByAssetCodes(JSONObject params);
 
-    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode);
+    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode,String manageDept);
 
     /**
      *

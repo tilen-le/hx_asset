@@ -3,7 +3,7 @@ package com.hexing.asset.controller;
 import java.util.List;
 
 import com.hexing.asset.domain.AssetProcessCountingTask;
-import com.hexing.asset.service.IAssetCountingTaskService;
+import com.hexing.asset.service.IAssetProcessCountingTaskService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,7 +28,7 @@ import com.hexing.common.core.page.TableDataInfo;
 public class AssetProcessCountingTaskController extends BaseController
 {
     @Autowired
-    private IAssetCountingTaskService assetCountingTaskService;
+    private IAssetProcessCountingTaskService assetProcessCountingTaskService;
 
     /**
      * 查询盘点任务列表
@@ -38,7 +38,7 @@ public class AssetProcessCountingTaskController extends BaseController
     public TableDataInfo list(AssetProcessCountingTask assetProcessCountingTask)
     {
         startPage();
-        List<AssetProcessCountingTask> list = assetCountingTaskService.selectAssetCountingTaskList(assetProcessCountingTask);
+        List<AssetProcessCountingTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetProcessCountingTask);
         return getDataTable(list);
     }
 
@@ -50,7 +50,7 @@ public class AssetProcessCountingTaskController extends BaseController
     @GetMapping("/export")
     public AjaxResult export(AssetProcessCountingTask assetProcessCountingTask)
     {
-        List<AssetProcessCountingTask> list = assetCountingTaskService.selectAssetCountingTaskList(assetProcessCountingTask);
+        List<AssetProcessCountingTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetProcessCountingTask);
         ExcelUtil<AssetProcessCountingTask> util = new ExcelUtil<AssetProcessCountingTask>(AssetProcessCountingTask.class);
         return util.exportExcel(list, "盘点任务数据");
     }
@@ -62,7 +62,7 @@ public class AssetProcessCountingTaskController extends BaseController
     @GetMapping(value = "/{taskId}")
     public AjaxResult getInfo(@PathVariable("taskId") String taskId)
     {
-        return AjaxResult.success(assetCountingTaskService.selectAssetCountingTaskByTaskId(taskId));
+        return AjaxResult.success(assetProcessCountingTaskService.selectAssetCountingTaskByTaskId(taskId));
     }
 
 

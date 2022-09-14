@@ -24,7 +24,7 @@ import com.hexing.common.core.page.TableDataInfo;
  * @date 2022-09-13
  */
 @RestController
-@RequestMapping("/mature/task")
+@RequestMapping("/asset/task")
 public class AssetProcessCountingTaskController extends BaseController
 {
     @Autowired
@@ -33,7 +33,7 @@ public class AssetProcessCountingTaskController extends BaseController
     /**
      * 查询盘点任务列表
      */
-    @PreAuthorize("@ss.hasPermi('mature:task:list')")
+    @PreAuthorize("@ss.hasPermi('asset:task:list')")
     @GetMapping("/list")
     public TableDataInfo list(AssetProcessCountingTask assetProcessCountingTask)
     {
@@ -45,7 +45,7 @@ public class AssetProcessCountingTaskController extends BaseController
     /**
      * 导出盘点任务列表
      */
-    @PreAuthorize("@ss.hasPermi('mature:task:export')")
+    @PreAuthorize("@ss.hasPermi('asset:task:export')")
     @Log(title = "盘点任务", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public AjaxResult export(AssetProcessCountingTask assetProcessCountingTask)

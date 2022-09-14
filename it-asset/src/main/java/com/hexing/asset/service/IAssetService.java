@@ -39,6 +39,16 @@ public interface IAssetService extends IService<Asset>
      */
     String getAssetsByAssetCodes(JSONObject params);
 
+    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode);
+
+    /**
+     *
+     *
+     * @param
+     * @return 人员资产查询
+     */
+    JSONObject getAssets(JSONObject params);
+
     /**
      * 新增资产表
      *

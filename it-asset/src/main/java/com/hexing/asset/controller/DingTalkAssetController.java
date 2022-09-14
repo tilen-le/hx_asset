@@ -39,6 +39,19 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
+     * 获取人员信息
+     */
+    @PostMapping(value = "/getAssets")
+    public JSONObject getAssets(@RequestBody JSONObject params) {
+        logger.info("--------调用getAssets接口");
+        JSONObject result = assetService.getAssets(params);
+        JSONObject R = new JSONObject();
+        R.put("result", result);
+        return R;
+    }
+
+
+    /**
      * 新增盘点任务
      */
     @PostMapping("/createCountingTask")

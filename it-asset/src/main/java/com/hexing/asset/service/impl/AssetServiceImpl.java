@@ -7,11 +7,15 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetService;
+import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.mapper.SysDictDataMapper;
+import com.hexing.system.service.impl.SysDeptServiceImpl;
+import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +52,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private AssetMapper assetMapper;
     @Autowired
     private SysDictDataMapper sysDictDataMapper;
+    @Autowired
+    private SysUserServiceImpl sysUserService;
+    @Autowired
+    private SysDeptServiceImpl sysDeptService;
 
     /**
      * 查询资产表
@@ -71,7 +79,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         JSONObject R = new JSONObject();
         JSONObject result = new JSONObject();
         try {
-            List<Asset> assets = new ArrayList<>();
+            List<JSONObject> assets = new ArrayList<>();
             String assetCode = params.getString("assetCode");
             if (StringUtils.isBlank(assetCode)) {
                 result.put("code", "500");
@@ -88,7 +96,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         wrapper.getEntity().setManageDept(fdDeptDescription);
                     }
                     wrapper.getEntity().setAssetCode(code);
-                    assets.add(assetMapper.selectOne(wrapper));
+                    JSONObject jsonObject = setNewAsset(assetMapper.selectOne(wrapper));
+                    assets.add(jsonObject);
                 }
                 result.put("assets", assets);
                 R.put("result", result);
@@ -99,7 +108,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     wrapper.getEntity().setManageDept(manageDept);
                 }
                 wrapper.getEntity().setAssetCode(assetCode);
-                assets.add(assetMapper.selectOne(wrapper));
+                JSONObject jsonObject = setNewAsset(assetMapper.selectOne(wrapper));
+                assets.add(jsonObject);
                 result.put("assets", assets);
                 R.put("result", result);
             }
@@ -109,6 +119,97 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         }
         return R.toString();
+
+    }
+
+
+    /**
+     * 根据人员查询资产
+     */
+    @Override
+    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode)
+    {
+        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        Asset asset =new Asset();
+        wrapper.setEntity(asset);
+        wrapper.getEntity().setResponsiblePersonCode(responsiblePersonCode);
+        return assetMapper.selectList(wrapper);
+    }
+
+    public JSONObject setNewAsset(Asset asset)
+    {
+        JSONObject result =new JSONObject();
+        result.put("assetCode",asset.getAssetCode());
+        result.put("fixedAsset",asset.getAssetName());
+        result.put("factoryCode",asset.getFactoryNo());
+        result.put("assetStatus",asset.getAssetStatus());
+        result.put("location",asset.getLocation());
+        result.put("manageDept",asset.getManageDept());
+        result.put("brand",asset.getBrand());
+        result.put("fdStandard",asset.getStandard());
+        result.put("financialAssetCode",asset.getFinancialAssetCode());
+        result.put("initialAssetValue",asset.getTotalValue());
+        result.put("netAssetValue",asset.getNetWorth());
+        result.put("purchaseTime",asset.getBuyDate());
+        result.put("companyCode",asset.getCompanyName());
+        String estimatedUsefulLife = "";
+        if (asset.getCanUseYears() != null && asset.getCanUseYears()>0){
+            estimatedUsefulLife =  asset.getCanUseYears().toString()+"年";
+        }
+        if (asset.getCanUseMonths() != null && asset.getCanUseMonths()>0){
+            estimatedUsefulLife = estimatedUsefulLife + asset.getCanUseMonths().toString()+"月";
+        }
+        result.put("estimatedUsefulLife",estimatedUsefulLife);
+        result.put("usageScenario",asset.getUsageScenario());
+        result.put("fdResponsiblePersonCode",asset.getResponsiblePersonCode());
+        return result;
+
+    }
+    @Override
+    public JSONObject getAssets(JSONObject params)
+    {
+        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        Asset asset =new Asset();
+        wrapper.setEntity(asset);
+
+        JSONObject R = new JSONObject();
+        JSONObject result = new JSONObject();
+        try {
+            String userId = params.getString("userId");
+            if (StringUtils.isBlank(userId)) {
+                result.put("code", "500");
+                result.put("msg", "保管人工号为空");
+                return result;
+            }
+            // 查询保管人信息
+            SysUser sysUser = sysUserService.selectUserByUserName(userId);
+            if (sysUser == null) {
+                result.put("code", "500");
+                result.put("msg", "未查询到此保管人");
+                return result;
+            }
+            R.put("userId",userId);
+            // 查询保管人所属部门
+            if (sysUser.getDeptId()==null) {
+                result.put("code", "500");
+                result.put("msg", "未查询到保管部门");
+                return result;
+            }
+            SysDept sysDept = sysDeptService.selectDeptById(sysUser.getDeptId());
+            R.put("department",sysDept.getDeptName());
+            List<Asset> assets = selectAssetByResponsiblePerson(userId);
+            List<JSONObject> assetsList =new ArrayList<>();
+            if (assets!=null){
+                for (int i = 0; i < assets.size(); i++) {
+                    assetsList.add(setNewAsset(assets.get(i)));
+                }
+            }
+            R.put("assets",assetsList);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return R;
 
     }
 

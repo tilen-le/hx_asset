@@ -16,6 +16,13 @@ import com.hexing.common.core.domain.entity.SysUser;
 public interface IAssetService extends IService<Asset>
 {
     /**
+     * 根据平台资产编号查询资产
+     * @param assetCode
+     * @return
+     */
+    Asset selectAssetByAssetCode(String assetCode);
+
+    /**
      * 查询资产表
      *
      * @param assetId 资产表主键

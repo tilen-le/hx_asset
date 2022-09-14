@@ -47,12 +47,12 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" v-columns="columns">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="固定资产名称" align="center" prop="assetName" />
       <el-table-column label="平台资产编号" align="center" prop="assetCode" />
-      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="100" />
-      <el-table-column label="保管人工号" align="center" prop="responsiblePersonNo" width="100" />
+      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="110" />
+      <el-table-column label="保管人工号" align="center" prop="responsiblePersonCode" width="110" />
       <el-table-column label="资产分类描述" align="center" prop="category" />
       <el-table-column label="资产状态描述" align="center" prop="assetStatus" />
       <el-table-column label="出厂编号" align="center" prop="factoryNo" />
@@ -112,8 +112,8 @@
         <el-form-item label="财务资产编号" prop="financialAssetCode">
           <el-input v-model="form.financialAssetCode" placeholder="请输入财务资产编号" />
         </el-form-item>
-        <el-form-item label="保管人工号" prop="responsiblePersonNo">
-          <el-input v-model="form.responsiblePersonNo" placeholder="请输入保管人工号" />
+        <el-form-item label="保管人工号" prop="responsiblePersonCode">
+          <el-input v-model="form.responsiblePersonCode" placeholder="请输入保管人工号" />
         </el-form-item>
         <el-form-item label="资产分类描述" prop="category">
           <el-input v-model="form.category" placeholder="请输入资产分类描述" />
@@ -317,7 +317,7 @@ export default {
         assetName: null,
         assetCode: null,
         financialAssetCode: null,
-        responsiblePersonNo: null,
+        responsiblePersonCode: null,
         category: null,
         assetStatus: "0",
         factoryNo: null,

@@ -31,11 +31,9 @@ public class AssetProcessCountingTask
     private String taskId;
 
     /** 流程总表id */
-    @Excel(name = "流程总表id")
     private Long processId;
 
     /** 实例ID */
-    @Excel(name = "实例ID")
     private String instanceId;
 
     /** 盘点任务编码 */
@@ -78,8 +76,5 @@ public class AssetProcessCountingTask
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
-
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date updateTime;
 
 }

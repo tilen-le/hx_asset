@@ -1,5 +1,7 @@
 package com.hexing.asset.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.hexing.common.annotation.Excel;
@@ -21,8 +23,8 @@ public class AssetProcessCounting extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** $column.columnComment */
-    private Long id;
+    @TableId(type = IdType.UUID)
+    private String id;
 
     /** 流程总表id */
     @Excel(name = "流程总表id")
@@ -34,7 +36,7 @@ public class AssetProcessCounting extends BaseEntity
 
     /** 盘点任务编码 */
     @Excel(name = "盘点任务编码")
-    private String countingTaskCode;
+    private String taskCode;
 
     /** 发起人工号 */
     @Excel(name = "发起人工号")

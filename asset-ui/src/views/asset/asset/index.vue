@@ -47,12 +47,12 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" v-columns="columns">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="固定资产名称" align="center" prop="assetName" />
       <el-table-column label="平台资产编号" align="center" prop="assetCode" />
-      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" />
-      <el-table-column label="保管人工号" align="center" prop="responsiblePersonNo" />
+      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="110" />
+      <el-table-column label="保管人工号" align="center" prop="responsiblePersonCode" width="110" />
       <el-table-column label="资产分类描述" align="center" prop="category" />
       <el-table-column label="资产状态描述" align="center" prop="assetStatus" />
       <el-table-column label="出厂编号" align="center" prop="factoryNo" />
@@ -112,8 +112,8 @@
         <el-form-item label="财务资产编号" prop="financialAssetCode">
           <el-input v-model="form.financialAssetCode" placeholder="请输入财务资产编号" />
         </el-form-item>
-        <el-form-item label="保管人工号" prop="responsiblePersonNo">
-          <el-input v-model="form.responsiblePersonNo" placeholder="请输入保管人工号" />
+        <el-form-item label="保管人工号" prop="responsiblePersonCode">
+          <el-input v-model="form.responsiblePersonCode" placeholder="请输入保管人工号" />
         </el-form-item>
         <el-form-item label="资产分类描述" prop="category">
           <el-input v-model="form.category" placeholder="请输入资产分类描述" />
@@ -243,6 +243,8 @@ export default {
       exportLoading: false,
       // 选中数组
       ids: [],
+      // 删除用
+      assetCodes: [],
       // 非单个禁用
       single: true,
       // 非多个禁用
@@ -267,9 +269,7 @@ export default {
         costCenter: null
       },
       //显隐列
-      columns: [
-        { key: 0, label: '123', visible: true },
-      ],
+      columns: [],
       // 用户导入参数
       upload: {
         // 是否显示弹出层（用户导入）
@@ -317,7 +317,7 @@ export default {
         assetName: null,
         assetCode: null,
         financialAssetCode: null,
-        responsiblePersonNo: null,
+        responsiblePersonCode: null,
         category: null,
         assetStatus: "0",
         factoryNo: null,
@@ -364,6 +364,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.assetId)
+      this.assetCodes = selection.map(item => item.assetCode)
       this.single = selection.length !== 1
       this.multiple = !selection.length
     },
@@ -403,11 +404,12 @@ export default {
         }
       });
     },
+    //QWER
     /** 删除按钮操作 */
     handleDelete(row) {
-      const assetIds = row.assetId || this.ids;
-      this.$modal.confirm('是否确认删除资产表编号为"' + assetIds + '"的数据项？').then(function () {
-        return delAsset(assetIds);
+      const assetCodes = row.assetCode || this.assetCodes;
+      this.$modal.confirm('是否确认删除平台资产编号为"' + assetCodes + '"的数据项？').then(function () {
+        return delAsset(assetCodes);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");

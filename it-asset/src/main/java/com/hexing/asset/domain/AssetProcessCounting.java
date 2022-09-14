@@ -1,12 +1,15 @@
 package com.hexing.asset.domain;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.hexing.common.annotation.Excel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.hexing.common.core.domain.BaseEntity;
+
+import java.util.List;
 
 /**
  * 资产盘点流程对象 asset_process_counting
@@ -21,8 +24,8 @@ public class AssetProcessCounting extends BaseEntity
 {
     private static final long serialVersionUID = 1L;
 
-    /** $column.columnComment */
-    private Long id;
+    @TableId(type = IdType.UUID)
+    private String id;
 
     /** 流程总表id */
     @Excel(name = "流程总表id")
@@ -34,7 +37,7 @@ public class AssetProcessCounting extends BaseEntity
 
     /** 盘点任务编码 */
     @Excel(name = "盘点任务编码")
-    private String countingTaskCode;
+    private String taskCode;
 
     /** 发起人工号 */
     @Excel(name = "发起人工号")
@@ -44,5 +47,7 @@ public class AssetProcessCounting extends BaseEntity
     @Excel(name = "平台资产编码")
     private String assetCode;
 
+    @JsonProperty(value = "assets")
+    private List<Asset> assets;
 
 }

@@ -26,7 +26,7 @@ public class Asset
     private static final long serialVersionUID = 1L;
 
     /** 资产id */
-    @TableId(type= IdType.UUID)
+    @TableId(type = IdType.UUID)
     private String assetId;
 
     /** 公司代码 */
@@ -51,7 +51,7 @@ public class Asset
 
     /** 保管人工号（老工号） */
     @Excel(name = "保管人工号")
-    private String responsiblePersonNo;
+    private String responsiblePersonCode;
 
     /** 资产分类描述 */
     @Excel(name = "*资产分类描述")
@@ -150,6 +150,9 @@ public class Asset
     /** 资产使用场景 */
     @Excel(name = "资产使用场景")
     private String usageScenario;
+
+    /** 盘点状态 */
+    private String inventoryStatus;
 
     /** 备注 */
     @Excel(name = "备注")

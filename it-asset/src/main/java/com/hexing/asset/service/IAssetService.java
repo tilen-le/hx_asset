@@ -2,7 +2,7 @@ package com.hexing.asset.service;
 
 import java.util.List;
 
-import cn.hutool.json.JSONObject;
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.common.core.domain.entity.SysUser;
@@ -62,6 +62,11 @@ public interface IAssetService extends IService<Asset>
      * @return 结果
      */
     public int deleteAssetByAssetId(Long assetId);
+
+    /**
+     * 根据平台资产编号删除资产信息
+     */
+    int deleteAssetByAssetCodes(List<String> assetCodes);
 
     /**
      * 资产信息导入

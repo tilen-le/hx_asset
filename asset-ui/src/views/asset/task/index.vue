@@ -3,23 +3,23 @@
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="发起人" prop="userCode">
         <el-input
-          v-model="queryParams.userCode"
+          v-model="queryParams.createBy"
           placeholder="请输入发起人"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="盘点范围" prop="inventoryRange">
+      <el-form-item label="盘点部门" prop="inventoryRange">
         <el-input
-          v-model="queryParams.inventoryRange"
-          placeholder="请输入盘点范围"
+          v-model="queryParams.inventoryDept"
+          placeholder="请输入盘点部门"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="盘点开始时间" prop="startDate">
+      <el-form-item label="开始时间" prop="startDate">
         <el-date-picker clearable size="small"
           v-model="queryParams.startDate"
           type="date"
@@ -27,7 +27,7 @@
           placeholder="选择盘点开始时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="盘点结束时间" prop="endDate">
+      <el-form-item label="结束时间" prop="endDate">
         <el-date-picker clearable size="small"
           v-model="queryParams.endDate"
           type="date"
@@ -54,7 +54,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['mature:task:add']"
+          v-hasPermi="['asset:task:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -65,7 +65,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['mature:task:edit']"
+          v-hasPermi="['asset:task:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -76,7 +76,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['mature:task:remove']"
+          v-hasPermi="['asset:task:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -87,7 +87,7 @@
           size="mini"
           :loading="exportLoading"
           @click="handleExport"
-          v-hasPermi="['mature:task:export']"
+          v-hasPermi="['asset:task:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -95,7 +95,7 @@
 
     <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" @row-click="showTaskDetail">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="盘点任务id" align="center" prop="taskId" /> -->
+      <!-- <el-table-column label="盘点任务id" align="center" prop="taskCode" /> -->
       <el-table-column label="盘点任务编码" align="center" prop="taskCode" />
       <el-table-column label="发起人" align="center" prop="userCode" />
       <el-table-column label="盘点范围" align="center" prop="inventoryRange" />
@@ -120,14 +120,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['mature:task:edit']"
+            v-hasPermi="['asset:task:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['mature:task:remove']"
+            v-hasPermi="['asset:task:remove']"
           >删除</el-button>
         </template>
       </el-table-column> -->
@@ -144,24 +144,15 @@
     <!-- 添加或修改盘点任务对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="盘点任务编码" prop="taskCode">
-          <el-input v-model="form.taskCode" placeholder="请输入盘点任务编码" />
+
+        <el-form-item label="盘点人" prop="inventoryRange">
+          <el-input v-model="form.inventoryUsers" placeholder="请输入盘点范围" />
         </el-form-item>
-        <el-form-item label="发起人" prop="userCode">
-          <el-input v-model="form.userCode" placeholder="请输入发起人" />
+
+        <el-form-item label="盘点组织" prop="inventoryRange">
+          <el-input v-model="form.inventoryDept" placeholder="请输入盘点范围" />
         </el-form-item>
-        <el-form-item label="盘点范围" prop="inventoryRange">
-          <el-input v-model="form.inventoryRange" placeholder="请输入盘点范围" />
-        </el-form-item>
-        <el-form-item label="已盘点资产数" prop="assetCounted">
-          <el-input v-model="form.assetCounted" placeholder="请输入已盘点资产数" />
-        </el-form-item>
-        <el-form-item label="待盘点资产数" prop="assetNotCounted">
-          <el-input v-model="form.assetNotCounted" placeholder="请输入待盘点资产数" />
-        </el-form-item>
-        <el-form-item label="异常资产数目" prop="assetAbnormal">
-          <el-input v-model="form.assetAbnormal" placeholder="请输入异常资产数目" />
-        </el-form-item>
+
         <el-form-item label="盘点开始时间" prop="startDate">
           <el-date-picker clearable size="small"
             v-model="form.startDate"
@@ -177,11 +168,6 @@
             value-format="yyyy-MM-dd"
             placeholder="选择盘点结束时间">
           </el-date-picker>
-        </el-form-item>
-        <el-form-item label="盘点状态">
-          <el-radio-group v-model="form.status">
-            <el-radio label="1">请选择字典生成</el-radio>
-          </el-radio-group>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -225,10 +211,7 @@ export default {
         pageSize: 10,
         taskCode: null,
         userCode: null,
-        inventoryRange: null,
-        assetCounted: null,
-        assetNotCounted: null,
-        assetAbnormal: null,
+        inventoryDept: null,
         startDate: null,
         endDate: null,
         status: null
@@ -261,16 +244,11 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        taskId: null,
         taskCode: null,
-        userCode: null,
-        inventoryRange: null,
-        assetCounted: null,
-        assetNotCounted: null,
-        assetAbnormal: null,
+        inventoryUsers: null,
+        inventoryDept: null,
         startDate: null,
-        endDate: null,
-        status: "0"
+        endDate: null
       };
       this.resetForm("form");
     },
@@ -286,7 +264,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.taskId)
+      this.ids = selection.map(item => item.taskCode)
       this.single = selection.length!==1
       this.multiple = !selection.length
     },
@@ -303,8 +281,8 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const taskId = row.taskId || this.ids
-      getTask(taskId).then(response => {
+      const taskCode = row.taskCode || this.ids
+      getTask(taskCode).then(response => {
         this.form = response.data;
         this.open = true;
         this.title = "修改盘点任务";
@@ -314,7 +292,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.taskId != null) {
+          if (this.form.taskCode != null) {
             updateTask(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
@@ -332,9 +310,9 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const taskIds = row.taskId || this.ids;
-      this.$modal.confirm('是否确认删除盘点任务编号为"' + taskIds + '"的数据项？').then(function() {
-        return delTask(taskIds);
+      const taskCodes = row.taskCode || this.ids;
+      this.$modal.confirm('是否确认删除盘点任务编号为"' + taskCodes + '"的数据项？').then(function() {
+        return delTask(taskCodes);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");

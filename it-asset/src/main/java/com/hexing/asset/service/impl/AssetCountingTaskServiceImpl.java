@@ -6,12 +6,11 @@ import java.util.List;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetCountingTask;
-import com.hexing.asset.domain.dto.AssetCountingTaskDTO;
+import com.hexing.asset.domain.AssetProcessCountingTask;
+import com.hexing.asset.domain.dto.AssetProcessCountingTaskDTO;
 import com.hexing.asset.mapper.AssetCountingTaskMapper;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetCountingTaskService;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ import org.springframework.stereotype.Service;
  * @date 2022-09-13
  */
 @Service
-public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskMapper, AssetCountingTask> implements IAssetCountingTaskService
+public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskMapper, AssetProcessCountingTask> implements IAssetCountingTaskService
 {
     @Autowired
     private AssetCountingTaskMapper assetCountingTaskMapper;
@@ -37,7 +36,7 @@ public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskM
      * @return 盘点任务
      */
     @Override
-    public AssetCountingTask selectAssetCountingTaskByTaskId(String taskId)
+    public AssetProcessCountingTask selectAssetCountingTaskByTaskId(String taskId)
     {
         return assetCountingTaskMapper.selectAssetCountingTaskByTaskId(taskId);
     }
@@ -45,22 +44,22 @@ public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskM
     /**
      * 查询盘点任务列表
      *
-     * @param assetCountingTask 盘点任务
+     * @param assetProcessCountingTask 盘点任务
      * @return 盘点任务
      */
     @Override
-    public List<AssetCountingTask> selectAssetCountingTaskList(AssetCountingTask assetCountingTask)
+    public List<AssetProcessCountingTask> selectAssetCountingTaskList(AssetProcessCountingTask assetProcessCountingTask)
     {
-        return assetCountingTaskMapper.selectAssetCountingTaskList(assetCountingTask);
+        return assetCountingTaskMapper.selectAssetCountingTaskList(assetProcessCountingTask);
     }
 
     /**
      * 新增盘点任务
      */
     @Override
-    public int insertAssetCountingTask(AssetCountingTaskDTO dto)
+    public int insertAssetCountingTask(AssetProcessCountingTaskDTO dto)
     {
-        AssetCountingTask task = new AssetCountingTask();
+        AssetProcessCountingTask task = new AssetProcessCountingTask();
         BeanUtils.copyProperties(dto, task);
 
         // 统计待盘点资产总数
@@ -80,13 +79,13 @@ public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskM
     /**
      * 修改盘点任务
      *
-     * @param assetCountingTask 盘点任务
+     * @param assetProcessCountingTask 盘点任务
      * @return 结果
      */
     @Override
-    public int updateAssetCountingTask(AssetCountingTask assetCountingTask)
+    public int updateAssetCountingTask(AssetProcessCountingTask assetProcessCountingTask)
     {
-        return assetCountingTaskMapper.updateAssetCountingTask(assetCountingTask);
+        return assetCountingTaskMapper.updateAssetCountingTask(assetProcessCountingTask);
     }
 
     /**

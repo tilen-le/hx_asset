@@ -4,12 +4,11 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetProcessCountingTask;
 import com.hexing.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessCountingTaskMapper;
-import com.hexing.asset.domain.AssetProcessCountingTask;
 import com.hexing.asset.service.IAssetProcessCountingTaskService;
 
 /**
@@ -31,7 +30,7 @@ public class AssetProcessCountingTaskServiceImpl extends ServiceImpl<AssetProces
      * @return 资产盘点任务流程
      */
     @Override
-    public AssetProcessCountingTask selectAssetProcessCountingTaskById(Long id)
+    public AssetProcessCountingTask selectAssetProcessCountingTaskById(String id)
     {
         return assetProcessCountingTaskMapper.selectAssetProcessCountingTaskById(id);
     }

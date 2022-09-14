@@ -1,8 +1,10 @@
 package com.hexing.asset.service;
 
 import java.util.List;
-import com.hexing.asset.domain.AssetProcessCountingTask;
+
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.AssetProcessCountingTask;
+
 /**
  * 资产盘点任务流程Service接口
  *
@@ -17,7 +19,7 @@ public interface IAssetProcessCountingTaskService extends IService<AssetProcessC
      * @param id 资产盘点任务流程主键
      * @return 资产盘点任务流程
      */
-    public AssetProcessCountingTask selectAssetProcessCountingTaskById(Long id);
+    public AssetProcessCountingTask selectAssetProcessCountingTaskById(String id);
 
     /**
      * 查询资产盘点任务流程列表

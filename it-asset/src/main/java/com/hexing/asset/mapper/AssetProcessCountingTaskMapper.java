@@ -2,8 +2,8 @@ package com.hexing.asset.mapper;
 
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.springframework.stereotype.Repository;
 import com.hexing.asset.domain.AssetProcessCountingTask;
+import org.springframework.stereotype.Repository;
 
 /**
  * 资产盘点任务流程Mapper接口
@@ -20,7 +20,7 @@ public interface AssetProcessCountingTaskMapper extends BaseMapper<AssetProcessC
      * @param id 资产盘点任务流程主键
      * @return 资产盘点任务流程
      */
-    public AssetProcessCountingTask selectAssetProcessCountingTaskById(Long id);
+    public AssetProcessCountingTask selectAssetProcessCountingTaskById(String id);
 
     /**
      * 查询资产盘点任务流程列表

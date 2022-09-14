@@ -2,7 +2,7 @@ package com.hexing.asset.mapper;
 
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.hexing.asset.domain.AssetCountingTask;
+import com.hexing.asset.domain.AssetProcessCountingTask;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Repository;
  * @date 2022-09-13
  */
 @Repository
-public interface AssetCountingTaskMapper extends BaseMapper<AssetCountingTask>
+public interface AssetCountingTaskMapper extends BaseMapper<AssetProcessCountingTask>
 {
     /**
      * 查询盘点任务
@@ -20,31 +20,31 @@ public interface AssetCountingTaskMapper extends BaseMapper<AssetCountingTask>
      * @param taskId 盘点任务主键
      * @return 盘点任务
      */
-    public AssetCountingTask selectAssetCountingTaskByTaskId(String taskId);
+    public AssetProcessCountingTask selectAssetCountingTaskByTaskId(String taskId);
 
     /**
      * 查询盘点任务列表
      *
-     * @param assetCountingTask 盘点任务
+     * @param assetProcessCountingTask 盘点任务
      * @return 盘点任务集合
      */
-    public List<AssetCountingTask> selectAssetCountingTaskList(AssetCountingTask assetCountingTask);
+    public List<AssetProcessCountingTask> selectAssetCountingTaskList(AssetProcessCountingTask assetProcessCountingTask);
 
     /**
      * 新增盘点任务
      *
-     * @param assetCountingTask 盘点任务
+     * @param assetProcessCountingTask 盘点任务
      * @return 结果
      */
-    public int insertAssetCountingTask(AssetCountingTask assetCountingTask);
+    public int insertAssetCountingTask(AssetProcessCountingTask assetProcessCountingTask);
 
     /**
      * 修改盘点任务
      *
-     * @param assetCountingTask 盘点任务
+     * @param assetProcessCountingTask 盘点任务
      * @return 结果
      */
-    public int updateAssetCountingTask(AssetCountingTask assetCountingTask);
+    public int updateAssetCountingTask(AssetProcessCountingTask assetProcessCountingTask);
 
     /**
      * 删除盘点任务

@@ -50,7 +50,8 @@ public class AssetProcessCountingTaskServiceImpl extends ServiceImpl<AssetProces
     @Override
     public List<AssetProcessCountingTask> selectAssetCountingTaskList(AssetProcessCountingTask assetProcessCountingTask)
     {
-        return assetProcessCountingTaskMapper.selectAssetCountingTaskList(assetProcessCountingTask);
+        QueryWrapper<AssetProcessCountingTask> wrapper = new QueryWrapper<>();
+        return assetProcessCountingTaskMapper.selectList(wrapper);
     }
 
     /**

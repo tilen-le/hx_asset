@@ -1,9 +1,15 @@
 package com.hexing.asset.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetCountingTask;
+import com.hexing.asset.domain.vo.AssetCountingTaskVO;
 import com.hexing.common.utils.DateUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
@@ -53,10 +59,19 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 结果
      */
     @Override
-    public int insertAssetProcessCounting(AssetProcessCounting assetProcessCounting)
+    public int insertAssetProcessCounting(AssetProcessCounting vo)
     {
-        assetProcessCounting.setCreateTime(DateUtils.getNowDate());
-        return assetProcessCountingMapper.insertAssetProcessCounting(assetProcessCounting);
+        int insert = 0;
+        List<Asset> assets = vo.getAssets();
+        for (int i = 0; i < assets.size(); i++) {
+            AssetProcessCounting assetProcessCounting  = new AssetProcessCounting();
+            assetProcessCounting.setAssetCode(assets.get(i).getAssetCode());
+            assetProcessCounting.setUserCode(vo.getUserCode());
+
+            insert = assetProcessCountingMapper.insert(assetProcessCounting);
+        }
+        return insert;
+
     }
 
     /**

@@ -3,6 +3,8 @@ package com.hexing.asset.service;
 import java.util.List;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.vo.AssetCountingTaskVO;
+
 /**
  * 资产盘点流程Service接口
  *
@@ -33,7 +35,7 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      * @param assetProcessCounting 资产盘点流程
      * @return 结果
      */
-    public int insertAssetProcessCounting(AssetProcessCounting assetProcessCounting);
+    public int insertAssetProcessCounting(AssetProcessCounting vo);
 
     /**
      * 修改资产盘点流程

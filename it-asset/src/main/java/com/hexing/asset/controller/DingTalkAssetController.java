@@ -2,7 +2,10 @@ package com.hexing.asset.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.dto.AssetCountingTaskDTO;
+import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.domain.vo.AssetCountingTaskVO;
 import com.hexing.asset.service.IAssetCountingTaskService;
+import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -23,6 +26,8 @@ public class DingTalkAssetController extends BaseController {
     private IAssetService assetService;
     @Autowired
     private IAssetCountingTaskService assetCountingTaskService;
+    @Autowired
+    private IAssetProcessCountingService assetProcessCountingService;
     /**
      * 通过资产编码，管理部门获取资产信息
      */
@@ -40,6 +45,16 @@ public class DingTalkAssetController extends BaseController {
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {
         AssetCountingTaskDTO dto = params.getObject("data", AssetCountingTaskDTO.class);
         return toAjax(assetCountingTaskService.insertAssetCountingTask(dto));
+    }
+
+    /**
+     * 新增盘点资产记录
+     */
+    @PostMapping("/countingAssets")
+    public AjaxResult countingAssets(@RequestBody JSONObject params) {
+        System.out.println("params: "+params);
+        AssetProcessCounting vo = params.getObject("data", AssetProcessCounting.class);
+        return toAjax(assetProcessCountingService.insertAssetProcessCounting(vo));
     }
 
 }

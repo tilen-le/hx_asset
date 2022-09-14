@@ -1,14 +1,15 @@
 package com.hexing.asset.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import com.hexing.common.annotation.Excel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.hexing.common.core.domain.BaseEntity;
+
+import java.util.List;
 
 /**
  * 资产盘点流程对象 asset_process_counting
@@ -46,5 +47,7 @@ public class AssetProcessCounting extends BaseEntity
     @Excel(name = "平台资产编码")
     private String assetCode;
 
+    @JsonProperty(value = "assets")
+    private List<Asset> assets;
 
 }

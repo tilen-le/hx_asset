@@ -3,7 +3,7 @@ import request from '@/utils/request'
 // 查询盘点任务列表
 export function listTask(query) {
   return request({
-    url: '/mature/task/list',
+    url: '/asset/task/list',
     method: 'get',
     params: query
   })
@@ -12,7 +12,7 @@ export function listTask(query) {
 // 查询盘点任务详细
 export function getTask(taskId) {
   return request({
-    url: '/mature/task/' + taskId,
+    url: '/asset/task/' + taskId,
     method: 'get'
   })
 }
@@ -20,7 +20,7 @@ export function getTask(taskId) {
 // 新增盘点任务
 export function addTask(data) {
   return request({
-    url: '/mature/task',
+    url: '/asset/task',
     method: 'post',
     data: data
   })
@@ -29,7 +29,7 @@ export function addTask(data) {
 // 修改盘点任务
 export function updateTask(data) {
   return request({
-    url: '/mature/task',
+    url: '/asset/task',
     method: 'put',
     data: data
   })
@@ -38,7 +38,7 @@ export function updateTask(data) {
 // 删除盘点任务
 export function delTask(taskId) {
   return request({
-    url: '/mature/task/' + taskId,
+    url: '/asset/task/' + taskId,
     method: 'delete'
   })
 }
@@ -46,7 +46,7 @@ export function delTask(taskId) {
 // 导出盘点任务
 export function exportTask(query) {
   return request({
-    url: '/mature/task/export',
+    url: '/asset/task/export',
     method: 'get',
     params: query
   })

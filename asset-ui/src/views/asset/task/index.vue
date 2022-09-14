@@ -202,7 +202,7 @@
 </template>
 
 <script>
-import { listTask, getTask, delTask, addTask, updateTask, exportTask } from "@/api/mature/task";
+import { listTask, getTask, delTask, addTask, updateTask, exportTask } from "@/api/task/task";
 
 export default {
   name: "Task",

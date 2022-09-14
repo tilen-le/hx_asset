@@ -50,7 +50,7 @@ public class TestController extends BaseController
     @GetMapping("/list")
     public AjaxResult userList()
     {
-        userService.syncUserList();
+        userService.syncDepartmentUserList();
         List<UserEntity> userList = new ArrayList<UserEntity>(users.values());
         return AjaxResult.success(userList);
     }

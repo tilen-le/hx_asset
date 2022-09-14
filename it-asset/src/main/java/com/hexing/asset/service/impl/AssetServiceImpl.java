@@ -1,5 +1,6 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -24,6 +25,8 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.hexing.common.utils.PageUtil.startPage;
 
 /**
  * 资产表Service业务层处理
@@ -240,8 +243,21 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public List<Asset> selectAssetList()
     {
+        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameNicknameMap();
+        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
+
+        startPage();
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        return assetMapper.selectList(wrapper);
+        List<Asset> assetList = assetMapper.selectList(wrapper);
+
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            for (Asset asset : assetList) {
+                SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
+                asset.setResponsiblePersonName(user.getUserName());
+                asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+            }
+        }
+        return assetList;
     }
 
     /**
@@ -326,7 +342,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     assetMapper.insert(asset);
                     totalNum++;
                     successNum++;
-                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
+//                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
                 } else if (isUpdateSupport) {
                     UpdateWrapper<Asset> updateWrapper = new UpdateWrapper<>();
                     updateWrapper.eq(FINANCIAL_ASSET_CODE, asset.getFinancialAssetCode())
@@ -337,7 +353,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     if (update > 0) {
                         totalNum++;
                         successNum++;
-                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新成功");
+//                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新成功");
                     } else {
                         totalNum++;
                         failureNum++;

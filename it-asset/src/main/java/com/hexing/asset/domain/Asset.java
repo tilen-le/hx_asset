@@ -49,9 +49,17 @@ public class Asset
     @Excel(name = "*财务资产编号")
     private String financialAssetCode;
 
+    /** 保管人姓名 */
+    @TableField(exist = false)
+    private String responsiblePersonName;
+
     /** 保管人工号（老工号） */
     @Excel(name = "保管人工号")
     private String responsiblePersonCode;
+
+    /** 保管部门 */
+    @TableField(exist = false)
+    private String responsiblePersonDept;
 
     /** 资产分类描述 */
     @Excel(name = "*资产分类描述")
@@ -171,5 +179,6 @@ public class Asset
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
+
 
 }

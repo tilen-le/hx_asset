@@ -689,4 +689,17 @@ public class SysUserServiceImpl implements ISysUserService
     public List<SysUser> getOnOfficeUserList(String parameter) {
         return userMapper.getOnOfficeUserList(parameter);
     }
+
+    @Override
+    public Map<String, SysUser> getUsernameNicknameMap() {
+        List<SysUser> allUserList = userMapper.getAllUserList();
+        Map<String,SysUser> usernameNicknameMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(allUserList)) {
+            for (SysUser sysUser : allUserList) {
+                usernameNicknameMap.put(sysUser.getUserName(), sysUser);
+            }
+        }
+        return usernameNicknameMap;
+    }
+
 }

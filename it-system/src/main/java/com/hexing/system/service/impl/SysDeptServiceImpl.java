@@ -1,8 +1,6 @@
 package com.hexing.system.service.impl;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.hexing.common.utils.MessageUtils;
@@ -22,6 +20,7 @@ import com.hexing.common.utils.spring.SpringUtils;
 import com.hexing.system.mapper.SysDeptMapper;
 import com.hexing.system.mapper.SysRoleMapper;
 import com.hexing.system.service.ISysDeptService;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 部门管理 服务实现
@@ -335,4 +334,17 @@ public class SysDeptServiceImpl implements ISysDeptService
     {
         return getChildList(list, t).size() > 0 ? true : false;
     }
+
+    @Override
+    public Map<String, String> getDeptIdDeptNameMap() {
+        List<SysDept> allDeptList = deptMapper.getAllDepartment();
+        Map<String,String> deptIdDeptNameMap = new HashMap<>();
+        if (!CollectionUtils.isEmpty(allDeptList)) {
+            for (SysDept sysDept : allDeptList) {
+                deptIdDeptNameMap.put(sysDept.getDeptId().toString(), sysDept.getDeptName());
+            }
+        }
+        return deptIdDeptNameMap;
+    }
+
 }

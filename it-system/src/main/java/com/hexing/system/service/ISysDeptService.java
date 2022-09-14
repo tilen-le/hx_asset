@@ -1,6 +1,8 @@
 package com.hexing.system.service;
 
 import java.util.List;
+import java.util.Map;
+
 import com.hexing.common.core.domain.TreeSelect;
 import com.hexing.common.core.domain.entity.SysDept;
 
@@ -117,4 +119,7 @@ public interface ISysDeptService
 
     //获取本部门及子部门
     List<SysDept> selectChildDeptList(SysDept sysDept);
+
+    // 获取部门ID和部门名称映射表
+    Map<String, String> getDeptIdDeptNameMap();
 }

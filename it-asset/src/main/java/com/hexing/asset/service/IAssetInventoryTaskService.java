@@ -2,8 +2,8 @@ package com.hexing.asset.service;
 
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hexing.asset.domain.AssetProcessCountingTask;
-import com.hexing.asset.domain.dto.AssetProcessCountingTaskDTO;
+import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 
 /**
  * 盘点任务Service接口
@@ -11,7 +11,7 @@ import com.hexing.asset.domain.dto.AssetProcessCountingTaskDTO;
  * @author zxy
  * @date 2022-09-13
  */
-public interface IAssetProcessCountingTaskService extends IService<AssetProcessCountingTask>
+public interface IAssetInventoryTaskService extends IService<AssetInventoryTask>
 {
     /**
      * 查询盘点任务
@@ -19,15 +19,15 @@ public interface IAssetProcessCountingTaskService extends IService<AssetProcessC
      * @param taskId 盘点任务主键
      * @return 盘点任务
      */
-    public AssetProcessCountingTask selectAssetCountingTaskByTaskId(String taskId);
+    public AssetInventoryTask selectAssetCountingTaskByTaskId(String taskId);
 
     /**
      * 查询盘点任务列表
      *
-     * @param assetProcessCountingTask 盘点任务
+     * @param assetInventoryTask 盘点任务
      * @return 盘点任务集合
      */
-    public List<AssetProcessCountingTask> selectAssetCountingTaskList(AssetProcessCountingTask assetProcessCountingTask);
+    public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask);
 
     /**
      * 新增盘点任务
@@ -35,15 +35,15 @@ public interface IAssetProcessCountingTaskService extends IService<AssetProcessC
      * @param dto 盘点任务DTO对象
      * @return 结果
      */
-    public int insertAssetCountingTask(AssetProcessCountingTaskDTO dto);
+    public int insertAssetCountingTask(AssetInventoryTaskDTO dto);
 
     /**
      * 修改盘点任务
      *
-     * @param assetProcessCountingTask 盘点任务
+     * @param assetInventoryTask 盘点任务
      * @return 结果
      */
-    public int updateAssetCountingTask(AssetProcessCountingTask assetProcessCountingTask);
+    public int updateAssetCountingTask(AssetInventoryTask assetInventoryTask);
 
     /**
      * 批量删除盘点任务

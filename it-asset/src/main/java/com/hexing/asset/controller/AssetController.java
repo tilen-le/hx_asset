@@ -77,8 +77,6 @@ public class AssetController extends BaseController {
         return AjaxResult.success(asset);
     }
 
-
-
     /**
      * 新增资产表
      */

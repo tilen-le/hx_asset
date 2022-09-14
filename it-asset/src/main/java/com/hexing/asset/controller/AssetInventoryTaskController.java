@@ -2,8 +2,8 @@ package com.hexing.asset.controller;
 
 import java.util.List;
 
-import com.hexing.asset.domain.AssetProcessCountingTask;
-import com.hexing.asset.service.IAssetProcessCountingTaskService;
+import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.asset.service.IAssetInventoryTaskService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,20 +25,20 @@ import com.hexing.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/asset/task")
-public class AssetProcessCountingTaskController extends BaseController
+public class AssetInventoryTaskController extends BaseController
 {
     @Autowired
-    private IAssetProcessCountingTaskService assetProcessCountingTaskService;
+    private IAssetInventoryTaskService assetProcessCountingTaskService;
 
     /**
      * 查询盘点任务列表
      */
     @PreAuthorize("@ss.hasPermi('asset:task:list')")
     @GetMapping("/list")
-    public TableDataInfo list(AssetProcessCountingTask assetProcessCountingTask)
+    public TableDataInfo list(AssetInventoryTask assetInventoryTask)
     {
         startPage();
-        List<AssetProcessCountingTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetProcessCountingTask);
+        List<AssetInventoryTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetInventoryTask);
         return getDataTable(list);
     }
 
@@ -48,10 +48,10 @@ public class AssetProcessCountingTaskController extends BaseController
     @PreAuthorize("@ss.hasPermi('asset:task:export')")
     @Log(title = "盘点任务", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(AssetProcessCountingTask assetProcessCountingTask)
+    public AjaxResult export(AssetInventoryTask assetInventoryTask)
     {
-        List<AssetProcessCountingTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetProcessCountingTask);
-        ExcelUtil<AssetProcessCountingTask> util = new ExcelUtil<AssetProcessCountingTask>(AssetProcessCountingTask.class);
+        List<AssetInventoryTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetInventoryTask);
+        ExcelUtil<AssetInventoryTask> util = new ExcelUtil<AssetInventoryTask>(AssetInventoryTask.class);
         return util.exportExcel(list, "盘点任务数据");
     }
 

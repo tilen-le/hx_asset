@@ -1,5 +1,6 @@
 package com.hexing.asset.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -9,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.hexing.common.core.domain.BaseEntity;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -18,9 +20,9 @@ import java.util.List;
  * @date 2022-09-08
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode
 @Accessors(chain = true)
-public class AssetProcessCounting extends BaseEntity
+public class AssetProcessCounting
 {
     private static final long serialVersionUID = 1L;
 
@@ -47,7 +49,26 @@ public class AssetProcessCounting extends BaseEntity
     @Excel(name = "平台资产编码")
     private String assetCode;
 
-    @JsonProperty(value = "assets")
-    private List<Asset> assets;
+//    @JsonProperty(value = "assets")
+//    private List<Asset> assets;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "创建时间")
+    private Date createTime;
+
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "更新时间")
+    private Date updateTime;
+
+    /** 盘点状态 */
+    @Excel(name = "盘点状态")
+    private String countingStatus;
+
+    /** 盘点时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "盘点时间")
+    private Date countingTime;
 
 }

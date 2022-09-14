@@ -1,5 +1,8 @@
 package com.hexing.asset.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import com.hexing.common.annotation.Excel;
@@ -8,6 +11,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.hexing.common.core.domain.BaseEntity;
 
+import java.util.Date;
+
 /**
  * 资产更换流程对象 asset_process_exchange
  *
@@ -15,13 +20,12 @@ import com.hexing.common.core.domain.BaseEntity;
  * @date 2022-09-08
  */
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class AssetProcessExchange extends BaseEntity
+public class AssetProcessExchange
 {
     private static final long serialVersionUID = 1L;
 
-    /** $column.columnComment */
+    @TableId(type = IdType.UUID)
     private Long id;
 
     /** 流程总表id */
@@ -39,6 +43,14 @@ public class AssetProcessExchange extends BaseEntity
     /** 平台资产编码 */
     @Excel(name = "平台资产编码")
     private String assetCode;
+
+    /** 创建时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+
+    /** 更新时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
 
 
 }

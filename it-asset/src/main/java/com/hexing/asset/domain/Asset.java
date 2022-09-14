@@ -26,7 +26,7 @@ public class Asset
     private static final long serialVersionUID = 1L;
 
     /** 资产id */
-    @TableId(type = IdType.UUID)
+    @TableId(type = IdType.AUTO)
     private String assetId;
 
     /** 公司代码 */

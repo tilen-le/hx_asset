@@ -1,6 +1,6 @@
 package com.hexing.asset.domain.dto;
 
-import com.hexing.asset.domain.AssetProcessCountingTask;
+import com.hexing.asset.domain.AssetInventoryTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -13,6 +13,6 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class AssetProcessCountingTaskDTO extends AssetProcessCountingTask {
+public class AssetInventoryTaskDTO extends AssetInventoryTask {
     private List<String> responsiblePersonCodes;
 }

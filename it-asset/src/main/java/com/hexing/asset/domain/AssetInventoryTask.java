@@ -1,6 +1,7 @@
 package com.hexing.asset.domain;
 
 import java.util.Date;
+import java.util.List;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -22,31 +23,21 @@ import com.hexing.common.core.domain.BaseEntity;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-public class AssetProcessCountingTask
+public class AssetInventoryTask
 {
     private static final long serialVersionUID = 1L;
 
-    /** 盘点任务id */
-    @TableId(type = IdType.UUID)
-    private String taskId;
-
-    /** 流程总表id */
-    private Long processId;
-
-    /** 实例ID */
-    private String instanceId;
-
     /** 盘点任务编码 */
+    @TableId
     @Excel(name = "盘点任务编码")
     private String taskCode;
 
-    /** 发起人 */
-    @Excel(name = "发起人")
-    private String userCode;
+    /** 盘点人 */
+    private String inventoryUsers;
 
     /** 盘点范围 */
     @Excel(name = "盘点范围")
-    private String inventoryRange;
+    private String inventoryDept;
 
     /** 已盘点资产数 */
     @Excel(name = "已盘点资产数")
@@ -73,6 +64,10 @@ public class AssetProcessCountingTask
     /** 盘点状态 */
     @Excel(name = "盘点状态")
     private String status;
+
+    /** 发起人 */
+    @Excel(name = "发起人")
+    private String createBy;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;

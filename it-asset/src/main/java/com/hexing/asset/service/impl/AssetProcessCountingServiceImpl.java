@@ -55,22 +55,9 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 结果
      */
     @Override
-    public int insertAssetProcessCounting(AssetProcessCounting vo)
+    public int insertAssetProcessCounting(AssetProcessCounting entity)
     {
-        int insert = 0;
-        List<Asset> assets = vo.getAssets();
-        for (int i = 0; i < assets.size(); i++) {
-            AssetProcessCounting assetProcessCounting  = new AssetProcessCounting();
-            assetProcessCounting.setAssetCode(assets.get(i).getAssetCode());
-            assetProcessCounting.setTaskCode(vo.getTaskCode());
-            assetProcessCounting.setUserCode(vo.getUserCode());
-            assetProcessCounting.setProcessId(vo.getProcessId());
-            assetProcessCounting.setInstanceId(vo.getInstanceId());
-            assetProcessCounting.setCreateTime(new Date());
-            insert = assetProcessCountingMapper.insert(assetProcessCounting);
-        }
-        return insert;
-
+       return assetProcessCountingMapper.insert(entity);
     }
 
     /**

@@ -34,7 +34,7 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      * @param assetProcessCounting 资产盘点流程
      * @return 结果
      */
-    public int insertAssetProcessCounting(AssetProcessCounting vo);
+    public int insertAssetProcessCounting(AssetProcessCounting entity);
 
     /**
      * 修改资产盘点流程

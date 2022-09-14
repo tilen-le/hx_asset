@@ -1,15 +1,6 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="盘点任务编码" prop="taskCode">
-        <el-input
-          v-model="queryParams.taskCode"
-          placeholder="请输入盘点任务编码"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="发起人" prop="userCode">
         <el-input
           v-model="queryParams.userCode"
@@ -102,7 +93,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" @row-click="showTaskDetail">
       <el-table-column type="selection" width="55" align="center" />
       <!-- <el-table-column label="盘点任务id" align="center" prop="taskId" /> -->
       <el-table-column label="盘点任务编码" align="center" prop="taskCode" />
@@ -122,7 +113,7 @@
         </template>
       </el-table-column>
       <el-table-column label="盘点状态" align="center" prop="status" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -139,7 +130,7 @@
             v-hasPermi="['mature:task:remove']"
           >删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination
@@ -298,6 +289,10 @@ export default {
       this.ids = selection.map(item => item.taskId)
       this.single = selection.length!==1
       this.multiple = !selection.length
+    },
+    // 跳转资产详情页面
+    showTaskDetail(row, column, event){
+
     },
     /** 新增按钮操作 */
     handleAdd() {

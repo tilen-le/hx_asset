@@ -4,8 +4,8 @@ export default {
   label_large_width: '120px',
   //系统
   project: {
-    name: 'IT-MANAGER系统',
-    logo: 'IT-MANAGER系统',
+    name: '资产管理系统',
+    logo: '资产管理系统',
   },
   //公用
   common_field: {

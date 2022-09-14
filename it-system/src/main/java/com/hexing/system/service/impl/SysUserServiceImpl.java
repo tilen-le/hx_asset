@@ -1,7 +1,10 @@
 package com.hexing.system.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.common.annotation.DataScope;
 import com.hexing.common.constant.UserConstants;
+import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysRole;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
@@ -9,6 +12,7 @@ import com.hexing.common.utils.MessageUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.spring.SpringUtils;
+import com.hexing.system.domain.OdoCodeDTO;
 import com.hexing.system.domain.SysPost;
 import com.hexing.system.domain.SysUserPost;
 import com.hexing.system.domain.SysUserRole;
@@ -19,10 +23,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.Resource;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -54,6 +62,15 @@ public class SysUserServiceImpl implements ISysUserService
 
     @Autowired
     private ISysConfigService configService;
+
+    @Resource
+    private RestTemplate restTemplate;
+
+    @Resource
+    private SysDeptMapper deptMapper;
+
+    @Value("${odoo.getDepartmentEmployee}")
+    private String DepartmentEmployeeURL;
 
     /**
      * 根据条件分页查询用户列表
@@ -594,36 +611,59 @@ public class SysUserServiceImpl implements ISysUserService
 
     @Override
     @Transactional
-    public void syncUserList() {
+    public void syncDepartmentUserList() {
         String delete = "2";
         String unDelete = "0";
-        List<SysUser> origin = userMapper.getAllUserList();
-        //todo:查询odoo在职人员列表 -> 异常终止
-        List<SysUser> recent = new ArrayList<>();
-
-        for (SysUser dingUser : recent) {
-            SysUser exist = origin.stream().filter(u -> u.getUserName().equals(dingUser.getUserName())).findFirst().orElse(null);
-            if (Objects.isNull(exist)) {
-                SysUser userDO = new SysUser();
-                userDO.setUserName(dingUser.getUserName());
-                userDO.setNickName(dingUser.getNickName());
-                userDO.setUserType("1");
-                userMapper.insertUser(userDO);
-            }
-            if (Objects.nonNull(exist)) {
-                if (delete.equals(exist.getDelFlag())) {
-                    exist.setDelFlag(unDelete);
-                    userMapper.updateDel(exist.getUserId(), unDelete);
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(DepartmentEmployeeURL, null, String.class);
+        String body = responseEntity.getBody();
+        JSONObject result = JSON.parseObject(body);
+        if (result.getIntValue("code") != 0) {
+            throw new ServiceException("获取odoo组织架构信息异常");
+        }
+        JSONObject dataObj = JSON.parseObject(result.getString("data"));
+        List<OdoCodeDTO> odoDeptList = JSON.parseArray(dataObj.getString("dept_data"), OdoCodeDTO.class);
+        //获取所有组织
+        List<SysDept> currentDeptList = deptMapper.getAllDepartment();
+        currentDeptList.forEach(d -> d.setDelFlag(delete));
+        for (OdoCodeDTO odoCodeDTO : odoDeptList) {
+            long deptCode = Long.parseLong(odoCodeDTO.getCode());
+            SysDept deptDO = currentDeptList.stream().filter(d -> d.getDeptId().equals(deptCode)).findFirst().orElse(null);
+            if (Objects.nonNull(deptDO)) {
+                deptDO.setDelFlag(unDelete);
+                deptDO.setDeptName(odoCodeDTO.getName());
+                if (StringUtils.isNotBlank(odoCodeDTO.getParent_code())) {
+                    deptDO.setParentId(Long.parseLong(odoCodeDTO.getParent_code()));
                 }
+            } else {
+                SysDept sysDept = new SysDept();
+                sysDept.setDeptId(deptCode);
+                if (StringUtils.isNotBlank(odoCodeDTO.getParent_code())) {
+                    sysDept.setParentId(Long.parseLong(odoCodeDTO.getParent_code()));
+                }
+                sysDept.setDeptName(odoCodeDTO.getName());
+                deptMapper.insertDept(sysDept);
             }
         }
-        for (SysUser sysUser : origin) {
-            if (delete.equals(sysUser.getDelFlag())) {
-                continue;
+        if (!CollectionUtils.isEmpty(currentDeptList)) {
+            for (SysDept sysDept : currentDeptList) {
+                deptMapper.updateDept(sysDept);
             }
-            long count = recent.stream().filter(u -> u.getUserName().equals(sysUser.getUserName())).count();
-            if (count == 0) {
-                userMapper.updateDel(sysUser.getUserId(), delete);
+        }
+        List<OdoCodeDTO> odoUserList = JSON.parseArray(dataObj.getString("user_data"), OdoCodeDTO.class);
+        List<SysUser> currentUserList = userMapper.getAllUserList();
+        //只增不减
+        for (OdoCodeDTO odoUser : odoUserList) {
+            SysUser userDO = currentUserList.stream().filter(u -> u.getUserName().equals(odoUser.getCode())).findFirst().orElse(null);
+            if (Objects.isNull(userDO)) {
+                SysUser sysUser = new SysUser();
+                sysUser.setUserName(odoUser.getCode());
+                sysUser.setNickName(odoUser.getName());
+                if (StringUtils.isNotBlank(odoUser.getDept_code())) {
+                    sysUser.setDeptId(Long.parseLong(odoUser.getDept_code()));
+                }
+                sysUser.setUserType("1");
+                sysUser.setStatus("1");
+                userMapper.insertUser(sysUser);
             }
         }
     }

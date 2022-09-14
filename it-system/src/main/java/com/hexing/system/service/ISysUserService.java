@@ -219,7 +219,7 @@ public interface ISysUserService
     List<SysUser> selectChildUserList(SysUser sysUser);
 
     //定时同步odoo在职人员
-    void syncUserList();
+    void syncDepartmentUserList();
 
     Map<String, SysUser> getUserByUserNames(Set<String> userNames);
 

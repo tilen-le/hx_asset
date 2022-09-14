@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.hexing.system.service.ISysUserService;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,6 +24,8 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiOperation;
 
+import javax.annotation.Resource;
+
 /**
  * swagger 用户测试方法
  *
@@ -34,14 +38,19 @@ public class TestController extends BaseController
 {
     private final static Map<Integer, UserEntity> users = new LinkedHashMap<Integer, UserEntity>();
     {
+
         users.put(1, new UserEntity(1, "admin", "admin123", "15888888888"));
         users.put(2, new UserEntity(2, "ry", "admin123", "15666666666"));
     }
+
+    @Resource
+    private ISysUserService userService;
 
     @ApiOperation("获取用户列表")
     @GetMapping("/list")
     public AjaxResult userList()
     {
+        userService.syncUserList();
         List<UserEntity> userList = new ArrayList<UserEntity>(users.values());
         return AjaxResult.success(userList);
     }

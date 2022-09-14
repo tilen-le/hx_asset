@@ -1,4 +1,4 @@
-package com.hexing.asset.domain.vo;
+package com.hexing.asset.domain.dto;
 
 import com.hexing.asset.domain.AssetCountingTask;
 import lombok.Data;
@@ -8,11 +8,11 @@ import lombok.experimental.Accessors;
 import java.util.List;
 
 /**
- * 盘点任务VO类
+ * 盘点任务DTO类
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Accessors(chain = true)
-public class AssetCountingTaskVO extends AssetCountingTask {
+public class AssetCountingTaskDTO extends AssetCountingTask {
     private List<String> responsiblePersonCodes;
 }

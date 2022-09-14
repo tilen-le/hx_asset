@@ -3,7 +3,7 @@ package com.hexing.asset.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.AssetCountingTask;
-import com.hexing.asset.domain.vo.AssetCountingTaskVO;
+import com.hexing.asset.domain.dto.AssetCountingTaskDTO;
 
 /**
  * 盘点任务Service接口
@@ -32,10 +32,10 @@ public interface IAssetCountingTaskService extends IService<AssetCountingTask>
     /**
      * 新增盘点任务
      *
-     * @param vo 盘点任务VO对象
+     * @param dto 盘点任务DTO对象
      * @return 结果
      */
-    public int insertAssetCountingTask(AssetCountingTaskVO vo);
+    public int insertAssetCountingTask(AssetCountingTaskDTO dto);
 
     /**
      * 修改盘点任务

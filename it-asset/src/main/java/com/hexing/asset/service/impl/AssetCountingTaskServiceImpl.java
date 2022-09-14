@@ -7,7 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetCountingTask;
-import com.hexing.asset.domain.vo.AssetCountingTaskVO;
+import com.hexing.asset.domain.dto.AssetCountingTaskDTO;
 import com.hexing.asset.mapper.AssetCountingTaskMapper;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetCountingTaskService;
@@ -58,17 +58,17 @@ public class AssetCountingTaskServiceImpl extends ServiceImpl<AssetCountingTaskM
      * 新增盘点任务
      */
     @Override
-    public int insertAssetCountingTask(AssetCountingTaskVO vo)
+    public int insertAssetCountingTask(AssetCountingTaskDTO dto)
     {
         AssetCountingTask task = new AssetCountingTask();
-        BeanUtils.copyProperties(vo, task);
+        BeanUtils.copyProperties(dto, task);
 
         // 统计待盘点资产总数
         task.setAssetCounted(0);   /* 已盘点资产数 */
         task.setAssetAbnormal(0);  /* 异常资产数目 */
 
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        wrapper.in("responsible_person_code", vo.getResponsiblePersonCodes());
+        wrapper.in("responsible_person_code", dto.getResponsiblePersonCodes());
         Integer assetNotCounted = assetMapper.selectCount(wrapper);
         task.setAssetNotCounted(assetNotCounted);   /* 待盘点资产数 */
 

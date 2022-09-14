@@ -1,7 +1,7 @@
 package com.hexing.asset.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.hexing.asset.domain.vo.AssetCountingTaskVO;
+import com.hexing.asset.domain.dto.AssetCountingTaskDTO;
 import com.hexing.asset.service.IAssetCountingTaskService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.controller.BaseController;
@@ -38,8 +38,8 @@ public class DingTalkAssetController extends BaseController {
      */
     @PostMapping("/createCountingTask")
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {
-        AssetCountingTaskVO vo = params.getObject("data", AssetCountingTaskVO.class);
-        return toAjax(assetCountingTaskService.insertAssetCountingTask(vo));
+        AssetCountingTaskDTO dto = params.getObject("data", AssetCountingTaskDTO.class);
+        return toAjax(assetCountingTaskService.insertAssetCountingTask(dto));
     }
 
 }

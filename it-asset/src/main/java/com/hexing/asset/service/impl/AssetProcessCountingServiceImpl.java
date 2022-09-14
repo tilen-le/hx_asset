@@ -1,15 +1,10 @@
 package com.hexing.asset.service.impl;
 
-import java.util.Date;
 import java.util.List;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetCountingTask;
-import com.hexing.asset.domain.vo.AssetCountingTaskVO;
 import com.hexing.common.utils.DateUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;

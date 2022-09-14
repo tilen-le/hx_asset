@@ -3,7 +3,6 @@ package com.hexing.asset.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.dto.AssetCountingTaskDTO;
 import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.domain.vo.AssetCountingTaskVO;
 import com.hexing.asset.service.IAssetCountingTaskService;
 import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetService;

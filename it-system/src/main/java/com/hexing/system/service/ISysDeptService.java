@@ -52,6 +52,7 @@ public interface ISysDeptService
      * @return 部门信息
      */
     public SysDept selectDeptById(Long deptId);
+    public List<SysDept> selectDeptByParentId(Long deptId);
 
     /**
      * 根据ID查询所有子部门（正常状态）

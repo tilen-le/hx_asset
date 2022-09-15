@@ -51,6 +51,7 @@ public interface SysUserMapper
      */
     public SysUser selectUserById(Long userId);
 
+    public List<SysUser> selectUserByDeptId(Long deptId);
     /**
      * 新增用户信息
      *

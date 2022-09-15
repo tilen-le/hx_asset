@@ -25,19 +25,19 @@
       </el-form-item>
     </el-form>
     <div style="display:flex">
-        <el-card selected="" class="taskAmountCard selectedCard" @click="setSearchParam()">
+        <el-card selected="" class="taskAmountCard selectedCard" @click="this.queryParams.status = '1'">
           固定资产总数
           <div class="card_text">9</div>
         </el-card>
-        <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
+        <el-card selected="" class="taskAmountCard" @click="this.queryParams.status = '1'">
           已盘点资产总数
           <div class="card_text">9</div>
         </el-card>
-        <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
+        <el-card selected="" class="taskAmountCard" @click="this.queryParams.status = '1'">
           待盘点资产总数
           <div class="card_text">9</div>
         </el-card>
-        <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
+        <el-card selected="" class="taskAmountCard" @click="this.queryParams.status = '1'">
           盘点异常设备数目
           <div class="card_text">9</div>
         </el-card>
@@ -50,7 +50,6 @@
 
     <el-table v-loading="loading" :data="taskList">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="盘点任务id" align="center" prop="taskId" /> -->
       <el-table-column label="资产编码" align="center" prop="taskCode" />
       <el-table-column label="资产的其他信息" align="center" prop="taskCode" />
       <el-table-column label="盘点人" align="center" prop="userCode" />
@@ -101,20 +100,15 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        taskCode: null,
         assetCode: null,
         createBy: null,
-        assetCounted: null,
-        assetNotCounted: null,
-        assetAbnormal: null,
-        startDate: null,
-        endDate: null,
-        status: null
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-      }
+      },
     };
   },
   created() {
@@ -123,6 +117,7 @@ export default {
   methods: {
     /** 查询盘点任务列表 */
     getList() {
+      this.queryParams.taskCode = this.$route.params && this.$route.params.id
       this.loading = true;
       listTask(this.queryParams).then(response => {
         this.taskList = response.rows;

@@ -82,7 +82,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" @row-click="showTaskDetail">
+    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="任务编码" align="center" prop="taskCode">
         <template slot-scope="scope">

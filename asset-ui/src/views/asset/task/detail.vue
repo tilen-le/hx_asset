@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="资产编码" prop="taskCode">
+      <el-form-item label="资产编码" prop="assetCode">
         <el-input
           v-model="queryParams.assetCode"
           placeholder="请输入资产编码"
@@ -10,7 +10,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="盘点人" prop="taskCode">
+      <el-form-item label="盘点人" prop="createBy">
         <el-input
           v-model="queryParams.createBy"
           placeholder="请输入盘点人"

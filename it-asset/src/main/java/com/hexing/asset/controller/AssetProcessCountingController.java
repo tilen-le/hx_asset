@@ -2,6 +2,8 @@ package com.hexing.asset.controller;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
+import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -45,9 +47,18 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(AssetProcessCounting assetProcessCounting)
     {
-        startPage();
-        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+        List<AssetProcessCountingVO> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
         return getDataTable(list);
+    }
+
+    /**
+     * 盘点状态统计
+     */
+    @ApiOperation("盘点状态统计")
+    @GetMapping("/countingStatusCount")
+    public AjaxResult countingStatusCount(String taskCode) {
+        JSONObject result = assetProcessCountingService.countingStatusCount(taskCode);
+        return AjaxResult.success(result);
     }
 
     /**
@@ -58,9 +69,10 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/export")
     public AjaxResult export(AssetProcessCounting assetProcessCounting)
     {
-        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-        ExcelUtil<AssetProcessCounting> util = new ExcelUtil<>(AssetProcessCounting.class);
-        return util.exportExcel(list, "资产盘点记录");
+//        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+//        ExcelUtil<AssetProcessCounting> util = new ExcelUtil<>(AssetProcessCounting.class);
+//        return util.exportExcel(list, "资产盘点记录");
+            return null;
     }
 
     /**

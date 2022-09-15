@@ -12,7 +12,7 @@ public enum AssetCountingStatus {
     ABNORMAL("2", "盘点异常"),
     ;
 
-    private String status;
-    private String name;
+    private final String status;
+    private final String name;
 
 }

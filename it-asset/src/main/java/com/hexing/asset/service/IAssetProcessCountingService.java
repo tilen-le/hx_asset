@@ -1,8 +1,12 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.vo.AssetProcessCountingVO;
+import com.hexing.common.core.domain.AjaxResult;
 
 /**
  * 资产盘点流程Service接口
@@ -26,12 +30,12 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      * @param assetProcessCounting 资产盘点流程
      * @return 资产盘点流程集合
      */
-    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
+    public List<AssetProcessCountingVO> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
 
     /**
      * 新增资产盘点流程
      *
-     * @param assetProcessCounting 资产盘点流程
+     * @param entity 资产盘点流程
      * @return 结果
      */
     public int insertAssetProcessCounting(AssetProcessCounting entity);
@@ -59,4 +63,6 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      * @return 结果
      */
     public int deleteAssetProcessCountingById(Long id);
+
+    JSONObject countingStatusCount(String taskCode);
 }

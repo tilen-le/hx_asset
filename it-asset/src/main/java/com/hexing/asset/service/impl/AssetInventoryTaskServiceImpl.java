@@ -23,11 +23,13 @@ import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
+import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 /**
@@ -79,6 +81,13 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask)
     {
         QueryWrapper<AssetInventoryTask> wrapper = new QueryWrapper<>();
+        wrapper.setEntity(assetInventoryTask);
+        if (StringUtils.isBlank(assetInventoryTask.getTaskCode())){
+            assetInventoryTask.setTaskCode(null);
+        }
+        if (StringUtils.isBlank(assetInventoryTask.getCreateBy())){
+            assetInventoryTask.setCreateBy(null);
+        }
         return assetInventoryTaskMapper.selectList(wrapper);
     }
 
@@ -86,6 +95,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
      * 新增盘点任务
      */
     @Override
+    @Transactional
     public int insertAssetCountingTask(AssetInventoryTask task)
     {
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
@@ -113,8 +123,11 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         String str = DateUtils.dateTimeNow();
         str+=RandomUtil.randomString(15);
         task.setTaskCode(str);
-//        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
-        String userName = "1";
+        if (task.getEndDate().getTime()< task.getStartDate().getTime()){
+            return 0;
+        }
+        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
+//        String userName = "1";
         task.setCreateBy(userName);
         if (task.getInventoryUserList()!=null){
             task.setInventoryUsers(task.getInventoryUserList().toString());
@@ -130,14 +143,13 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
             AssetProcessCounting entity = new AssetProcessCounting();
             entity.setTaskCode(task.getTaskCode());
-            entity.setAssetCode(asset.getCreateBy());
+            entity.setAssetCode(asset.getAssetCode());
             entity.setProcessId(assetProcess.getId());
             entity.setCreateTime(new Date());
             entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             assetProcessCountingService.insertAssetProcessCounting(entity);
         }
-
-        return assetInventoryTaskMapper.insert(task);
+        return 1;
     }
 
     /**

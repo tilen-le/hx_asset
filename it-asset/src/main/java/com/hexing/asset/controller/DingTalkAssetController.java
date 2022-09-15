@@ -66,8 +66,8 @@ public class DingTalkAssetController extends BaseController {
      */
     @PostMapping("/createCountingTask")
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {
-        AssetInventoryTaskDTO dto = params.getObject("data", AssetInventoryTaskDTO.class);
-        return toAjax(assetInventoryTaskService.insertAssetCountingTask(dto));
+        AssetInventoryTask task = params.getObject("data", AssetInventoryTask.class);
+        return toAjax(assetInventoryTaskService.insertAssetCountingTask(task));
     }
 
     /**

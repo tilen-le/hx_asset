@@ -2,14 +2,13 @@ package com.hexing.asset.controller;
 
 import java.util.List;
 
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 import com.hexing.asset.service.IAssetInventoryTaskService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -65,6 +64,15 @@ public class AssetInventoryTaskController extends BaseController
         return AjaxResult.success(assetProcessCountingTaskService.selectAssetCountingTaskByTaskId(taskId));
     }
 
+    /**
+     * 新增盘点任务
+     */
+//    @PreAuthorize("@ss.hasPermi('mature:task:add')")
+    @Log(title = "盘点任务表", businessType = BusinessType.INSERT)
+    @PostMapping(value = "/add")
+    public AjaxResult add(@RequestBody AssetInventoryTaskDTO asset) {
+        return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(asset));
+    }
 
 
 

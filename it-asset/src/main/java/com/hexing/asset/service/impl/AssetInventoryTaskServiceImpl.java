@@ -86,10 +86,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
      * 新增盘点任务
      */
     @Override
-    public int insertAssetCountingTask(AssetInventoryTaskDTO dto)
+    public int insertAssetCountingTask(AssetInventoryTask task)
     {
-        AssetInventoryTask task = new AssetInventoryTask();
-        BeanUtils.copyProperties(dto, task);
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         wrapper.setEntity(new Asset());
 
@@ -115,7 +113,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         String str = DateUtils.dateTimeNow();
         str+=RandomUtil.randomString(15);
         task.setTaskCode(str);
-        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
+//        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userName = "1";
         task.setCreateBy(userName);
         if (task.getInventoryUserList()!=null){
             task.setInventoryUsers(task.getInventoryUserList().toString());

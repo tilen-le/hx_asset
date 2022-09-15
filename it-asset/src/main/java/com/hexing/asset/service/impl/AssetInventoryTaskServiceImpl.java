@@ -80,6 +80,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask)
     {
         QueryWrapper<AssetInventoryTask> wrapper = new QueryWrapper<>();
+        wrapper.setEntity(assetInventoryTask);
         return assetInventoryTaskMapper.selectList(wrapper);
     }
 

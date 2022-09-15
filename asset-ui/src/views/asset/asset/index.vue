@@ -91,11 +91,11 @@
       <el-table-column label="申请人" align="center" prop="proposer" />
       <el-table-column label="资产使用场景" align="center" prop="usageScenario" />
       <el-table-column label="备注" align="center" prop="comment" />
-      <el-table-column label="盘点状态" align="center" prop="inventoryStatus">
+      <!-- <el-table-column label="盘点状态" align="center" prop="inventoryStatus">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_counting_status" :value="scope.row.inventoryStatus" />
         </template>
-      </el-table-column>
+      </el-table-column> -->
       <!-- <el-table-column label="备注" align="center" prop="remark" /> -->
       <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -245,7 +245,6 @@ import { listAsset, delAsset, addAsset, updateAsset, exportAsset, importTemplate
 import { getToken } from '@/utils/auth'
 export default {
   name: "Asset",
-  dicts: ['asset_counting_status'],
   data() {
     return {
       // 遮罩层

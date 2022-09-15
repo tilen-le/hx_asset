@@ -150,6 +150,19 @@ export const constantRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen'}
       }
     ]
+  },
+  {
+    path: '/asset/assetCard',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/asset/assetCard',
+        component: (resolve) => require(['@/views/asset/asset/assetCard'], resolve),
+        name: 'assetCard',
+        meta: { title: '资产卡片'}
+      }
+    ]
   }
 ]
 

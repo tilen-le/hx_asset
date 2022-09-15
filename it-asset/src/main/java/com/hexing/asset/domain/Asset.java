@@ -159,9 +159,6 @@ public class Asset
     @Excel(name = "资产使用场景")
     private String usageScenario;
 
-    /** 盘点状态 */
-    private String inventoryStatus;
-
     /** 备注 */
     @Excel(name = "备注")
     private String comment;

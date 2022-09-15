@@ -35,11 +35,6 @@
           placeholder="选择盘点结束时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="盘点状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择盘点状态" clearable size="small">
-          <el-option label="请选择字典生成" value="" />
-        </el-select>
-      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -105,7 +100,11 @@
         </template>
       </el-table-column>
       <el-table-column label="发起人" align="center" prop="createBy" />
-      <el-table-column label="盘点状态" align="center" prop="status" />
+      <el-table-column label="盘点状态" align="center" prop="status" >
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.inventory_task_status" :value="scope.row.status"/>
+        </template>
+      </el-table-column>
     </el-table>
 
     <pagination
@@ -162,6 +161,7 @@ import { allUser } from '@/api/system/user'
 export default {
   name: "Task",
   components: { Treeselect },
+  dicts: ['inventory_task_status'],
   data() {
     return {
       // 遮罩层

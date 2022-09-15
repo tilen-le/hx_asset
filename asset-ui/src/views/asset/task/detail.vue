@@ -78,7 +78,7 @@
   import {countRecord, listRecord} from "@/api/task/record";
 
   export default {
-  name: "Task",
+  name: "taskDetail",
   dicts: ['asset_counting_status'],
   data() {
     return {
@@ -170,6 +170,7 @@
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
+      this.queryParams.countingStatus = null;
       this.handleQuery();
     },
     /** 导出按钮操作 */

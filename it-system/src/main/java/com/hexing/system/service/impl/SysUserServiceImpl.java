@@ -691,6 +691,10 @@ public class SysUserServiceImpl implements ISysUserService
     }
 
     @Override
+    public List<SysUser> selectUserAll() {
+        return userMapper.selectUserAll();
+    }
+
     public Map<String, SysUser> getUsernameUserObjMap() {
         List<SysUser> allUserList = userMapper.getAllUserList();
         Map<String,SysUser> usernameNicknameMap = new HashMap<>();

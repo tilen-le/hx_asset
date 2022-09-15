@@ -143,4 +143,5 @@ public interface SysUserMapper
 
     SysUser getUserByUserName(String userName);
 
+    List<SysUser> selectUserAll();
 }

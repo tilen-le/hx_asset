@@ -23,6 +23,7 @@ import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
+import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.springframework.beans.BeanUtils;
@@ -81,6 +82,12 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     {
         QueryWrapper<AssetInventoryTask> wrapper = new QueryWrapper<>();
         wrapper.setEntity(assetInventoryTask);
+        if (StringUtils.isBlank(assetInventoryTask.getTaskCode())){
+            assetInventoryTask.setTaskCode(null);
+        }
+        if (StringUtils.isBlank(assetInventoryTask.getCreateBy())){
+            assetInventoryTask.setCreateBy(null);
+        }
         return assetInventoryTaskMapper.selectList(wrapper);
     }
 

@@ -288,7 +288,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="getUserByUserName" parameterType="String" resultMap="UserResult">
 		SELECT * FROM sys_user
-		where u.user_name = #{userName}
+		where user_name = #{userName}
 	</select>
 
 	<select id="selectUserAll" resultMap="UserResult">

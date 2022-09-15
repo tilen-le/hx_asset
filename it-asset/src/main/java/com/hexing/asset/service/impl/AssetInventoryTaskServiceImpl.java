@@ -24,6 +24,8 @@ import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.framework.manager.AsyncManager;
+import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.springframework.beans.BeanUtils;
@@ -149,6 +151,11 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             assetProcessCountingService.insertAssetProcessCounting(entity);
         }
+        List<String> inventoryUserList = task.getInventoryUserList();
+//        List<String> inventoryUserList = new ArrayList<>();
+//        inventoryUserList.add("80010712");
+        String title ="盘点任务编码:"+task.getTaskCode();
+        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
         return 1;
     }
 

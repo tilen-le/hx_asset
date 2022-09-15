@@ -1,9 +1,6 @@
 package com.hexing.asset.service.impl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
@@ -97,10 +94,16 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         for (AssetProcessCounting obj : assetProcessCountingList) {
             Asset asset = assetService.selectAssetByAssetCode(obj.getAssetCode());
             SysUser responsiblePerson = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-            SysUser inventoryPerson = sysUserService.getUserByUserName(obj.getUserCode());
+            String inventoryPerson = "";
+            if (StringUtils.isNotBlank(obj.getUserCode())) {
+                SysUser userByUserName = sysUserService.getUserByUserName(obj.getUserCode());
+                if (Objects.nonNull(userByUserName)) {
+                    inventoryPerson = userByUserName.getNickName();
+                }
+            }
             SysDept dept = deptService.selectDeptById(responsiblePerson.getDeptId());
             AssetProcessCountingVO vo = new AssetProcessCountingVO().setUserCode(obj.getUserCode())
-                    .setUserNickName(inventoryPerson.getNickName())
+                    .setUserNickName(inventoryPerson)
                     .setCompanyName(asset.getCompanyName())
                     .setAssetCode(asset.getAssetCode())
                     .setAssetName(asset.getAssetName())

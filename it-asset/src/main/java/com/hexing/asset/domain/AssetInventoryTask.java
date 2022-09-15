@@ -40,6 +40,10 @@ public class AssetInventoryTask
     @Excel(name = "盘点范围")
     private String inventoryDept;
 
+    /** 盘点范围名称 */
+    @TableField(exist = false)
+    private String inventoryDeptName;
+
     /** 已盘点资产数 */
     @TableField(exist = false)
     @Excel(name = "固定资产总数")

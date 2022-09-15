@@ -101,12 +101,15 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             task.setAssetNotCounted(notCounted);
             task.setAssetCounted(counted);
             task.setAssetAbnormal(abnormal);
-//            if (CountingTaskStatus.COUNTING.getStatus().equals(task.getStatus())) {
-//                if (new Date().compareTo(task.getEndDate()) > 0 || notCounted == 0) {
-//                    task.setStatus(CountingTaskStatus.FINISHED.getStatus());
+
+            SysDept dept = sysDeptService.selectDeptById(Long.valueOf(task.getInventoryDept()));
+            task.setInventoryDeptName(dept.getDeptName());
+            if (CountingTaskStatus.COUNTING.getStatus().equals(task.getStatus())) {
+                if (new Date().compareTo(task.getEndDate()) > 0 || notCounted == 0) {
+                    task.setStatus(CountingTaskStatus.FINISHED.getStatus());
 //                    assetInventoryTaskMapper.updateById(task);
-//                }
-//            }
+                }
+            }
         }
 
         return taskList;

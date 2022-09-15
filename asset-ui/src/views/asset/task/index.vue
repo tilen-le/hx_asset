@@ -1,19 +1,19 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="发起人" prop="userCode">
+      <el-form-item label="任务编码" prop="taskCode">
         <el-input
-          v-model="queryParams.createBy"
-          placeholder="请输入发起人"
+          v-model="queryParams.taskCode"
+          placeholder="请输入任务编码"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="盘点部门" prop="inventoryRange">
+      <el-form-item label="发起人" prop="userCode">
         <el-input
-          v-model="queryParams.inventoryDept"
-          placeholder="请输入盘点部门"
+          v-model="queryParams.createBy"
+          placeholder="请输入发起人"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -84,7 +84,11 @@
 
     <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" @row-click="showTaskDetail">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="任务编码" align="center" prop="taskCode" />
+      <el-table-column label="任务编码" align="center" prop="taskCode">
+        <template slot-scope="scope">
+          <el-link :underline="false" type="primary" @click="showTaskDetail(scope.row)">{{ scope.row.taskCode }}</el-link>
+        </template>
+      </el-table-column>
       <el-table-column label="盘点人" align="center" prop="createBy" />
       <el-table-column label="盘点组织" align="center" prop="inventoryDept" />
        <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
@@ -185,8 +189,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         taskCode: null,
-        userCode: null,
-        inventoryDept: null,
+        createBy: null,
         startDate: null,
         endDate: null,
         status: null
@@ -273,8 +276,8 @@ export default {
       this.multiple = !selection.length
     },
     // 跳转资产详情页面
-    showTaskDetail(row, column, event){
-
+    showTaskDetail(row) {
+        this.$router.push('/inventory/taskInfo/detail/' + row.taskCode)
     },
     /** 新增按钮操作 */
     handleAdd() {

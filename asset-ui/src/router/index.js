@@ -150,7 +150,22 @@ export const constantRoutes = [
         meta: { title: '修改生成配置', activeMenu: '/tool/gen'}
       }
     ]
-  }
+  },
+  {
+    path: '/inventory/taskInfo',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'detail/:id',
+        component: (resolve) => require(['@/views/asset/task/detail'], resolve),
+        name: 'taskDetail',
+        meta: { title: '任务详情', activeMenu: '/inventory/task'}
+      }
+    ]
+  },
+
+
 ]
 
 export default new Router({

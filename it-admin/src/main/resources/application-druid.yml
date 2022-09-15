@@ -83,5 +83,3 @@ ding:
     login: http://192.168.108.172:8001/login
 uip:
     uipTransfer: http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper
-odoo:
-    getDepartmentEmployee: http://192.168.108.150:8069/apis/employee/get_department_employee

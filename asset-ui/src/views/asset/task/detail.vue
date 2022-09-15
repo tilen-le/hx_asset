@@ -5,10 +5,10 @@
         固定资产总数
       </el-card>
       <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
-        已盘点固定资产总数
+        已盘点资产总数
       </el-card>
       <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
-        待盘点固定资产总数
+        待盘点资产总数
       </el-card>
       <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
         盘点异常设备数目
@@ -164,10 +164,6 @@ export default {
       this.ids = selection.map(item => item.taskId)
       this.single = selection.length !== 1
       this.multiple = !selection.length
-    },
-    // 跳转资产详情页面
-    showTaskDetail(row, column, event) {
-
     },
     /** 新增按钮操作 */
     handleAdd() {

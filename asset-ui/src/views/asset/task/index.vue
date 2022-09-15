@@ -59,17 +59,6 @@
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['asset:task:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="danger"
           plain
           icon="el-icon-delete"
@@ -95,42 +84,24 @@
 
     <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" @row-click="showTaskDetail">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="盘点任务id" align="center" prop="taskCode" /> -->
-      <el-table-column label="盘点任务编码" align="center" prop="taskCode" />
-      <el-table-column label="发起人" align="center" prop="userCode" />
-      <el-table-column label="盘点范围" align="center" prop="inventoryRange" />
-      <!-- <el-table-column label="已盘点资产数" align="center" prop="assetCounted" /> -->
-      <!-- <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" /> -->
-      <!-- <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" /> -->
-      <el-table-column label="盘点开始时间" align="center" prop="startDate" width="180">
+      <el-table-column label="任务编码" align="center" prop="taskCode" />
+      <el-table-column label="盘点人" align="center" prop="createBy" />
+      <el-table-column label="盘点组织" align="center" prop="inventoryDept" />
+       <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
+       <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" />
+       <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" />
+      <el-table-column label="开始时间" align="center" prop="startDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="盘点结束时间" align="center" prop="endDate" width="180">
+      <el-table-column label="结束时间" align="center" prop="endDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="发起人" align="center" prop="createBy" />
       <el-table-column label="盘点状态" align="center" prop="status" />
-      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['asset:task:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['asset:task:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column> -->
     </el-table>
 
     <pagination
@@ -143,30 +114,29 @@
 
     <!-- 添加或修改盘点任务对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-
-        <el-form-item label="盘点人" prop="inventoryRange">
-          <el-input v-model="form.inventoryUsers" placeholder="请输入盘点范围" />
+      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="盘点人" prop="inventoryUserList">
+          <el-select v-model="form.inventoryUserList" placeholder="请选择盘点人" multiple filterable style="width: 80%;">
+            <el-option v-for="item in userOptions" :key="item.userName" :label="item.nickName" :value="item.userName"/>
+          </el-select>
         </el-form-item>
-
-        <el-form-item label="盘点组织" prop="inventoryRange">
-          <el-input v-model="form.inventoryDept" placeholder="请输入盘点范围" />
+        <el-form-item label="盘点组织" prop="inventoryDept">
+          <treeselect v-model="form.inventoryDept" :options="deptOptions" :show-count="true" placeholder="请选择盘点组织" style="width: 80%;" />
         </el-form-item>
-
-        <el-form-item label="盘点开始时间" prop="startDate">
+        <el-form-item label="开始时间" prop="startDate">
           <el-date-picker clearable size="small"
             v-model="form.startDate"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="选择盘点开始时间">
+            placeholder="选择盘点开始时间" style="width: 80%;">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="盘点结束时间" prop="endDate">
+        <el-form-item label="结束时间" prop="endDate">
           <el-date-picker clearable size="small"
             v-model="form.endDate"
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="选择盘点结束时间">
+            placeholder="选择盘点结束时间" style="width: 80%;">
           </el-date-picker>
         </el-form-item>
       </el-form>
@@ -180,9 +150,14 @@
 
 <script>
 import { listTask, getTask, delTask, addTask, updateTask, exportTask } from "@/api/task/task";
+import { treeselect } from '@/api/system/dept'
+import Treeselect from '@riophae/vue-treeselect'
+import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+import { allUser } from '@/api/system/user'
 
 export default {
   name: "Task",
+  components: { Treeselect },
   data() {
     return {
       // 遮罩层
@@ -220,13 +195,43 @@ export default {
       form: {},
       // 表单校验
       rules: {
-      }
+        inventoryUserList: [
+          { required: true, message: '此项必填', trigger: "blur" }
+        ],
+        inventoryDept: [
+          { required: true, message: '此项必填', trigger: "blur" }
+        ],
+        startDate: [
+          { required: true, message: '此项必填', trigger: "blur" }
+        ],
+        endDate: [
+          { required: true, message: '此项必填', trigger: "blur" }
+        ],
+      },
+      // 部门树选项
+      deptOptions: [],
+      userOptions: [],
+      defaultProps: {
+        children: "children",
+        label: "label"
+      },
     };
   },
   created() {
     this.getList();
   },
   methods: {
+    /** 查询部门下拉树结构 */
+    getTreeSelect() {
+      treeselect().then(response => {
+        this.deptOptions = response.data;
+      });
+    },
+    getUsers() {
+      allUser().then(response => {
+        this.userOptions = response.data;
+      });
+    },
     /** 查询盘点任务列表 */
     getList() {
       this.loading = true;
@@ -244,11 +249,10 @@ export default {
     // 表单重置
     reset() {
       this.form = {
-        taskCode: null,
-        inventoryUsers: null,
         inventoryDept: null,
         startDate: null,
-        endDate: null
+        endDate: null,
+        inventoryUserList: []
       };
       this.resetForm("form");
     },
@@ -275,6 +279,8 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.getTreeSelect();
+      this.getUsers();
       this.open = true;
       this.title = "添加盘点任务";
     },
@@ -292,19 +298,11 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.taskCode != null) {
-            updateTask(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addTask(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+          addTask(this.form).then(response => {
+            this.$modal.msgSuccess("新增成功");
+            this.open = false;
+            this.getList();
+          });
         }
       });
     },

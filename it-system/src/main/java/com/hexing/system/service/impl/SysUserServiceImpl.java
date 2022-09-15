@@ -689,4 +689,9 @@ public class SysUserServiceImpl implements ISysUserService
     public List<SysUser> getOnOfficeUserList(String parameter) {
         return userMapper.getOnOfficeUserList(parameter);
     }
+
+    @Override
+    public List<SysUser> selectUserAll() {
+        return userMapper.selectUserAll();
+    }
 }

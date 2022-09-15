@@ -227,4 +227,5 @@ public interface ISysUserService
 
     List<SysUser> getOnOfficeUserList(String parameter);
 
+    List<SysUser> selectUserAll();
 }

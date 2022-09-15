@@ -153,7 +153,7 @@
 </template>
 
 <script>
-import { listTask, getTask, delTask, addTask, updateTask, exportTask } from "@/api/task/task";
+import { listTask, getTask, delTask, addTask, exportTask } from "@/api/task/task";
 import { treeselect } from '@/api/system/dept'
 import Treeselect from '@riophae/vue-treeselect'
 import '@riophae/vue-treeselect/dist/vue-treeselect.css'
@@ -326,7 +326,7 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$modal.confirm('是否确认导出所有盘点任务数据项？').then(() => {
+      this.$modal.confirm("提示", "确认","取消", "是否确认导出所有符合条件数据项？").then(() => {
         this.exportLoading = true;
         return exportTask(queryParams);
       }).then(response => {

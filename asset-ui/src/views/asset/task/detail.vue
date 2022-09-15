@@ -3,7 +3,7 @@
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="资产编码" prop="taskCode">
         <el-input
-          v-model="queryParams.taskCode"
+          v-model="queryParams.assetCode"
           placeholder="请输入资产编码"
           clearable
           size="small"
@@ -12,12 +12,16 @@
       </el-form-item>
       <el-form-item label="盘点人" prop="taskCode">
         <el-input
-          v-model="queryParams.taskCode"
+          v-model="queryParams.createBy"
           placeholder="请输入盘点人"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
         />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
     <div style="display:flex">
@@ -27,19 +31,22 @@
         </el-card>
         <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
           已盘点资产总数
+          <div class="card_text">9</div>
         </el-card>
         <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
           待盘点资产总数
+          <div class="card_text">9</div>
         </el-card>
         <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
           盘点异常设备数目
+          <div class="card_text">9</div>
         </el-card>
     </div>
-    <el-row :gutter="10" class="mb8">
+<!--    <el-row :gutter="10" class="mb8">
       <el-tooltip style="float:right" effect="dark" content="刷新" placement="top">
         <el-button size="mini" circle icon="el-icon-refresh" @click="getList" />
       </el-tooltip>
-    </el-row>
+    </el-row>-->
 
     <el-table v-loading="loading" :data="taskList">
       <el-table-column type="selection" width="55" align="center" />
@@ -94,9 +101,8 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        taskCode: null,
-        userCode: null,
-        inventoryRange: null,
+        assetCode: null,
+        createBy: null,
         assetCounted: null,
         assetNotCounted: null,
         assetAbnormal: null,
@@ -158,7 +164,7 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$modal.confirm('是否确认导出所有盘点任务数据项？').then(() => {
+      this.$modal.confirm("提示", "确认","取消", "是否确认导出所有符合条件数据项？").then(() => {
         this.exportLoading = true;
         return exportTask(queryParams);
       }).then(response => {

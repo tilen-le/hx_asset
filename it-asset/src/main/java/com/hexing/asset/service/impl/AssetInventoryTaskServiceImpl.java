@@ -1,23 +1,23 @@
 package com.hexing.asset.service.impl;
 
-import java.util.Date;
-import java.util.List;
-
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.constant.AssetConstants;
 import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
+import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.mapper.AssetInventoryTaskMapper;
 import com.hexing.asset.mapper.AssetMapper;
-import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetInventoryTaskService;
+import com.hexing.asset.service.IAssetProcessCountingService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * 盘点任务Service业务层处理
@@ -92,7 +92,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             entity.setTaskCode(task.getTaskCode());
             entity.setAssetCode(asset.getAssetCode());
             entity.setCreateTime(new Date());
-            entity.setCountingStatus(AssetConstants.COUNTING_STATUS_NOT_COUNTED);
+            entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             assetProcessCountingService.insertAssetProcessCounting(entity);
         }
 

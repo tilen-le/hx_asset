@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.enums.UIPcodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDept;
@@ -17,8 +18,13 @@ import com.hexing.common.utils.StringUtils;
 import com.hexing.system.mapper.SysDictDataMapper;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -34,6 +40,7 @@ import static com.hexing.common.utils.PageUtil.startPage;
  * @date 2022-09-08
  */
 @Service
+@Slf4j
 public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements IAssetService
 {
 
@@ -349,6 +356,21 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     assetMapper.insert(asset);
                     totalNum++;
                     successNum++;
+                    try {
+                        JSONObject temp = new JSONObject();
+                        temp.put("BUKRS", asset.getCompanyCode());
+                        temp.put("ANLN1", asset.getFinancialAssetCode());
+                        temp.put("ZNUM", asset.getAssetCode());
+                        JSONObject toSAPJSON = new JSONObject();
+                        List<JSONObject> jsonList = new ArrayList<>();
+                        jsonList.add(temp);
+                        toSAPJSON.put("INBOUND", jsonList);
+                        log.info("===导入如资产数据-新资产平台资产编号推送SAP："+ toSAPJSON);
+                        JSONObject sapResponse = pushToSAP(toSAPJSON, UIPcodeEnum.pushSingleFdCodeToSAP.getCode());
+                        log.info("===导入资产数据--新资产的平台资产编码同步到SAP，SAP响应：" + sapResponse);
+                    } catch (Exception e) {
+                        log.error("资产导入：平台资产编号同步SAP出错");
+                    }
 //                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
                 } else if (isUpdateSupport) {
                     UpdateWrapper<Asset> updateWrapper = new UpdateWrapper<>();
@@ -375,6 +397,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 log.error(msg, e);
             }
         }
+
         if (failureNum > 0 && successNum == 0) {
             message.insert(0, "很抱歉，导入失败！错误如下：");
             throw new ServiceException(message.toString());
@@ -474,5 +497,28 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetCode.toString();
     }
 
+    /**
+     * 将资产信息和保管人关联关系通过UIP推送到SAP
+     *
+     * @param data
+     * @return
+     * @throws Exception
+     */
+    public JSONObject pushToSAP(JSONObject data, String uidCode) throws Exception {
+        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+        params.add("INBOUND", data.getJSONArray("INBOUND"));
+        params.add("interfaceCode", uidCode);
+
+        log.info("params to uip: " + params);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String uipTransfer = "http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper";
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
+
+        String body = responseEntity.getBody();
+        JSONObject responseBody = JSONObject.parseObject(body);
+
+        return responseBody;
+    }
 
 }

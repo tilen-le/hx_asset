@@ -1,39 +1,36 @@
 package com.hexing.asset.service.impl;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.domain.AssetInventoryTask;
-import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.mapper.AssetInventoryTaskMapper;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.mapper.AssetProcessMapper;
-import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetInventoryTaskService;
+import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
-import com.hexing.common.utils.StringUtils;
 import com.hexing.framework.manager.AsyncManager;
 import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 import static com.hexing.common.utils.PageUtil.startPage;
 

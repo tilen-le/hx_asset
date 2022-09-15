@@ -88,7 +88,7 @@
       },
       loading: false,
       // 验证码开关
-      captchaOnOff: true,
+      captchaOnOff: false,
       // 注册开关
       register: true,
       redirect: undefined
@@ -103,7 +103,7 @@
     }
   },
   created() {
-    this.getCode();
+    // this.getCode();
     this.getCookie();
   },
   methods: {

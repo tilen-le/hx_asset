@@ -3,6 +3,7 @@ package com.hexing.asset.service.impl;
 import java.util.Date;
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.common.utils.DateUtils;
@@ -46,7 +47,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     @Override
     public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting)
     {
-        return assetProcessCountingMapper.selectAssetProcessCountingList(assetProcessCounting);
+        QueryWrapper<AssetProcessCounting> wrapper = new QueryWrapper<>();
+        return assetProcessCountingMapper.selectList(wrapper);
     }
 
     /**

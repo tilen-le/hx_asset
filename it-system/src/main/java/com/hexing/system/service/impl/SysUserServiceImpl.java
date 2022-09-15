@@ -699,7 +699,7 @@ public class SysUserServiceImpl implements ISysUserService
         return userMapper.selectUserAll();
     }
 
-    public Map<String, SysUser> getUsernameNicknameMap() {
+    public Map<String, SysUser> getUsernameUserObjMap() {
         List<SysUser> allUserList = userMapper.getAllUserList();
         Map<String,SysUser> usernameNicknameMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(allUserList)) {

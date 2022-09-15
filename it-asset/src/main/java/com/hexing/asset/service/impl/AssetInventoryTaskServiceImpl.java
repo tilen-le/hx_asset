@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.constant.AssetConstants;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetInventoryTask;
@@ -28,9 +29,7 @@ import org.springframework.util.CollectionUtils;
 public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTaskMapper, AssetInventoryTask> implements IAssetInventoryTaskService
 {
 
-    private static final String COUNTING_STATUS_NOT_COUNTED = "0";
-    private static final String COUNTING_STATUS_COUNTED = "1";
-    private static final String COUNTING_STATUS_ABNORMAL = "2";
+
 
     @Autowired
     private AssetInventoryTaskMapper assetInventoryTaskMapper;
@@ -93,7 +92,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             entity.setTaskCode(task.getTaskCode());
             entity.setAssetCode(asset.getAssetCode());
             entity.setCreateTime(new Date());
-            entity.setCountingStatus(COUNTING_STATUS_NOT_COUNTED);
+            entity.setCountingStatus(AssetConstants.COUNTING_STATUS_NOT_COUNTED);
             assetProcessCountingService.insertAssetProcessCounting(entity);
         }
 

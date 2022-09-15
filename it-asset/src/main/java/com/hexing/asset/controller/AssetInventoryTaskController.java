@@ -36,7 +36,6 @@ public class AssetInventoryTaskController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(AssetInventoryTask assetInventoryTask)
     {
-        startPage();
         List<AssetInventoryTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetInventoryTask);
         return getDataTable(list);
     }

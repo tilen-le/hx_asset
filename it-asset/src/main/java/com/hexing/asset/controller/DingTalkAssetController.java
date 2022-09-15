@@ -1,6 +1,10 @@
 package com.hexing.asset.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.hexing.asset.constant.AssetConstants;
 import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.service.IAssetInventoryTaskService;
@@ -68,6 +72,25 @@ public class DingTalkAssetController extends BaseController {
         System.out.println("params: "+params);
         AssetProcessCounting vo = params.getObject("data", AssetProcessCounting.class);
         return toAjax(assetProcessCountingService.insertAssetProcessCounting(vo));
+    }
+
+    /**
+     * 盘点资产
+     */
+    @PostMapping("/countAsset")
+    public AjaxResult countAsset(@RequestBody JSONObject params) {
+        JSONObject data = params.getObject("data", JSONObject.class);
+        String assetCode = data.getString("assetCode");
+        AssetProcessCounting entity = assetProcessCountingService
+                .getOne(new QueryWrapper<AssetProcessCounting>().eq("asset_code", assetCode));
+        String status = entity.getCountingStatus();
+        if (AssetConstants.COUNTING_STATUS_NOT_COUNTED.equals(status)) {
+            entity.setCountingStatus(AssetConstants.COUNTING_STATUS_COUNTED);
+            assetProcessCountingService.updateById(entity);
+            return AjaxResult.success("盘点成功");
+        } else {
+            return AjaxResult.error("盘点失败，该资产已盘点过");
+        }
     }
 
 }

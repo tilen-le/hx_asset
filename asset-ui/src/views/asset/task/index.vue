@@ -226,14 +226,18 @@ export default {
   methods: {
     /** 查询部门下拉树结构 */
     getTreeSelect() {
-      treeselect().then(response => {
-        this.deptOptions = response.data;
-      });
+      if (this.deptOptions.length == 0) {
+        treeselect().then(response => {
+          this.deptOptions = response.data;
+        });
+      }
     },
     getUsers() {
-      allUser().then(response => {
-        this.userOptions = response.data;
-      });
+      if (this.userOptions.length == 0) {
+        allUser().then(response => {
+          this.userOptions = response.data;
+        });
+      }
     },
     /** 查询盘点任务列表 */
     getList() {

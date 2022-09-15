@@ -9,6 +9,8 @@ import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.utils.ServletUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.framework.web.service.TokenService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
  * @author zxy
  * @date 2022-09-08
  */
+@Api(tags = "资产信息管理")
 @RestController
 @RequestMapping("/asset")
 public class AssetController extends BaseController {
@@ -45,12 +48,12 @@ public class AssetController extends BaseController {
     private TokenService tokenService;
 
     /**
-     * 查询资产表列表
+     * 查询资产列表
      */
+    @ApiOperation("查询资产列表")
     @PreAuthorize("@ss.hasPermi('asset:asset:list')")
     @GetMapping("/list")
     public TableDataInfo list() {
-
         List<Asset> list = assetService.selectAssetList();
         return getDataTable(list);
     }
@@ -70,6 +73,7 @@ public class AssetController extends BaseController {
     /**
      * 获取资产详细信息
      */
+    @ApiOperation("获取资产详细信息")
     @PreAuthorize("@ss.hasPermi('asset:asset:query')")
     @GetMapping(value = "/getInfo/{assetCode}")
     public AjaxResult getInfo(@PathVariable String assetCode) {

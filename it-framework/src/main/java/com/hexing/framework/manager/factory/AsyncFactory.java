@@ -1,6 +1,20 @@
 package com.hexing.framework.manager.factory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import com.dingtalk.api.DefaultDingTalkClient;
+import com.dingtalk.api.DingTalkClient;
+import com.dingtalk.api.request.OapiGettokenRequest;
+import com.dingtalk.api.request.OapiMessageCorpconversationAsyncsendV2Request;
+import com.dingtalk.api.response.OapiGettokenResponse;
+import com.dingtalk.api.response.OapiMessageCorpconversationAsyncsendV2Response;
+import com.hexing.common.core.text.Convert;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import com.hexing.common.constant.Constants;
@@ -15,12 +29,14 @@ import com.hexing.system.domain.SysOperLog;
 import com.hexing.system.service.ISysLogininforService;
 import com.hexing.system.service.ISysOperLogService;
 import eu.bitwalker.useragentutils.UserAgent;
+import org.springframework.util.CollectionUtils;
 
 /**
  * 异步工厂（产生任务用）
  *
  * @author ruoyi
  */
+@Slf4j
 public class AsyncFactory
 {
     private static final Logger sys_user_logger = LoggerFactory.getLogger("sys-user");
@@ -98,5 +114,68 @@ public class AsyncFactory
                 SpringUtils.getBean(ISysOperLogService.class).insertOperlog(operLog);
             }
         };
+    }
+
+
+    public static TimerTask sendDingNotice(final List<String> userList, final String title) {
+        return new TimerTask() {
+            @Override
+            public void run() {
+                if (CollectionUtils.isEmpty(userList)) {
+                    return;
+                }
+                List<String> userIds = new ArrayList<>();
+                for (String userId : userList) {
+                    if (!userId.startsWith("S")) {
+                        userIds.add("S" + userId);
+                    } else {
+                        userIds.add(userId);
+                    }
+                }
+                DingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/message/corpconversation/asyncsend_v2");
+                OapiMessageCorpconversationAsyncsendV2Request request = new OapiMessageCorpconversationAsyncsendV2Request();
+                request.setAgentId(878069237L);
+                request.setUseridList(userIds.stream().collect(Collectors.joining(",")));
+                request.setToAllUser(false);
+                OapiMessageCorpconversationAsyncsendV2Request.Msg msg = new OapiMessageCorpconversationAsyncsendV2Request.Msg();
+                msg.setActionCard(new OapiMessageCorpconversationAsyncsendV2Request.ActionCard());
+                msg.getActionCard().setTitle("成熟性流程提醒");
+                msg.getActionCard().setMarkdown("## 你有一条成熟性流程等待处理   \n  " + title);
+                msg.getActionCard().setSingleTitle("查看详情");
+//                String singleUrl = "dingtalk://dingtalkclient/page/link?url=" + URLUtil.encode(detailUrl + matureId) + "&pc_slide=false";
+                msg.getActionCard().setSingleUrl("singleUrl");
+                msg.setMsgtype("action_card");
+                request.setMsg(msg);
+                String dingToken = getDingToken();
+                if (StringUtils.isBlank(dingToken)) {
+                    log.error("token获取失败");
+                    return;
+                }
+                OapiMessageCorpconversationAsyncsendV2Response rsp = null;
+                try {
+                    rsp = client.execute(request, dingToken);
+                } catch (Exception e) {
+                    log.error("钉钉发生通知异常" + userList.toString());
+                    e.printStackTrace();
+                }
+                log.info(rsp.getBody());
+            }
+        };
+    }
+
+    public static String getDingToken() {
+        try {
+            DingTalkClient getToeknClient = new DefaultDingTalkClient("https://oapi.dingtalk.com/gettoken");
+            OapiGettokenRequest req = new OapiGettokenRequest();
+            req.setAppkey("dingdg5xw8bs25xrhc3x");
+            req.setAppsecret("9kJHco5VvVDQ9bmLojiPOpLNQW_B_3vwFtc4eUIzh0lj8rw1H1cpz_RrabnUf9T_");
+            req.setHttpMethod("GET");
+            OapiGettokenResponse rsp = getToeknClient.execute(req);
+            String token = rsp.getAccessToken();
+            return token;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

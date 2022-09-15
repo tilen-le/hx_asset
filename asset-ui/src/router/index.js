@@ -152,6 +152,19 @@ export const constantRoutes = [
     ]
   },
   {
+    path: '/inventory/taskInfo',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: 'detail/:id',
+        component: (resolve) => require(['@/views/asset/task/detail'], resolve),
+        name: 'taskDetail',
+        meta: { title: '任务详情', activeMenu: '/inventory/task'}
+      }
+    ]
+  },
+  {
     path: '/asset/assetCard',
     component: Layout,
     hidden: true,
@@ -164,6 +177,8 @@ export const constantRoutes = [
       }
     ]
   }
+
+
 ]
 
 export default new Router({

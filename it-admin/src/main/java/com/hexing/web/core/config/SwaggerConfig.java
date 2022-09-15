@@ -27,7 +27,7 @@ import springfox.documentation.spring.web.plugins.Docket;
  *
  * @author ruoyi
  */
-@Configuration
+//@Configuration
 public class SwaggerConfig
 {
     /** 系统基础配置 */

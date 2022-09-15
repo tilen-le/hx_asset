@@ -1,64 +1,67 @@
 <template>
   <div class="app-container">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+      <el-form-item label="资产编码" prop="taskCode">
+        <el-input
+          v-model="queryParams.assetCode"
+          placeholder="请输入资产编码"
+          clearable
+          size="small"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="盘点人" prop="taskCode">
+        <el-input
+          v-model="queryParams.createBy"
+          placeholder="请输入盘点人"
+          clearable
+          size="small"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+      </el-form-item>
+    </el-form>
     <div style="display:flex">
-      <el-card selected="" class="taskAmountCard selectedCard" @click="setSearchParam()">
-        固定资产总数
-      </el-card>
-      <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
-        已盘点固定资产总数
-      </el-card>
-      <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
-        待盘点固定资产总数
-      </el-card>
-      <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
-        盘点异常设备数目
-      </el-card>
+        <el-card selected="" class="taskAmountCard selectedCard" @click="setSearchParam()">
+          固定资产总数
+          <div class="card_text">9</div>
+        </el-card>
+        <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
+          已盘点资产总数
+          <div class="card_text">9</div>
+        </el-card>
+        <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
+          待盘点资产总数
+          <div class="card_text">9</div>
+        </el-card>
+        <el-card selected="" class="taskAmountCard" @click="setSearchParam()">
+          盘点异常设备数目
+          <div class="card_text">9</div>
+        </el-card>
     </div>
-    <el-row :gutter="10" class="mb8">
+<!--    <el-row :gutter="10" class="mb8">
       <el-tooltip style="float:right" effect="dark" content="刷新" placement="top">
         <el-button size="mini" circle icon="el-icon-refresh" @click="getList" />
       </el-tooltip>
-    </el-row>
+    </el-row>-->
 
-    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange"
-      @row-click="showTaskDetail">
+    <el-table v-loading="loading" :data="taskList">
       <el-table-column type="selection" width="55" align="center" />
       <!-- <el-table-column label="盘点任务id" align="center" prop="taskId" /> -->
-      <el-table-column label="盘点任务编码" align="center" prop="taskCode" />
-      <el-table-column label="发起人" align="center" prop="userCode" />
-      <el-table-column label="盘点范围" align="center" prop="inventoryRange" />
-      <!-- <el-table-column label="已盘点资产数" align="center" prop="assetCounted" /> -->
-      <!-- <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" /> -->
-      <!-- <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" /> -->
-      <el-table-column label="盘点开始时间" align="center" prop="startDate" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="盘点结束时间" align="center" prop="endDate" width="180">
+      <el-table-column label="资产编码" align="center" prop="taskCode" />
+      <el-table-column label="资产的其他信息" align="center" prop="taskCode" />
+      <el-table-column label="盘点人" align="center" prop="userCode" />
+
+      <el-table-column label="盘点时间" align="center" prop="endDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="异常信息" align="center" prop="userCode" />
       <el-table-column label="盘点状态" align="center" prop="status" />
-      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['mature:task:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['mature:task:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column> -->
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
@@ -98,9 +101,8 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        taskCode: null,
-        userCode: null,
-        inventoryRange: null,
+        assetCode: null,
+        createBy: null,
         assetCounted: null,
         assetNotCounted: null,
         assetAbnormal: null,
@@ -159,66 +161,10 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.taskId)
-      this.single = selection.length !== 1
-      this.multiple = !selection.length
-    },
-    // 跳转资产详情页面
-    showTaskDetail(row, column, event) {
-
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加盘点任务";
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const taskId = row.taskId || this.ids
-      getTask(taskId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改盘点任务";
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.taskId != null) {
-            updateTask(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addTask(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const taskIds = row.taskId || this.ids;
-      this.$modal.confirm('是否确认删除盘点任务编号为"' + taskIds + '"的数据项？').then(function () {
-        return delTask(taskIds);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => { });
-    },
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$modal.confirm('是否确认导出所有盘点任务数据项？').then(() => {
+      this.$modal.confirm("提示", "确认","取消", "是否确认导出所有符合条件数据项？").then(() => {
         this.exportLoading = true;
         return exportTask(queryParams);
       }).then(response => {
@@ -239,7 +185,11 @@ export default {
   font-weight: bold;
   background-color: rgb(236, 245, 255);
 }
-
+.card_text {
+  color: blue;
+  margin-top: 15px;
+  font-size: 15pt;
+}
 .selectedCard {
   background: rgb(198, 226, 255);
 }

@@ -227,7 +227,9 @@ public interface ISysUserService
 
     List<SysUser> getOnOfficeUserList(String parameter);
 
+    List<SysUser> selectUserAll();
+
     // 获取用户名和昵称映射表
-    Map<String, SysUser> getUsernameNicknameMap();
+    Map<String, SysUser> getUsernameUserObjMap();
 
 }

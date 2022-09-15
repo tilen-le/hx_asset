@@ -28,6 +28,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.Resource;
@@ -69,8 +71,10 @@ public class SysUserServiceImpl implements ISysUserService
     @Resource
     private SysDeptMapper deptMapper;
 
-    @Value("${odoo.getDepartmentEmployee}")
-    private String DepartmentEmployeeURL;
+    @Value("${uip.uipTransfer}")
+    private String uipTransfer;
+
+    private static final String initPassword = "hx.123";
 
     /**
      * 根据条件分页查询用户列表
@@ -614,7 +618,9 @@ public class SysUserServiceImpl implements ISysUserService
     public void syncDepartmentUserList() {
         String delete = "2";
         String unDelete = "0";
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(DepartmentEmployeeURL, null, String.class);
+        MultiValueMap<String, Object> param = new LinkedMultiValueMap<>();
+        param.add("interfaceCode", "get_department_employee");
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, param, String.class);
         String body = responseEntity.getBody();
         JSONObject result = JSON.parseObject(body);
         if (result.getIntValue("code") != 0) {
@@ -658,6 +664,7 @@ public class SysUserServiceImpl implements ISysUserService
                 SysUser sysUser = new SysUser();
                 sysUser.setUserName(odoUser.getCode());
                 sysUser.setNickName(odoUser.getName());
+                sysUser.setPassword(SecurityUtils.encryptPassword(initPassword));
                 if (StringUtils.isNotBlank(odoUser.getDept_code())) {
                     sysUser.setDeptId(Long.parseLong(odoUser.getDept_code()));
                 }
@@ -691,7 +698,11 @@ public class SysUserServiceImpl implements ISysUserService
     }
 
     @Override
-    public Map<String, SysUser> getUsernameNicknameMap() {
+    public List<SysUser> selectUserAll() {
+        return userMapper.selectUserAll();
+    }
+
+    public Map<String, SysUser> getUsernameUserObjMap() {
         List<SysUser> allUserList = userMapper.getAllUserList();
         Map<String,SysUser> usernameNicknameMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(allUserList)) {

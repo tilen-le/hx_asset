@@ -237,4 +237,10 @@ public class SysUserController extends BaseController
         return AjaxResult.success(userListByRoleCode);
     }
 
+    @GetMapping("/all")
+    public AjaxResult list()
+    {
+        List<SysUser> list = userService.selectUserAll();
+        return AjaxResult.success(list);
+    }
 }

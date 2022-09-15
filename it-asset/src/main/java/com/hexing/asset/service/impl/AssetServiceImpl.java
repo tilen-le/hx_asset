@@ -2,7 +2,6 @@ package com.hexing.asset.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -70,7 +69,15 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public Asset selectAssetByAssetCode(String assetCode) {
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         wrapper.eq("asset_code", assetCode);
-        return assetMapper.selectOne(wrapper);
+        Asset asset = new Asset();
+        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
+        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
+
+        SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
+        asset.setResponsiblePersonName(user.getUserName());
+        asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+
+        return asset;
     }
 
 
@@ -243,7 +250,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public List<Asset> selectAssetList()
     {
-        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameNicknameMap();
+        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
         Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
 
         startPage();

@@ -37,6 +37,12 @@
             <version>1.6.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-spring-boot-starter</artifactId>
+            <version>2.0.9</version>
+        </dependency>
+
          <!-- Mysql驱动包 -->
         <dependency>
             <groupId>mysql</groupId>
@@ -78,6 +84,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>2.1.1.RELEASE</version>
                 <configuration>
+                    <includeSystemScope>true</includeSystemScope>
                     <fork>true</fork> <!-- 如果没有该配置，devtools不会生效 -->
                 </configuration>
                 <executions>

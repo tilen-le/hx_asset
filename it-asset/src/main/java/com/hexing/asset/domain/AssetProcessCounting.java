@@ -71,4 +71,7 @@ public class AssetProcessCounting
     @Excel(name = "盘点时间")
     private Date countingTime;
 
+    /** 备注 */
+    private String comment;
+
 }

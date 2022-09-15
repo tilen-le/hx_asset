@@ -56,7 +56,7 @@ service.interceptors.response.use(res => {
     // 获取错误信息
     const msg = errorCode[code] || res.data.msg || errorCode['default']
     if (code === 401) {
-      MessageBox.confirm('登录状态已过期/The login status has expired', 'Tip', {
+      MessageBox.confirm('登录状态已过期', 'Tip', {
           confirmButtonText: 'ReLogin',
           cancelButtonText: 'Cancel',
           type: 'warning'

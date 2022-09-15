@@ -22,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 开放给钉钉端的rest接口
@@ -68,6 +70,21 @@ public class DingTalkAssetController extends BaseController {
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {
         AssetInventoryTask task = params.getObject("data", AssetInventoryTask.class);
         return toAjax(assetInventoryTaskService.insertAssetCountingTask(task));
+    }
+
+    /**
+     * 查询盘点任务编码
+     */
+    @PostMapping("/selectCountingTaskCode")
+    public List  selectCountingTaskCode() {
+        logger.info("--------调用selectCountingTaskCode接口");
+        AssetInventoryTask task =new AssetInventoryTask();
+        List<AssetInventoryTask> taskList = assetInventoryTaskService.selectAssetCountingTaskList(task);
+        List list=new ArrayList();
+        for (AssetInventoryTask a:taskList){
+            list.add(a.getTaskCode());
+        }
+        return list;
     }
 
     /**

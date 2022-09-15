@@ -36,7 +36,6 @@ public class AssetInventoryTaskController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(AssetInventoryTask assetInventoryTask)
     {
-        startPage();
         List<AssetInventoryTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetInventoryTask);
         return getDataTable(list);
     }
@@ -69,7 +68,7 @@ public class AssetInventoryTaskController extends BaseController
      */
 //    @PreAuthorize("@ss.hasPermi('mature:task:add')")
     @Log(title = "盘点任务表", businessType = BusinessType.INSERT)
-    @PostMapping(value = "/add")
+    @PostMapping
     public AjaxResult add(@RequestBody AssetInventoryTaskDTO asset) {
         return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(asset));
     }

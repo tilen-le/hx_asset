@@ -1,9 +1,12 @@
 package com.hexing.asset.domain.vo;
 
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hexing.common.annotation.Excel;
 import lombok.Data;
 import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 @Data
 @Accessors(chain = true)
@@ -47,4 +50,15 @@ public class AssetProcessCountingVO {
 
     /** 存放地点 */
     private String location;
+
+    /** 盘点时间 */
+    private Date countingTime;
+
+    /** 盘点状态 */
+    private String countingStatus;
+
+    /** 备注 */
+    private String comment;
+
+
 }

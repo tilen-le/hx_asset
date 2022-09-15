@@ -97,9 +97,10 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         for (AssetProcessCounting obj : assetProcessCountingList) {
             Asset asset = assetService.selectAssetByAssetCode(obj.getAssetCode());
             SysUser responsiblePerson = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+            SysUser inventoryPerson = sysUserService.getUserByUserName(obj.getUserCode());
             SysDept dept = deptService.selectDeptById(responsiblePerson.getDeptId());
             AssetProcessCountingVO vo = new AssetProcessCountingVO().setUserCode(obj.getUserCode())
-                    .setUserNickName(obj.getUserNickName())
+                    .setUserNickName(inventoryPerson.getNickName())
                     .setCompanyName(asset.getCompanyName())
                     .setAssetCode(asset.getAssetCode())
                     .setAssetName(asset.getAssetName())
@@ -110,7 +111,10 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     .setResponsiblePersonName(responsiblePerson.getNickName())
                     .setResponsiblePersonCode(responsiblePerson.getUserName())
                     .setResponsiblePersonDept(dept.getDeptName())
-                    .setLocation(asset.getLocation());
+                    .setLocation(asset.getLocation())
+                    .setCountingTime(obj.getCountingTime())
+                    .setCountingStatus(obj.getCountingStatus())
+                    .setComment(obj.getComment());
             assetProcessCountingVOList.add(vo);
         }
         return assetProcessCountingVOList;
@@ -121,8 +125,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     public JSONObject countingStatusCount(String taskCode) {
         JSONObject result = new JSONObject();
 
-        QueryWrapper<AssetProcessCounting> wrapper = new QueryWrapper<>();
-        wrapper.eq("task_code", taskCode);
+        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetProcessCounting::getTaskCode, taskCode);
         List<AssetProcessCounting> assetProcessCountingList = assetProcessCountingMapper.selectList(wrapper);
 
         int total = 0;

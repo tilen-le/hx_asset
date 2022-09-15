@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import cn.hutool.core.util.RandomUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -13,6 +14,7 @@ import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 import com.hexing.asset.enums.AssetCountingStatus;
+import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.mapper.AssetInventoryTaskMapper;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.mapper.AssetProcessMapper;
@@ -24,12 +26,16 @@ import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.framework.manager.AsyncManager;
+import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.hexing.common.utils.PageUtil.startPage;
 
 
 /**
@@ -82,13 +88,28 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     {
         QueryWrapper<AssetInventoryTask> wrapper = new QueryWrapper<>();
         wrapper.setEntity(assetInventoryTask);
-        if (StringUtils.isBlank(assetInventoryTask.getTaskCode())){
-            assetInventoryTask.setTaskCode(null);
+
+        startPage();
+        List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);
+        for (AssetInventoryTask task : taskList) {
+            JSONObject countResult = assetProcessCountingService.countingStatusCount(task.getTaskCode());
+            int total = countResult.getIntValue("total");
+            int notCounted = countResult.getIntValue("notCounted");
+            int counted = countResult.getIntValue("counted");
+            int abnormal = countResult.getIntValue("abnormal");
+            task.setAssetTotal(total);
+            task.setAssetNotCounted(notCounted);
+            task.setAssetCounted(counted);
+            task.setAssetAbnormal(abnormal);
+//            if (CountingTaskStatus.COUNTING.getStatus().equals(task.getStatus())) {
+//                if (new Date().compareTo(task.getEndDate()) > 0 || notCounted == 0) {
+//                    task.setStatus(CountingTaskStatus.FINISHED.getStatus());
+//                    assetInventoryTaskMapper.updateById(task);
+//                }
+//            }
         }
-        if (StringUtils.isBlank(assetInventoryTask.getCreateBy())){
-            assetInventoryTask.setCreateBy(null);
-        }
-        return assetInventoryTaskMapper.selectList(wrapper);
+
+        return taskList;
     }
 
     /**
@@ -149,6 +170,11 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             assetProcessCountingService.insertAssetProcessCounting(entity);
         }
+        List<String> inventoryUserList = task.getInventoryUserList();
+//        List<String> inventoryUserList = new ArrayList<>();
+//        inventoryUserList.add("80010712");
+        String title ="盘点任务编码:"+task.getTaskCode();
+        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
         return 1;
     }
 

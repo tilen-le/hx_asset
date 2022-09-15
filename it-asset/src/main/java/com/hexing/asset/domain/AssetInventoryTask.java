@@ -42,6 +42,11 @@ public class AssetInventoryTask
 
     /** 已盘点资产数 */
     @TableField(exist = false)
+    @Excel(name = "固定资产总数")
+    private Integer assetTotal;
+
+    /** 已盘点资产数 */
+    @TableField(exist = false)
     @Excel(name = "已盘点资产数")
     private Integer assetCounted;
 

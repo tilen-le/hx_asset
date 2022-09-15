@@ -1,8 +1,10 @@
 package com.hexing.asset.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
@@ -79,9 +81,31 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 盘点资产
+     * 扫码盘点时，查询资产信息
      */
-    @PostMapping("/countAsset")
+    @PostMapping("/counting/getAssetInfo")
+    public AjaxResult getAssetInfo(@RequestBody JSONObject params) {
+        String assetCode = params.getString("assetCode");
+        String taskCode = params.getString("taskCode");
+
+        QueryWrapper<AssetProcessCounting> wrapper = new QueryWrapper<>();
+        wrapper.eq("task_code", taskCode)
+                .eq("asset_code", assetCode);
+        AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
+        if (entity == null) {
+            return AjaxResult.error("所盘点资产不在当前任务盘点范围内");
+        }
+        if (!AssetCountingStatus.NOT_COUNTED.getStatus().equals(entity.getCountingStatus())) {
+            return AjaxResult.error("该资产在当前任务中已被盘点过");
+        }
+        Asset asset = assetService.getOne(new QueryWrapper<Asset>().eq("asset_code", assetCode));
+        return AjaxResult.success(asset);
+    }
+
+    /**
+     * 钉钉提交盘点流程
+     */
+    @PostMapping("/counting/countAsset")
     public AjaxResult countAsset(@RequestBody JSONObject params) {
         JSONObject data = params.getObject("data", JSONObject.class);
         String taskCode = data.getString("taskCode");
@@ -101,25 +125,32 @@ public class DingTalkAssetController extends BaseController {
         }
 
         String userCode = data.getString("userCode");
-        String assetCode = data.getString("assetCode");
         String instanceId = data.getString("instanceId");
         JSONArray assetList = data.getJSONArray("assets");
 
         for (Object o : assetList) {
             JSONObject jo = (JSONObject) o;
-
+            String assetCode = jo.getString("assetCode");
+            // 若备注不为空，则为盘点异常
+            String comment = jo.getString("comment");
+            AssetProcessCounting entity = assetProcessCountingService
+                    .getOne(new QueryWrapper<AssetProcessCounting>().eq("asset_code", assetCode));
+            String status = entity.getCountingStatus();
+            if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
+                if (StringUtils.isNotEmpty(comment)) {
+                    entity.setCountingStatus(AssetCountingStatus.ABNORMAL.getStatus());
+                } else {
+                    entity.setCountingStatus(AssetCountingStatus.COUNTED.getStatus());
+                }
+                entity.setUserCode(userCode);
+                entity.setInstanceId(instanceId);
+                entity.setCountingTime(new Date());
+                entity.setComment(comment);
+                assetProcessCountingService.updateById(entity);
+            }
         }
 
-        AssetProcessCounting entity = assetProcessCountingService
-                .getOne(new QueryWrapper<AssetProcessCounting>().eq("asset_code", assetCode));
-        String status = entity.getCountingStatus();
-        if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
-            entity.setCountingStatus(AssetCountingStatus.COUNTED.getStatus());
-            assetProcessCountingService.updateById(entity);
-            return AjaxResult.success("盘点成功");
-        } else {
-            return AjaxResult.error("盘点失败，该资产已盘点过");
-        }
+        return AjaxResult.success("盘点成功");
     }
 
 }

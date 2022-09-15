@@ -74,7 +74,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
 
         SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
-        asset.setResponsiblePersonName(user.getUserName());
+        asset.setResponsiblePersonName(user.getNickName());
         asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
 
         return asset;

@@ -68,7 +68,7 @@ public class AssetInventoryTaskController extends BaseController
      */
 //    @PreAuthorize("@ss.hasPermi('mature:task:add')")
     @Log(title = "盘点任务表", businessType = BusinessType.INSERT)
-    @PostMapping(value = "/add")
+    @PostMapping
     public AjaxResult add(@RequestBody AssetInventoryTaskDTO asset) {
         return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(asset));
     }

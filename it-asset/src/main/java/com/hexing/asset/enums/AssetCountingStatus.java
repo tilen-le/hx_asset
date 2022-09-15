@@ -7,11 +7,12 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AssetCountingStatus {
 
-    COUNTED("0", "未盘点"),
-    NOT_COUNTED("1", "已盘点"),
+    NOT_COUNTED("0", "待盘点"),
+    COUNTED("1", "已盘点"),
     ABNORMAL("2", "盘点异常"),
     ;
 
     private String status;
     private String name;
+
 }

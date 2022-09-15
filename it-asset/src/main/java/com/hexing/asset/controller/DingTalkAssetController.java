@@ -1,22 +1,26 @@
 package com.hexing.asset.controller;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
-import com.hexing.asset.constant.AssetConstants;
-import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
+import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
+import com.hexing.asset.enums.AssetCountingStatus;
+import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.service.IAssetInventoryTaskService;
 import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
+import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Date;
 
 /**
  * 开放给钉钉端的rest接口
@@ -28,7 +32,7 @@ public class DingTalkAssetController extends BaseController {
     @Autowired
     private IAssetService assetService;
     @Autowired
-    private IAssetInventoryTaskService assetProcessCountingTaskService;
+    private IAssetInventoryTaskService assetInventoryTaskService;
     @Autowired
     private IAssetProcessCountingService assetProcessCountingService;
 
@@ -61,7 +65,7 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/createCountingTask")
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {
         AssetInventoryTaskDTO dto = params.getObject("data", AssetInventoryTaskDTO.class);
-        return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(dto));
+        return toAjax(assetInventoryTaskService.insertAssetCountingTask(dto));
     }
 
     /**
@@ -69,7 +73,7 @@ public class DingTalkAssetController extends BaseController {
      */
     @PostMapping("/countingAssets")
     public AjaxResult countingAssets(@RequestBody JSONObject params) {
-        System.out.println("params: "+params);
+        System.out.println("params: " + params);
         AssetProcessCounting vo = params.getObject("data", AssetProcessCounting.class);
         return toAjax(assetProcessCountingService.insertAssetProcessCounting(vo));
     }
@@ -80,12 +84,37 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/countAsset")
     public AjaxResult countAsset(@RequestBody JSONObject params) {
         JSONObject data = params.getObject("data", JSONObject.class);
+        String taskCode = data.getString("taskCode");
+        // 判断盘点任务编码是否为空
+        if (StringUtils.isEmpty(taskCode)) {
+            return AjaxResult.error("盘点任务编码为空");
+        }
+        // 判断盘点任务编码是否存在
+        AssetInventoryTask task = assetInventoryTaskService
+                .getOne(new QueryWrapper<AssetInventoryTask>().eq("task_code", taskCode));
+        if (task == null) {
+            return AjaxResult.error("盘点任务编码不存在");
+        }
+        // 若超出盘点任务截止日期
+        if (CountingTaskStatus.FINISHED.getStatus().equals(task.getStatus()) || new Date().compareTo(task.getEndDate()) > 0) {
+            return AjaxResult.error("盘点任务已结束");
+        }
+
+        String userCode = data.getString("userCode");
         String assetCode = data.getString("assetCode");
+        String instanceId = data.getString("instanceId");
+        JSONArray assetList = data.getJSONArray("assets");
+
+        for (Object o : assetList) {
+            JSONObject jo = (JSONObject) o;
+
+        }
+
         AssetProcessCounting entity = assetProcessCountingService
                 .getOne(new QueryWrapper<AssetProcessCounting>().eq("asset_code", assetCode));
         String status = entity.getCountingStatus();
-        if (AssetConstants.COUNTING_STATUS_NOT_COUNTED.equals(status)) {
-            entity.setCountingStatus(AssetConstants.COUNTING_STATUS_COUNTED);
+        if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
+            entity.setCountingStatus(AssetCountingStatus.COUNTED.getStatus());
             assetProcessCountingService.updateById(entity);
             return AjaxResult.success("盘点成功");
         } else {

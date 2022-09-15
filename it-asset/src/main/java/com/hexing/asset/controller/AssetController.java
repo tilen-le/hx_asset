@@ -50,7 +50,7 @@ public class AssetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('asset:asset:list')")
     @GetMapping("/list")
     public TableDataInfo list() {
-        startPage();
+
         List<Asset> list = assetService.selectAssetList();
         return getDataTable(list);
     }

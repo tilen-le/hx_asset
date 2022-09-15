@@ -41,14 +41,17 @@ public class AssetInventoryTask
     private String inventoryDept;
 
     /** 已盘点资产数 */
+    @TableField(exist = false)
     @Excel(name = "已盘点资产数")
     private Integer assetCounted;
 
     /** 待盘点资产数 */
+    @TableField(exist = false)
     @Excel(name = "待盘点资产数")
     private Integer assetNotCounted;
 
     /** 异常资产数目 */
+    @TableField(exist = false)
     @Excel(name = "异常资产数目")
     private Integer assetAbnormal;
 

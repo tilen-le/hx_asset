@@ -1,6 +1,9 @@
 package com.hexing.asset.controller;
 
 import java.util.List;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,6 +29,7 @@ import com.hexing.common.core.page.TableDataInfo;
  * @author zxy
  * @date 2022-09-08
  */
+@Api(tags = "资产盘点记录管理")
 @RestController
 @RequestMapping("/asset/counting")
 public class AssetProcessCountingController extends BaseController
@@ -36,6 +40,7 @@ public class AssetProcessCountingController extends BaseController
     /**
      * 查询资产盘点流程列表
      */
+    @ApiOperation("获取盘点记录列表")
     @PreAuthorize("@ss.hasPermi('asset:counting:list')")
     @GetMapping("/list")
     public TableDataInfo list(AssetProcessCounting assetProcessCounting)
@@ -54,8 +59,8 @@ public class AssetProcessCountingController extends BaseController
     public AjaxResult export(AssetProcessCounting assetProcessCounting)
     {
         List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-        ExcelUtil<AssetProcessCounting> util = new ExcelUtil<AssetProcessCounting>(AssetProcessCounting.class);
-        return util.exportExcel(list, "资产盘点流程数据");
+        ExcelUtil<AssetProcessCounting> util = new ExcelUtil<>(AssetProcessCounting.class);
+        return util.exportExcel(list, "资产盘点记录");
     }
 
     /**

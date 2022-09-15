@@ -164,6 +164,19 @@ export const constantRoutes = [
       }
     ]
   },
+  {
+    path: '/asset/assetCard',
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: '/asset/assetCard',
+        component: (resolve) => require(['@/views/asset/asset/assetCard'], resolve),
+        name: 'assetCard',
+        meta: { title: '资产卡片'}
+      }
+    ]
+  }
 
 
 ]

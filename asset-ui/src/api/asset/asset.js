@@ -10,9 +10,9 @@ export function listAsset(query) {
 }
 
 // 查询资产表详细
-export function getAsset(assetId) {
+export function getAsset(assetCode) {
   return request({
-    url: '/asset/getInfo?assetId=' + assetId,
+    url: '/asset/getInfo/' + assetCode,
     method: 'get'
   })
 }

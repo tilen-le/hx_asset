@@ -69,7 +69,15 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public Asset selectAssetByAssetCode(String assetCode) {
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         wrapper.eq("asset_code", assetCode);
-        return assetMapper.selectOne(wrapper);
+        Asset asset = assetMapper.selectOne(wrapper);
+        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
+        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
+
+        SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
+        asset.setResponsiblePersonName(user.getUserName());
+        asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+
+        return asset;
     }
 
 
@@ -252,7 +260,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (CollectionUtil.isNotEmpty(assetList)) {
             for (Asset asset : assetList) {
                 SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
-                asset.setResponsiblePersonName(user.getUserName());
+                asset.setResponsiblePersonName(user.getNickName());
                 asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
             }
         }

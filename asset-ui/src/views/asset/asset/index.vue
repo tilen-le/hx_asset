@@ -24,14 +24,14 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
           v-hasPermi="['asset:asset:add']">新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
+      </el-col> -->
+      <!-- <el-col :span="1.5">
         <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
           v-hasPermi="['asset:asset:edit']">修改</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
           v-hasPermi="['asset:asset:remove']">删除</el-button>
@@ -47,12 +47,15 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" v-columns="columns">
+    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" v-columns="columns"
+      @row-click="showAssetCard">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="固定资产名称" align="center" prop="assetName" />
       <el-table-column label="平台资产编号" align="center" prop="assetCode" />
       <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="110" />
+      <el-table-column label="保管人" align="center" prop="responsiblePersonName" />
       <el-table-column label="保管人工号" align="center" prop="responsiblePersonCode" width="110" />
+      <el-table-column label="保管部门" align="center" prop="responsiblePersonDept" />
       <el-table-column label="资产分类描述" align="center" prop="category" />
       <el-table-column label="资产状态描述" align="center" prop="assetStatus" />
       <el-table-column label="出厂编号" align="center" prop="factoryNo" />
@@ -64,10 +67,11 @@
           <span>{{ parseTime(scope.row.buyDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
+      <el-table-column label="资产总价值" align="center" prop="totalValue" />
       <el-table-column label="净值" align="center" prop="netWorth" />
       <el-table-column label="保修期" align="center" prop="warranty" />
-      <el-table-column label="预计使用寿命" align="center" prop="canUseMonths" />
-      <el-table-column label="预计使用寿命" align="center" prop="canUseYears" />
+      <el-table-column label="预计使用寿命（月）" align="center" prop="canUseMonths" />
+      <el-table-column label="预计使用寿命（年）" align="center" prop="canUseYears" />
       <el-table-column label="资本化日期/资产价值录入日期" align="center" prop="capitalizationDate" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.capitalizationDate, '{y}-{m}-{d}') }}</span>
@@ -87,21 +91,27 @@
       <el-table-column label="申请人" align="center" prop="proposer" />
       <el-table-column label="资产使用场景" align="center" prop="usageScenario" />
       <el-table-column label="备注" align="center" prop="comment" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="盘点状态" align="center" prop="inventoryStatus">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.asset_counting_status" :value="scope.row.inventoryStatus" />
+        </template>
+      </el-table-column>
+      <!-- <el-table-column label="备注" align="center" prop="remark" /> -->
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
             v-hasPermi="['asset:asset:edit']">修改</el-button>
           <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
             v-hasPermi="['asset:asset:remove']">删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
       @pagination="getList" />
 
     <!-- 添加或修改资产表对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <!-- <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="固定资产名称" prop="assetName">
           <el-input v-model="form.assetName" placeholder="请输入固定资产名称" />
@@ -204,7 +214,7 @@
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
-    </el-dialog>
+    </el-dialog> -->
 
     <!-- 用户导入对话框 -->
     <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
@@ -231,10 +241,11 @@
 </template>
 
 <script>
-import { listAsset, getAsset, delAsset, addAsset, updateAsset, exportAsset, importTemplate } from "@/api/asset/asset";
+import { listAsset, delAsset, addAsset, updateAsset, exportAsset, importTemplate } from "@/api/asset/asset";
 import { getToken } from '@/utils/auth'
 export default {
   name: "Asset",
+  dicts: ['asset_counting_status'],
   data() {
     return {
       // 遮罩层
@@ -293,7 +304,16 @@ export default {
     };
   },
   created() {
+    if (this.$store.state.assetCard.redirect) {
+      this.$store.commit('SET_Redirect', false);
+      this.$router.go(-1)
+    }
     this.getList();
+  },
+  watch: {
+    columns() {
+      this.$store.commit("SET_ASSET_COLUMNS", this.columns);
+    }
   },
   methods: {
     /** 查询资产表列表 */
@@ -368,6 +388,10 @@ export default {
       this.single = selection.length !== 1
       this.multiple = !selection.length
     },
+    // 跳转资产卡片
+    showAssetCard(row) {
+      this.$router.push({ path: "/asset/assetCard", query: { assetCode: row.assetCode } })
+    },
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
@@ -375,36 +399,35 @@ export default {
       this.title = "添加资产表";
     },
     /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const assetId = row.assetId || this.ids
-      getAsset(assetId).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改资产表";
-      });
-    },
+    // handleUpdate(row) {
+    //   this.reset();
+    //   const assetId = row.assetId || this.ids
+    //   getAsset(assetId).then(response => {
+    //     this.form = response.data;
+    //     this.open = true;
+    //     this.title = "修改资产表";
+    //   });
+    // },
     /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.assetId != null) {
-            updateAsset(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addAsset(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    //QWER
+    // submitForm() {
+    //   this.$refs["form"].validate(valid => {
+    //     if (valid) {
+    //       if (this.form.assetId != null) {
+    //         updateAsset(this.form).then(response => {
+    //           this.$modal.msgSuccess("修改成功");
+    //           this.open = false;
+    //           this.getList();
+    //         });
+    //       } else {
+    //         addAsset(this.form).then(response => {
+    //           this.$modal.msgSuccess("新增成功");
+    //           this.open = false;
+    //           this.getList();
+    //         });
+    //       }
+    //     }
+    //   });
+    // },
     /** 删除按钮操作 */
     handleDelete(row) {
       const assetCodes = row.assetCode || this.assetCodes;

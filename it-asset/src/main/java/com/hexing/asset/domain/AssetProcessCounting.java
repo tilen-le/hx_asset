@@ -30,11 +30,9 @@ public class AssetProcessCounting
     private String id;
 
     /** 流程总表id */
-    @Excel(name = "流程总表id")
     private Long processId;
 
     /** 实例ID */
-    @Excel(name = "实例ID")
     private String instanceId;
 
     /** 盘点任务编码 */
@@ -49,17 +47,12 @@ public class AssetProcessCounting
     @Excel(name = "平台资产编码")
     private String assetCode;
 
-//    @JsonProperty(value = "assets")
-//    private List<Asset> assets;
-
     /** 创建时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Excel(name = "创建时间")
     private Date createTime;
 
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Excel(name = "更新时间")
     private Date updateTime;
 
     /** 盘点状态 */

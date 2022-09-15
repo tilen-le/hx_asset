@@ -1,26 +1,26 @@
-import Vue from "vue";
+/**
+ * 生成columns用于表格显隐列
+ * 控制表格显隐列
+ */
 export default {
   bind: function (el, binding, vnode) {
     var columns = [];
-    Vue.nextTick(() => {
-      var thList = el.querySelectorAll("th .cell");
-      for (var i = 0; i < thList.length; i++) {
-        if (
-          thList[i].innerHTML.indexOf("el-checkbox") < 0 &&
-          thList[i].innerHTML != "操作"
-        ) {
-          columns.push({
-            key: i,
-            label: thList[i].innerHTML,
-            className: thList[i].parentElement.className.match(
-              /el-table_[0-9]*_column_[0-9]*/
-            )[0],
-            visible: true,
-          });
-        }
-      }
-      vnode.context.$data.columns = columns;
-    });
+    var array = vnode.componentOptions.children;
+    for (
+      var i = array[0].componentOptions.propsData.type == "selection" ? 1 : 0;
+      i < array.length;
+      i++
+    ) {
+      const element = array[i];
+      columns.push({
+        key: i,
+        label: element.componentOptions.propsData.label,
+        prop: element.componentOptions.propsData.prop, //用于资产卡片
+        className: element.elm.__vue__.columnId,
+        visible: true,
+      });
+    }
+    vnode.context.$data.columns = columns;
   },
   update(el, binding) {
     var columns = binding.value;

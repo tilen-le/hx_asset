@@ -8,8 +8,9 @@
     <table class="tab-box" border="1">
       <tr v-for="index in columns" :key="index">
         <template v-for="n in 3">
-          <template v-if="3*(index-1)+n-1<assetColumns.length">
-            <td class='asset-th' :key="'th'+assetColumns[3*(index-1)+n-1].prop">
+          <el-col v-if="3*(index-1)+n-1<assetColumns.length" :key="'th'+assetColumns[3*(index-1)+n-1].prop" :span="8"
+            style="display: flex;">
+            <td class='asset-th'>
               {{assetColumns[3*(index-1)+n-1].label}}
             </td>
             <td :key="'td'+assetColumns[3*(index-1)+n-1].prop">
@@ -17,8 +18,8 @@
                 {{form[assetColumns[3*(index-1)+n-1].prop]}}
               </span>
               <template v-else>
-                <input v-if="assetColumns[3*(index-1)+n-1].prop!='responsiblePersonName'"
-                  v-model="form[assetColumns[3*(index-1)+n-1].prop]" size="mini" />
+                <el-input v-if="assetColumns[3*(index-1)+n-1].prop!='responsiblePersonName'"
+                  v-model="form[assetColumns[3*(index-1)+n-1].prop]" style="background-color:inherit" />
                 <el-select v-else v-model="form.responsiblePersonName" @change="handleChange" placeholder="请选择盘点人"
                   filterable style="width: 80%;">
                   <el-option v-for="item in userOptions" :key="item.userName" :label="item.nickName"
@@ -26,7 +27,7 @@
                 </el-select>
               </template>
             </td>
-          </template>
+          </el-col>
         </template>
       </tr>
     </table>
@@ -61,7 +62,6 @@ export default {
         this.assetColumns.splice(i, 1)
       }
     }
-    console.log(this.assetColumns)
     if (this.assetColumns.length == 0) {
       this.$store.commit('SET_Redirect', true);
       this.$router.push({ path: "/asset/asset" })
@@ -82,13 +82,10 @@ export default {
       if (this.userOptions.length == 0) {
         allUser().then(response => {
           this.userOptions = response.data;
-          console.log('this.userOptions::')
-          console.log(this.userOptions)
         });
       }
     },
     handleChange(value) {
-      console.log('handleChange:::::', value)
       this.form.responsiblePersonCode = value
     },
     handleUpdate() {
@@ -121,25 +118,32 @@ export default {
   width: 95%;
   margin: 20px auto;
   border-collapse: collapse;
+  border-color: rgb(179, 216, 255);
 }
 
 .tab-box tr {
   display: flex;
 }
 
+.tab-box tr:nth-child(even) {
+  background: #f1f1f1;
+}
+
 .tab-box td {
   flex: 1;
   /*让每个单元格宽度一样*/
-  min-height: 30px;
+  min-height: 35px;
   padding-left: 10px;
   display: flex;
   /*flex布局*/
   align-items: center;
   /*让单元格文字垂直居中*/
   color: #606266;
+  overflow:auto
 }
 
 .tab-box .asset-th {
+  width: 200px;
   background-color: rgb(198, 226, 255);
 }
 </style>

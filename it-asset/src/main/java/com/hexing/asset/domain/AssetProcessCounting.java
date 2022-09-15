@@ -1,5 +1,6 @@
 package com.hexing.asset.domain;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.baomidou.mybatisplus.annotation.IdType;
@@ -40,8 +41,12 @@ public class AssetProcessCounting
     private String taskCode;
 
     /** 发起人工号 */
-    @Excel(name = "发起人工号")
+    @Excel(name = "盘点人工号")
     private String userCode;
+
+    /** 发起人姓名 */
+    @TableField(exist = false)
+    private String userNickName;
 
     /** 平台资产编码 */
     @Excel(name = "平台资产编码")

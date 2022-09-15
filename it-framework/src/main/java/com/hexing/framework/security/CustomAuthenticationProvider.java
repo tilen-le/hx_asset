@@ -20,8 +20,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
     @Resource
     private UserDetailsService userDetailsService;
-    @Value("${ding.login}")
-    private String loginUrl;
 
     private final PasswordEncoder encoder = new BCryptPasswordEncoder();
 
@@ -31,14 +29,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String username = authentication.getName();
         String password = (String) authentication.getCredentials();
         UserDetails node = userDetailsService.loadUserByUsername(username);
-        // 此处钉钉域账号登录验证模式
-        String userType = ((LoginUser) node).getUser().getUserType();
-        if ("1".equals(userType)) {
-            getTokenFromAD(username, password);
-        } else {
-            if (!encoder.matches(password, node.getPassword())) {
-                throw new BadCredentialsException("用户名或密码不正确!");
-            }
+        if (!encoder.matches(password, node.getPassword())) {
+            throw new BadCredentialsException("用户名或密码不正确!");
         }
         return new UsernamePasswordAuthenticationToken(node, password, node.getAuthorities());
     }
@@ -48,7 +40,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return true;
     }
 
-    private String getTokenFromAD(String username, String password) {
+/*    private String getTokenFromAD(String username, String password) {
         LoginRequestDTO loginRequestDTO = new LoginRequestDTO();
         loginRequestDTO.setUsername(username);
         loginRequestDTO.setPassword(password);
@@ -62,6 +54,6 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
             }
         }
         return null;
-    }
+    }*/
 
 }

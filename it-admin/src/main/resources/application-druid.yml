@@ -79,7 +79,5 @@ spring:
                 max-wait: -1ms
 ruoyi:
     profile: D:/ruoyi/uploadPath
-ding:
-    login: http://192.168.108.172:8001/login
 uip:
     uipTransfer: http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper

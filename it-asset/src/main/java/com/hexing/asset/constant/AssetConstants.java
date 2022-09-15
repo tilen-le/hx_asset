@@ -12,4 +12,10 @@ public class AssetConstants {
 
 
     // 盘点任务状态
+    /** 盘点中 */
+    public static final String TASK_STATUS_COUNTING = "0";
+    /** 已完成 */
+    public static final String TASK_STATUS_FINISHED = "1";
+
+
 }

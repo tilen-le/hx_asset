@@ -122,7 +122,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                     SysUser sysUser1 = sysUserService.selectUserByUserName(split[i].trim());
                     inventoryUsersName +=sysUser1.getNickName()+",";
                 }
-                String substring = inventoryUsersName.substring(1, inventoryUsersName.lastIndexOf(","));
+                String substring = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
                 task.setInventoryUsersName(substring);
             }else {
                 String s=inventoryUsers.substring(1,inventoryUsers.lastIndexOf("]"));
@@ -208,7 +208,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 //        List<String> inventoryUserList = new ArrayList<>();
 //        inventoryUserList.add("80010712");
         String title ="盘点任务编码:"+task.getTaskCode();
-        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
+//        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
         return 1;
     }
 

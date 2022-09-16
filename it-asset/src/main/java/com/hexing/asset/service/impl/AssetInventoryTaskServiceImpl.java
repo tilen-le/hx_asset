@@ -122,6 +122,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                     task.setStatus(CountingTaskStatus.FINISHED.getStatus());
 //                    assetInventoryTaskMapper.updateById(task);
                 }
+            } else {
+                task.setStatus(CountingTaskStatus.COUNTING.getStatus());
             }
         }
 

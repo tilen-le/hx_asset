@@ -49,7 +49,7 @@ public interface IAssetInventoryTaskService extends IService<AssetInventoryTask>
      * @param taskIds 需要删除的盘点任务主键集合
      * @return 结果
      */
-    public int deleteAssetCountingTaskByTaskIds(String[] taskIds);
+    public int deleteAssetCountingTaskByTaskIds(List<String> taskCode);
 
     /**
      * 删除盘点任务信息

@@ -216,9 +216,9 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
      * @return 结果
      */
     @Override
-    public int deleteAssetCountingTaskByTaskIds(String[] taskIds)
+    public int deleteAssetCountingTaskByTaskIds(List<String> taskCode)
     {
-        return assetInventoryTaskMapper.deleteAssetCountingTaskByTaskIds(taskIds);
+        return assetInventoryTaskMapper.deleteBatchIds(taskCode);
     }
 
     /**

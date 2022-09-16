@@ -27,6 +27,8 @@ public class AssetInventoryTaskController extends BaseController
 {
     @Autowired
     private IAssetInventoryTaskService assetProcessCountingTaskService;
+    @Autowired
+    IAssetInventoryTaskService assetInventoryTaskService;
 
     /**
      * 查询盘点任务列表
@@ -70,6 +72,18 @@ public class AssetInventoryTaskController extends BaseController
     @PostMapping
     public AjaxResult add(@RequestBody AssetInventoryTaskDTO asset) {
         return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(asset));
+    }
+
+    /**
+     * 删除盘点任务
+     *
+     * @editor 80015306
+     */
+    @PreAuthorize("@ss.hasPermi('asset:task:remove')")
+    @Log(title = "盘点任务表", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{taskCodes}")
+    public AjaxResult remove(@PathVariable List<String> taskCodes) {
+        return toAjax(assetInventoryTaskService.deleteAssetCountingTaskByTaskIds(taskCodes));
     }
 
 

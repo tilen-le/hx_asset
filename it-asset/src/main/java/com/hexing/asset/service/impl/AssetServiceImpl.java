@@ -351,7 +351,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (StringUtils.isNull(assetList) || assetList.size() == 0) {
             throw new ServiceException("导入资产数据不能为空！");
         }
-        boolean isAssetExist = false;
         int successNum = 0; /* 导入成功条数 */
         int failureNum = 0; /* 导入失败条数 */
         StringBuilder message = new StringBuilder();
@@ -371,9 +370,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .eq(Asset::getCompanyCode, asset.getCompanyCode());
                 Asset a = assetMapper.selectOne(queryWrapper);
 
-                if (a != null) {
+                if (a != null && !isUpdateSupport) {
                     failureNum++;
                     message.append("<br/>" + "第 " + (i + 2) + " 行导入失败，原因：" + "资产已存在");
+                    continue;
                 }
 
                 if (a == null) {
@@ -383,7 +383,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     asset.setCreateTime(new Date());
                     assetMapper.insert(asset);
                     successNum++;
-//                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
                 } else if (isUpdateSupport) {
                     LambdaUpdateWrapper<Asset> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
@@ -393,7 +392,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     int update = assetMapper.update(asset, updateWrapper);
                     if (update > 0) {
                         successNum++;
-//                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新成功");
                     } else {
                         failureNum++;
                         message.append("<br/>" + "错误：第 " + (i + 2) + "公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新失败");
@@ -408,26 +406,28 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             }
         }
 
-        if (!isUpdateSupport && !isAssetExist) {
+        if (!isUpdateSupport) {
             try {
-                JSONObject sapResponse = syncAssetCodeToSAP(assetList);
+                // 过滤已导入过的资产信息
+                List<Asset> assets = assetList.stream()
+                        .filter(x->StringUtils.isNotEmpty(x.getAssetCode()))
+                        .collect(Collectors.toList());
+                if (CollectionUtil.isNotEmpty(assets)){
+                    JSONObject sapResponse = syncAssetCodeToSAP(assets);
 
-                JSONArray inbound = sapResponse.getJSONArray("INBOUND");
-                JSONObject response = inbound.getJSONObject(0);
-                if (SAPRespType.ERROR.getType().equals(response.getString("TYPE"))) {
-                    throw new ServiceException("SAP同步出错：" + response.getString("MSG"));
+                    JSONArray inbound = sapResponse.getJSONArray("INBOUND");
+                    JSONObject response = inbound.getJSONObject(0);
+                    if (SAPRespType.ERROR.getType().equals(response.getString("TYPE"))) {
+                        throw new ServiceException("SAP同步出错：" + response.getString("MSG"));
+                    }
                 }
             } catch (Exception e) {
+                log.error("", e);
                 throw new ServiceException("SAP同步出错");
             }
         }
 
-        if (failureNum > 0 && successNum == 0) {
-            message.insert(0, "很抱歉，导入失败！错误如下：");
-            throw new ServiceException(message.toString());
-        } else {
-            message.insert(0, "数据导入成功！共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，数据如下：");
-        }
+        message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，导入详情如下：");
         return message.toString();
     }
 

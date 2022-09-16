@@ -43,7 +43,6 @@ public class AssetProcessCountingController extends BaseController
      * 查询资产盘点流程列表
      */
     @ApiOperation("获取盘点记录列表")
-    @PreAuthorize("@ss.hasPermi('asset:counting:list')")
     @GetMapping("/list")
     public TableDataInfo list(AssetProcessCounting assetProcessCounting)
     {

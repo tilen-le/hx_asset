@@ -207,8 +207,10 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         List<String> inventoryUserList = task.getInventoryUserList();
 //        List<String> inventoryUserList = new ArrayList<>();
 //        inventoryUserList.add("80010712");
-        String title ="盘点任务编码:"+task.getTaskCode();
-//        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
+        String title ="盘点任务编码 :"+task.getTaskCode()
+                +"\n盘点开始时间 :"+DateUtils.parseDateToStr("YYYY-MM-dd",task.getStartDate())
+                + "\n盘点结束时间 :"+DateUtils.parseDateToStr("YYYY-MM-dd",task.getEndDate());
+        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
         return 1;
     }
 

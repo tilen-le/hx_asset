@@ -36,6 +36,10 @@ public class AssetInventoryTask
     /** 盘点人 */
     private String inventoryUsers;
 
+    /** 盘点人姓名 */
+    @TableField(exist = false)
+    private String inventoryUsersName;
+
     /** 盘点范围 */
     @Excel(name = "盘点范围")
     private String inventoryDept;
@@ -81,6 +85,10 @@ public class AssetInventoryTask
     /** 发起人 */
     @Excel(name = "发起人")
     private String createBy;
+
+    /** 发起人姓名 */
+    @TableField(exist = false)
+    private String createByName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;

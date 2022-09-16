@@ -1,18 +1,18 @@
 package com.hexing.asset.controller;
 
-import com.alibaba.fastjson.JSON;
+import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.service.IAssetInventoryTaskService;
 import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetService;
+import com.hexing.asset.service.impl.AssetServiceImpl;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.utils.StringUtils;
@@ -76,15 +76,22 @@ public class DingTalkAssetController extends BaseController {
      * 查询盘点任务编码
      */
     @PostMapping("/selectCountingTaskCode")
-    public List  selectCountingTaskCode() {
+    public String  selectCountingTaskCode(@RequestBody JSONObject params) {
         logger.info("--------调用selectCountingTaskCode接口");
         AssetInventoryTask task =new AssetInventoryTask();
+        JSONObject result =new JSONObject();
+        String userCode =params.getString("userCode");
         List<AssetInventoryTask> taskList = assetInventoryTaskService.selectAssetCountingTaskList(task);
         List list=new ArrayList();
+        Date date=new Date();
+
         for (AssetInventoryTask a:taskList){
-            list.add(a.getTaskCode());
+            if (a.getInventoryUsers().contains(userCode)&&(a.getEndDate().getTime()>=date.getTime())){
+                list.add(a.getTaskCode());
+            }
         }
-        return list;
+        result.put("result",list.toString());
+        return result.toString();
     }
 
     /**
@@ -116,7 +123,8 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error("该资产在当前任务中已被盘点过");
         }
         Asset asset = assetService.getOne(new QueryWrapper<Asset>().eq("asset_code", assetCode));
-        return AjaxResult.success(asset);
+        JSONObject jsonObject = AssetServiceImpl.setNewAsset(asset);
+        return AjaxResult.success(jsonObject);
     }
 
     /**
@@ -146,12 +154,13 @@ public class DingTalkAssetController extends BaseController {
         JSONArray assetList = data.getJSONArray("assets");
 
         for (Object o : assetList) {
-            JSONObject jo = (JSONObject) o;
-            String assetCode = jo.getString("assetCode");
+            String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             // 若备注不为空，则为盘点异常
-            String comment = jo.getString("comment");
-            AssetProcessCounting entity = assetProcessCountingService
-                    .getOne(new QueryWrapper<AssetProcessCounting>().eq("asset_code", assetCode));
+            String comment = JSONUtil.parseObj(o).getStr("comment");
+            QueryWrapper<AssetProcessCounting> w = new QueryWrapper();
+            w.eq("asset_code", assetCode);
+            w.eq("task_code", taskCode);
+            AssetProcessCounting entity = assetProcessCountingService.getOne(w);
             String status = entity.getCountingStatus();
             if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
                 if (StringUtils.isNotEmpty(comment)) {

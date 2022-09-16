@@ -176,7 +176,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetMapper.selectList(wrapper);
     }
 
-    public JSONObject setNewAsset(Asset asset)
+    public static JSONObject setNewAsset(Asset asset)
     {
         JSONObject result =new JSONObject();
         result.put("assetCode",asset.getAssetCode());
@@ -202,6 +202,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         result.put("estimatedUsefulLife",estimatedUsefulLife);
         result.put("usageScenario",asset.getUsageScenario());
         result.put("fdResponsiblePersonCode",asset.getResponsiblePersonCode());
+        result.put("fdResponsiblePerson",asset.getResponsiblePersonName());
+        result.put("responsibleDept",asset.getResponsiblePersonDept());
         return result;
 
     }

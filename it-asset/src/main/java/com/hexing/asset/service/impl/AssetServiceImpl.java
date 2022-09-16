@@ -22,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
@@ -326,6 +327,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return
      */
     @Override
+    @Transactional
     public String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName) {
         if (StringUtils.isNull(assetList) || assetList.size() == 0) {
             throw new ServiceException("导入资产数据不能为空！");
@@ -366,7 +368,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         jsonList.add(temp);
                         toSAPJSON.put("INBOUND", jsonList);
                         log.info("===导入如资产数据-新资产平台资产编号推送SAP："+ toSAPJSON);
-                        JSONObject sapResponse = pushToSAP(toSAPJSON, UIPcodeEnum.pushSingleFdCodeToSAP.getCode());
+//                        JSONObject sapResponse = pushToSAP(toSAPJSON, UIPcodeEnum.pushSingleFdCodeToSAP.getCode());
+                        JSONObject sapResponse = syncAssetCodeToSAP(asset);
                         log.info("===导入资产数据--新资产的平台资产编码同步到SAP，SAP响应：" + sapResponse);
                     } catch (Exception e) {
                         log.error("资产导入：平台资产编号同步SAP出错");
@@ -389,6 +392,14 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新失败");
                     }
                 }
+
+
+
+
+                //
+                //调用sap
+                //code throw
+                throw new ServiceException("");
             } catch (Exception e) {
                 totalNum++;
                 failureNum++;
@@ -498,27 +509,28 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     /**
-     * 将资产信息和保管人关联关系通过UIP推送到SAP
+     * 将资产信息和保管人关联关系通过UIP同步到SAP
      *
      * @param data
      * @return
      * @throws Exception
      */
-    public JSONObject pushToSAP(JSONObject data, String uidCode) throws Exception {
-        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-        params.add("INBOUND", data.getJSONArray("INBOUND"));
-        params.add("interfaceCode", uidCode);
-
-        log.info("params to uip: " + params);
-
-        RestTemplate restTemplate = new RestTemplate();
-        String uipTransfer = "http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper";
-        ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
-
-        String body = responseEntity.getBody();
-        JSONObject responseBody = JSONObject.parseObject(body);
-
-        return responseBody;
+    public JSONObject syncAssetCodeToSAP(/*JSONObject data, String uidCode*/Asset asset) throws Exception {
+//        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+//        params.add("INBOUND", data.getJSONArray("INBOUND"));
+//        params.add("interfaceCode", uidCode);
+//
+//        log.info("params to uip: " + params);
+//
+//        RestTemplate restTemplate = new RestTemplate();
+//        String uipTransfer = "http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper";
+//        ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
+//
+//        String body = responseEntity.getBody();
+//        JSONObject responseBody = JSONObject.parseObject(body);
+//
+//        return responseBody;
+        return null;
     }
 
 }

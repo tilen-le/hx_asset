@@ -51,7 +51,7 @@ public class AssetController extends BaseController {
      * 查询资产列表
      */
     @ApiOperation("查询资产列表")
-    @PreAuthorize("@ss.hasPermi('asset:asset:list')")
+    @PreAuthorize("@ss.hasPermi('asset:collection:list')")
     @GetMapping("/list")
     public TableDataInfo list() {
         List<Asset> list = assetService.selectAssetList();

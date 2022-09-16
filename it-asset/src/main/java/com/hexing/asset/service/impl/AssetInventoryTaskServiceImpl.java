@@ -1,7 +1,9 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -20,10 +22,12 @@ import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
+import com.hexing.common.utils.StringUtils;
 import com.hexing.framework.manager.AsyncManager;
 import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
+import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,6 +66,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
+
     /**
      * 查询盘点任务
      *
@@ -83,8 +88,19 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     @Override
     public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask)
     {
-        QueryWrapper<AssetInventoryTask> wrapper = new QueryWrapper<>();
-        wrapper.setEntity(assetInventoryTask);
+        LambdaQueryWrapper<AssetInventoryTask> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(assetInventoryTask.getTaskCode())) {
+            wrapper.like(AssetInventoryTask::getTaskCode, assetInventoryTask.getTaskCode());
+        }
+        if (StringUtils.isNotBlank(assetInventoryTask.getCreateBy())) {
+            wrapper.eq(AssetInventoryTask::getCreateBy, assetInventoryTask.getCreateBy());
+        }
+        if (ObjectUtil.isNotNull(assetInventoryTask.getStartDate())) {
+            wrapper.ge(AssetInventoryTask::getStartDate, assetInventoryTask.getStartDate());
+        }
+        if (ObjectUtil.isNotNull(assetInventoryTask.getEndDate())) {
+            wrapper.le(AssetInventoryTask::getEndDate, assetInventoryTask.getEndDate());
+        }
 
         startPage();
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);

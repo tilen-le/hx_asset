@@ -27,7 +27,6 @@ import com.hexing.framework.manager.AsyncManager;
 import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
-import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -101,7 +100,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (ObjectUtil.isNotNull(assetInventoryTask.getEndDate())) {
             wrapper.le(AssetInventoryTask::getEndDate, assetInventoryTask.getEndDate());
         }
-
         startPage();
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);
         for (AssetInventoryTask task : taskList) {
@@ -114,6 +112,23 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             task.setAssetNotCounted(notCounted);
             task.setAssetCounted(counted);
             task.setAssetAbnormal(abnormal);
+            SysUser sysUser = sysUserService.selectUserByUserName(task.getCreateBy());
+            task.setCreateByName(sysUser.getNickName());
+            String inventoryUsers = task.getInventoryUsers();
+            if (inventoryUsers.contains(",")){
+                String[] split=inventoryUsers.substring(1,inventoryUsers.lastIndexOf("]")).split(",");
+                String inventoryUsersName ="";
+                for (int i = 0; i < split.length; i++) {
+                    SysUser sysUser1 = sysUserService.selectUserByUserName(split[i].trim());
+                    inventoryUsersName +=sysUser1.getNickName()+",";
+                }
+                String substring = inventoryUsersName.substring(1, inventoryUsersName.lastIndexOf(","));
+                task.setInventoryUsersName(substring);
+            }else {
+                String s=inventoryUsers.substring(1,inventoryUsers.lastIndexOf("]"));
+                SysUser sysUser1 = sysUserService.selectUserByUserName(s.trim());
+                task.setInventoryUsersName(sysUser1.getNickName());
+            }
 
             SysDept dept = sysDeptService.selectDeptById(Long.valueOf(task.getInventoryDept()));
             task.setInventoryDeptName(dept.getDeptName());

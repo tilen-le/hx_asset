@@ -139,8 +139,8 @@ public class AsyncFactory
                 request.setToAllUser(false);
                 OapiMessageCorpconversationAsyncsendV2Request.Msg msg = new OapiMessageCorpconversationAsyncsendV2Request.Msg();
                 msg.setActionCard(new OapiMessageCorpconversationAsyncsendV2Request.ActionCard());
-                msg.getActionCard().setTitle("成熟性流程提醒");
-                msg.getActionCard().setMarkdown("## 你有一条成熟性流程等待处理   \n  " + title);
+                msg.getActionCard().setTitle("盘点流程提醒");
+                msg.getActionCard().setMarkdown("## 盘点流程等待处理   \n  " + title);
                 msg.getActionCard().setSingleTitle("查看详情");
 //                String singleUrl = "dingtalk://dingtalkclient/page/link?url=" + URLUtil.encode(detailUrl + matureId) + "&pc_slide=false";
                 String singleUrl ="dingtalk://dingtalkclient/action/openapp?app_id=-4&container_type=work_platform&corpid=ding389cf0d9a2e1cc2f&ddtab=true&redirect_type=jump&redirect_url=https%3A%2F%2Faflow.dingtalk.com%2Fdingtalk%2Fmobile%2Fhomepage.htm%3Fback_control%3Dfalse%26backcontrol%3Dfalse%26corpid%3Dding389cf0d9a2e1cc2f%26dd_progress%3Dfalse%26dd_share%3Dfalse%26ddtab%3Dtrue%26showmenu%3Dfalse%23%2Fcustom%3Fpcredirect%3Dself%26processCode%3DPROC-82D0501E-705A-4DDF-9274-C257BFFE4866";

@@ -92,7 +92,7 @@ service.interceptors.response.use(res => {
       message = "系统接口请求超时/timeout";
     }
     else if (message.includes("Request failed with status code")) {
-      message = "系统接口" + message.substr(message.length - 3) + "异常/Request failed with status code";
+      message = "系统接口" + message.substr(message.length - 3) + "异常";
     }
     Message({
       message: message,

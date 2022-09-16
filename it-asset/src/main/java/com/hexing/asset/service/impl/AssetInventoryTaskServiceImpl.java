@@ -169,6 +169,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (task.getInventoryUserList()!=null){
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }
+        task.setStatus(CountingTaskStatus.COUNTING.getStatus());
         assetInventoryTaskMapper.insert(task);
         for (Asset asset : list) {
             AssetProcess assetProcess = new AssetProcess();

@@ -1,9 +1,12 @@
 <template>
   <div>
     <el-row class="assetOptRow">
-      <el-button v-show="!onEdit" type="success" icon="el-icon-edit" size="mini" @click="handleUpdate">修改</el-button>
-      <el-button v-show="onEdit" type="primary" icon="el-icon-check" size="mini" @click="handleSubmit">保存</el-button>
-      <el-button v-show="onEdit" icon="el-icon-close" size="mini" @click="handleCancel">取消</el-button>
+      <el-button v-show="!onEdit" type="success" icon="el-icon-edit" size="mini" @click="handleUpdate"
+        v-hasPermi="['asset:asset:edit']">修改</el-button>
+      <el-button v-show="onEdit" type="primary" icon="el-icon-check" size="mini" @click="handleSubmit"
+        v-hasPermi="['asset:asset:edit']">保存</el-button>
+      <el-button v-show="onEdit" icon="el-icon-close" size="mini" @click="handleCancel"
+        v-hasPermi="['asset:asset:edit']">取消</el-button>
     </el-row>
     <table class="tab-box" border="1">
       <tr v-for="index in columns" :key="index">
@@ -139,7 +142,7 @@ export default {
   align-items: center;
   /*让单元格文字垂直居中*/
   color: #606266;
-  overflow:auto
+  overflow: auto
 }
 
 .tab-box .asset-th {

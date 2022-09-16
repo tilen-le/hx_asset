@@ -430,7 +430,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const assetCodes = row.assetCode || this.assetCodes;
-      this.$modal.confirm('是否确认删除平台资产编号为"' + assetCodes + '"的数据项？').then(function () {
+      this.$modal.confirm("提示", "确认","取消", '是否确认删除平台资产编号为"' + assetCodes + '"的数据项？').then(function () {
         return delAsset(assetCodes);
       }).then(() => {
         this.getList();

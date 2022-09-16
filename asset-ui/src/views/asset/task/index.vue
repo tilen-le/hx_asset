@@ -85,7 +85,7 @@
         </template>
       </el-table-column>
       <el-table-column label="盘点人" align="center" prop="createBy" />
-      <el-table-column label="盘点组织" align="center" prop="inventoryDept" />
+      <el-table-column label="盘点组织" align="center" prop="inventoryDeptName" />
        <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
        <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" />
        <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" />
@@ -316,7 +316,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const taskCodes = row.taskCode || this.ids;
-      this.$modal.confirm('是否确认删除盘点任务编号为"' + taskCodes + '"的数据项？').then(function() {
+      this.$modal.confirm("提示", "确认","取消", '是否确认删除盘点任务编号为"' + taskCodes + '"的数据项？').then(function() {
         return delTask(taskCodes);
       }).then(() => {
         this.getList();

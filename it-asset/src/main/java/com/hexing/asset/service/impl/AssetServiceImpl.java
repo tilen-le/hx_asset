@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetService;
@@ -348,31 +349,37 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (StringUtils.isNull(assetList) || assetList.size() == 0) {
             throw new ServiceException("导入资产数据不能为空！");
         }
-        int totalNum = 0;
-        int successNum = 0;
-        int failureNum = 0;
+        boolean isAssetExist = false;
+        int successNum = 0; /* 导入成功条数 */
+        int failureNum = 0; /* 导入失败条数 */
         StringBuilder message = new StringBuilder();
         for (int i = 0; i < assetList.size(); i++) {
             Asset asset = assetList.get(i);
             try {
+                // 检查必填字段是否存在未填
                 String requiredFieldLeftUnfilled = checkRequiredFields(asset);
                 if (requiredFieldLeftUnfilled != null) {
-                    totalNum++;
                     failureNum++;
-                    message.append("<br/><font color=\"red\">" + totalNum + "、" + "错误：第 " + (i + 2) + " 行的必填字段：" + requiredFieldLeftUnfilled + " 未填写</font>");
+                    message.append("<br/><font color=\"red\">" + "第 " + (i + 2) + " 行导入失败，原因：" + "必填字段：" + requiredFieldLeftUnfilled + " 未填写</font>");
                     continue;
                 }
+
                 LambdaQueryWrapper<Asset> queryWrapper = new LambdaQueryWrapper<>();
                 queryWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
                         .eq(Asset::getCompanyCode, asset.getCompanyCode());
                 Asset a = assetMapper.selectOne(queryWrapper);
+
+                if (a != null) {
+                    failureNum++;
+                    message.append("<br/>" + "第 " + (i + 2) + " 行导入失败，原因：" + "资产已存在");
+                }
+
                 if (a == null) {
                     String assetCode = generateAssetCode(asset);
                     asset.setAssetCode(assetCode);
                     asset.setCreateBy(operName);
                     asset.setCreateTime(new Date());
                     assetMapper.insert(asset);
-                    totalNum++;
                     successNum++;
 //                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
                 } else if (isUpdateSupport) {
@@ -383,29 +390,31 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     asset.setUpdateTime(new Date());
                     int update = assetMapper.update(asset, updateWrapper);
                     if (update > 0) {
-                        totalNum++;
                         successNum++;
 //                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新成功");
                     } else {
-                        totalNum++;
                         failureNum++;
-                        message.append("<br/>" + totalNum + "、公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新失败");
+                        message.append("<br/>" + "错误：第 " + (i + 2) + "公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新失败");
                     }
                 }
 
             } catch (Exception e) {
-                totalNum++;
                 failureNum++;
-                String msg = "<br/>" + totalNum + "、资产 " + asset.getAssetName() + " 导入失败：";
+                String msg = "<br/>" + "错误：第 " + (i + 2) + "公司代码： " + "、资产 " + asset.getAssetName() + " 导入失败：";
                 message.append(msg + e.getMessage());
                 log.error(msg, e);
             }
         }
 
-        if (!isUpdateSupport) {
+        if (!isUpdateSupport && !isAssetExist) {
             try {
                 JSONObject sapResponse = syncAssetCodeToSAP(assetList);
-                System.out.println(sapResponse);
+
+                JSONArray inbound = sapResponse.getJSONArray("INBOUND");
+                JSONObject response = inbound.getJSONObject(0);
+                if (SAPRespType.ERROR.getType().equals(response.getString("TYPE"))) {
+                    throw new ServiceException("SAP同步出错：" + response.getString("MSG"));
+                }
             } catch (Exception e) {
                 throw new ServiceException("SAP同步出错");
             }
@@ -414,9 +423,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (failureNum > 0 && successNum == 0) {
             message.insert(0, "很抱歉，导入失败！错误如下：");
             throw new ServiceException(message.toString());
-        }
-        else {
-            message.insert(0, "数据导入成功！共 "+totalNum+" 条，成功导入 " + successNum + " 条，出错 "+failureNum +" 条，数据如下：");
+        } else {
+            message.insert(0, "数据导入成功！共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，数据如下：");
         }
         return message.toString();
     }

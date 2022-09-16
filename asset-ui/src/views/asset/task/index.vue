@@ -77,14 +77,14 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" tooltip-effect="light">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="任务编码" align="center" prop="taskCode">
         <template slot-scope="scope">
           <el-link :underline="false" type="primary" @click="showTaskDetail(scope.row)">{{ scope.row.taskCode }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="盘点人" align="center" prop="createBy" />
+      <el-table-column label="盘点人" align="center" prop="inventoryUsersName" :show-overflow-tooltip="true" />
       <el-table-column label="盘点组织" align="center" prop="inventoryDeptName" />
        <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
        <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" />
@@ -99,7 +99,7 @@
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="发起人" align="center" prop="createBy" />
+      <el-table-column label="发起人" align="center" prop="createByName" />
       <el-table-column label="盘点状态" align="center" prop="status" >
         <template slot-scope="scope">
           <dict-tag :options="dict.type.inventory_task_status" :value="scope.row.status"/>

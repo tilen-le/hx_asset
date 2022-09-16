@@ -53,19 +53,19 @@ public class AssetController extends BaseController {
     @ApiOperation("查询资产列表")
     @PreAuthorize("@ss.hasPermi('asset:collection:list')")
     @GetMapping("/list")
-    public TableDataInfo list() {
-        List<Asset> list = assetService.selectAssetList();
+    public TableDataInfo list(Asset asset) {
+        List<Asset> list = assetService.selectAssetList(asset);
         return getDataTable(list);
     }
 
     /**
      * 导出资产表列表
      */
-//    @PreAuthorize("@ss.hasPermi('asset:asset:export')")
+    @PreAuthorize("@ss.hasPermi('asset:asset:export')")
     @Log(title = "资产表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public AjaxResult export(Asset asset) {
-        List<Asset> list = assetService.selectAssetList();
+        List<Asset> list = assetService.selectAssetList(asset);
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }
@@ -116,6 +116,7 @@ public class AssetController extends BaseController {
     /**
      * 资产导入
      */
+    @PreAuthorize("@ss.hasPermi('asset:asset:import')")
     @Log(title = "资产信息导入", businessType = BusinessType.IMPORT)
     @PostMapping("/importData")
     public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception {
@@ -130,6 +131,7 @@ public class AssetController extends BaseController {
     /**
      * 资产导入模板下载
      */
+    @PreAuthorize("@ss.hasPermi('asset:asset:template')")
     @GetMapping("/importTemplate")
     public AjaxResult importTemplate() {
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);

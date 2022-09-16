@@ -1,8 +1,11 @@
 package com.hexing.asset.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -19,7 +22,9 @@ import com.hexing.system.mapper.SysDictDataMapper;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.MatrixFunction;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -51,10 +56,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private static final String MANAGE_DEPT = "manage_dept";
     private static final String ASSET_CATEGORY = "asset_category";
 
-    // 数据表字段名
-    private static final String FINANCIAL_ASSET_CODE = "financial_asset_code";
-    private static final String COMPANY_CODE = "company_code";
-
     private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 
     private List<SysDictData> assetImportRequiredFieldDictDataList = null;
@@ -67,6 +68,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
+
+    @Value("${uip.uipTransfer}")
+    private String uipTransfer;
 
     /**
      * 根据平台资产编号查询资产
@@ -256,20 +260,32 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 资产表
      */
     @Override
-    public List<Asset> selectAssetList()
+    public List<Asset> selectAssetList(Asset asset)
     {
         Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
         Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
 
         startPage();
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(asset.getAssetName())) {
+            wrapper.like(Asset::getAssetName, asset.getAssetName());
+        }
+        if (StringUtils.isNotBlank(asset.getAssetCode())) {
+            wrapper.like(Asset::getAssetCode, asset.getAssetCode());
+        }
+        if (StringUtils.isNotBlank(asset.getLocation())) {
+            wrapper.eq(Asset::getLocation, asset.getLocation());
+        }
+        if (StringUtils.isNotBlank(asset.getCostCenter())) {
+            wrapper.eq(Asset::getCostCenter, asset.getCostCenter());
+        }
         List<Asset> assetList = assetMapper.selectList(wrapper);
 
         if (CollectionUtil.isNotEmpty(assetList)) {
-            for (Asset asset : assetList) {
-                SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
-                asset.setResponsiblePersonName(user.getNickName());
-                asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+            for (Asset a : assetList) {
+                SysUser user = usernameNicknameMap.get(a.getResponsiblePersonCode());
+                a.setResponsiblePersonName(user.getNickName());
+                a.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
             }
         }
         return assetList;
@@ -346,9 +362,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     message.append("<br/><font color=\"red\">" + totalNum + "、" + "错误：第 " + (i + 2) + " 行的必填字段：" + requiredFieldLeftUnfilled + " 未填写</font>");
                     continue;
                 }
-                QueryWrapper<Asset> queryWrapper = new QueryWrapper<>();
-                queryWrapper.eq(FINANCIAL_ASSET_CODE, asset.getFinancialAssetCode())
-                        .eq(COMPANY_CODE, asset.getCompanyCode());
+                LambdaQueryWrapper<Asset> queryWrapper = new LambdaQueryWrapper<>();
+                queryWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
+                        .eq(Asset::getCompanyCode, asset.getCompanyCode());
                 Asset a = assetMapper.selectOne(queryWrapper);
                 if (a == null) {
                     String assetCode = generateAssetCode(asset);
@@ -358,27 +374,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     assetMapper.insert(asset);
                     totalNum++;
                     successNum++;
-                    try {
-                        JSONObject temp = new JSONObject();
-                        temp.put("BUKRS", asset.getCompanyCode());
-                        temp.put("ANLN1", asset.getFinancialAssetCode());
-                        temp.put("ZNUM", asset.getAssetCode());
-                        JSONObject toSAPJSON = new JSONObject();
-                        List<JSONObject> jsonList = new ArrayList<>();
-                        jsonList.add(temp);
-                        toSAPJSON.put("INBOUND", jsonList);
-                        log.info("===导入如资产数据-新资产平台资产编号推送SAP："+ toSAPJSON);
-//                        JSONObject sapResponse = pushToSAP(toSAPJSON, UIPcodeEnum.pushSingleFdCodeToSAP.getCode());
-                        JSONObject sapResponse = syncAssetCodeToSAP(asset);
-                        log.info("===导入资产数据--新资产的平台资产编码同步到SAP，SAP响应：" + sapResponse);
-                    } catch (Exception e) {
-                        log.error("资产导入：平台资产编号同步SAP出错");
-                    }
 //                    message.append("<br/>" + totalNum + "、资产：" + asset.getAssetName() + " 导入成功，生成的资产编码为：" + assetCode);
                 } else if (isUpdateSupport) {
-                    UpdateWrapper<Asset> updateWrapper = new UpdateWrapper<>();
-                    updateWrapper.eq(FINANCIAL_ASSET_CODE, asset.getFinancialAssetCode())
-                            .eq(COMPANY_CODE, asset.getCompanyCode());
+                    LambdaUpdateWrapper<Asset> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
+                            .eq(Asset::getCompanyCode, asset.getCompanyCode());
                     asset.setUpdateBy(operName);
                     asset.setUpdateTime(new Date());
                     int update = assetMapper.update(asset, updateWrapper);
@@ -393,19 +393,21 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     }
                 }
 
-
-
-
-                //
-                //调用sap
-                //code throw
-                throw new ServiceException("");
             } catch (Exception e) {
                 totalNum++;
                 failureNum++;
                 String msg = "<br/>" + totalNum + "、资产 " + asset.getAssetName() + " 导入失败：";
                 message.append(msg + e.getMessage());
                 log.error(msg, e);
+            }
+        }
+
+        if (!isUpdateSupport) {
+            try {
+                JSONObject sapResponse = syncAssetCodeToSAP(assetList);
+                System.out.println(sapResponse);
+            } catch (Exception e) {
+                throw new ServiceException("SAP同步出错");
             }
         }
 
@@ -510,27 +512,33 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
     /**
      * 将资产信息和保管人关联关系通过UIP同步到SAP
-     *
-     * @param data
-     * @return
-     * @throws Exception
      */
-    public JSONObject syncAssetCodeToSAP(/*JSONObject data, String uidCode*/Asset asset) throws Exception {
-//        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-//        params.add("INBOUND", data.getJSONArray("INBOUND"));
-//        params.add("interfaceCode", uidCode);
-//
-//        log.info("params to uip: " + params);
-//
-//        RestTemplate restTemplate = new RestTemplate();
-//        String uipTransfer = "http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper";
-//        ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
-//
-//        String body = responseEntity.getBody();
-//        JSONObject responseBody = JSONObject.parseObject(body);
-//
-//        return responseBody;
-        return null;
+    public JSONObject syncAssetCodeToSAP(List<Asset> assetList) throws Exception {
+
+        JSONArray data = new JSONArray();
+        for (Asset asset : assetList) {
+            JSONObject obj = new JSONObject();
+            obj.put("BUKRS", asset.getCompanyCode());
+            obj.put("ANLN1", asset.getFinancialAssetCode());
+            obj.put("ZNUM", asset.getAssetCode());
+            data.add(obj);
+        }
+
+        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+
+        params.add("INBOUND", data);
+        params.add("interfaceCode", UIPcodeEnum.pushSingleFdCodeToSAP.getCode());
+
+        log.info("===导入如资产数据-新资产平台资产编号推送SAP：" + params);
+
+        RestTemplate restTemplate = new RestTemplate();
+        ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
+
+        String body = responseEntity.getBody();
+        JSONObject responseBody = JSONObject.parseObject(body);
+        log.info("===导入资产数据--新资产的平台资产编码同步到SAP，SAP响应：" + responseBody);
+
+        return responseBody;
     }
 
 }

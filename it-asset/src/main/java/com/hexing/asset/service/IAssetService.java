@@ -36,7 +36,7 @@ public interface IAssetService extends IService<Asset>
      * @param
      * @return 资产表集合
      */
-    public List<Asset> selectAssetList();
+    public List<Asset> selectAssetList(Asset asset);
 
     /**
      * 查询资产表列表通过管理部门和资产code

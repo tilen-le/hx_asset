@@ -77,15 +77,15 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" tooltip-effect="light">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="任务编码" align="center" prop="taskCode">
         <template slot-scope="scope">
           <el-link :underline="false" type="primary" @click="showTaskDetail(scope.row)">{{ scope.row.taskCode }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="盘点人" align="center" prop="createBy" />
-      <el-table-column label="盘点组织" align="center" prop="inventoryDept" />
+      <el-table-column label="盘点人" align="center" prop="inventoryUsersName" :show-overflow-tooltip="true" />
+      <el-table-column label="盘点组织" align="center" prop="inventoryDeptName" />
        <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
        <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" />
        <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" />
@@ -99,7 +99,7 @@
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="发起人" align="center" prop="createBy" />
+      <el-table-column label="发起人" align="center" prop="createByName" />
       <el-table-column label="盘点状态" align="center" prop="status" >
         <template slot-scope="scope">
           <dict-tag :options="dict.type.inventory_task_status" :value="scope.row.status"/>
@@ -316,7 +316,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const taskCodes = row.taskCode || this.ids;
-      this.$modal.confirm('是否确认删除盘点任务编号为"' + taskCodes + '"的数据项？').then(function() {
+      this.$modal.confirm("提示", "确认","取消", '是否确认删除盘点任务编号为"' + taskCodes + '"的数据项？').then(function() {
         return delTask(taskCodes);
       }).then(() => {
         this.getList();

@@ -38,6 +38,16 @@
               @keyup.enter.native="handleQuery"
             />
           </el-form-item>
+          <el-form-item label="昵称" prop="nickName">
+            <el-input
+              v-model="queryParams.nickName"
+              placeholder="昵称"
+              clearable
+              size="small"
+              style="width: 240px"
+              @keyup.enter.native="handleQuery"
+            />
+          </el-form-item>
           <el-form-item :label="$t('common_field.phone')" prop="phonenumber">
             <el-input
               v-model="queryParams.phonenumber"
@@ -423,6 +433,7 @@
         pageNum: 1,
         pageSize: 10,
         userName: undefined,
+        nickName: undefined,
         phonenumber: undefined,
         status: undefined,
         deptId: undefined

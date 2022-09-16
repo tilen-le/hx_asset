@@ -42,7 +42,8 @@ spring:
     basename: i18n/messages
     encoding: utf-8
   profiles:
-    active: druid
+#    active: prod
+      active: druid
 #    active: @environment@
   # 文件上传
   servlet:

@@ -7,12 +7,14 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetService;
+import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
@@ -106,154 +108,189 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetMapper.selectById(assetId);
     }
 
+    /**
+     * 根据资产编号查询资产信息
+     */
     @Override
-    public String getAssetsByAssetCodes(JSONObject params)
-    {
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        Asset asset =new Asset();
-        wrapper.setEntity(asset);
-
-        JSONObject R = new JSONObject();
-        JSONObject result = new JSONObject();
+    public Result queryAssetCard(Asset asset) {
         try {
-            List<JSONObject> assets = new ArrayList<>();
-            String assetCode = params.getString("assetCode");
+            LambdaUpdateWrapper<Asset> wrapper = new LambdaUpdateWrapper<>();
+            String assetCode = asset.getAssetCode();
             if (StringUtils.isBlank(assetCode)) {
-                result.put("code", "500");
-                result.put("msg", "平台资产编号为空");
-                return result.toString();
+                return new Result(500, "平台资产编号为空");
             }
             // 资产编号1;资产编号2;... 的情况
             if (assetCode.contains(";")) {
-                String[] assetCodes = assetCode.split(";");
-                assets = new ArrayList<>();
-                for (String code : assetCodes) {
-                    String fdDeptDescription = params.getString("manageDept");
-                    if (StringUtils.isNotBlank(fdDeptDescription)) {
-                        wrapper.getEntity().setManageDept(fdDeptDescription);
-                    }
-                    wrapper.getEntity().setAssetCode(code);
-                    JSONObject jsonObject = setNewAsset(assetMapper.selectOne(wrapper));
-                    assets.add(jsonObject);
-                }
-                result.put("assets", assets);
-                R.put("result", result);
-                return R.toString();
-            }else{
-                String manageDept = params.getString("manageDept");
-                if (StringUtils.isNotBlank(manageDept)) {
-                    wrapper.getEntity().setManageDept(manageDept);
-                }
-                wrapper.getEntity().setAssetCode(assetCode);
-                JSONObject jsonObject = setNewAsset(assetMapper.selectOne(wrapper));
-                assets.add(jsonObject);
-                result.put("assets", assets);
-                R.put("result", result);
+                List<String> assetCodes = Arrays.asList(assetCode.split(";"));
+                wrapper.in(Asset::getAssetCode, assetCodes);
+            } else {
+                wrapper.eq(Asset::getAssetCode, assetCode);
             }
-
+            if (StringUtils.isNotBlank(asset.getManageDept())) {
+                wrapper.eq(Asset::getManageDept, asset.getManageDept());
+            }
+            List<Asset> assets = assetMapper.selectList(wrapper);
+            return Result.success(assets);
         } catch (Exception e) {
             e.printStackTrace();
-
+            return Result.error("出错");
         }
-        return R.toString();
-
     }
 
 
-    /**
-     * 根据人员查询资产
-     */
-    @Override
-    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode,String manageDept)
-    {
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        Asset asset =new Asset();
-        wrapper.setEntity(asset);
-        wrapper.getEntity().setResponsiblePersonCode(responsiblePersonCode);
-        if (StringUtils.isNotBlank(manageDept)){
-            wrapper.getEntity().setManageDept(manageDept);
-        }
-        return assetMapper.selectList(wrapper);
-    }
-
-    public static JSONObject setNewAsset(Asset asset)
-    {
-        JSONObject result =new JSONObject();
-        result.put("assetCode",asset.getAssetCode());
-        result.put("fixedAsset",asset.getAssetName());
-        result.put("factoryCode",asset.getFactoryNo());
-        result.put("assetStatus",asset.getAssetStatus());
-        result.put("location",asset.getLocation());
-        result.put("manageDept",asset.getManageDept());
-        result.put("brand",asset.getBrand());
-        result.put("fdStandard",asset.getStandard());
-        result.put("financialAssetCode",asset.getFinancialAssetCode());
-        result.put("initialAssetValue",asset.getTotalValue());
-        result.put("netAssetValue",asset.getNetWorth());
-        result.put("purchaseTime",asset.getBuyDate());
-        result.put("companyCode",asset.getCompanyName());
-        String estimatedUsefulLife = "";
-        if (asset.getCanUseYears() != null && asset.getCanUseYears()>0){
-            estimatedUsefulLife =  asset.getCanUseYears().toString()+"年";
-        }
-        if (asset.getCanUseMonths() != null && asset.getCanUseMonths()>0){
-            estimatedUsefulLife = estimatedUsefulLife + asset.getCanUseMonths().toString()+"月";
-        }
-        result.put("estimatedUsefulLife",estimatedUsefulLife);
-        result.put("usageScenario",asset.getUsageScenario());
-        result.put("fdResponsiblePersonCode",asset.getResponsiblePersonCode());
-        result.put("fdResponsiblePerson",asset.getResponsiblePersonName());
-        result.put("responsibleDept",asset.getResponsiblePersonDept());
-        return result;
-
-    }
-    @Override
-    public JSONObject getAssets(JSONObject params)
-    {
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        Asset asset =new Asset();
-        wrapper.setEntity(asset);
-
-        JSONObject R = new JSONObject();
+    public static JSONObject setNewAsset(Asset asset) {
         JSONObject result = new JSONObject();
-        try {
-            String userId = params.getString("userId");
-            if (StringUtils.isBlank(userId)) {
-                result.put("code", "500");
-                result.put("msg", "保管人工号为空");
-                return result;
-            }
-            // 查询保管人信息
-            SysUser sysUser = sysUserService.selectUserByUserName(userId);
-            if (sysUser == null) {
-                result.put("code", "500");
-                result.put("msg", "未查询到此保管人");
-                return result;
-            }
-            R.put("userId",userId);
-            // 查询保管人所属部门
-            if (sysUser.getDeptId()==null) {
-                result.put("code", "500");
-                result.put("msg", "未查询到保管部门");
-                return result;
-            }
-            SysDept sysDept = sysDeptService.selectDeptById(sysUser.getDeptId());
-            R.put("department",sysDept.getDeptName());
-            String manageDept = params.getString("manageDept");
-            List<Asset> assets = selectAssetByResponsiblePerson(userId,manageDept);
-            List<JSONObject> assetsList =new ArrayList<>();
-            if (assets!=null){
-                for (int i = 0; i < assets.size(); i++) {
-                    assetsList.add(setNewAsset(assets.get(i)));
-                }
-            }
-            R.put("assets",assetsList);
+        result.put("assetCode", asset.getAssetCode());
+        result.put("fixedAsset", asset.getAssetName());
+        result.put("factoryCode", asset.getFactoryNo());
+        result.put("assetStatus", asset.getAssetStatus());
+        result.put("location", asset.getLocation());
+        result.put("manageDept", asset.getManageDept());
+        result.put("brand", asset.getBrand());
+        result.put("fdStandard", asset.getStandard());
+        result.put("financialAssetCode", asset.getFinancialAssetCode());
+        result.put("initialAssetValue", asset.getTotalValue());
+        result.put("netAssetValue", asset.getNetWorth());
+        result.put("purchaseTime", asset.getBuyDate());
+        result.put("companyCode", asset.getCompanyName());
+        String estimatedUsefulLife = "";
+        if (asset.getCanUseYears() != null && asset.getCanUseYears() > 0) {
+            estimatedUsefulLife = asset.getCanUseYears().toString() + "年";
+        }
+        if (asset.getCanUseMonths() != null && asset.getCanUseMonths() > 0) {
+            estimatedUsefulLife = estimatedUsefulLife + asset.getCanUseMonths().toString() + "月";
+        }
+        result.put("estimatedUsefulLife", estimatedUsefulLife);
+        result.put("usageScenario", asset.getUsageScenario());
+        result.put("fdResponsiblePersonCode", asset.getResponsiblePersonCode());
+        result.put("fdResponsiblePerson", asset.getResponsiblePersonName());
+        result.put("responsibleDept", asset.getResponsiblePersonDept());
+        return result;
+    }
 
+    @Override
+    public Result queryPersonInfoAndAssetsByUserCode(JSONObject params) {
+        try {
+            // 查询保管人信息
+            String userId = params.getString("userId");
+            SysUser user = sysUserService.selectUserByUserName(userId);
+            if (user == null) {
+                return new Result(500, "未查询到此保管人");
+            }
+            // 查询保管人所属部门
+            if (user.getDeptId() == null) {
+                return new Result(500, "未查询到保管部门");
+            }
+            SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+
+            LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Asset::getResponsiblePersonCode, userId);
+            String manageDept = params.getString("manageDept");
+            if (StringUtils.isNotBlank(manageDept)) {
+                wrapper.eq(Asset::getManageDept, manageDept);
+            }
+            List<Asset> assets = assetMapper.selectList(wrapper);
+
+//            List<JSONObject> assetsList = new ArrayList<>();
+//            if (assets != null) {
+//                for (Asset asset : assets) {
+//                    assetsList.add(setNewAsset(asset));
+//                }
+//            }
+            JSONObject data = new JSONObject();
+            data.put("userId", user.getUserName());
+            data.put("manageDept", dept.getDeptName());
+            data.put("assets", assets);
+            return Result.success(data);
         } catch (Exception e) {
             e.printStackTrace();
+            return new Result(500, "出错");
         }
-        return R;
+    }
 
+    @Override
+    @Transactional
+    public Result updateAssetExchange(JSONObject params) {
+        try {
+            params = params.getJSONObject("data");
+
+            String adminId = params.getString("adminId"); // 资产管理员工号（老工号）
+            String docAlterId = params.getString("docAlterId"); // 流程申请人工号（老工号）
+
+            String locationOfOldAsset = params.getJSONObject("before").getString("location");
+            String codeOfOldAsset = params.getJSONObject("before").getString("assetCode");
+
+            String locationOfNewAsset = params.getJSONObject("after").getString("location");
+            String codeOfNewAsset = params.getJSONObject("after").getString("assetCode");
+
+            // 老资产
+            int updateOfOld = assetMapper.update(new Asset()
+                            .setLocation(locationOfNewAsset)
+                            .setResponsiblePersonCode(adminId)
+                            .setAssetStatus("闲置")
+                            .setUpdateBy(docAlterId)
+                            .setUpdateTime(new Date()),
+                    new LambdaUpdateWrapper<Asset>()
+                            .eq(Asset::getAssetCode, codeOfOldAsset));
+            if (updateOfOld == 0) {
+                log.error("老资产更新失败");
+                throw new ServiceException("老资产更新失败");
+            }
+
+
+            int updateOfNew = assetMapper.update(new Asset()
+                            .setLocation(locationOfOldAsset)
+                            .setLocation(locationOfOldAsset)
+                            .setAssetStatus("在用")
+                            .setResponsiblePersonCode(docAlterId)
+                            .setUpdateBy(docAlterId)
+                            .setUpdateTime(new Date()),
+                    new LambdaUpdateWrapper<Asset>()
+                            .eq(Asset::getAssetCode, codeOfNewAsset));
+            if (updateOfNew == 0) {
+                log.error("新资产更新失败");
+                throw new ServiceException("新资产更新失败");
+            }
+
+            log.warn("资产更换流程，目标资产更新成功");
+            return Result.success("资产更换流程，目标资产更新成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(500, "出错");
+        }
+    }
+
+    @Override
+    @Transactional
+    public Result updateAssetTransfer(JSONObject params) {
+        try {
+            JSONArray assets = params.getJSONArray("assets");
+            String recipient = params.getString("recipient");
+            if (CollectionUtil.isNotEmpty(assets)) {
+                for (int i = 0; i < assets.size(); i++) {
+                    JSONObject updateInfo = assets.getObject(i, JSONObject.class);
+                    if (StringUtils.isNull(recipient)) {
+                        return new Result(500, "接收者工号不能为空");
+                    }
+                    SysUser recipientInfo = sysUserService.selectUserByUserName(recipient);
+                    if (recipientInfo == null) {
+                        return new Result(500, "后台无该接收者信息");
+                    }
+                    int update = assetMapper.update(new Asset()
+                                    .setLocation(updateInfo.getString("location"))
+                                    .setResponsiblePersonCode(recipient),
+                            new LambdaUpdateWrapper<Asset>()
+                                    .eq(Asset::getAssetCode, updateInfo.getString("assetCode")));
+                    if (update == 0) {
+                        throw new ServiceException("更新未成功");
+                    }
+                }
+            }
+            return Result.success("资产转移成功");
+        } catch (Exception e) {
+            log.error("", e);
+            return new Result(500, "出错");
+        }
     }
 
     /**

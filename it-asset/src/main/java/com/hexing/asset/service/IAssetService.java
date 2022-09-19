@@ -5,6 +5,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysUser;
 
 /**
@@ -39,22 +40,34 @@ public interface IAssetService extends IService<Asset>
     public List<Asset> selectAssetList(Asset asset);
 
     /**
-     * 查询资产表列表通过管理部门和资产code
-     *
-     * @param
-     * @return 资产表集合
+     * 根据资产编号查询资产信息
      */
-    String getAssetsByAssetCodes(JSONObject params);
-
-    public List<Asset> selectAssetByResponsiblePerson(String responsiblePersonCode,String manageDept);
+    Result queryAssetCard(Asset asset);
 
     /**
-     *
+     * 根据工号查询保管人信息及其名下资产
      *
      * @param
      * @return 人员资产查询
      */
-    JSONObject getAssets(JSONObject params);
+    Result queryPersonInfoAndAssetsByUserCode(JSONObject params);
+
+    /**
+     * 资产变更
+     *
+     * @param params
+     * @return
+     */
+    Result updateAssetExchange(JSONObject params);
+
+    /**
+     * 资产转移
+     *
+     * @param params
+     * @return
+     */
+    Result updateAssetTransfer(JSONObject params);
+
 
     /**
      * 新增资产表

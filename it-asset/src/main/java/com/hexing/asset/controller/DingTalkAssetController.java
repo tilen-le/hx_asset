@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.AssetProcessCounting;
@@ -16,6 +17,7 @@ import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.impl.AssetServiceImpl;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
+import com.hexing.common.core.domain.Result;
 import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,25 +44,48 @@ public class DingTalkAssetController extends BaseController {
     private IAssetProcessCountingService assetProcessCountingService;
 
     /**
-     * 通过资产编码，管理部门获取资产信息
+     * 根据资产编号查询资产信息
      */
-    @PostMapping(value = "/getAssetsByAssetCodes")
-    public String getAssetsByAssetCodes(@RequestBody JSONObject params) {
-        logger.info("--------调用getAssetsByAssetCodes接口");
-        String asset = assetService.getAssetsByAssetCodes(params);
-        return asset;
-    }
-
-    /**
-     * 获取人员资产信息
-     */
-    @PostMapping(value = "/getAssets")
-    public JSONObject getAssets(@RequestBody JSONObject params) {
-        logger.info("--------调用getAssets接口");
-        JSONObject result = assetService.getAssets(params);
+    @PostMapping(value = "/queryAssetCard")
+    public JSONObject queryAssetCard(@RequestBody Asset asset) {
+        Result result = assetService.queryAssetCard(asset);
         JSONObject R = new JSONObject();
         R.put("result", result);
         return R;
+    }
+
+    /**
+     * 根据工号查询保管人信息及名下资产
+     */
+    @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
+    public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody JSONObject params) {
+        Result result = assetService.queryPersonInfoAndAssetsByUserCode(params);
+        JSONObject R = new JSONObject();
+        R.put("result", result);
+        return R;
+    }
+
+    /**
+     * 根据资产编号更新资产信息
+     */
+    @PostMapping(value = "/updateAssetCardByAssetCode")
+    public JSONObject updateAssetCardByAssetCode(@RequestBody JSONObject params) {
+        Asset asset = params.getObject("data", Asset.class);
+        boolean success = assetService.update(asset.setUpdateTime(new Date()), new LambdaUpdateWrapper<Asset>()
+                .eq(Asset::getAssetCode, asset.getAssetCode()));
+        if (success) {
+            return JSONObject.parseObject(Result.success("更新成功").toString());
+        } else {
+            return JSONObject.parseObject(Result.success("更新失败").toString());
+        }
+    }
+
+    /**
+     * 资产变更
+     */
+    public JSONObject updateAssetExchange(@RequestBody JSONObject params) {
+        Result result = assetService.updateAssetExchange(params);
+        return JSONObject.parseObject(result.toString());
     }
 
 

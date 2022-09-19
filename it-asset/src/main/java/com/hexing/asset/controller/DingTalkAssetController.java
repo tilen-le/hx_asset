@@ -89,6 +89,9 @@ public class DingTalkAssetController extends BaseController {
         return JSONObject.parseObject(result.toString());
     }
 
+    /**
+     * 资产转移
+     */
     @PostMapping(value = "/updateAssetTransfer")
     public JSONObject updateAssetTransfer(@RequestBody JSONObject params) {
         Result result = assetService.updateAssetTransfer(params);

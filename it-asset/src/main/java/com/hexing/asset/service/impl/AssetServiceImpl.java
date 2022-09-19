@@ -351,8 +351,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (StringUtils.isNull(assetList) || assetList.size() == 0) {
             throw new ServiceException("导入资产数据不能为空！");
         }
-        int successNum = 0; /* 导入成功条数 */
-        int failureNum = 0; /* 导入失败条数 */
+        int successNum = 0;         /* 导入成功条数 */
+        int failureNum = 0;         /* 导入失败条数 */
         StringBuilder message = new StringBuilder();
         for (int i = 0; i < assetList.size(); i++) {
             Asset asset = assetList.get(i);
@@ -365,25 +365,23 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     continue;
                 }
 
-                LambdaQueryWrapper<Asset> queryWrapper = new LambdaQueryWrapper<>();
-                queryWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
-                        .eq(Asset::getCompanyCode, asset.getCompanyCode());
-                Asset a = assetMapper.selectOne(queryWrapper);
-
-                if (a != null && !isUpdateSupport) {
-                    failureNum++;
-                    message.append("<br/>" + "第 " + (i + 2) + " 行导入失败，原因：" + "资产已存在");
-                    continue;
-                }
-
-                if (a == null) {
-                    String assetCode = generateAssetCode(asset);
-                    asset.setAssetCode(assetCode);
-                    asset.setCreateBy(operName);
-                    asset.setCreateTime(new Date());
-                    assetMapper.insert(asset);
-                    successNum++;
-                } else if (isUpdateSupport) {
+                if (!isUpdateSupport) {
+                    LambdaQueryWrapper<Asset> queryWrapper = new LambdaQueryWrapper<>();
+                    queryWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
+                            .eq(Asset::getCompanyCode, asset.getCompanyCode());
+                    Asset a = assetMapper.selectOne(queryWrapper);
+                    if (a != null) {
+                        message.append("<br/>" + "第 " + (i + 2) + " 行导入失败，原因：" + "资产已存在，平台资产编号为：" + a.getAssetCode());
+                        failureNum++;
+                    } else {
+                        String assetCode = generateAssetCode(asset);
+                        asset.setAssetCode(assetCode)
+                                .setCreateBy(operName)
+                                .setCreateTime(new Date());
+                        assetMapper.insert(asset);
+                        successNum++;
+                    }
+                } else {
                     LambdaUpdateWrapper<Asset> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
                             .eq(Asset::getCompanyCode, asset.getCompanyCode());
@@ -400,7 +398,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
             } catch (Exception e) {
                 failureNum++;
-                String msg = "<br/>" + "错误：第 " + (i + 2) + "公司代码： " + "、资产 " + asset.getAssetName() + " 导入失败：";
+                String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";
                 message.append(msg + e.getMessage());
                 log.error(msg, e);
             }
@@ -410,24 +408,18 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             try {
                 // 过滤已导入过的资产信息
                 List<Asset> assets = assetList.stream()
-                        .filter(x->StringUtils.isNotEmpty(x.getAssetCode()))
+                        .filter(x -> StringUtils.isNotEmpty(x.getAssetCode()))
                         .collect(Collectors.toList());
-                if (CollectionUtil.isNotEmpty(assets)){
-                    JSONObject sapResponse = syncAssetCodeToSAP(assets);
-
-                    JSONArray inbound = sapResponse.getJSONArray("INBOUND");
-                    JSONObject response = inbound.getJSONObject(0);
-                    if (SAPRespType.ERROR.getType().equals(response.getString("TYPE"))) {
-                        throw new ServiceException("SAP同步出错：" + response.getString("MSG"));
-                    }
+                if (CollectionUtil.isNotEmpty(assets)) {
+                    syncAssetCodeToSAP(assets);
                 }
             } catch (Exception e) {
                 log.error("", e);
-                throw new ServiceException("SAP同步出错");
+                throw new ServiceException("SAP同步出错：" + e.getMessage());
             }
         }
 
-        message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，导入详情如下：");
+        message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");
         return message.toString();
     }
 
@@ -523,7 +515,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     /**
      * 将资产信息和保管人关联关系通过UIP同步到SAP
      */
-    public JSONObject syncAssetCodeToSAP(List<Asset> assetList) throws Exception {
+    public void syncAssetCodeToSAP(List<Asset> assetList) throws Exception {
 
         JSONArray data = new JSONArray();
         for (Asset asset : assetList) {
@@ -548,7 +540,20 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         JSONObject responseBody = JSONObject.parseObject(body);
         log.info("===导入资产数据--新资产的平台资产编码同步到SAP，SAP响应：" + responseBody);
 
-        return responseBody;
+        StringBuilder message = new StringBuilder();
+        JSONArray inbound = responseBody.getJSONArray("INBOUND");
+        for (Object o : inbound) {
+            JSONObject next = (JSONObject) o;
+            String type = next.getString("TYPE");
+            if (SAPRespType.ERROR.getType().equals(type)) {
+                String msg = next.getString("MSG");
+                message.append("<br/>").append(msg);
+            }
+        }
+        if (message.length() > 0) {
+            throw new ServiceException(message.toString());
+        }
+
     }
 
 }

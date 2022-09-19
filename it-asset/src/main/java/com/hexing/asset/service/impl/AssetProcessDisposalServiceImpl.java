@@ -2,8 +2,10 @@ package com.hexing.asset.service.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessDisposalMapper;
@@ -43,7 +45,14 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
     @Override
     public List<AssetProcessDisposal> selectAssetProcessDisposalList(AssetProcessDisposal assetProcessDisposal)
     {
-        return assetProcessDisposalMapper.selectAssetProcessDisposalList(assetProcessDisposal);
+        LambdaQueryWrapper<AssetProcessDisposal> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(assetProcessDisposal.getUserCode())) {
+            wrapper.like(AssetProcessDisposal::getUserCode, assetProcessDisposal.getUserCode());
+        }
+        if (StringUtils.isNotBlank(assetProcessDisposal.getAssetCode())) {
+            wrapper.like(AssetProcessDisposal::getAssetCode, assetProcessDisposal.getAssetCode());
+        }
+        return assetProcessDisposalMapper.selectList(wrapper);
     }
 
     /**

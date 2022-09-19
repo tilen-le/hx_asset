@@ -3,6 +3,7 @@ package com.hexing.asset.controller;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
@@ -112,9 +113,9 @@ public class DingTalkAssetController extends BaseController {
         String assetCode = params.getString("assetCode");
         String taskCode = params.getString("taskCode");
 
-        QueryWrapper<AssetProcessCounting> wrapper = new QueryWrapper<>();
-        wrapper.eq("task_code", taskCode)
-                .eq("asset_code", assetCode);
+        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetProcessCounting::getTaskCode, taskCode)
+                .eq(AssetProcessCounting::getAssetCode, assetCode);
         AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
         if (entity == null) {
             return AjaxResult.error("所盘点资产不在当前任务盘点范围内");
@@ -122,7 +123,7 @@ public class DingTalkAssetController extends BaseController {
         if (!AssetCountingStatus.NOT_COUNTED.getStatus().equals(entity.getCountingStatus())) {
             return AjaxResult.error("该资产在当前任务中已被盘点过");
         }
-        Asset asset = assetService.getOne(new QueryWrapper<Asset>().eq("asset_code", assetCode));
+        Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
         JSONObject jsonObject = AssetServiceImpl.setNewAsset(asset);
         return AjaxResult.success(jsonObject);
     }

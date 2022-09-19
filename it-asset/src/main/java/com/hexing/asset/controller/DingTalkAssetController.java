@@ -18,7 +18,9 @@ import com.hexing.asset.service.impl.AssetServiceImpl;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
+import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.system.service.ISysDictDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 开放给钉钉端的rest接口
@@ -42,6 +45,8 @@ public class DingTalkAssetController extends BaseController {
     private IAssetInventoryTaskService assetInventoryTaskService;
     @Autowired
     private IAssetProcessCountingService assetProcessCountingService;
+    @Autowired
+    private ISysDictDataService sysDictDataService;
 
     /**
      * 根据资产编号查询资产信息
@@ -96,6 +101,21 @@ public class DingTalkAssetController extends BaseController {
     public JSONObject updateAssetTransfer(@RequestBody JSONObject params) {
         Result result = assetService.updateAssetTransfer(params);
         return JSONObject.parseObject(result.toString());
+    }
+
+    /**
+     * 查询所有存放地点
+     */
+    @PostMapping(value = "/queryAllAssetAddresses")
+    public JSONObject queryAllAssetAddresses() {
+        String dictType = "asset_location";
+        List<SysDictData> locationDictDataList = sysDictDataService.selectDictDataByType(dictType);
+        List<String> locationList = locationDictDataList.stream().map(SysDictData::getDictLabel).collect(Collectors.toList());
+        JSONObject addressList = new JSONObject();
+        addressList.put("addressList", locationList);
+        JSONObject result = new JSONObject();
+        result.put("result", addressList);
+        return result;
     }
 
     /**

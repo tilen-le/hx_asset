@@ -83,11 +83,17 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 资产变更
      */
+    @PostMapping(value = "/updateAssetExchange")
     public JSONObject updateAssetExchange(@RequestBody JSONObject params) {
         Result result = assetService.updateAssetExchange(params);
         return JSONObject.parseObject(result.toString());
     }
 
+    @PostMapping(value = "/updateAssetTransfer")
+    public JSONObject updateAssetTransfer(@RequestBody JSONObject params) {
+        Result result = assetService.updateAssetTransfer(params);
+        return JSONObject.parseObject(result.toString());
+    }
 
     /**
      * 新增盘点任务

@@ -65,7 +65,8 @@ public class AssetController extends BaseController {
     @Log(title = "资产表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public AjaxResult export(Asset asset) {
-        List<Asset> list = assetService.selectAssetList(asset);
+//        List<Asset> list = assetService.selectAssetList(asset);
+        List<Asset> list = assetService.list();
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }

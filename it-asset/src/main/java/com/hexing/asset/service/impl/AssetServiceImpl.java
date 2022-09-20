@@ -194,12 +194,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             }
             List<Asset> assets = assetMapper.selectList(wrapper);
 
-//            List<JSONObject> assetsList = new ArrayList<>();
-//            if (assets != null) {
-//                for (Asset asset : assets) {
-//                    assetsList.add(setNewAsset(asset));
-//                }
-//            }
             JSONObject data = new JSONObject();
             data.put("userId", user.getUserName());
             data.put("manageDept", dept.getDeptName());

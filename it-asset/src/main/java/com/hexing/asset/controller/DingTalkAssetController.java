@@ -71,7 +71,7 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 根据工号查询保管人信息及名下资产
+     * 根据工号,管理部门查询保管人信息及名下资产
      */
     @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
     public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody JSONObject params) {

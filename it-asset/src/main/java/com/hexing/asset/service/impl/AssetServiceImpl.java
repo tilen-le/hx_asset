@@ -131,7 +131,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 wrapper.eq(Asset::getManageDept, asset.getManageDept());
             }
             List<Asset> assets = assetMapper.selectList(wrapper);
-            return Result.success(assets);
+            JSONObject data = new JSONObject();
+            data.put("assets", assets);
+            return Result.success(data);
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error("出错");

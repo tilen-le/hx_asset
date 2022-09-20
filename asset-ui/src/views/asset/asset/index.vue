@@ -69,7 +69,7 @@
       </el-table-column>
       <el-table-column label="资产总价值" align="center" prop="totalValue" />
       <el-table-column label="净值" align="center" prop="netWorth" />
-      <el-table-column label="保修期" align="center" prop="warranty" />
+      <el-table-column label="保修期（月）" align="center" prop="warranty" />
       <el-table-column label="预计使用寿命（月）" align="center" prop="canUseMonths" />
       <el-table-column label="预计使用寿命（年）" align="center" prop="canUseYears" />
       <el-table-column label="资本化日期/资产价值录入日期" align="center" prop="capitalizationDate" width="180">

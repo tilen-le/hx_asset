@@ -14,14 +14,14 @@ import com.hexing.common.core.domain.BaseEntity;
 import java.util.Date;
 
 /**
- * 资产维修流程对象 asset_process_maintain
+ * 资产改造流程对象 asset_process_transform
  *
  * @author zxy
- * @date 2022-09-08
+ * @date 2022-09-20
  */
 @Data
 @Accessors(chain = true)
-public class AssetProcessMaintain
+public class AssetProcessTransform
 {
     private static final long serialVersionUID = 1L;
 

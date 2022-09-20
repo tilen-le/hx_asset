@@ -2,8 +2,11 @@ package com.hexing.asset.service.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.AssetProcessDisposal;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessMaintainMapper;
@@ -43,7 +46,14 @@ public class AssetProcessMaintainServiceImpl extends ServiceImpl<AssetProcessMai
     @Override
     public List<AssetProcessMaintain> selectAssetProcessMaintainList(AssetProcessMaintain assetProcessMaintain)
     {
-        return assetProcessMaintainMapper.selectAssetProcessMaintainList(assetProcessMaintain);
+        LambdaQueryWrapper<AssetProcessMaintain> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(assetProcessMaintain.getUserCode())) {
+            wrapper.like(AssetProcessMaintain::getUserCode, assetProcessMaintain.getUserCode());
+        }
+        if (StringUtils.isNotBlank(assetProcessMaintain.getAssetCode())) {
+            wrapper.like(AssetProcessMaintain::getAssetCode, assetProcessMaintain.getAssetCode());
+        }
+        return assetProcessMaintainMapper.selectList(wrapper);
     }
 
     /**
@@ -55,8 +65,7 @@ public class AssetProcessMaintainServiceImpl extends ServiceImpl<AssetProcessMai
     @Override
     public int insertAssetProcessMaintain(AssetProcessMaintain assetProcessMaintain)
     {
-        assetProcessMaintain.setCreateTime(DateUtils.getNowDate());
-        return assetProcessMaintainMapper.insertAssetProcessMaintain(assetProcessMaintain);
+        return assetProcessMaintainMapper.insert(assetProcessMaintain);
     }
 
     /**

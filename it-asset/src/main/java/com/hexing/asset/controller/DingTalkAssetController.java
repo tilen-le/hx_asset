@@ -6,10 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetInventoryTask;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.domain.*;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
@@ -57,6 +54,12 @@ public class DingTalkAssetController extends BaseController {
     private IAssetProcessBackService assetProcessBackService;
     @Autowired
     private IAssetProcessReceiveService assetProcessReceiveService;
+    @Autowired
+    private IAssetProcessDisposalService disposalService;
+    @Autowired
+    private IAssetProcessMaintainService maintainService;
+    @Autowired
+    private IAssetProcessTransformService transformService;
 
 
     /**
@@ -173,16 +176,6 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 新增盘点资产记录
-     */
-    @PostMapping("/countingAssets")
-    public AjaxResult countingAssets(@RequestBody JSONObject params) {
-        System.out.println("params: " + params);
-        AssetProcessCounting vo = params.getObject("data", AssetProcessCounting.class);
-        return toAjax(assetProcessCountingService.insertAssetProcessCounting(vo));
-    }
-
-    /**
      * 扫码盘点时，查询资产信息
      */
     @PostMapping("/counting/getAssetInfo")
@@ -255,6 +248,103 @@ public class DingTalkAssetController extends BaseController {
         }
 
         return AjaxResult.success("盘点成功");
+    }
+
+    /**
+     * 员工处置资产流程
+     */
+    @Transactional
+    @PostMapping("/disposalAssets")
+    public AjaxResult disposalAssets(@RequestBody JSONObject params) {
+        System.out.println("params: " + params);
+        JSONObject data = params.getObject("data", JSONObject.class);
+        String userCode = data.getString("userCode");
+        String processType = data.getString("processType");
+        String instanceId = data.getString("instanceId");
+        JSONArray assetList = data.getJSONArray("assets");
+        for (Object o : assetList) {
+            String  assetCode = o.toString();
+            AssetProcess assetProcess = new AssetProcess();
+            assetProcess.setAssetCode(assetCode);
+            assetProcess.setUserCode(userCode);
+            assetProcess.setProcessType(processType);
+            assetProcess.setCreateTime(new Date());
+            assetProcessService.insertAssetProcess(assetProcess);
+
+            AssetProcessDisposal entity = new AssetProcessDisposal();
+            entity.setAssetCode(assetCode);
+            entity.setProcessId(assetProcess.getId());
+            entity.setUserCode(userCode);
+            entity.setInstanceId(instanceId);
+            entity.setCreateTime(new Date());
+            disposalService.insertAssetProcessDisposal(entity);
+        }
+        return AjaxResult.success("处置成功");
+    }
+
+    /**
+     * 员工改造资产流程
+     */
+    @Transactional
+    @PostMapping("/transformAssets")
+    public AjaxResult transformAssets(@RequestBody JSONObject params) {
+        System.out.println("params: " + params);
+        JSONObject data = params.getObject("data", JSONObject.class);
+        String userCode = data.getString("userCode");
+        String processType = data.getString("processType");
+        String instanceId = data.getString("instanceId");
+        JSONArray assetList = data.getJSONArray("assets");
+        for (Object o : assetList) {
+            String  assetCode = o.toString();
+            AssetProcess assetProcess = new AssetProcess();
+            assetProcess.setAssetCode(assetCode);
+            assetProcess.setUserCode(userCode);
+            assetProcess.setProcessType(processType);
+            assetProcess.setCreateTime(new Date());
+            assetProcessService.insertAssetProcess(assetProcess);
+
+            AssetProcessTransform entity = new AssetProcessTransform();
+            entity.setAssetCode(assetCode);
+            entity.setProcessId(assetProcess.getId());
+            entity.setUserCode(userCode);
+            entity.setInstanceId(instanceId);
+            entity.setCreateTime(new Date());
+            transformService.insertAssetProcessTransform(entity);
+        }
+
+        return AjaxResult.success("改造成功");
+    }
+
+    /**
+     * 员工维修资产流程
+     */
+    @Transactional
+    @PostMapping("/maintainAssets")
+    public AjaxResult maintainAssets(@RequestBody JSONObject params) {
+        System.out.println("params: " + params);
+        JSONObject data = params.getObject("data", JSONObject.class);
+        String userCode = data.getString("userCode");
+        String processType = data.getString("processType");
+        String instanceId = data.getString("instanceId");
+        JSONArray assetList = data.getJSONArray("assets");
+        for (Object o : assetList) {
+            String  assetCode = o.toString();
+            AssetProcess assetProcess = new AssetProcess();
+            assetProcess.setAssetCode(assetCode);
+            assetProcess.setUserCode(userCode);
+            assetProcess.setProcessType(processType);
+            assetProcess.setCreateTime(new Date());
+            assetProcessService.insertAssetProcess(assetProcess);
+
+            AssetProcessMaintain entity = new AssetProcessMaintain();
+            entity.setAssetCode(assetCode);
+            entity.setProcessId(assetProcess.getId());
+            entity.setUserCode(userCode);
+            entity.setInstanceId(instanceId);
+            entity.setCreateTime(new Date());
+            maintainService.insertAssetProcessMaintain(entity);
+        }
+        return AjaxResult.success("维修成功");
     }
 
 }

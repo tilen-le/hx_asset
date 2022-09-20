@@ -64,8 +64,7 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
     @Override
     public int insertAssetProcessDisposal(AssetProcessDisposal assetProcessDisposal)
     {
-        assetProcessDisposal.setCreateTime(DateUtils.getNowDate());
-        return assetProcessDisposalMapper.insertAssetProcessDisposal(assetProcessDisposal);
+        return assetProcessDisposalMapper.insert(assetProcessDisposal);
     }
 
     /**

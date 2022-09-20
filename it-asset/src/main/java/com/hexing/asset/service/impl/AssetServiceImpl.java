@@ -1,6 +1,7 @@
 package com.hexing.asset.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -390,6 +391,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         int successNum = 0;         /* 导入成功条数 */
         int failureNum = 0;         /* 导入失败条数 */
+        Map<String, SysUser> usernameUserObjMap = sysUserService.getUsernameUserObjMap();
         StringBuilder message = new StringBuilder();
         for (int i = 0; i < assetList.size(); i++) {
             Asset asset = assetList.get(i);
@@ -398,7 +400,14 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String requiredFieldLeftUnfilled = checkRequiredFields(asset);
                 if (requiredFieldLeftUnfilled != null) {
                     failureNum++;
-                    message.append("<br/><font color=\"red\">" + "第 " + (i + 2) + " 行导入失败，原因：" + "必填字段：" + requiredFieldLeftUnfilled + " 未填写</font>");
+                    message.append("<br/><font color=\"red\">" + "第 " + (i + 2) + " 行导入失败，原因：" + "必填字段：" + requiredFieldLeftUnfilled + " 未填写或格式存在错误</font>");
+                    continue;
+                }
+
+                // 检查保管人是否存在于系统中
+                if (usernameUserObjMap.get(asset.getResponsiblePersonCode()) == null) {
+                    failureNum++;
+                    message.append("<br/><font color=\"red\">" + "第 " + (i + 2) + " 行导入失败，原因：" + "该保管人在系统中不存在");
                     continue;
                 }
 
@@ -438,6 +447,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";
                 message.append(msg + e.getMessage());
                 log.error(msg, e);
+                throw new ServiceException("导入出错");
             }
         }
 
@@ -448,7 +458,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .filter(x -> StringUtils.isNotEmpty(x.getAssetCode()))
                         .collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(assets)) {
-                    syncAssetCodeToSAP(assets);
+//                    syncAssetCodeToSAP(assets);
                 }
             } catch (Exception e) {
                 log.error("", e);
@@ -478,8 +488,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         for (SysDictData dictData : assetImportRequiredFieldDictDataList) {
             String fieldName = dictData.getDictValue();
             String getMethodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-            String value = clazz.getMethod(getMethodName).invoke(asset).toString();
-            if (StringUtils.isEmpty(value)) {
+            Object value = clazz.getMethod(getMethodName).invoke(asset);
+            if (ObjectUtil.isEmpty(value)) {
                 return dictData.getDictLabel();
             }
         }
@@ -488,7 +498,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
     private String generateAssetCode(Asset asset) throws Exception {
 
-        StringBuffer assetCode = new StringBuffer();
+        StringBuilder assetCode = new StringBuilder();
 
         DecimalFormat df = new DecimalFormat("0000");
 

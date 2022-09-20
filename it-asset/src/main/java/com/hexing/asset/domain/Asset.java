@@ -54,7 +54,7 @@ public class Asset
     private String responsiblePersonName;
 
     /** 保管人工号（老工号） */
-    @Excel(name = "保管人工号")
+    @Excel(name = "*保管人工号")
     private String responsiblePersonCode;
 
     /** 保管部门 */

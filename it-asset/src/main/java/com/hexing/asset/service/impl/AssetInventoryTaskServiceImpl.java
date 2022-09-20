@@ -27,10 +27,12 @@ import com.hexing.framework.manager.AsyncManager;
 import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -150,23 +152,22 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
      */
     @Override
     @Transactional
-    public int insertAssetCountingTask(AssetInventoryTask task)
-    {
+    public int insertAssetCountingTask(AssetInventoryTask task) {
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         wrapper.setEntity(new Asset());
 
-        Long deptId =  Long.valueOf(task.getInventoryDept());
+        Long deptId = Long.valueOf(task.getInventoryDept());
         List<SysDept> sysDeptList = sysDeptService.selectDeptByParentId(deptId);
-        SysDept sysDept =new SysDept();
+        SysDept sysDept = new SysDept();
         sysDept.setDeptId(deptId);
         sysDeptList.add(sysDept);
-        List<Asset>  list =new ArrayList();
+        List<Asset> list = new ArrayList();
         for (SysDept sd : sysDeptList) {
             List<SysUser> sysUserList = sysUserService.selectUserByDeptId(sd.getDeptId());
             for (SysUser s : sysUserList) {
                 wrapper.getEntity().setResponsiblePersonCode(s.getUserName());
                 List<Asset> assetList = assetMapper.selectList(wrapper);
-                if (assetList.size()>0){
+                if (assetList.size() > 0) {
                     for (Asset asset : assetList) {
                         list.add(asset);
                     }
@@ -175,15 +176,26 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         }
         task.setCreateTime(new Date());
         String str = DateUtils.dateTimeNow();
-        str+=RandomUtil.randomString(15);
+        str += RandomUtil.randomString(15);
         task.setTaskCode(str);
-        if (task.getEndDate().getTime()< task.getStartDate().getTime()){
+
+        String beginDateTime = DateFormatUtils.format(task.getStartDate(), "yyyy-MM-dd 00:00:00");
+        String endDateTime = DateFormatUtils.format(task.getEndDate(), "yyyy-MM-dd 23:59:59");
+
+        try {
+            task.setStartDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(beginDateTime));
+            task.setEndDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endDateTime));
+        } catch (Exception e) {
+            log.error("盘点任务始末时间设置出错", e);
+        }
+
+        if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
             return 0;
         }
         String userName = SecurityUtils.getLoginUser().getUser().getUserName();
 //        String userName = "1";
         task.setCreateBy(userName);
-        if (task.getInventoryUserList()!=null){
+        if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }
         task.setStatus(CountingTaskStatus.COUNTING.getStatus());
@@ -207,10 +219,10 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         List<String> inventoryUserList = task.getInventoryUserList();
 //        List<String> inventoryUserList = new ArrayList<>();
 //        inventoryUserList.add("80010712");
-        String title ="盘点任务编码 :"+task.getTaskCode()
-                +"\n盘点开始时间 :"+DateUtils.parseDateToStr("YYYY-MM-dd",task.getStartDate())
-                + "\n盘点结束时间 :"+DateUtils.parseDateToStr("YYYY-MM-dd",task.getEndDate());
-        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList,title));
+        String title = "盘点任务编码 :" + task.getTaskCode()
+                + "\n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
+                + "\n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
+        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
         return 1;
     }
 

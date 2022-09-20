@@ -8,12 +8,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
-import com.hexing.asset.service.IAssetInventoryTaskService;
-import com.hexing.asset.service.IAssetProcessCountingService;
-import com.hexing.asset.service.IAssetService;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.service.*;
 import com.hexing.asset.service.impl.AssetServiceImpl;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -21,12 +21,16 @@ import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDictDataService;
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -47,6 +51,13 @@ public class DingTalkAssetController extends BaseController {
     private IAssetProcessCountingService assetProcessCountingService;
     @Autowired
     private ISysDictDataService sysDictDataService;
+    @Autowired
+    private IAssetProcessService assetProcessService;
+    @Autowired
+    private IAssetProcessBackService assetProcessBackService;
+    @Autowired
+    private IAssetProcessReceiveService assetProcessReceiveService;
+
 
     /**
      * 根据资产编号查询资产信息
@@ -74,8 +85,21 @@ public class DingTalkAssetController extends BaseController {
      * 根据资产编号更新资产信息
      */
     @PostMapping(value = "/updateAssetCardByAssetCode")
+    @Transactional
     public JSONObject updateAssetCardByAssetCode(@RequestBody JSONObject params) {
-        Asset asset = params.getObject("data", Asset.class);
+        params = params.getJSONObject("data");
+        String processType = params.getString("processType"); /* 资产管理流程类型 */
+        String userCode = params.getString("userCode");       /* 流程发起人工号 */
+        AssetProcess assetProcess = new AssetProcess();
+        assetProcess.setCreateTime(new Date());
+        assetProcess.setUserCode(userCode);
+        if (DingTalkAssetProcessType.PROCESS_RECEIVE.getCode().equals(processType)) { // 领用流程
+            assetProcess.setProcessType(DingTalkAssetProcessType.PROCESS_RECEIVE.getCode());
+        } else if (DingTalkAssetProcessType.PROCESS_BACK.getCode().equals(processType)) { // 归还流程
+            assetProcess.setProcessType(DingTalkAssetProcessType.PROCESS_BACK.getCode());
+        }
+        assetProcessService.save(assetProcess);
+        Asset asset = JSONObject.toJavaObject(params, Asset.class);
         boolean success = assetService.update(asset.setUpdateTime(new Date()), new LambdaUpdateWrapper<Asset>()
                 .eq(Asset::getAssetCode, asset.getAssetCode()));
         if (success) {
@@ -131,21 +155,20 @@ public class DingTalkAssetController extends BaseController {
      * 查询盘点任务编码
      */
     @PostMapping("/selectCountingTaskCode")
-    public String  selectCountingTaskCode(@RequestBody JSONObject params) {
-        logger.info("--------调用selectCountingTaskCode接口");
-        AssetInventoryTask task =new AssetInventoryTask();
-        JSONObject result =new JSONObject();
-        String userCode =params.getString("userCode");
-        List<AssetInventoryTask> taskList = assetInventoryTaskService.selectAssetCountingTaskList(task);
-        List list=new ArrayList();
-        Date date=new Date();
-
-        for (AssetInventoryTask a:taskList){
-            if (a.getInventoryUsers().contains(userCode)&&(a.getEndDate().getTime()>=date.getTime())){
+    public String selectCountingTaskCode(@RequestBody JSONObject params) {
+        JSONObject result = new JSONObject();
+        String userCode = params.getString("userCode");
+        List<AssetInventoryTask> taskList = assetInventoryTaskService
+                .selectAssetCountingTaskList(new AssetInventoryTask());
+        List<String> list = new ArrayList<>();
+        for (AssetInventoryTask a : taskList) {
+            JSONObject countResult = assetProcessCountingService.countingStatusCount(a.getTaskCode());
+            int notCounted = countResult.getIntValue("notCounted");
+            if (a.getInventoryUsers().contains(userCode) && (a.getEndDate().getTime() >= new Date().getTime()) && notCounted != 0) {
                 list.add(a.getTaskCode());
             }
         }
-        result.put("result",list.toString());
+        result.put("result", list.toString());
         return result.toString();
     }
 

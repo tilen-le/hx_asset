@@ -205,17 +205,17 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/counting/countAsset")
     public AjaxResult countAsset(@RequestBody JSONObject params) {
         JSONObject data = params.getObject("data", JSONObject.class);
-        String taskCode = data.getString("taskCode");
-        // 判断盘点任务编码是否为空
-        if (StringUtils.isEmpty(taskCode)) {
-            return AjaxResult.error("盘点任务编码为空");
+        String taskName = data.getString("taskName");
+        // 判断盘点任务名称是否为空
+        if (StringUtils.isEmpty(taskName)) {
+            return AjaxResult.error("盘点任务名称为空");
         }
-        // 判断盘点任务编码是否存在
         AssetInventoryTask task = assetInventoryTaskService
-                .getOne(new QueryWrapper<AssetInventoryTask>().eq("task_code", taskCode));
-        if (task == null) {
-            return AjaxResult.error("盘点任务编码不存在");
+                .getOne(new LambdaQueryWrapper<AssetInventoryTask>().eq(AssetInventoryTask::getTaskName, taskName));
+        if (ObjectUtil.isNull(task)) {
+            return AjaxResult.error(500, "该盘点任务名称对应的盘点任务不存在");
         }
+        String taskCode = task.getTaskCode();
         // 若超出盘点任务截止日期
         if (CountingTaskStatus.FINISHED.getStatus().equals(task.getStatus()) || new Date().compareTo(task.getEndDate()) > 0) {
             return AjaxResult.error("盘点任务已结束");

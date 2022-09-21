@@ -14,14 +14,15 @@ import com.hexing.common.core.domain.BaseEntity;
 import java.util.Date;
 
 /**
- * 资产更换流程对象 asset_process_exchange
+ * 资产转移流程对象 asset_process_transfer
  *
  * @author zxy
- * @date 2022-09-08
+ * @date 2022-09-20
  */
 @Data
+@EqualsAndHashCode
 @Accessors(chain = true)
-public class AssetProcessExchange
+public class AssetProcessTransfer
 {
     private static final long serialVersionUID = 1L;
 
@@ -51,6 +52,5 @@ public class AssetProcessExchange
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
-
 
 }

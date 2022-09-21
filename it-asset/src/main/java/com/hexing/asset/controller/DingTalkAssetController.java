@@ -1,20 +1,19 @@
 package com.hexing.asset.controller;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetInventoryTask;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.domain.*;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.*;
 import com.hexing.asset.service.impl.AssetServiceImpl;
+import com.hexing.common.annotation.RepeatSubmit;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
@@ -52,8 +51,6 @@ public class DingTalkAssetController extends BaseController {
     @Autowired
     private ISysDictDataService sysDictDataService;
     @Autowired
-    private IAssetProcessService assetProcessService;
-    @Autowired
     private IAssetProcessBackService assetProcessBackService;
     @Autowired
     private IAssetProcessReceiveService assetProcessReceiveService;
@@ -86,26 +83,30 @@ public class DingTalkAssetController extends BaseController {
      */
     @PostMapping(value = "/updateAssetCardByAssetCode")
     @Transactional
-    public JSONObject updateAssetCardByAssetCode(@RequestBody JSONObject params) {
+    public Result updateAssetCardByAssetCode(@RequestBody JSONObject params) {
         params = params.getJSONObject("data");
-        String processType = params.getString("processType"); /* 资产管理流程类型 */
-        String userCode = params.getString("userCode");       /* 流程发起人工号 */
-        AssetProcess assetProcess = new AssetProcess();
-        assetProcess.setCreateTime(new Date());
-        assetProcess.setUserCode(userCode);
-        if (DingTalkAssetProcessType.PROCESS_RECEIVE.getCode().equals(processType)) { // 领用流程
-            assetProcess.setProcessType(DingTalkAssetProcessType.PROCESS_RECEIVE.getCode());
-        } else if (DingTalkAssetProcessType.PROCESS_BACK.getCode().equals(processType)) { // 归还流程
-            assetProcess.setProcessType(DingTalkAssetProcessType.PROCESS_BACK.getCode());
-        }
-        assetProcessService.save(assetProcess);
+        String processType = params.getString("processType");                           /* 资产管理流程类型 */
+        String userCode = params.getString("userCode");                                 /* 流程发起人工号 */
+        String instanceId = params.getString("instanceId");
         Asset asset = JSONObject.toJavaObject(params, Asset.class);
-        boolean success = assetService.update(asset.setUpdateTime(new Date()), new LambdaUpdateWrapper<Asset>()
-                .eq(Asset::getAssetCode, asset.getAssetCode()));
+        if (DingTalkAssetProcessType.PROCESS_RECEIVE.getCode().equals(processType)) {       /* 领用流程 */
+            assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode());
+        } else if (DingTalkAssetProcessType.PROCESS_BACK.getCode().equals(processType)) {   /* 归还流程 */
+            assetProcessBackService.saveProcess(instanceId, userCode, asset.getAssetCode());
+        }
+        Asset temp = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, asset.getAssetCode()));
+        if (ObjectUtil.isNull(temp)) {
+            return Result.error(500, "该平台资产编码对应资产不存在");
+        }
+        boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
+                .eq(Asset::getAssetCode, asset.getAssetCode())
+                .set(StringUtils.isNotEmpty(asset.getAssetStatus()), Asset::getAssetStatus, asset.getAssetStatus())
+                .set(StringUtils.isNotEmpty(asset.getResponsiblePersonCode()), Asset::getResponsiblePersonCode, asset.getResponsiblePersonCode())
+                .set(StringUtils.isNotEmpty(asset.getLocation()), Asset::getAssetStatus, asset.getAssetStatus()));
         if (success) {
-            return JSONObject.parseObject(Result.success("更新成功").toString());
+            return Result.success("更新成功");
         } else {
-            return JSONObject.parseObject(Result.success("更新失败").toString());
+            return Result.success("更新失败");
         }
     }
 
@@ -113,18 +114,16 @@ public class DingTalkAssetController extends BaseController {
      * 资产变更
      */
     @PostMapping(value = "/updateAssetExchange")
-    public JSONObject updateAssetExchange(@RequestBody JSONObject params) {
-        Result result = assetService.updateAssetExchange(params);
-        return JSONObject.parseObject(result.toString());
+    public Result updateAssetExchange(@RequestBody JSONObject params) {
+        return assetService.updateAssetExchange(params);
     }
 
     /**
      * 资产转移
      */
     @PostMapping(value = "/updateAssetTransfer")
-    public JSONObject updateAssetTransfer(@RequestBody JSONObject params) {
-        Result result = assetService.updateAssetTransfer(params);
-        return JSONObject.parseObject(result.toString());
+    public Result updateAssetTransfer(@RequestBody JSONObject params) {
+        return assetService.updateAssetTransfer(params);
     }
 
     /**
@@ -140,15 +139,6 @@ public class DingTalkAssetController extends BaseController {
         JSONObject result = new JSONObject();
         result.put("result", addressList);
         return result;
-    }
-
-    /**
-     * 新增盘点任务
-     */
-    @PostMapping("/createCountingTask")
-    public AjaxResult createCountingTask(@RequestBody JSONObject params) {
-        AssetInventoryTask task = params.getObject("data", AssetInventoryTask.class);
-        return toAjax(assetInventoryTaskService.insertAssetCountingTask(task));
     }
 
     /**
@@ -189,16 +179,18 @@ public class DingTalkAssetController extends BaseController {
     public AjaxResult getAssetInfo(@RequestBody JSONObject params) {
         String assetCode = params.getString("assetCode");
         String taskCode = params.getString("taskCode");
-
+        if (StringUtils.isEmpty(taskCode)) {
+            return AjaxResult.error(500, "盘点任务编码未选择");
+        }
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetProcessCounting::getTaskCode, taskCode)
                 .eq(AssetProcessCounting::getAssetCode, assetCode);
         AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
         if (entity == null) {
-            return AjaxResult.error("所盘点资产不在当前任务盘点范围内");
+            return AjaxResult.error(500, "所盘点资产不在当前任务盘点范围内");
         }
         if (!AssetCountingStatus.NOT_COUNTED.getStatus().equals(entity.getCountingStatus())) {
-            return AjaxResult.error("该资产在当前任务中已被盘点过");
+            return AjaxResult.error(500, "该资产在当前任务中已被盘点过");
         }
         Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
         JSONObject jsonObject = AssetServiceImpl.setNewAsset(asset);
@@ -235,9 +227,9 @@ public class DingTalkAssetController extends BaseController {
             String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             // 若备注不为空，则为盘点异常
             String comment = JSONUtil.parseObj(o).getStr("comment");
-            QueryWrapper<AssetProcessCounting> w = new QueryWrapper();
-            w.eq("asset_code", assetCode);
-            w.eq("task_code", taskCode);
+            LambdaQueryWrapper<AssetProcessCounting> w = new LambdaQueryWrapper<>();
+            w.eq(AssetProcessCounting::getAssetCode, assetCode)
+                    .eq(AssetProcessCounting::getTaskCode, taskCode);
             AssetProcessCounting entity = assetProcessCountingService.getOne(w);
             String status = entity.getCountingStatus();
             if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
@@ -246,10 +238,10 @@ public class DingTalkAssetController extends BaseController {
                 } else {
                     entity.setCountingStatus(AssetCountingStatus.COUNTED.getStatus());
                 }
-                entity.setUserCode(userCode);
-                entity.setInstanceId(instanceId);
-                entity.setCountingTime(new Date());
-                entity.setComment(comment);
+                entity.setUserCode(userCode)
+                        .setInstanceId(instanceId)
+                        .setCountingTime(new Date())
+                        .setComment(comment);
                 assetProcessCountingService.updateById(entity);
             }
         }

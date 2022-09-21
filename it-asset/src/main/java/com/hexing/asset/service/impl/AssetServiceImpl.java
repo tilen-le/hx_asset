@@ -11,9 +11,12 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
+import com.hexing.asset.service.IAssetProcessExchangeService;
+import com.hexing.asset.service.IAssetProcessTransferService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
@@ -72,6 +75,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
+    @Autowired
+    private IAssetProcessExchangeService assetProcessExchangeService;
+    @Autowired
+    private IAssetProcessTransferService assetProcessTransferService;
 
     @Value("${uip.uipTransfer}")
     private String uipTransfer;
@@ -211,8 +218,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         try {
             params = params.getJSONObject("data");
 
-            String adminId = params.getString("adminId"); // 资产管理员工号（老工号）
-            String docAlterId = params.getString("docAlterId"); // 流程申请人工号（老工号）
+            String adminId = params.getString("adminCode"); // 资产管理员工号
+            String userCode = params.getString("userCode"); // 流程申请人工号
 
             String locationOfOldAsset = params.getJSONObject("before").getString("location");
             String codeOfOldAsset = params.getJSONObject("before").getString("assetCode");
@@ -221,36 +228,42 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             String codeOfNewAsset = params.getJSONObject("after").getString("assetCode");
 
             // 老资产
-            int updateOfOld = assetMapper.update(new Asset()
-                            .setLocation(locationOfNewAsset)
-                            .setResponsiblePersonCode(adminId)
-                            .setAssetStatus("闲置")
-                            .setUpdateBy(docAlterId)
-                            .setUpdateTime(new Date()),
+            int updateOfOld = assetMapper.update(null,
                     new LambdaUpdateWrapper<Asset>()
-                            .eq(Asset::getAssetCode, codeOfOldAsset));
+                            .eq(Asset::getAssetCode, codeOfOldAsset)
+                            .set(Asset::getLocation, locationOfNewAsset)
+                            .set(Asset::getResponsiblePersonCode, adminId)
+                            .set(Asset::getAssetStatus, AssetStatus.UNUSED.getName())
+                            .set(Asset::getUpdateBy, userCode)
+                            .set(Asset::getUpdateTime, new Date()));
             if (updateOfOld == 0) {
                 log.error("老资产更新失败");
                 throw new ServiceException("老资产更新失败");
             }
 
-
-            int updateOfNew = assetMapper.update(new Asset()
-                            .setLocation(locationOfOldAsset)
-                            .setLocation(locationOfOldAsset)
-                            .setAssetStatus("在用")
-                            .setResponsiblePersonCode(docAlterId)
-                            .setUpdateBy(docAlterId)
-                            .setUpdateTime(new Date()),
+            int updateOfNew = assetMapper.update(null,
                     new LambdaUpdateWrapper<Asset>()
-                            .eq(Asset::getAssetCode, codeOfNewAsset));
+                            .eq(Asset::getAssetCode, codeOfNewAsset)
+                            .set(Asset::getAssetStatus, AssetStatus.USING.getName())
+                            .set(Asset::getLocation, locationOfOldAsset)
+                            .set(Asset::getResponsiblePersonCode, userCode)
+                            .set(Asset::getUpdateBy, userCode)
+                            .set(Asset::getUpdateTime, new Date()));
             if (updateOfNew == 0) {
                 log.error("新资产更新失败");
                 throw new ServiceException("新资产更新失败");
             }
 
-            log.warn("资产更换流程，目标资产更新成功");
-            return Result.success("资产更换流程，目标资产更新成功");
+            log.warn("资产更换流程，目标资产更成功");
+
+            // 记录流程
+            String instanceId = params.getString("instanceId");
+            List<String> assetCodeList = new ArrayList<>();
+            assetCodeList.add(codeOfOldAsset);
+            assetCodeList.add(codeOfNewAsset);
+            assetProcessExchangeService.saveProcess(instanceId, userCode, assetCodeList);
+
+            return Result.success("更换成功");
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(500, "出错");
@@ -261,8 +274,14 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Transactional
     public Result updateAssetTransfer(JSONObject params) {
         try {
+            params = params.getJSONObject("data");
+
             JSONArray assets = params.getJSONArray("assets");
-            String recipient = params.getString("recipient");
+            String recipient = params.getString("recipientCode");
+
+            String userCode = params.getString("userCode");       /* 流程发起人工号 */
+            String instanceId = params.getString("instanceId");
+
             if (CollectionUtil.isNotEmpty(assets)) {
                 for (int i = 0; i < assets.size(); i++) {
                     JSONObject updateInfo = assets.getObject(i, JSONObject.class);
@@ -273,14 +292,17 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     if (recipientInfo == null) {
                         return new Result(500, "后台无该接收者信息");
                     }
-                    int update = assetMapper.update(new Asset()
-                                    .setLocation(updateInfo.getString("location"))
-                                    .setResponsiblePersonCode(recipient),
+                    String location = updateInfo.getString("location");
+                    int update = assetMapper.update(null,
                             new LambdaUpdateWrapper<Asset>()
-                                    .eq(Asset::getAssetCode, updateInfo.getString("assetCode")));
+                                    .eq(Asset::getAssetCode, updateInfo.getString("assetCode"))
+                                    .set(StringUtils.isNotEmpty(location), Asset::getLocation, location)
+                                    .set(StringUtils.isNotEmpty(recipient), Asset::getResponsiblePersonCode, recipient));
                     if (update == 0) {
                         throw new ServiceException("更新未成功");
                     }
+                    // 记录流程
+                    assetProcessTransferService.saveProcess(instanceId, userCode, updateInfo.getString("assetCode"));
                 }
             }
             return Result.success("资产转移成功");
@@ -321,8 +343,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (CollectionUtil.isNotEmpty(assetList)) {
             for (Asset a : assetList) {
                 SysUser user = usernameNicknameMap.get(a.getResponsiblePersonCode());
-                a.setResponsiblePersonName(user.getNickName());
-                a.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+                if (user != null) {
+                    a.setResponsiblePersonName(user.getNickName());
+                    a.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+                }
             }
         }
         return assetList;

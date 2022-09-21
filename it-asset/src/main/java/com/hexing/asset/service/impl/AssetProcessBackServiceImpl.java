@@ -1,14 +1,20 @@
 package com.hexing.asset.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.domain.AssetProcessReceive;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.mapper.AssetProcessMapper;
 import com.hexing.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessBackMapper;
 import com.hexing.asset.domain.AssetProcessBack;
 import com.hexing.asset.service.IAssetProcessBackService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 资产归还流程Service业务层处理
@@ -21,6 +27,8 @@ public class AssetProcessBackServiceImpl extends ServiceImpl<AssetProcessBackMap
 {
     @Autowired
     private AssetProcessBackMapper assetProcessBackMapper;
+    @Autowired
+    private AssetProcessMapper assetProcessMapper;
 
     /**
      * 查询资产归还流程
@@ -95,4 +103,32 @@ public class AssetProcessBackServiceImpl extends ServiceImpl<AssetProcessBackMap
     {
         return assetProcessBackMapper.deleteAssetProcessBackById(id);
     }
+
+    /**
+     * 新增归还流程记录
+     *
+     * @param instanceId 实例ID
+     * @param userCode 发起人工号
+     * @param assetCode 平台资产编号
+     */
+    @Override
+    @Transactional
+    public void saveProcess(String instanceId, String userCode, String assetCode) {
+        // 新增主流程记录
+        AssetProcess process = new AssetProcess()
+                .setProcessType(DingTalkAssetProcessType.PROCESS_BACK.getCode())
+                .setAssetCode(assetCode)
+                .setUserCode(userCode)
+                .setCreateTime(new Date());
+        assetProcessMapper.insert(process);
+        // 新增归还流程记录
+        AssetProcessBack processBack = new AssetProcessBack()
+                .setProcessId(process.getId())
+                .setInstanceId(instanceId)
+                .setUserCode(userCode)
+                .setAssetCode(assetCode)
+                .setCreateTime(new Date());
+        assetProcessBackMapper.insert(processBack);
+    }
+
 }

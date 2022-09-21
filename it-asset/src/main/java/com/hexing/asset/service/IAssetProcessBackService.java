@@ -58,4 +58,13 @@ public interface IAssetProcessBackService extends IService<AssetProcessBack>
      * @return 结果
      */
     public int deleteAssetProcessBackById(Long id);
+
+    /**
+     * 新增归还流程记录
+     *
+     * @param instanceId 实例ID
+     * @param userCode 发起人工号
+     * @param assetCode 平台资产编号
+     */
+    void saveProcess(String instanceId, String userCode, String assetCode);
 }

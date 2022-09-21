@@ -4,6 +4,7 @@ import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.dto.AssetInventoryTaskDTO;
 import com.hexing.asset.service.IAssetInventoryTaskService;
 import com.hexing.common.annotation.Log;
+import com.hexing.common.annotation.RepeatSubmit;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.page.TableDataInfo;
@@ -57,7 +58,7 @@ public class AssetInventoryTaskController extends BaseController
     /**
      * 获取盘点任务详细信息
      */
-    @PreAuthorize("@ss.hasPermi('mature:task:query')")
+    @PreAuthorize("@ss.hasPermi('asset:task:query')")
     @GetMapping(value = "/{taskId}")
     public AjaxResult getInfo(@PathVariable("taskId") String taskId)
     {
@@ -67,9 +68,10 @@ public class AssetInventoryTaskController extends BaseController
     /**
      * 新增盘点任务
      */
-//    @PreAuthorize("@ss.hasPermi('mature:task:add')")
+    @PreAuthorize("@ss.hasPermi('asset:task:add')")
     @Log(title = "盘点任务表", businessType = BusinessType.INSERT)
     @PostMapping
+    @RepeatSubmit(interval = 10000)
     public AjaxResult add(@RequestBody AssetInventoryTaskDTO asset) {
         return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(asset));
     }

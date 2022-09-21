@@ -58,4 +58,13 @@ public interface IAssetProcessExchangeService extends IService<AssetProcessExcha
      * @return 结果
      */
     public int deleteAssetProcessExchangeById(Long id);
+
+    /**
+     * 新增更换流程
+     *
+     * @param instanceId 实例ID
+     * @param userCode 发起人工号
+     * @param assetCode 平台资产编号
+     */
+    void saveProcess(String instanceId, String userCode, List<String> assetCodeList);
 }

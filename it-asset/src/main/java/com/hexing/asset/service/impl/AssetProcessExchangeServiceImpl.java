@@ -1,14 +1,21 @@
 package com.hexing.asset.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.mapper.AssetProcessMapper;
 import com.hexing.common.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessExchangeMapper;
 import com.hexing.asset.domain.AssetProcessExchange;
 import com.hexing.asset.service.IAssetProcessExchangeService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 资产更换流程Service业务层处理
@@ -21,6 +28,9 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
 {
     @Autowired
     private AssetProcessExchangeMapper assetProcessExchangeMapper;
+    @Autowired
+    private AssetProcessMapper assetProcessMapper;
+
 
     /**
      * 查询资产更换流程
@@ -95,4 +105,36 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
     {
         return assetProcessExchangeMapper.deleteAssetProcessExchangeById(id);
     }
+
+    /**
+     * 新增更换流程记录
+     *
+     * @param instanceId 实例ID
+     * @param userCode 发起人工号
+     * @param assetCodeList 平台资产编号
+     */
+    @Override
+    @Transactional
+    public void saveProcess(String instanceId, String userCode, List<String> assetCodeList) {
+        if (CollectionUtil.isNotEmpty(assetCodeList)) {
+            for (String assetCode : assetCodeList) {
+                // 新增主流程记录
+                AssetProcess process = new AssetProcess()
+                        .setProcessType(DingTalkAssetProcessType.PROCESS_EXCHANGE.getCode())
+                        .setAssetCode(assetCode)
+                        .setUserCode(userCode)
+                        .setCreateTime(new Date());
+                assetProcessMapper.insert(process);
+                // 新增更换流程记录
+                AssetProcessExchange processExchange = new AssetProcessExchange()
+                        .setProcessId(process.getId())
+                        .setInstanceId(instanceId)
+                        .setUserCode(userCode)
+                        .setAssetCode(assetCode)
+                        .setCreateTime(new Date());
+                assetProcessExchangeMapper.insert(processExchange);
+            }
+        }
+    }
+
 }

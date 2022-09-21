@@ -25,7 +25,7 @@ public class AssetProcessReceive
 {
     private static final long serialVersionUID = 1L;
 
-    @TableId(type = IdType.UUID)
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /** 流程总表id */

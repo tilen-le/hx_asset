@@ -30,7 +30,7 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      * @param assetProcessCounting 资产盘点流程
      * @return 资产盘点流程集合
      */
-    public List<AssetProcessCountingVO> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
+    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
 
     /**
      * 新增资产盘点流程
@@ -55,6 +55,13 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      * @return 结果
      */
     public int deleteAssetProcessCountingByIds(Long[] ids);
+
+    /**
+     *
+     * @param list
+     * @return
+     */
+    List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list);
 
     /**
      * 删除资产盘点流程信息

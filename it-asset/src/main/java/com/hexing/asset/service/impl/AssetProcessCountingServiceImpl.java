@@ -69,7 +69,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 资产盘点流程
      */
     @Override
-    public List<AssetProcessCountingVO> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting)
+    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting)
     {
         // 筛选条件
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
@@ -90,9 +90,13 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         if (StringUtils.isNotBlank(assetProcessCounting.getCountingStatus())) {
             wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
         }
-        List<AssetProcessCounting> assetProcessCountingList = assetProcessCountingMapper.selectList(wrapper);
-        List<AssetProcessCountingVO> assetProcessCountingVOList = new ArrayList<>();
-        for (AssetProcessCounting obj : assetProcessCountingList) {
+        return assetProcessCountingMapper.selectList(wrapper);
+    }
+
+
+    public List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list) {
+        List<AssetProcessCountingVO> voList = new ArrayList<>();
+        for (AssetProcessCounting obj : list) {
             Asset asset = assetService.selectAssetByAssetCode(obj.getAssetCode());
             SysUser responsiblePerson = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
             String inventoryPerson = "";
@@ -119,11 +123,10 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     .setCountingTime(obj.getCountingTime())
                     .setCountingStatus(obj.getCountingStatus())
                     .setComment(obj.getComment());
-            assetProcessCountingVOList.add(vo);
+            voList.add(vo);
         }
-        return assetProcessCountingVOList;
+        return voList;
     }
-
 
     @Override
     public JSONObject countingStatusCount(String taskCode) {

@@ -176,12 +176,17 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/counting/getAssetInfo")
     public AjaxResult getAssetInfo(@RequestBody JSONObject params) {
         String assetCode = params.getString("assetCode");
-        String taskCode = params.getString("taskCode");
-        if (StringUtils.isEmpty(taskCode)) {
-            return AjaxResult.error(500, "盘点任务编码未选择");
+        String taskName = params.getString("taskName");
+        if (StringUtils.isEmpty(taskName)) {
+            return AjaxResult.error(500, "盘点任务名称未选择");
+        }
+        AssetInventoryTask task = assetInventoryTaskService
+                .getOne(new LambdaQueryWrapper<AssetInventoryTask>().eq(AssetInventoryTask::getTaskName, taskName));
+        if (ObjectUtil.isNull(task)) {
+            return AjaxResult.error(500, "该盘点任务名称对应的盘点任务不存在");
         }
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetProcessCounting::getTaskCode, taskCode)
+        wrapper.eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
                 .eq(AssetProcessCounting::getAssetCode, assetCode);
         AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
         if (entity == null) {

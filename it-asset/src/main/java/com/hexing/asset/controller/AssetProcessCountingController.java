@@ -49,8 +49,11 @@ public class AssetProcessCountingController extends BaseController
     public TableDataInfo list(AssetProcessCounting assetProcessCounting)
     {
         startPage();
-        List<AssetProcessCountingVO> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-        return getDataTable(list);
+        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
+        TableDataInfo dataTable = getDataTable(list);
+        dataTable.setRows(voList);
+        return dataTable;
     }
 
     /**
@@ -71,9 +74,10 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/export")
     public AjaxResult export(AssetProcessCounting assetProcessCounting)
     {
-        List<AssetProcessCountingVO> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
-        return util.exportExcel(list, "资产盘点记录");
+//        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+//        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
+//        return util.exportExcel(list, "资产盘点记录");
+        return null;
     }
 
     /**

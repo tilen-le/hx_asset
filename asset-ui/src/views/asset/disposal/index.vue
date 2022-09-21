@@ -116,7 +116,7 @@
         </template>
       </el-table-column>
     </el-table>
-    
+
     <pagination
       v-show="total>0"
       :total="total"
@@ -278,7 +278,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除资产处置流程编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm("提示", "确认","取消",'是否确认删除资产处置流程编号为"' + ids + '"的数据项？').then(function() {
         return delDisposal(ids);
       }).then(() => {
         this.getList();
@@ -288,7 +288,7 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$modal.confirm('是否确认导出所有资产处置流程数据项？').then(() => {
+      this.$modal.confirm("提示", "确认","取消",'是否确认导出所有资产处置流程数据项？').then(() => {
         this.exportLoading = true;
         return exportDisposal(queryParams);
       }).then(response => {

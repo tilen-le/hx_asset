@@ -1,6 +1,7 @@
 package com.hexing.system.service.impl;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.hexing.common.utils.MessageUtils;
@@ -117,6 +118,21 @@ public class SysDeptServiceImpl implements ISysDeptService
     public SysDept selectDeptById(Long deptId)
     {
         return deptMapper.selectDeptById(deptId);
+    }
+
+    /**
+     * 根据部门ID列表查询信息
+     *
+     * @param deptIds
+     * @return
+     */
+    @Override
+    public Map<Long, SysDept> selectDeptByIds(List<Long> deptIds) {
+        if (CollectionUtils.isEmpty(deptIds)) {
+            return Collections.emptyMap();
+        }
+        List<SysDept> deptList = deptMapper.selectDeptByIds(deptIds);
+        return deptList.stream().collect(Collectors.toMap(SysDept::getDeptId, Function.identity(), (n1, n2) -> n2));
     }
 
     @Override

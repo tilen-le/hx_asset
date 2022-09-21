@@ -53,6 +53,14 @@ public interface ISysDeptService
      */
     public SysDept selectDeptById(Long deptId);
 
+    /**
+     * 根据部门ID列表查询信息
+     *
+     * @param deptIds
+     * @return
+     */
+    Map<Long, SysDept> selectDeptByIds(List<Long> deptIds);
+
     public List selectDeptByParentId(Long deptId);
 
     /**

@@ -108,6 +108,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                 .getUserByUserNames(list.stream().map(AssetProcessCounting::getUserCode).collect(Collectors.toSet()));
         Map<String, SysUser> responsiblePersonMap = sysUserService
                 .getUserByUserNames(assetMap.values().stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+        Map<Long, SysDept> deptMap = deptService
+                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
 
         for (AssetProcessCounting obj : list) {
             Asset asset = assetMap.get(obj.getAssetCode());
@@ -119,7 +121,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     inventoryPerson = userByUserName.getNickName();
                 }
             }
-            SysDept dept = deptService.selectDeptById(responsiblePerson.getDeptId());
+            SysDept dept = deptMap.get(responsiblePerson.getDeptId());
             AssetProcessCountingVO vo = new AssetProcessCountingVO().setUserCode(obj.getUserCode())
                     .setUserNickName(inventoryPerson)
                     .setCompanyName(asset.getCompanyName())

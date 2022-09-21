@@ -31,6 +31,8 @@ import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.hexing.common.utils.PageUtil.startPage;
+
 /**
  * 资产表Controller
  *
@@ -54,6 +56,7 @@ public class AssetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('asset:collection:list')")
     @GetMapping("/list")
     public TableDataInfo list(Asset asset) {
+        startPage();
         List<Asset> list = assetService.selectAssetList(asset);
         return getDataTable(list);
     }
@@ -65,8 +68,8 @@ public class AssetController extends BaseController {
     @Log(title = "资产表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public AjaxResult export(Asset asset) {
-//        List<Asset> list = assetService.selectAssetList(asset);
-        List<Asset> list = assetService.list();
+        List<Asset> list = assetService.selectAssetList(asset);
+//        List<Asset> list = assetService.list();
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }

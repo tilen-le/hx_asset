@@ -290,10 +290,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public List<Asset> selectAssetList(Asset asset)
     {
-        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
-        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
 
-        startPage();
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(asset.getAssetName())) {
             wrapper.like(Asset::getAssetName, asset.getAssetName());
@@ -308,6 +305,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.eq(Asset::getCostCenter, asset.getCostCenter());
         }
         List<Asset> assetList = assetMapper.selectList(wrapper);
+
+        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
+        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
 
         if (CollectionUtil.isNotEmpty(assetList)) {
             for (Asset a : assetList) {

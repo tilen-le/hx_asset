@@ -8,12 +8,15 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.Page;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.core.page.PageDomain;
+import com.hexing.common.core.page.TableSupport;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.mapper.SysUserMapper;
@@ -70,25 +73,23 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     {
         // 筛选条件
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-
         wrapper.eq(AssetProcessCounting::getTaskCode, assetProcessCounting.getTaskCode());
-
         if (StringUtils.isNotBlank(assetProcessCounting.getAssetCode())) {
             wrapper.like(AssetProcessCounting::getAssetCode, assetProcessCounting.getAssetCode());
         }
-        if (StringUtils.isNotBlank(assetProcessCounting.getUserNickName())) {
-            String userNickName = assetProcessCounting.getUserNickName();
-            List<SysUser> userList = sysUserService.getUserByNickName(userNickName);
-            if (CollectionUtil.isNotEmpty(userList)) {
-                wrapper.in(AssetProcessCounting::getUserCode, userList.stream().map(SysUser::getUserName));
-            } else {
-                return Collections.emptyList();
-            }
+        if (StringUtils.isNotBlank(assetProcessCounting.getUserCode())) {
+//            String userNickName = assetProcessCounting.getUserNickName();
+//            List<SysUser> userList = sysUserService.getUserByNickName(userNickName);
+//            if (CollectionUtil.isNotEmpty(userList)) {
+//                wrapper.in(AssetProcessCounting::getUserCode, userList.stream().map(SysUser::getUserName));
+//            } else {
+//                return Collections.emptyList();
+//            }
+            wrapper.eq(AssetProcessCounting::getUserCode, assetProcessCounting.getUserCode());
         }
         if (StringUtils.isNotBlank(assetProcessCounting.getCountingStatus())) {
             wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
         }
-        startPage();
         List<AssetProcessCounting> assetProcessCountingList = assetProcessCountingMapper.selectList(wrapper);
         List<AssetProcessCountingVO> assetProcessCountingVOList = new ArrayList<>();
         for (AssetProcessCounting obj : assetProcessCountingList) {

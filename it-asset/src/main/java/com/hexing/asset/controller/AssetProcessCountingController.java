@@ -25,6 +25,8 @@ import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.common.core.page.TableDataInfo;
 
+import static com.hexing.common.utils.PageUtil.startPage;
+
 /**
  * 资产盘点流程Controller
  *
@@ -46,6 +48,7 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(AssetProcessCounting assetProcessCounting)
     {
+        startPage();
         List<AssetProcessCountingVO> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
         return getDataTable(list);
     }
@@ -68,10 +71,9 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/export")
     public AjaxResult export(AssetProcessCounting assetProcessCounting)
     {
-//        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-//        ExcelUtil<AssetProcessCounting> util = new ExcelUtil<>(AssetProcessCounting.class);
-//        return util.exportExcel(list, "资产盘点记录");
-            return null;
+        List<AssetProcessCountingVO> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
+        return util.exportExcel(list, "资产盘点记录");
     }
 
     /**

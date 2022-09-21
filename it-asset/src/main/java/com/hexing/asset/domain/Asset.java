@@ -66,7 +66,7 @@ public class Asset
     private String category;
 
     /** 资产状态描述 */
-    @Excel(name = "资产状态描述")
+    @Excel(name = "*资产状态描述")
     private String assetStatus;
 
     /** 出厂编号 */
@@ -120,7 +120,7 @@ public class Asset
     private String monetaryUnit;
 
     /** 存放地点 */
-    @Excel(name = "存放地点")
+    @Excel(name = "*存放地点")
     private String location;
 
     /** 供应商 */
@@ -156,7 +156,7 @@ public class Asset
     private String proposer;
 
     /** 资产使用场景 */
-    @Excel(name = "资产使用场景")
+    @Excel(name = "*资产使用场景")
     private String usageScenario;
 
     /** 备注 */

@@ -73,7 +73,13 @@ public class AssetInventoryTaskController extends BaseController
     @PostMapping
     @RepeatSubmit(interval = 10000)
     public AjaxResult add(@RequestBody AssetInventoryTaskDTO asset) {
-        return toAjax(assetProcessCountingTaskService.insertAssetCountingTask(asset));
+        int i = assetInventoryTaskService.insertAssetCountingTask(asset);
+        if (i==2){
+            return AjaxResult.error("盘点任务名称重复");
+        }else if (i==0){
+            return AjaxResult.error("盘点任务创建失败");
+        }
+        return AjaxResult.success("盘点任务创建成功");
     }
 
     /**

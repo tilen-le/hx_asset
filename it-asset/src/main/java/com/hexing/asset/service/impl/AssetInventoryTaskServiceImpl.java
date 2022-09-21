@@ -201,8 +201,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
             return 0;
         }
-//        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
-        String userName = "1";
+        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
+//        String userName = "1";
         task.setCreateBy(userName);
         if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
@@ -231,7 +231,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         String title = "盘点任务编码 :" + task.getTaskCode()
                 + "\n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
                 + "\n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
-//        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
+        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
         return 1;
     }
 

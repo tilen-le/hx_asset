@@ -163,7 +163,7 @@ public class DingTalkAssetController extends BaseController {
             JSONObject countResult = assetProcessCountingService.countingStatusCount(a.getTaskCode());
             int notCounted = countResult.getIntValue("notCounted");
             if (a.getInventoryUsers().contains(userCode) && (a.getEndDate().getTime() >= new Date().getTime()) && notCounted != 0) {
-                list.add(a.getTaskCode());
+                list.add(a.getTaskName());
             }
         }
         result.put("result", list.toString());
@@ -262,6 +262,7 @@ public class DingTalkAssetController extends BaseController {
         String userCode = data.getString("userCode");
         String processType = data.getString("processType");
         String instanceId = data.getString("instanceId");
+        String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
         for (Object o : assetList) {
             String  assetCode = o.toString();
@@ -276,6 +277,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setAssetCode(assetCode);
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
+            entity.setFileInfo(fileInfo);
             entity.setInstanceId(instanceId);
             entity.setCreateTime(new Date());
             disposalService.insertAssetProcessDisposal(entity);
@@ -294,6 +296,7 @@ public class DingTalkAssetController extends BaseController {
         String userCode = data.getString("userCode");
         String processType = data.getString("processType");
         String instanceId = data.getString("instanceId");
+        String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
         for (Object o : assetList) {
             String  assetCode = o.toString();
@@ -308,6 +311,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setAssetCode(assetCode);
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
+            entity.setFileInfo(fileInfo);
             entity.setInstanceId(instanceId);
             entity.setCreateTime(new Date());
             transformService.insertAssetProcessTransform(entity);
@@ -327,6 +331,7 @@ public class DingTalkAssetController extends BaseController {
         String userCode = data.getString("userCode");
         String processType = data.getString("processType");
         String instanceId = data.getString("instanceId");
+        String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
         for (Object o : assetList) {
             String  assetCode = o.toString();
@@ -342,6 +347,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
             entity.setInstanceId(instanceId);
+            entity.setFileInfo(fileInfo);
             entity.setCreateTime(new Date());
             maintainService.insertAssetProcessMaintain(entity);
         }
@@ -354,12 +360,6 @@ public class DingTalkAssetController extends BaseController {
     @RepeatSubmit(interval = 10000, message = "请勿重复提交")
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {
         AssetInventoryTask task = params.getObject("data", AssetInventoryTask.class);
-        int i = assetInventoryTaskService.insertAssetCountingTask(task);
-        if (i==2){
-            return AjaxResult.error("盘点任务名称重复");
-        }else if (i==0){
-            return AjaxResult.error("盘点任务创建失败");
-        }
-        return AjaxResult.success("盘点任务创建成功");
+        return toAjax(assetInventoryTaskService.insertAssetCountingTask(task));
     }
 }

@@ -1,6 +1,7 @@
 package com.hexing.asset.service.impl;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSON;
@@ -96,12 +97,24 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
 
     public List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list) {
         List<AssetProcessCountingVO> voList = new ArrayList<>();
+
+        List<String> assetCodeList = list.stream().map(AssetProcessCounting::getAssetCode).collect(Collectors.toList());
+        Map<String, Asset> assetMap = new HashMap<>();
+        if (CollectionUtil.isNotEmpty(assetCodeList)) {
+            assetMap = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeList))
+                    .stream().collect(Collectors.toMap(Asset::getAssetCode, asset -> asset));
+        }
+        Map<String, SysUser> userMap = sysUserService
+                .getUserByUserNames(list.stream().map(AssetProcessCounting::getUserCode).collect(Collectors.toSet()));
+        Map<String, SysUser> responsiblePersonMap = sysUserService
+                .getUserByUserNames(assetMap.values().stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+
         for (AssetProcessCounting obj : list) {
-            Asset asset = assetService.selectAssetByAssetCode(obj.getAssetCode());
-            SysUser responsiblePerson = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+            Asset asset = assetMap.get(obj.getAssetCode());
+            SysUser responsiblePerson = responsiblePersonMap.get(asset.getResponsiblePersonCode());
             String inventoryPerson = "";
             if (StringUtils.isNotBlank(obj.getUserCode())) {
-                SysUser userByUserName = sysUserService.getUserByUserName(obj.getUserCode());
+                SysUser userByUserName = userMap.get(obj.getUserCode());
                 if (Objects.nonNull(userByUserName)) {
                     inventoryPerson = userByUserName.getNickName();
                 }

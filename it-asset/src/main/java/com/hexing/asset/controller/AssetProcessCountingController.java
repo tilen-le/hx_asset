@@ -74,10 +74,10 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/export")
     public AjaxResult export(AssetProcessCounting assetProcessCounting)
     {
-//        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-//        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
-//        return util.exportExcel(list, "资产盘点记录");
-        return null;
+        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
+        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
+        return util.exportExcel(voList, "资产盘点记录");
     }
 
     /**

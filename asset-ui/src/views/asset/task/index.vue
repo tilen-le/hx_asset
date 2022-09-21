@@ -89,12 +89,12 @@
        <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
        <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" />
        <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" />
-      <el-table-column label="开始时间" align="center" prop="startDate" width="180">
+      <el-table-column label="开始时间" align="center" prop="startDate" width="150">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="结束时间" align="center" prop="endDate" width="180">
+      <el-table-column label="结束时间" align="center" prop="endDate" width="150">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
@@ -120,7 +120,7 @@
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="盘点人" prop="inventoryUserList">
           <el-select v-model="form.inventoryUserList" placeholder="请选择盘点人" multiple filterable style="width: 80%;">
-            <el-option v-for="item in userOptions" :key="item.userName" :label="item.nickName" :value="item.userName"/>
+            <el-option v-for="item in userOptions" :key="item.userName" :label="item.showName" :value="item.userName"/>
           </el-select>
         </el-form-item>
         <el-form-item label="盘点组织" prop="inventoryDept">

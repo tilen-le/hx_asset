@@ -176,7 +176,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         }
         task.setCreateTime(new Date());
         String str = DateUtils.dateTimeNow();
-        str += RandomUtil.randomString(15);
+        str += RandomUtil.randomString(4);
         task.setTaskCode(str);
 
         String beginDateTime = DateFormatUtils.format(task.getStartDate(), "yyyy-MM-dd 00:00:00");

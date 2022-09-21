@@ -703,7 +703,9 @@ public class SysUserServiceImpl implements ISysUserService
 
     @Override
     public List<SysUser> selectUserAll() {
-        return userMapper.selectUserAll();
+        List<SysUser> userList = userMapper.selectUserAll();
+        userList.forEach(user -> user.setShowName(user.getNickName() + "（" + user.getUserName() + "）"));
+        return userList;
     }
 
     public Map<String, SysUser> getUsernameUserObjMap() {

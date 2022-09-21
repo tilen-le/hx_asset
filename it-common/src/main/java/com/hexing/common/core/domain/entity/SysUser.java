@@ -95,6 +95,17 @@ public class SysUser extends BaseEntity
     /** 角色ID */
     private Long roleId;
 
+    public String getShowName() {
+        return showName;
+    }
+
+    public void setShowName(String showName) {
+        this.showName = showName;
+    }
+
+    /** 姓名(工号) */
+    private String showName;
+
     public String getUserType() {
         return userType;
     }

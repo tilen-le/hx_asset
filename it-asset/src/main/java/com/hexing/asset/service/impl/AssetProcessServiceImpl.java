@@ -55,8 +55,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Override
     public int insertAssetProcess(AssetProcess assetProcess)
     {
-        assetProcess.setCreateTime(DateUtils.getNowDate());
-        return assetProcessMapper.insertAssetProcess(assetProcess);
+        return assetProcessMapper.insert(assetProcess);
     }
 
     /**

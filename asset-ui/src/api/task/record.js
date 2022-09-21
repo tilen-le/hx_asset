@@ -15,3 +15,12 @@ export function countRecord(query) {
     params: query
   })
 }
+
+export function exportRecord(query) {
+  return request({
+    url: '/asset/counting/export',
+    method: 'get',
+    params: query
+  })
+}
+

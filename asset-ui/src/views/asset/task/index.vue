@@ -84,16 +84,16 @@
           <el-link :underline="false" type="primary" @click="showTaskDetail(scope.row)">{{ scope.row.taskCode }}</el-link>
         </template>
       </el-table-column>-->
-      <el-table-column label="任务名称" align="center" prop="taskName" :show-overflow-tooltip="true">
+      <el-table-column label="任务名称" align="center" prop="taskName" width="220" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <el-link :underline="false" type="primary" @click="showTaskDetail(scope.row)">{{ scope.row.taskName }}</el-link>
         </template>
       </el-table-column>
       <el-table-column label="盘点人" align="center" prop="inventoryUsersName" :show-overflow-tooltip="true" />
-      <el-table-column label="盘点组织" align="center" prop="inventoryDeptName" :show-overflow-tooltip="true" />
-       <el-table-column label="已盘点资产数" align="center" prop="assetCounted" />
-       <el-table-column label="待盘点资产数" align="center" prop="assetNotCounted" />
-       <el-table-column label="异常资产数目" align="center" prop="assetAbnormal" />
+      <el-table-column label="盘点组织" align="center" prop="inventoryDeptName" width="180" :show-overflow-tooltip="true" />
+       <el-table-column label="已盘点数" align="center" prop="assetCounted" width="80" />
+       <el-table-column label="待盘点数" align="center" prop="assetNotCounted" width="80" />
+       <el-table-column label="异常数" align="center" prop="assetAbnormal" width="80" />
       <el-table-column label="开始时间" align="center" prop="startDate" width="120">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.startDate, '{y}-{m}-{d}') }}</span>
@@ -104,8 +104,8 @@
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="发起人" align="center" prop="createByName" />
-      <el-table-column label="盘点状态" align="center" prop="status" >
+      <el-table-column label="发起人" align="center" prop="createByName" width="100" />
+      <el-table-column label="盘点状态" align="center" prop="status" width="100" >
         <template slot-scope="scope">
           <dict-tag :options="dict.type.inventory_task_status" :value="scope.row.status"/>
         </template>

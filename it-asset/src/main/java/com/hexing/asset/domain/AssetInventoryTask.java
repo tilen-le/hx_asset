@@ -33,6 +33,9 @@ public class AssetInventoryTask
     @Excel(name = "盘点任务编码")
     private String taskCode;
 
+    @Excel(name = "盘点任务名称")
+    private String taskName;
+
     /** 盘点人 */
     private String inventoryUsers;
 

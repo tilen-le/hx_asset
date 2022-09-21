@@ -118,6 +118,9 @@
     <!-- 添加或修改盘点任务对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="任务名称" prop="taskName" >
+          <el-input v-model="form.taskName" placeholder="请输入盘点任务名称" style="width: 80%;" />
+        </el-form-item>
         <el-form-item label="盘点人" prop="inventoryUserList">
           <el-select v-model="form.inventoryUserList" placeholder="请选择盘点人" multiple filterable style="width: 80%;">
             <el-option v-for="item in userOptions" :key="item.userName" :label="item.showName" :value="item.userName"/>
@@ -198,6 +201,9 @@ export default {
       form: {},
       // 表单校验
       rules: {
+        taskName: [
+          { required: true, message: '此项必填', trigger: "blur" }
+        ],
         inventoryUserList: [
           { required: true, message: '此项必填', trigger: "blur" }
         ],

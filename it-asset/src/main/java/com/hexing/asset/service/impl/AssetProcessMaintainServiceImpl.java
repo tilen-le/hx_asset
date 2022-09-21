@@ -48,10 +48,13 @@ public class AssetProcessMaintainServiceImpl extends ServiceImpl<AssetProcessMai
     {
         LambdaQueryWrapper<AssetProcessMaintain> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(assetProcessMaintain.getUserCode())) {
-            wrapper.like(AssetProcessMaintain::getUserCode, assetProcessMaintain.getUserCode());
+            wrapper.eq(AssetProcessMaintain::getUserCode, assetProcessMaintain.getUserCode());
         }
         if (StringUtils.isNotBlank(assetProcessMaintain.getAssetCode())) {
-            wrapper.like(AssetProcessMaintain::getAssetCode, assetProcessMaintain.getAssetCode());
+            wrapper.eq(AssetProcessMaintain::getAssetCode, assetProcessMaintain.getAssetCode());
+        }
+        if (StringUtils.isNotBlank(assetProcessMaintain.getInstanceId())) {
+            wrapper.eq(AssetProcessMaintain::getInstanceId, assetProcessMaintain.getInstanceId());
         }
         return assetProcessMaintainMapper.selectList(wrapper);
     }

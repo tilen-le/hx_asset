@@ -46,4 +46,8 @@ public interface AssetMapper extends BaseMapper<Asset>
      */
     public int deleteAssetByAssetId(Long assetId);
 
+    /**
+     * 查询用户资产
+     */
+    public List selectAssetsByUserCodes(List userCodes);
 }

@@ -147,43 +147,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
     }
 
-
-    public static JSONObject setNewAsset(Asset asset) {
-        JSONObject result = new JSONObject();
-        result.put("assetCode", asset.getAssetCode());
-        result.put("fixedAsset", asset.getAssetName());
-        result.put("factoryCode", asset.getFactoryNo());
-        result.put("assetStatus", asset.getAssetStatus());
-        result.put("location", asset.getLocation());
-        result.put("manageDept", asset.getManageDept());
-        result.put("brand", asset.getBrand());
-        result.put("fdStandard", asset.getStandard());
-        result.put("financialAssetCode", asset.getFinancialAssetCode());
-        result.put("initialAssetValue", asset.getTotalValue());
-        result.put("netAssetValue", asset.getNetWorth());
-        result.put("purchaseTime", asset.getBuyDate());
-        result.put("companyCode", asset.getCompanyName());
-        String estimatedUsefulLife = "";
-        if (asset.getCanUseYears() != null && asset.getCanUseYears() > 0) {
-            estimatedUsefulLife = asset.getCanUseYears().toString() + "年";
-        }
-        if (asset.getCanUseMonths() != null && asset.getCanUseMonths() > 0) {
-            estimatedUsefulLife = estimatedUsefulLife + asset.getCanUseMonths().toString() + "月";
-        }
-        result.put("estimatedUsefulLife", estimatedUsefulLife);
-        result.put("usageScenario", asset.getUsageScenario());
-        result.put("fdResponsiblePersonCode", asset.getResponsiblePersonCode());
-        result.put("fdResponsiblePerson", asset.getResponsiblePersonName());
-        result.put("responsibleDept", asset.getResponsiblePersonDept());
-        return result;
-    }
-
     @Override
     public Result queryPersonInfoAndAssetsByUserCode(JSONObject params) {
         try {
             // 查询保管人信息
-            String userId = params.getString("userId");
-            SysUser user = sysUserService.selectUserByUserName(userId);
+            String userCode = params.getString("userCode");
+            SysUser user = sysUserService.selectUserByUserName(userCode);
             if (user == null) {
                 return new Result(500, "未查询到此保管人");
             }
@@ -194,7 +163,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
 
             LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Asset::getResponsiblePersonCode, userId);
+            wrapper.eq(Asset::getResponsiblePersonCode, userCode);
             String manageDept = params.getString("manageDept");
             if (StringUtils.isNotBlank(manageDept)) {
                 wrapper.eq(Asset::getManageDept, manageDept);
@@ -202,7 +171,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             List<Asset> assets = assetMapper.selectList(wrapper);
 
             JSONObject data = new JSONObject();
-            data.put("userId", user.getUserName());
+            data.put("userCode", user.getUserName());
             data.put("manageDept", dept.getDeptName());
             data.put("assets", assets);
             return Result.success(data);

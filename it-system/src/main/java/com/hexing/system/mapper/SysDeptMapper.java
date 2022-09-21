@@ -35,7 +35,8 @@ public interface SysDeptMapper
      * @return 部门信息
      */
     public SysDept selectDeptById(Long deptId);
-    public List<SysDept> selectDeptByParentId(Long deptId);
+
+    public List selectDeptByParentId(Long deptId);
 
     /**
      * 根据ID查询所有子部门

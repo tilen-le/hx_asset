@@ -48,10 +48,13 @@ public class AssetProcessTransformServiceImpl extends ServiceImpl<AssetProcessTr
     {
         LambdaQueryWrapper<AssetProcessTransform> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(assetProcessTransform.getUserCode())) {
-            wrapper.like(AssetProcessTransform::getUserCode, assetProcessTransform.getUserCode());
+            wrapper.eq(AssetProcessTransform::getUserCode, assetProcessTransform.getUserCode());
         }
         if (StringUtils.isNotBlank(assetProcessTransform.getAssetCode())) {
-            wrapper.like(AssetProcessTransform::getAssetCode, assetProcessTransform.getAssetCode());
+            wrapper.eq(AssetProcessTransform::getAssetCode, assetProcessTransform.getAssetCode());
+        }
+        if (StringUtils.isNotBlank(assetProcessTransform.getInstanceId())) {
+            wrapper.eq(AssetProcessTransform::getInstanceId, assetProcessTransform.getInstanceId());
         }
         return assetProcessTransformMapper.selectList(wrapper);
     }

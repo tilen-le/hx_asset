@@ -62,9 +62,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<include refid="selectDeptVo"/>
 		where dept_id = #{deptId}
 	</select>
-	<select id="selectDeptByParentId" parameterType="Long" resultMap="SysDeptResult">
-		select dept_id,dept_name
 
+	<select id="selectDeptByParentId" parameterType="Long" resultType="String">
+		select dept_id
 			from (
 		select t1.dept_id,t1.dept_name,
 			CASE

@@ -118,8 +118,9 @@ public class SysDeptServiceImpl implements ISysDeptService
     {
         return deptMapper.selectDeptById(deptId);
     }
+
     @Override
-    public List<SysDept> selectDeptByParentId(Long deptId)
+    public List selectDeptByParentId(Long deptId)
     {
         return deptMapper.selectDeptByParentId(deptId);
     }

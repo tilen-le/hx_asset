@@ -47,10 +47,13 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
     {
         LambdaQueryWrapper<AssetProcessDisposal> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(assetProcessDisposal.getUserCode())) {
-            wrapper.like(AssetProcessDisposal::getUserCode, assetProcessDisposal.getUserCode());
+            wrapper.eq(AssetProcessDisposal::getUserCode, assetProcessDisposal.getUserCode());
         }
         if (StringUtils.isNotBlank(assetProcessDisposal.getAssetCode())) {
-            wrapper.like(AssetProcessDisposal::getAssetCode, assetProcessDisposal.getAssetCode());
+            wrapper.eq(AssetProcessDisposal::getAssetCode, assetProcessDisposal.getAssetCode());
+        }
+        if (StringUtils.isNotBlank(assetProcessDisposal.getInstanceId())) {
+            wrapper.eq(AssetProcessDisposal::getInstanceId, assetProcessDisposal.getInstanceId());
         }
         return assetProcessDisposalMapper.selectList(wrapper);
     }

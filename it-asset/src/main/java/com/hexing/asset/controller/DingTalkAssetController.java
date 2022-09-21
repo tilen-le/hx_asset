@@ -60,6 +60,8 @@ public class DingTalkAssetController extends BaseController {
     private IAssetProcessMaintainService maintainService;
     @Autowired
     private IAssetProcessTransformService transformService;
+    @Autowired
+    private IAssetProcessService assetProcessService;
 
 
     /**
@@ -189,8 +191,7 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error(500, "该资产在当前任务中已被盘点过");
         }
         Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
-        JSONObject jsonObject = AssetServiceImpl.setNewAsset(asset);
-        return AjaxResult.success(jsonObject);
+        return AjaxResult.success(asset);
     }
 
     /**
@@ -341,5 +342,19 @@ public class DingTalkAssetController extends BaseController {
         }
         return AjaxResult.success("维修成功");
     }
-
+    /**
+     * 新增盘点任务
+     */
+    @PostMapping("/createCountingTask")
+    @RepeatSubmit(interval = 10000, message = "请勿重复提交")
+    public AjaxResult createCountingTask(@RequestBody JSONObject params) {
+        AssetInventoryTask task = params.getObject("data", AssetInventoryTask.class);
+        int i = assetInventoryTaskService.insertAssetCountingTask(task);
+        if (i==2){
+            return AjaxResult.error("盘点任务名称重复");
+        }else if (i==0){
+            return AjaxResult.error("盘点任务创建失败");
+        }
+        return AjaxResult.success("盘点任务创建成功");
+    }
 }

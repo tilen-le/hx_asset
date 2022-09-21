@@ -156,21 +156,30 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         wrapper.setEntity(new Asset());
 
+        LambdaQueryWrapper<AssetInventoryTask> lambdaQueryWrapper =new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(AssetInventoryTask::getTaskName,task.getTaskName());
+        List<AssetInventoryTask> assetInventoryTasks = assetInventoryTaskMapper.selectList(lambdaQueryWrapper);
+        if (assetInventoryTasks.size()>0){
+            return 2;
+        }
+
         Long deptId = Long.valueOf(task.getInventoryDept());
-        List<SysDept> sysDeptList = sysDeptService.selectDeptByParentId(deptId);
-        SysDept sysDept = new SysDept();
-        sysDept.setDeptId(deptId);
-        sysDeptList.add(sysDept);
-        List<Asset> list = new ArrayList();
-        for (SysDept sd : sysDeptList) {
-            List<SysUser> sysUserList = sysUserService.selectUserByDeptId(sd.getDeptId());
-            for (SysUser s : sysUserList) {
-                wrapper.getEntity().setResponsiblePersonCode(s.getUserName());
-                List<Asset> assetList = assetMapper.selectList(wrapper);
-                if (assetList.size() > 0) {
-                    for (Asset asset : assetList) {
-                        list.add(asset);
-                    }
+        List sysDeptList = sysDeptService.selectDeptByParentId(deptId);
+        sysDeptList.add(deptId.toString());
+        List sysUserList = sysUserService.selectUserByDeptId(sysDeptList);
+        List<List> userCodeList = new ArrayList();
+        while(sysUserList.size()>1000){
+            userCodeList.add(sysUserList.subList(0,1000));
+            sysUserList = sysUserList.subList(1000,sysUserList.size());
+        }
+        userCodeList.add(sysUserList);
+
+        List list = new ArrayList();
+        for (List userCode:userCodeList){
+            List assetList = assetMapper.selectAssetsByUserCodes(userCode);
+            for (Object assetCode : assetList) {
+                if (ObjectUtil.isNotNull(assetCode)){
+                    list.add(assetCode.toString());
                 }
             }
         }
@@ -192,17 +201,17 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
             return 0;
         }
-        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
-//        String userName = "1";
+//        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userName = "1";
         task.setCreateBy(userName);
         if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }
         task.setStatus(CountingTaskStatus.COUNTING.getStatus());
         assetInventoryTaskMapper.insert(task);
-        for (Asset asset : list) {
+        for (Object assetCode : list) {
             AssetProcess assetProcess = new AssetProcess();
-            assetProcess.setAssetCode(asset.getAssetCode());
+            assetProcess.setAssetCode(assetCode.toString());
             assetProcess.setUserCode(userName);
             assetProcess.setProcessType("1000");
             assetProcess.setCreateTime(new Date());
@@ -210,7 +219,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
             AssetProcessCounting entity = new AssetProcessCounting();
             entity.setTaskCode(task.getTaskCode());
-            entity.setAssetCode(asset.getAssetCode());
+            entity.setAssetCode(assetCode.toString());
             entity.setProcessId(assetProcess.getId());
             entity.setCreateTime(new Date());
             entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
@@ -222,7 +231,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         String title = "盘点任务编码 :" + task.getTaskCode()
                 + "\n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
                 + "\n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
-        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
+//        AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
         return 1;
     }
 
@@ -240,8 +249,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
     /**
      * 批量删除盘点任务
-     *
-     * @param taskIds 需要删除的盘点任务主键
      * @return 结果
      */
     @Override

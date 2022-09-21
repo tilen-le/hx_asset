@@ -98,10 +98,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		<!-- 数据范围过滤 -->
 		${params.dataScope}
 	</select>
-	<select id="selectUserByDeptId" parameterType="Long" resultMap="SysUserResult">
-		select user_id, dept_id,user_name from sys_user
-		where dept_id = #{deptId}
+
+	<select id="selectUserByDeptId"   resultType="String">
+		select user_name from sys_user
+		where dept_id in
+		<foreach collection="list" item="dept_id" index="index" open="(" close=")" separator=",">
+		  #{dept_id}
+	    </foreach>
 	</select>
+
 	<select id="selectAllocatedList" parameterType="SysUser" resultMap="SysUserResult">
 	    select distinct u.user_id, u.dept_id, u.user_name, u.nick_name, u.email, u.phonenumber, u.status, u.create_time
 	    from sys_user u

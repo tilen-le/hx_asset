@@ -20,7 +20,8 @@ public interface ISysUserService
      * @return 用户信息集合信息
      */
     public List<SysUser> selectUserList(SysUser user);
-    public List<SysUser> selectUserByDeptId(Long deptId);
+
+    public List<SysUser> selectUserByDeptId(List deptId);
 
     /**
      * 根据条件分页查询已分配用户角色列表

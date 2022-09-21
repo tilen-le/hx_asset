@@ -22,6 +22,7 @@
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="warning" plain icon="el-icon-download" size="mini" :loading="exportLoading" @click="handleExport" v-hasPermi="['asset:task:export']">导出</el-button>
       </el-form-item>
     </el-form>
     <div style="display:flex">
@@ -75,7 +76,7 @@
 
 <script>
 
-  import {countRecord, listRecord} from "@/api/task/record";
+  import {countRecord, listRecord, exportRecord } from "@/api/task/record";
 
   export default {
   name: "taskDetail",
@@ -178,7 +179,7 @@
       const queryParams = this.queryParams;
       this.$modal.confirm("提示", "确认","取消", "是否确认导出所有符合条件数据项？").then(() => {
         this.exportLoading = true;
-        return exportTask(queryParams);
+        return exportRecord(queryParams);
       }).then(response => {
         this.$download.name(response.msg);
         this.exportLoading = false;

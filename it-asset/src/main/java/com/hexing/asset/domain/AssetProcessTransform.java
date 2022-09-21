@@ -52,4 +52,6 @@ public class AssetProcessTransform
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 
+    /** 文件信息 */
+    private String fileInfo;
 }

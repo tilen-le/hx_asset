@@ -20,6 +20,7 @@ import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
@@ -160,20 +161,24 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         lambdaQueryWrapper.eq(AssetInventoryTask::getTaskName,task.getTaskName());
         List<AssetInventoryTask> assetInventoryTasks = assetInventoryTaskMapper.selectList(lambdaQueryWrapper);
         if (assetInventoryTasks.size()>0){
-            return 2;
+            throw new ServiceException("盘点任务名称重复");
         }
 
         Long deptId = Long.valueOf(task.getInventoryDept());
+        //查询所以子部门
         List sysDeptList = sysDeptService.selectDeptByParentId(deptId);
         sysDeptList.add(deptId.toString());
+        //查询部门所有人员
         List sysUserList = sysUserService.selectUserByDeptId(sysDeptList);
         List<List> userCodeList = new ArrayList();
         while(sysUserList.size()>1000){
             userCodeList.add(sysUserList.subList(0,1000));
             sysUserList = sysUserList.subList(1000,sysUserList.size());
         }
-        userCodeList.add(sysUserList);
-
+        if (sysUserList.size()>0){
+            userCodeList.add(sysUserList);
+        }
+        //查询人员资产
         List list = new ArrayList();
         for (List userCode:userCodeList){
             List assetList = assetMapper.selectAssetsByUserCodes(userCode);
@@ -202,36 +207,47 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             return 0;
         }
         String userName = SecurityUtils.getLoginUser().getUser().getUserName();
-//        String userName = "1";
+//        String userName = "80010712";
         task.setCreateBy(userName);
         if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }
         task.setStatus(CountingTaskStatus.COUNTING.getStatus());
-        assetInventoryTaskMapper.insert(task);
-        for (Object assetCode : list) {
+        assetInventoryTaskMapper.insert(task);//创建盘点任务
+
+        List<AssetProcess> assetProcessList =new ArrayList<>();
+        for(Object assetCode:list){
             AssetProcess assetProcess = new AssetProcess();
             assetProcess.setAssetCode(assetCode.toString());
             assetProcess.setUserCode(userName);
             assetProcess.setProcessType("1000");
             assetProcess.setCreateTime(new Date());
-            assetProcessMapper.insert(assetProcess);
+            assetProcessList.add(assetProcess);
+        }
+        if (assetProcessList.size()>0){
+            assetProcessService.saveBatch(assetProcessList);//创建总流程
+        }
 
+        List<AssetProcessCounting> assetProcessCountingList =new ArrayList<>();
+        for(AssetProcess assetProcess:assetProcessList){
             AssetProcessCounting entity = new AssetProcessCounting();
             entity.setTaskCode(task.getTaskCode());
-            entity.setAssetCode(assetCode.toString());
+            entity.setAssetCode(assetProcess.getAssetCode());
             entity.setProcessId(assetProcess.getId());
             entity.setCreateTime(new Date());
             entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
-            assetProcessCountingService.insertAssetProcessCounting(entity);
+            assetProcessCountingList.add(entity);
         }
+        if (assetProcessCountingList.size()>0){
+            assetProcessCountingService.saveBatch(assetProcessCountingList);//创建盘点资产流程
+        }
+
         List<String> inventoryUserList = task.getInventoryUserList();
-//        List<String> inventoryUserList = new ArrayList<>();
-//        inventoryUserList.add("80010712");
-        String title = "盘点任务编码 :" + task.getTaskCode()
+        String title = "盘点任务名称 :" + task.getTaskName()
                 + "\n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
                 + "\n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
         AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
+
         return 1;
     }
 

@@ -57,7 +57,7 @@
       <el-table-column label="盘点人" align="center" prop="userNickName" />
       <el-table-column label="盘点时间" align="center" prop="countingTime" width="180">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.countingTime, '{y}-{m}-{d}') }}</span>
+          <span>{{ parseTime(scope.row.countingTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
       <el-table-column label="异常信息" align="center" prop="comment" />

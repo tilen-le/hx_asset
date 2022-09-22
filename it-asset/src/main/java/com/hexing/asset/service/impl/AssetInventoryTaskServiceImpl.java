@@ -293,4 +293,16 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     {
         return assetInventoryTaskMapper.deleteAssetCountingTaskByTaskId(taskId);
     }
+
+    /**
+     * 更新盘点任务状态
+     */
+    @Override
+    public void updateInventoryTaskStatus() {
+        // 查询所有未完成的盘点任务
+        List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(new LambdaQueryWrapper<AssetInventoryTask>()
+                .eq(AssetInventoryTask::getStatus, CountingTaskStatus.COUNTING.getStatus()));
+        // 是否满足完成条件
+//        taskList.for
+    }
 }

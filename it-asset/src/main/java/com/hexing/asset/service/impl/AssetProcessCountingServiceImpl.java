@@ -122,7 +122,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                 }
             }
             SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-            AssetProcessCountingVO vo = new AssetProcessCountingVO().setUserCode(obj.getUserCode())
+            AssetProcessCountingVO vo = new AssetProcessCountingVO()
+                    .setUserCode(obj.getUserCode())
                     .setUserNickName(inventoryPerson)
                     .setCompanyName(asset.getCompanyName())
                     .setAssetCode(asset.getAssetCode())

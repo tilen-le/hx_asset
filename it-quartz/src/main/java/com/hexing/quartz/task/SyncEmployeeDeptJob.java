@@ -1,20 +1,18 @@
-package com.hexing.asset.job;
+package com.hexing.quartz.task;
 
 import com.hexing.system.service.ISysUserService;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 
 
-@Component
+@Component("SyncEmployeeDeptJob")
 public class SyncEmployeeDeptJob {
 
     @Resource
     private ISysUserService userService;
 
-    @Scheduled(cron = "0 0 8,12,17,21 * * ? ")
-    private void autoEmployeeTransfer() {
+    public void autoEmployeeTransfer() {
         userService.syncDepartmentUserList();
     }
 

@@ -32,6 +32,7 @@ import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +43,7 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hexing.common.utils.PageUtil.startPage;
 
@@ -132,7 +134,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             task.setCreatorName(sysUser.getNickName());
             String inventoryUsers = task.getInventoryUsers();
             if (inventoryUsers.contains(",")){
-                String[] split=inventoryUsers.substring(1,inventoryUsers.lastIndexOf("]")).split(",");
+                String[] split=inventoryUsers.split(",");
                 String inventoryUsersName ="";
                 for (int i = 0; i < split.length; i++) {
                     SysUser sysUser1 = sysUserService.selectUserByUserName(split[i].trim());
@@ -141,8 +143,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                 String substring = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
                 task.setInventoryUsersName(substring);
             }else {
-                String s=inventoryUsers.substring(1,inventoryUsers.lastIndexOf("]"));
-                SysUser sysUser1 = sysUserService.selectUserByUserName(s.trim());
+                SysUser sysUser1 = sysUserService.selectUserByUserName(inventoryUsers.trim());
                 task.setInventoryUsersName(sysUser1.getNickName());
             }
 
@@ -233,8 +234,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         String user = SecurityUtils.getLoginUser().getUser().getNickName();
         task.setCreateBy(userName);
         task.setCreatorName(user);
-        if (task.getInventoryUserList() != null) {
-            task.setInventoryUsers(task.getInventoryUserList().toString());
+        if (!CollectionUtils.isEmpty(task.getInventoryUserList())) {
+            task.setInventoryUsers(task.getInventoryUserList().stream().collect(Collectors.joining(",")));
         }
         if (list.size()>0){
             task.setStatus(CountingTaskStatus.COUNTING.getStatus());

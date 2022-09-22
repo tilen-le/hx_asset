@@ -111,12 +111,10 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             wrapper.like(AssetInventoryTask::getCreatorName, assetInventoryTask.getCreatorName());
         }
         if (ObjectUtil.isNotNull(assetInventoryTask.getStartDate())) {
-            wrapper.apply("DATE_FORMAT(start_date, '%Y-%m-%d 00:00:00') >= DATE_FORMAT({0}, '%Y-%m-%d 00:00:00')",
-                    assetInventoryTask.getStartDate());
+            wrapper.ge(AssetInventoryTask::getStartDate, assetInventoryTask.getStartDate());
         }
         if (ObjectUtil.isNotNull(assetInventoryTask.getEndDate())) {
-            wrapper.apply("DATE_FORMAT(end_date, '%Y-%m-%d 23:59:59') <= DATE_FORMAT({0}, '%Y-%m-%d 23:59:59')",
-                    assetInventoryTask.getEndDate());
+            wrapper.le(AssetInventoryTask::getEndDate, assetInventoryTask.getEndDate());
         }
         startPage();
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);

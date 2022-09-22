@@ -34,6 +34,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -113,23 +117,27 @@ public class DingTalkAssetController extends BaseController {
             SysUser user = sysUserService.getUserByUserName(userCode);
             asset.setResponsiblePersonName(user.getNickName());
 
-            assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode());
+            assetProcessReceiveService
+                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_RECEIVE.getCode());
         } else if (DingTalkAssetProcessType.PROCESS_BACK.getCode().equals(processType)) {   /* 归还流程 */
             asset.setResponsiblePersonCode(userCode);
             SysUser user = sysUserService.getUserByUserName(userCode);
             asset.setResponsiblePersonName(user.getNickName());
 
-            assetProcessBackService.saveProcess(instanceId, userCode, asset.getAssetCode());
+            assetProcessBackService
+                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_BACK.getCode());
         } else if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(processType)) { /* 代领用流程 */
             SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
             asset.setResponsiblePersonName(user.getNickName());
 
-            assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode());
+            assetProcessReceiveService
+                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode());
         } else if (DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode().equals(processType)) {  /* 代归还流程 */
             SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
             asset.setResponsiblePersonName(user.getNickName());
 
-            assetProcessBackService.saveProcess(instanceId, userCode, asset.getAssetCode());
+            assetProcessBackService
+                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode());
         }
 
         Asset temp = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, asset.getAssetCode()));
@@ -252,8 +260,17 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error(500, "该盘点任务名称对应的盘点任务不存在");
         }
         String taskCode = task.getTaskCode();
-        // 若超出盘点任务截止日期
-        if (CountingTaskStatus.FINISHED.getStatus().equals(task.getStatus()) || new Date().compareTo(task.getEndDate()) > 0) {
+
+        // 盘点任务是否结束
+        LocalDateTime localDateTime = LocalDateTime
+                .ofInstant(Instant.ofEpochMilli(task.getEndDate().getTime()), ZoneId.systemDefault());
+        LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+        Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
+
+        JSONObject countResult = assetProcessCountingService.countingStatusCount(task.getTaskCode());
+        int notCounted = countResult.getIntValue("notCounted");
+
+        if (new Date().compareTo(endMomentOfEndDate) > 0 || notCounted == 0) {
             return AjaxResult.error("盘点任务已结束");
         }
 

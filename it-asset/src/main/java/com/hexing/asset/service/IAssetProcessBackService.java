@@ -65,6 +65,7 @@ public interface IAssetProcessBackService extends IService<AssetProcessBack>
      * @param instanceId 实例ID
      * @param userCode 发起人工号
      * @param assetCode 平台资产编号
+     * @param type 流程类型
      */
-    void saveProcess(String instanceId, String userCode, String assetCode);
+    void saveProcess(String instanceId, String userCode, String assetCode, String type);
 }

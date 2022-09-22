@@ -113,13 +113,16 @@ public class AssetProcessReceiveServiceImpl extends ServiceImpl<AssetProcessRece
      */
     @Override
     @Transactional
-    public void saveProcess(String instanceId, String userCode, String assetCode) {
+    public void saveProcess(String instanceId, String userCode, String assetCode, String type) {
         // 新增主流程记录
         AssetProcess process = new AssetProcess()
                 .setProcessType(DingTalkAssetProcessType.PROCESS_RECEIVE.getCode())
                 .setAssetCode(assetCode)
                 .setUserCode(userCode)
                 .setCreateTime(new Date());
+        if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(type)) {
+            process.setProcessType(DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode());
+        }
         assetProcessMapper.insert(process);
         // 新增领用流程记录
         AssetProcessReceive processReceive = new AssetProcessReceive()

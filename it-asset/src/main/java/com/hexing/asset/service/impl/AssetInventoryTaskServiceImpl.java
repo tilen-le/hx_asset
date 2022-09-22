@@ -150,15 +150,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             SysDept dept = sysDeptService.selectDeptById(Long.valueOf(task.getInventoryDept()));
             task.setInventoryDeptName(dept.getDeptName());
 
-            LocalDateTime localDateTime = LocalDateTime
-                    .ofInstant(Instant.ofEpochMilli(task.getEndDate().getTime()), ZoneId.systemDefault());
-            LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
-            Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
-            if (new Date().compareTo(endMomentOfEndDate) > 0 || notCounted == 0) {
-                task.setStatus(CountingTaskStatus.FINISHED.getStatus());
-            } else {
-                task.setStatus(CountingTaskStatus.COUNTING.getStatus());
-            }
         }
 
         return taskList;

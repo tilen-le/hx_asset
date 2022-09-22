@@ -17,8 +17,8 @@ public class AssetProcessCountingVO {
     private String userCode;
 
     /** 盘点人 */
-    @Excel(name = "盘点人")
-    private String userNickName;
+    @Excel(name = "盘点人名称")
+    private String userName;
 
     /** 公司代码描述 */
     @Excel(name = "公司代码描述")

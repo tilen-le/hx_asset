@@ -4,34 +4,24 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollectionUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.github.pagehelper.Page;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
-import com.hexing.common.core.page.PageDomain;
-import com.hexing.common.core.page.TableSupport;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
-import com.hexing.system.mapper.SysUserMapper;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysUserService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.service.IAssetProcessCountingService;
-import springfox.documentation.spring.web.json.Json;
-
-import static com.hexing.common.utils.PageUtil.startPage;
 
 /**
  * 资产盘点流程Service业务层处理
@@ -124,7 +114,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
             SysDept dept = deptMap.get(responsiblePerson.getDeptId());
             AssetProcessCountingVO vo = new AssetProcessCountingVO()
                     .setUserCode(obj.getUserCode())
-                    .setUserNickName(inventoryPerson)
+                    .setUserName(inventoryPerson)
                     .setCompanyName(asset.getCompanyName())
                     .setAssetCode(asset.getAssetCode())
                     .setAssetName(asset.getAssetName())

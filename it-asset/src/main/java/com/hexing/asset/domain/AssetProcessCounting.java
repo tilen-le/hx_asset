@@ -47,10 +47,6 @@ public class AssetProcessCounting
     /** 发起人名称 */
     private String userName;
 
-    /** 发起人姓名 */
-    @TableField(exist = false)
-    private String userNickName;
-
     /** 平台资产编码 */
     @Excel(name = "平台资产编码")
     private String assetCode;

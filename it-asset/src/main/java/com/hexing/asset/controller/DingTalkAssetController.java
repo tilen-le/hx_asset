@@ -94,30 +94,56 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 根据资产编号更新资产信息
+     * 根据资产编号更新资产信息，对应领用流程和归还流程
      */
     @PostMapping(value = "/updateAssetCardByAssetCode")
     @Transactional
     public Result updateAssetCardByAssetCode(@RequestBody JSONObject params) {
         params = params.getJSONObject("data");
+
         String processType = params.getString("processType");                           /* 资产管理流程类型 */
         String userCode = params.getString("userCode");                                 /* 流程发起人工号 */
+        String responsiblePersonCode = params.getString("responsiblePersonCode");       /* 代领用/代归还流程发起人工号 */
         String instanceId = params.getString("instanceId");
+
         Asset asset = JSONObject.toJavaObject(params, Asset.class);
+
         if (DingTalkAssetProcessType.PROCESS_RECEIVE.getCode().equals(processType)) {       /* 领用流程 */
+            asset.setResponsiblePersonCode(userCode);
+            SysUser user = sysUserService.getUserByUserName(userCode);
+            asset.setResponsiblePersonName(user.getNickName());
+
             assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode());
         } else if (DingTalkAssetProcessType.PROCESS_BACK.getCode().equals(processType)) {   /* 归还流程 */
+            asset.setResponsiblePersonCode(userCode);
+            SysUser user = sysUserService.getUserByUserName(userCode);
+            asset.setResponsiblePersonName(user.getNickName());
+
+            assetProcessBackService.saveProcess(instanceId, userCode, asset.getAssetCode());
+        } else if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(processType)) { /* 代领用流程 */
+            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+            asset.setResponsiblePersonName(user.getNickName());
+
+            assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode());
+        } else if (DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode().equals(processType)) {  /* 代归还流程 */
+            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+            asset.setResponsiblePersonName(user.getNickName());
+
             assetProcessBackService.saveProcess(instanceId, userCode, asset.getAssetCode());
         }
+
         Asset temp = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, asset.getAssetCode()));
         if (ObjectUtil.isNull(temp)) {
             return Result.error(500, "该平台资产编码对应资产不存在");
         }
+
         boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
                 .eq(Asset::getAssetCode, asset.getAssetCode())
                 .set(StringUtils.isNotEmpty(asset.getAssetStatus()), Asset::getAssetStatus, asset.getAssetStatus())
                 .set(StringUtils.isNotEmpty(asset.getResponsiblePersonCode()), Asset::getResponsiblePersonCode, asset.getResponsiblePersonCode())
+                .set(StringUtils.isNotEmpty(asset.getResponsiblePersonName()), Asset::getResponsiblePersonName, asset.getResponsiblePersonName())
                 .set(StringUtils.isNotEmpty(asset.getLocation()), Asset::getAssetStatus, asset.getAssetStatus()));
+
         if (success) {
             return Result.success("更新成功");
         } else {
@@ -126,7 +152,7 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 资产变更
+     * 资产更换
      */
     @PostMapping(value = "/updateAssetExchange")
     public Result updateAssetExchange(@RequestBody JSONObject params) {

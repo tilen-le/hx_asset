@@ -17,9 +17,13 @@ import com.hexing.common.annotation.RepeatSubmit;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
+import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
+import com.hexing.system.service.ISysUserService;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -62,7 +66,10 @@ public class DingTalkAssetController extends BaseController {
     private IAssetProcessTransformService transformService;
     @Autowired
     private IAssetProcessService assetProcessService;
-
+    @Autowired
+    private ISysDeptService sysDeptService;
+    @Autowired
+    private ISysUserService sysUserService;
 
     /**
      * 根据资产编号查询资产信息
@@ -196,6 +203,9 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error(500, "该资产在当前任务中已被盘点过");
         }
         Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
+        SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+        SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+        asset.setResponsiblePersonDept(dept.getDeptName());
         return AjaxResult.success("", asset);
     }
 

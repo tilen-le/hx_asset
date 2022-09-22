@@ -196,7 +196,7 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error(500, "该资产在当前任务中已被盘点过");
         }
         Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
-        return AjaxResult.success(asset);
+        return AjaxResult.success("", asset);
     }
 
     /**

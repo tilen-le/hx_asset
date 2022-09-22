@@ -50,7 +50,6 @@ public class Asset
     private String financialAssetCode;
 
     /** 保管人姓名 */
-    @TableField(exist = false)
     private String responsiblePersonName;
 
     /** 保管人工号（老工号） */

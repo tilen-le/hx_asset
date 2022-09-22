@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
@@ -290,7 +291,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public List<Asset> selectAssetList(Asset asset)
     {
-
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(asset.getAssetName())) {
             wrapper.like(Asset::getAssetName, asset.getAssetName());
@@ -306,16 +306,16 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         List<Asset> assetList = assetMapper.selectList(wrapper);
 
-        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
-        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
+        Map<String, SysUser> responsiblePersonMap = sysUserService
+                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+        Map<Long, SysDept> deptMap = sysDeptService
+                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
 
         if (CollectionUtil.isNotEmpty(assetList)) {
             for (Asset a : assetList) {
-                SysUser user = usernameNicknameMap.get(a.getResponsiblePersonCode());
-                if (user != null) {
-                    a.setResponsiblePersonName(user.getNickName());
-                    a.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
-                }
+                SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
+                SysDept dept = deptMap.get(responsiblePerson.getDeptId());
+                a.setResponsiblePersonDept(dept.getDeptName());
             }
         }
         return assetList;
@@ -380,7 +380,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         int successNum = 0;         /* 导入成功条数 */
         int failureNum = 0;         /* 导入失败条数 */
-        Map<String, SysUser> usernameUserObjMap = sysUserService.getUsernameUserObjMap();
+        Map<String, SysUser> userMap = sysUserService
+                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
         StringBuilder message = new StringBuilder();
         for (int i = 0; i < assetList.size(); i++) {
             Asset asset = assetList.get(i);
@@ -392,14 +393,13 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     message.append("<br/><font color=\"red\">" + "第 " + (i + 2) + " 行导入失败，原因：" + "必填字段：" + requiredFieldLeftUnfilled + " 未填写或格式存在错误</font>");
                     continue;
                 }
-
                 // 检查保管人是否存在于系统中
-                if (usernameUserObjMap.get(asset.getResponsiblePersonCode()) == null) {
+                SysUser user = userMap.get(asset.getResponsiblePersonCode());
+                if (ObjectUtil.isNull(user)) {
                     failureNum++;
                     message.append("<br/><font color=\"red\">" + "第 " + (i + 2) + " 行导入失败，原因：" + "该保管人在系统中不存在");
                     continue;
                 }
-
                 if (!isUpdateSupport) {
                     LambdaQueryWrapper<Asset> queryWrapper = new LambdaQueryWrapper<>();
                     queryWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
@@ -411,6 +411,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     } else {
                         String assetCode = generateAssetCode(asset);
                         asset.setAssetCode(assetCode)
+                                .setResponsiblePersonName(user.getNickName())
                                 .setCreateBy(operName)
                                 .setCreateTime(new Date());
                         assetMapper.insert(asset);
@@ -420,8 +421,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     LambdaUpdateWrapper<Asset> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
                             .eq(Asset::getCompanyCode, asset.getCompanyCode());
-                    asset.setUpdateBy(operName);
-                    asset.setUpdateTime(new Date());
+                    asset.setResponsiblePersonName(user.getNickName()); // 更新资产保管人信息
                     int update = assetMapper.update(asset, updateWrapper);
                     if (update > 0) {
                         successNum++;
@@ -430,7 +430,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         message.append("<br/>" + "错误：第 " + (i + 2) + "公司代码： " + asset.getCompanyCode() + "，财务资产编码：" + asset.getFinancialAssetCode() + " 的资产更新失败");
                     }
                 }
-
             } catch (Exception e) {
                 failureNum++;
                 String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";

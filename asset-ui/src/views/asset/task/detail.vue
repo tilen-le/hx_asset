@@ -26,19 +26,19 @@
       </el-form-item>
     </el-form>
     <div style="display:flex">
-        <el-card class="taskAmountCard" @click.native="statusSearch('')">
+        <el-card :class="cardClick === ''?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('')">
           固定资产总数
           <div class="card_text">{{countResult.total}}</div>
         </el-card>
-        <el-card class="taskAmountCard" @click.native="statusSearch('1')">
+        <el-card :class="cardClick === '1'?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('1')">
           已盘点资产总数
           <div class="card_text">{{countResult.counted}}</div>
         </el-card>
-        <el-card class="taskAmountCard" @click.native="statusSearch('0')">
+        <el-card :class="cardClick === '0'?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('0')">
           待盘点资产总数
           <div class="card_text">{{countResult.notCounted}}</div>
         </el-card>
-        <el-card class="taskAmountCard" @click.native="statusSearch('2')">
+        <el-card :class="cardClick === '2'?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('2')">
           盘点异常设备数目
           <div class="card_text">{{countResult.abnormal}}</div>
         </el-card>
@@ -117,7 +117,8 @@
       // 表单校验
       rules: {
       },
-      countResult: {}
+      countResult: {},
+      cardClick: null,
     };
   },
   created() {
@@ -127,6 +128,8 @@
     statusSearch(status) {
       this.queryParams.countingStatus = status;
       this.getList();
+      //颜色高亮
+      this.cardClick = status;
     },
     /** 查询盘点任务列表 */
     getList() {
@@ -172,6 +175,7 @@
     resetQuery() {
       this.resetForm("queryForm");
       this.queryParams.countingStatus = null;
+      this.cardClick = null;
       this.handleQuery();
     },
     /** 导出按钮操作 */
@@ -203,7 +207,10 @@
   margin-top: 15px;
   font-size: 15pt;
 }
-.selectedCard {
-  background: rgb(198, 226, 255);
+.cardClickClass {
+  background: #46e5ff;
+}
+.cardNoClickClass {
+  background-color: rgb(236, 245, 255);
 }
 </style>

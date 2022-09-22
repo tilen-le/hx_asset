@@ -90,7 +90,7 @@ public class AssetInventoryTask
     private String createBy;
 
     /** 发起人姓名 */
-    @TableField(exist = false)
+//    @TableField(exist = false)
     private String createByName;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

@@ -40,6 +40,9 @@ public class AssetProcessMaintain
     @Excel(name = "发起人工号")
     private String userCode;
 
+    /** 发起人名称 */
+    private String userName;
+
     /** 平台资产编码 */
     @Excel(name = "平台资产编码")
     private String assetCode;

@@ -44,6 +44,9 @@ public class AssetProcessCounting
     @Excel(name = "盘点人工号")
     private String userCode;
 
+    /** 发起人名称 */
+    private String userName;
+
     /** 发起人姓名 */
     @TableField(exist = false)
     private String userNickName;

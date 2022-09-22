@@ -36,6 +36,9 @@ public class AssetProcess
     @Excel(name = "发起人工号")
     private String userCode;
 
+    /** 发起人名称 */
+    private String userName;
+
     /** 资产编码 */
     @Excel(name = "资产编码")
     private String assetCode;

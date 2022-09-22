@@ -201,9 +201,14 @@ public class DingTalkAssetController extends BaseController {
                 .selectAssetCountingTaskList(new AssetInventoryTask());
         List<String> list = new ArrayList<>();
         for (AssetInventoryTask a : taskList) {
+            LocalDateTime localDateTime = LocalDateTime
+                    .ofInstant(Instant.ofEpochMilli(a.getEndDate().getTime()), ZoneId.systemDefault());
+            LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+            Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
+
             JSONObject countResult = assetProcessCountingService.countingStatusCount(a.getTaskCode());
             int notCounted = countResult.getIntValue("notCounted");
-            if (a.getInventoryUsers().contains(userCode) && (a.getEndDate().getTime() >= new Date().getTime()) && notCounted != 0) {
+            if (a.getInventoryUsers().contains(userCode) && (endMomentOfEndDate.getTime() >= new Date().getTime()) && notCounted != 0) {
                 list.add(a.getTaskName());
             }
         }

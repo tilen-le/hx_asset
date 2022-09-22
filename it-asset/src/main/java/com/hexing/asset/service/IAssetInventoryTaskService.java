@@ -58,4 +58,9 @@ public interface IAssetInventoryTaskService extends IService<AssetInventoryTask>
      * @return 结果
      */
     public int deleteAssetCountingTaskByTaskId(String taskId);
+
+    /**
+     * 更新盘点任务状态
+     */
+    void updateInventoryTaskStatus();
 }

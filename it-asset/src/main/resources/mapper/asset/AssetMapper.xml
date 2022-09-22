@@ -94,7 +94,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectAssetsByUserCodes"   resultType="String">
         select asset_code from asset
-        where responsible_person_code in
+        where deleted = 0 and responsible_person_code in
         <foreach collection="list" item="responsible_person_code" index="index" open="(" close=")" separator=",">
             #{responsible_person_code}
         </foreach>

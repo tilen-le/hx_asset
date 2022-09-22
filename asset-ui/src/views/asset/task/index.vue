@@ -35,6 +35,16 @@
           placeholder="选择盘点结束时间">
         </el-date-picker>
       </el-form-item>
+      <el-form-item label="盘点状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择盘点状态" clearable size="small">
+          <el-option
+            v-for="dict in dict.type.inventory_task_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>

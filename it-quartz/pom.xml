@@ -38,6 +38,10 @@
             <groupId>com.hexing</groupId>
             <artifactId>it-system</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hexing</groupId>
+            <artifactId>it-asset</artifactId>
+        </dependency>
 
     </dependencies>
 

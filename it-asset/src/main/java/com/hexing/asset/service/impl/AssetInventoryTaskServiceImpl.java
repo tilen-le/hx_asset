@@ -321,7 +321,16 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         // 查询所有未完成的盘点任务
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(new LambdaQueryWrapper<AssetInventoryTask>()
                 .eq(AssetInventoryTask::getStatus, CountingTaskStatus.COUNTING.getStatus()));
-        // 是否满足完成条件
-//        taskList.for
+        for (AssetInventoryTask task : taskList) {
+            // 是否满足完成条件：当前时间大于盘点任务结束时间
+            LocalDateTime localDateTime = LocalDateTime
+                    .ofInstant(Instant.ofEpochMilli(task.getEndDate().getTime()), ZoneId.systemDefault());
+            LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+            Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
+            if (new Date().compareTo(endMomentOfEndDate) > 0) {
+                task.setStatus(CountingTaskStatus.FINISHED.getStatus());
+            }
+        }
     }
+
 }

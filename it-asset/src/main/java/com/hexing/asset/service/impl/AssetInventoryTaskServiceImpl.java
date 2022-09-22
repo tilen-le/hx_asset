@@ -101,6 +101,9 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (StringUtils.isNotBlank(assetInventoryTask.getCreateBy())) {
             wrapper.eq(AssetInventoryTask::getCreateBy, assetInventoryTask.getCreateBy());
         }
+        if (StringUtils.isNotBlank(assetInventoryTask.getCreatorName())) {
+            wrapper.like(AssetInventoryTask::getCreatorName, assetInventoryTask.getCreatorName());
+        }
         if (ObjectUtil.isNotNull(assetInventoryTask.getStartDate())) {
             wrapper.apply("DATE_FORMAT(start_date, '%Y-%m-%d 00:00:00') >= DATE_FORMAT({0}, '%Y-%m-%d 00:00:00')",
                     assetInventoryTask.getStartDate());

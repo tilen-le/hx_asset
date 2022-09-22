@@ -3,6 +3,7 @@ package com.hexing.asset.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hexing.common.annotation.Excel;
 import com.hexing.common.core.domain.BaseEntity;
@@ -176,5 +177,8 @@ public class Asset
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 
+    /** 逻辑删除 */
+    @TableLogic
+    private Integer deleted;
 
 }

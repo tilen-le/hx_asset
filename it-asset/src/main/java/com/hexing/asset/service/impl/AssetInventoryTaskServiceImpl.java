@@ -101,6 +101,9 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (StringUtils.isNotBlank(assetInventoryTask.getCreateBy())) {
             wrapper.eq(AssetInventoryTask::getCreateBy, assetInventoryTask.getCreateBy());
         }
+        if (StringUtils.isNotBlank(assetInventoryTask.getCreatorName())) {
+            wrapper.like(AssetInventoryTask::getCreatorName, assetInventoryTask.getCreatorName());
+        }
         if (ObjectUtil.isNotNull(assetInventoryTask.getStartDate())) {
             wrapper.apply("DATE_FORMAT(start_date, '%Y-%m-%d 00:00:00') >= DATE_FORMAT({0}, '%Y-%m-%d 00:00:00')",
                     assetInventoryTask.getStartDate());
@@ -253,8 +256,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
         List<String> inventoryUserList = task.getInventoryUserList();
         String title = "盘点任务名称 :" + task.getTaskName()
-                + "\n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
-                + "\n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
+                + "   \n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
+                + "   \n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
         AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
 
         return 1;

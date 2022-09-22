@@ -200,7 +200,6 @@
   text-align: center;
   cursor: pointer;
   font-weight: bold;
-  background-color: rgb(236, 245, 255);
 }
 .card_text {
   color: blue;
@@ -208,7 +207,7 @@
   font-size: 15pt;
 }
 .cardClickClass {
-  background: #46e5ff;
+  background: #88eeff;
 }
 .cardNoClickClass {
   background-color: rgb(236, 245, 255);

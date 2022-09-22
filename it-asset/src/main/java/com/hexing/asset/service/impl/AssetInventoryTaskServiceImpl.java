@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -100,6 +101,12 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         }
         if (StringUtils.isNotBlank(assetInventoryTask.getCreateBy())) {
             wrapper.eq(AssetInventoryTask::getCreateBy, assetInventoryTask.getCreateBy());
+        }
+        if (StringUtils.isNotBlank(assetInventoryTask.getStatus())) {
+            wrapper.eq(AssetInventoryTask::getStatus, assetInventoryTask.getStatus());
+        }
+        if (StringUtils.isNotBlank(assetInventoryTask.getCreatorName())) {
+            wrapper.like(AssetInventoryTask::getCreatorName, assetInventoryTask.getCreatorName());
         }
         if (ObjectUtil.isNotNull(assetInventoryTask.getStartDate())) {
             wrapper.apply("DATE_FORMAT(start_date, '%Y-%m-%d 00:00:00') >= DATE_FORMAT({0}, '%Y-%m-%d 00:00:00')",
@@ -210,7 +217,15 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 //        } catch (Exception e) {
 //            log.error("盘点任务始末时间设置出错", e);
 //        }
-
+        String date = DateFormatUtils.format(new Date(), "yyyy-MM-dd");
+        try {
+            Date parse = new SimpleDateFormat("yyyy-MM-dd").parse(date);
+            if (task.getEndDate().getTime() < parse.getTime()) {
+                throw new ServiceException("盘点结束时间设置错误");
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
             throw new ServiceException("盘点开始结束时间设置错误");
         }
@@ -221,7 +236,11 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }
-        task.setStatus(CountingTaskStatus.COUNTING.getStatus());
+        if (list.size()>0){
+            task.setStatus(CountingTaskStatus.COUNTING.getStatus());
+        }else {
+            task.setStatus(CountingTaskStatus.FINISHED.getStatus());
+        }
         assetInventoryTaskMapper.insert(task);//创建盘点任务
 
         List<AssetProcess> assetProcessList =new ArrayList<>();
@@ -253,8 +272,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
         List<String> inventoryUserList = task.getInventoryUserList();
         String title = "盘点任务名称 :" + task.getTaskName()
-                + "\n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
-                + "\n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
+                + "   \n盘点开始时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getStartDate())
+                + "   \n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
         AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
 
         return 1;

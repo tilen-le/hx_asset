@@ -34,6 +34,10 @@
             <groupId>com.hexing</groupId>
             <artifactId>it-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.hexing</groupId>
+            <artifactId>it-system</artifactId>
+        </dependency>
 
     </dependencies>
 

@@ -204,11 +204,12 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         }
 
         if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
-            return 0;
+            throw new ServiceException("盘点开始结束时间设置错误");
         }
         String userName = SecurityUtils.getLoginUser().getUser().getUserName();
-//        String userName = "80010712";
+        String user = SecurityUtils.getLoginUser().getUser().getNickName();
         task.setCreateBy(userName);
+        task.setCreateByName(user);
         if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }

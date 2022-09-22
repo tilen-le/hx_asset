@@ -10,9 +10,9 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="发起人" prop="userCode">
+      <el-form-item label="发起人" prop="creatorName">
         <el-input
-          v-model="queryParams.createBy"
+          v-model="queryParams.creatorName"
           placeholder="请输入发起人"
           clearable
           size="small"
@@ -104,7 +104,7 @@
           <span>{{ parseTime(scope.row.endDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="发起人" align="center" prop="createByName" width="100" />
+      <el-table-column label="发起人" align="center" prop="creatorName" width="100" />
       <el-table-column label="盘点状态" align="center" prop="status" width="100" >
         <template slot-scope="scope">
           <dict-tag :options="dict.type.inventory_task_status" :value="scope.row.status"/>
@@ -197,7 +197,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         taskName: null,
-        createBy: null,
+        creatorName: null,
         startDate: null,
         endDate: null,
         status: null

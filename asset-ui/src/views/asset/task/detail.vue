@@ -10,9 +10,9 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="盘点人" prop="userNickName">
+      <el-form-item label="盘点人" prop="userName">
         <el-input
-          v-model="queryParams.userNickName"
+          v-model="queryParams.userName"
           placeholder="请输入盘点人"
           clearable
           size="small"
@@ -54,7 +54,7 @@
       <el-table-column label="保管部门" align="center" prop="responsiblePersonDept" />
       <el-table-column label="使用场景" align="center" prop="usageScenario" />
       <el-table-column label="规格型号" align="center" prop="standard" />
-      <el-table-column label="盘点人" align="center" prop="userNickName" />
+      <el-table-column label="盘点人" align="center" prop="userName" />
       <el-table-column label="盘点时间" align="center" prop="countingTime" width="150">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.countingTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
@@ -109,7 +109,7 @@
         pageSize: 10,
         taskCode: null,
         assetCode: null,
-        userNickName: null,
+        userName: null,
         countingStatus: null
       },
       // 表单参数

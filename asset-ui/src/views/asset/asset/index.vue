@@ -9,6 +9,10 @@
         <el-input v-model="queryParams.assetCode" placeholder="请输入平台资产编号" clearable size="small"
           @keyup.enter.native="handleQuery" />
       </el-form-item>
+      <el-form-item label="保管人" prop="responsiblePersonName">
+        <el-input v-model="queryParams.responsiblePersonName" placeholder="请输入保管人" clearable size="small"
+                  @keyup.enter.native="handleQuery" />
+      </el-form-item>
       <el-form-item label="存放地点" prop="location">
         <el-input v-model="queryParams.location" placeholder="请输入存放地点" clearable size="small"
           @keyup.enter.native="handleQuery" />
@@ -275,6 +279,7 @@ export default {
         pageSize: 10,
         assetName: null,
         assetCode: null,
+        responsiblePersonName: null,
         location: null,
         costCenter: null
       },

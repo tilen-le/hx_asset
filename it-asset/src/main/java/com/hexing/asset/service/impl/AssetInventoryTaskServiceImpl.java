@@ -91,8 +91,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask)
     {
         LambdaQueryWrapper<AssetInventoryTask> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(assetInventoryTask.getTaskCode())) {
-            wrapper.like(AssetInventoryTask::getTaskCode, assetInventoryTask.getTaskCode());
+        if (StringUtils.isNotBlank(assetInventoryTask.getTaskName())) {
+            wrapper.like(AssetInventoryTask::getTaskName, assetInventoryTask.getTaskName());
         }
         if (StringUtils.isNotBlank(assetInventoryTask.getCreateBy())) {
             wrapper.eq(AssetInventoryTask::getCreateBy, assetInventoryTask.getCreateBy());

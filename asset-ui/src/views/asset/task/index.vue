@@ -1,10 +1,10 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="任务编码" prop="taskCode">
+      <el-form-item label="任务名称" prop="taskCode">
         <el-input
-          v-model="queryParams.taskCode"
-          placeholder="请输入任务编码"
+          v-model="queryParams.taskName"
+          placeholder="请输入任务名称"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -196,7 +196,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        taskCode: null,
+        taskName: null,
         createBy: null,
         startDate: null,
         endDate: null,

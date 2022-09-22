@@ -116,7 +116,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             task.setAssetCounted(counted);
             task.setAssetAbnormal(abnormal);
             SysUser sysUser = sysUserService.selectUserByUserName(task.getCreateBy());
-            task.setCreateByName(sysUser.getNickName());
+            task.setCreatorName(sysUser.getNickName());
             String inventoryUsers = task.getInventoryUsers();
             if (inventoryUsers.contains(",")){
                 String[] split=inventoryUsers.substring(1,inventoryUsers.lastIndexOf("]")).split(",");
@@ -209,7 +209,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         String userName = SecurityUtils.getLoginUser().getUser().getUserName();
         String user = SecurityUtils.getLoginUser().getUser().getNickName();
         task.setCreateBy(userName);
-        task.setCreateByName(user);
+        task.setCreatorName(user);
         if (task.getInventoryUserList() != null) {
             task.setInventoryUsers(task.getInventoryUserList().toString());
         }

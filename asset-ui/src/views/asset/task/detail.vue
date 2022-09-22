@@ -43,11 +43,11 @@
           <div class="card_text">{{countResult.abnormal}}</div>
         </el-card>
     </div>
-    <el-table v-loading="loading" :data="taskList">
+    <el-table v-loading="loading" :data="taskList" tooltip-effect="light">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="资产编码" align="center" prop="assetCode" width="180"/>
+      <el-table-column label="资产编码" align="center" prop="assetCode" width="150"/>
       <el-table-column label="资产名称" align="center" prop="assetName" />
-      <el-table-column label="公司名称" align="center" prop="companyName" />
+      <el-table-column label="公司名称" align="center" prop="companyName" :show-overflow-tooltip="true" />
       <el-table-column label="存放地点" align="center" prop="location" />
       <el-table-column label="管理部门" align="center" prop="manageDept" />
       <el-table-column label="保管人" align="center" prop="responsiblePersonName" />
@@ -55,12 +55,12 @@
       <el-table-column label="使用场景" align="center" prop="usageScenario" />
       <el-table-column label="规格型号" align="center" prop="standard" />
       <el-table-column label="盘点人" align="center" prop="userNickName" />
-      <el-table-column label="盘点时间" align="center" prop="countingTime" width="180">
+      <el-table-column label="盘点时间" align="center" prop="countingTime" width="150">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.countingTime, '{y}-{m}-{d} {h}:{i}:{s}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="异常信息" align="center" prop="comment" />
+      <el-table-column label="异常信息" align="center" prop="comment" :show-overflow-tooltip="true" />
       <el-table-column label="盘点状态" align="center" prop="countingStatus" >
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_counting_status" :value="scope.row.countingStatus"/>

@@ -1,11 +1,11 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="固定资产名称" prop="assetName">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="80px">
+      <el-form-item label="资产名称" prop="assetName">
         <el-input v-model="queryParams.assetName" placeholder="请输入固定资产名称" clearable size="small"
           @keyup.enter.native="handleQuery" />
       </el-form-item>
-      <el-form-item label="平台资产编号" prop="assetCode">
+      <el-form-item label="资产编号" prop="assetCode">
         <el-input v-model="queryParams.assetCode" placeholder="请输入平台资产编号" clearable size="small"
           @keyup.enter.native="handleQuery" />
       </el-form-item>

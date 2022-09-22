@@ -34,6 +34,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -98,10 +102,12 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             wrapper.eq(AssetInventoryTask::getCreateBy, assetInventoryTask.getCreateBy());
         }
         if (ObjectUtil.isNotNull(assetInventoryTask.getStartDate())) {
-            wrapper.ge(AssetInventoryTask::getStartDate, assetInventoryTask.getStartDate());
+            wrapper.apply("DATE_FORMAT(start_date, '%Y-%m-%d 00:00:00') >= DATE_FORMAT({0}, '%Y-%m-%d 00:00:00')",
+                    assetInventoryTask.getStartDate());
         }
         if (ObjectUtil.isNotNull(assetInventoryTask.getEndDate())) {
-            wrapper.le(AssetInventoryTask::getEndDate, assetInventoryTask.getEndDate());
+            wrapper.apply("DATE_FORMAT(end_date, '%Y-%m-%d 23:59:59') <= DATE_FORMAT({0}, '%Y-%m-%d 23:59:59')",
+                    assetInventoryTask.getEndDate());
         }
         startPage();
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);
@@ -135,11 +141,13 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
             SysDept dept = sysDeptService.selectDeptById(Long.valueOf(task.getInventoryDept()));
             task.setInventoryDeptName(dept.getDeptName());
-            if (CountingTaskStatus.COUNTING.getStatus().equals(task.getStatus())) {
-                if (new Date().compareTo(task.getEndDate()) > 0 || notCounted == 0) {
-                    task.setStatus(CountingTaskStatus.FINISHED.getStatus());
-//                    assetInventoryTaskMapper.updateById(task);
-                }
+
+            LocalDateTime localDateTime = LocalDateTime
+                    .ofInstant(Instant.ofEpochMilli(task.getEndDate().getTime()), ZoneId.systemDefault());
+            LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
+            Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
+            if (new Date().compareTo(endMomentOfEndDate) > 0 || notCounted == 0) {
+                task.setStatus(CountingTaskStatus.FINISHED.getStatus());
             } else {
                 task.setStatus(CountingTaskStatus.COUNTING.getStatus());
             }
@@ -193,15 +201,15 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         str += RandomUtil.randomString(4);
         task.setTaskCode(str);
 
-        String beginDateTime = DateFormatUtils.format(task.getStartDate(), "yyyy-MM-dd 00:00:00");
-        String endDateTime = DateFormatUtils.format(task.getEndDate(), "yyyy-MM-dd 23:59:59");
-
-        try {
-            task.setStartDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(beginDateTime));
-            task.setEndDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endDateTime));
-        } catch (Exception e) {
-            log.error("盘点任务始末时间设置出错", e);
-        }
+//        String beginDateTime = DateFormatUtils.format(task.getStartDate(), "yyyy-MM-dd 00:00:00");
+//        String endDateTime = DateFormatUtils.format(task.getEndDate(), "yyyy-MM-dd 23:59:59");
+//
+//        try {
+//            task.setStartDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(beginDateTime));
+//            task.setEndDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endDateTime));
+//        } catch (Exception e) {
+//            log.error("盘点任务始末时间设置出错", e);
+//        }
 
         if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
             throw new ServiceException("盘点开始结束时间设置错误");

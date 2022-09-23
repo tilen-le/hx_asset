@@ -221,7 +221,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                             .set(Asset::getAssetStatus, AssetStatus.USING.getName())
                             .set(Asset::getLocation, locationOfOldAsset)
                             .set(Asset::getResponsiblePersonCode, userCode)
-                            .set(Asset::getResponsiblePersonCode, user.getNickName())
+                            .set(Asset::getResponsiblePersonName, user.getNickName())
                             .set(Asset::getUpdateBy, userCode)
                             .set(Asset::getUpdateTime, new Date()));
             if (updateOfNew == 0) {

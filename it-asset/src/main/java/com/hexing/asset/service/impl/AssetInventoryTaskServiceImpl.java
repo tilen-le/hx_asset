@@ -117,6 +117,10 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             wrapper.le(AssetInventoryTask::getEndDate, assetInventoryTask.getEndDate());
         }
         startPage();
+        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
+
+        wrapper.apply("find_in_set( {0} , inventory_users ) or create_by = {0}", userName);
+
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);
         for (AssetInventoryTask task : taskList) {
             JSONObject countResult = assetProcessCountingService.countingStatusCount(task.getTaskCode());

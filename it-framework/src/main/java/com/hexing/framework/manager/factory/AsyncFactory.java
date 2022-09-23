@@ -169,8 +169,8 @@ public class AsyncFactory
         try {
             DingTalkClient getToeknClient = new DefaultDingTalkClient("https://oapi.dingtalk.com/gettoken");
             OapiGettokenRequest req = new OapiGettokenRequest();
-            req.setAppkey("dingdg5xw8bs25xrhc3x");
-            req.setAppsecret("9kJHco5VvVDQ9bmLojiPOpLNQW_B_3vwFtc4eUIzh0lj8rw1H1cpz_RrabnUf9T_");
+            req.setAppkey("ding98zqtbejykgn1tbw");
+            req.setAppsecret("t8eBHsOyWRStoGB4G3xwhSMCugNoVRfHr2qvQHjkynvcXeJZmfPPf-Ju__Wqv9G0");
             req.setHttpMethod("GET");
             OapiGettokenResponse rsp = getToeknClient.execute(req);
             String token = rsp.getAccessToken();

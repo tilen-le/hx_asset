@@ -11,20 +11,22 @@
     <table class="tab-box" border="1">
       <tr v-for="index in columns" :key="index">
         <template v-for="n in 3">
-          <el-col v-if="3*(index-1)+n-1<assetColumns.length" :key="'th'+assetColumns[3*(index-1)+n-1].prop" :span="8"
-            style="display: flex;">
-            <td class='asset-th'>
-              {{assetColumns[3*(index-1)+n-1].label}}
+          <el-col v-if="3 * (index - 1) + n - 1 < assetColumns.length"
+            :key="'th' + assetColumns[3 * (index - 1) + n - 1].prop" :span="8" style="display: flex">
+            <td class="asset-th">
+              {{ assetColumns[3 * (index - 1) + n - 1].label }}
             </td>
-            <td :key="'td'+assetColumns[3*(index-1)+n-1].prop">
-              <span v-if="!isOnEdit(3*(index-1)+n-1)">
-                {{form[assetColumns[3*(index-1)+n-1].prop]}}
+            <td :key="'td' + assetColumns[3 * (index - 1) + n - 1].prop">
+              <span v-if="!isOnEdit(3 * (index - 1) + n - 1)">
+                {{ form[assetColumns[3 * (index - 1) + n - 1].prop] }}
               </span>
               <template v-else>
-                <el-input v-if="assetColumns[3*(index-1)+n-1].prop!='responsiblePersonName'"
-                  v-model="form[assetColumns[3*(index-1)+n-1].prop]" style="background-color:inherit" />
+                <el-input v-if="
+                  assetColumns[3 * (index - 1) + n - 1].prop !=
+                  'responsiblePersonName'
+                " v-model="form[assetColumns[3 * (index - 1) + n - 1].prop]" style="background-color: inherit" />
                 <el-select v-else v-model="form.responsiblePersonName" @change="handleChange" placeholder="请选择盘点人"
-                  filterable style="width: 80%;">
+                  filterable style="width: 80%">
                   <el-option v-for="item in userOptions" :key="item.userName" :label="item.nickName"
                     :value="item.userName" />
                 </el-select>
@@ -39,75 +41,207 @@
 
 <script>
 //可改项
-var EditableProps = ["assetName", "responsiblePersonName", "assetStatus", "factoryNo", "location", "usageScenario", "comment"];
+var EditableProps = [
+  "assetName",
+  "responsiblePersonName",
+  "assetStatus",
+  "factoryNo",
+  "location",
+  "usageScenario",
+  "comment",
+];
 import { getAsset, updateAsset } from "@/api/asset/asset";
-import { allUser } from '@/api/system/user'
+import { allUser } from "@/api/system/user";
 export default {
-  dicts: ['asset_counting_status'],
+  dicts: ["asset_counting_status"],
   data() {
     return {
-      assetColumns: [],
+      assetColumns: [
+        {
+          label: "固定资产名称",
+          prop: "assetName",
+        },
+        {
+          label: "平台资产编号",
+          prop: "assetCode",
+        },
+        {
+          label: "财务资产编号",
+          prop: "financialAssetCode",
+        },
+        {
+          label: "保管人",
+          prop: "responsiblePersonName",
+        },
+        {
+          label: "保管人工号",
+          prop: "responsiblePersonCode",
+        },
+        {
+          label: "保管部门",
+          prop: "responsiblePersonDept",
+        },
+        {
+          label: "资产分类描述",
+          prop: "category",
+        },
+        {
+          label: "资产状态描述",
+          prop: "assetStatus",
+        },
+        {
+          label: "出厂编号",
+          prop: "factoryNo",
+        },
+        {
+          label: "规格型号",
+          prop: "standard",
+        },
+        {
+          label: "单位",
+          prop: "measure",
+        },
+        {
+          label: "采购人",
+          prop: "buyer",
+        },
+        {
+          label: "采购日期",
+          prop: "buyDate",
+        },
+        {
+          label: "资产总价值",
+          prop: "totalValue",
+        },
+        {
+          label: "净值",
+          prop: "netWorth",
+        },
+        {
+          label: "保修期（月）",
+          prop: "warranty",
+        },
+        {
+          label: "预计寿命（月）",
+          prop: "canUseMonths",
+        },
+        {
+          label: "预计寿命（年）",
+          prop: "canUseYears",
+        },
+        {
+          label: "资本化日期",
+          prop: "capitalizationDate",
+        },
+        {
+          label: "资产原值币制",
+          prop: "monetaryUnit",
+        },
+        {
+          label: "公司代码",
+          prop: "companyCode",
+        },
+        {
+          label: "公司代码描述",
+          prop: "companyName",
+        },
+        {
+          label: "存放地点",
+          prop: "location",
+        },
+        {
+          label: "供应商",
+          prop: "provider",
+        },
+        {
+          label: "数量",
+          prop: "amount",
+        },
+        {
+          label: "品牌",
+          prop: "brand",
+        },
+        {
+          label: "成本中心",
+          prop: "costCenter",
+        },
+        {
+          label: "成本中心描述",
+          prop: "costCenterName",
+        },
+        {
+          label: "管理部门描述",
+          prop: "manageDept",
+        },
+        {
+          label: "合同单号",
+          prop: "contractNo",
+        },
+        {
+          label: "申请人",
+          prop: "proposer",
+        },
+        {
+          label: "资产使用场景",
+          prop: "usageScenario",
+        },
+        {
+          label: "备注",
+          prop: "comment",
+        },
+      ],
       form: {},
       userOptions: [],
       onEdit: false,
-    }
+    };
   },
   computed: {
     columns() {
-      return Math.ceil(this.assetColumns.length / 3)
-    }
+      return Math.ceil(this.assetColumns.length / 3);
+    },
   },
   created() {
-    this.assetColumns = this.$store.state.assetCard.assetColumns
-    for (let i = 0; i < this.assetColumns.length; i++) {
-      const element = this.assetColumns[i];
-      if (element.prop == 'inventoryStatus') {
-        this.assetColumns.splice(i, 1)
-      }
-    }
-    if (this.assetColumns.length == 0) {
-      this.$store.commit('SET_Redirect', true);
-      this.$router.push({ path: "/asset/asset" })
-    }
-    this.refreshData()
+    this.refreshData();
   },
   methods: {
     refreshData() {
-      var assetCode = this.$route.query.assetCode
-      getAsset(assetCode).then(response => {
-        this.form = response.data
+      var assetCode = this.$route.query.assetCode;
+      getAsset(assetCode).then((response) => {
+        this.form = response.data;
       });
     },
     isOnEdit(index) {
-      return EditableProps.indexOf(this.assetColumns[index].prop) > -1 && this.onEdit
+      return (
+        EditableProps.indexOf(this.assetColumns[index].prop) > -1 && this.onEdit
+      );
     },
     getUsers() {
       if (this.userOptions.length == 0) {
-        allUser().then(response => {
+        allUser().then((response) => {
           this.userOptions = response.data;
         });
       }
     },
     handleChange(value) {
-      this.form.responsiblePersonCode = value
+      this.form.responsiblePersonCode = value;
     },
     handleUpdate() {
       this.onEdit = true;
-      this.getUsers()
+      this.getUsers();
     },
     handleSubmit() {
-      updateAsset(this.form).then(response => {
+      updateAsset(this.form).then((response) => {
         this.$modal.msgSuccess("修改成功");
         this.onEdit = false;
         this.refreshData();
       });
     },
     handleCancel() {
-      this.refreshData()
+      this.refreshData();
       this.onEdit = false;
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>
@@ -142,7 +276,7 @@ export default {
   align-items: center;
   /*让单元格文字垂直居中*/
   color: #606266;
-  overflow: auto
+  overflow: auto;
 }
 
 .tab-box .asset-th {

@@ -51,50 +51,49 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" v-columns="columns"
-      @row-click="showAssetCard">
+    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" @row-click="showAssetCard">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="固定资产名称" align="center" prop="assetName" />
-      <el-table-column label="平台资产编号" align="center" prop="assetCode" />
-      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="110" />
-      <el-table-column label="保管人" align="center" prop="responsiblePersonName" />
-      <el-table-column label="保管人工号" align="center" prop="responsiblePersonCode" width="110" />
-      <el-table-column label="保管部门" align="center" prop="responsiblePersonDept" />
-      <el-table-column label="资产分类描述" align="center" prop="category" />
-      <el-table-column label="资产状态描述" align="center" prop="assetStatus" />
-      <el-table-column label="出厂编号" align="center" prop="factoryNo" />
-      <el-table-column label="规格型号" align="center" prop="standard" />
-      <el-table-column label="单位" align="center" prop="measure" />
-      <el-table-column label="采购人" align="center" prop="buyer" />
-      <el-table-column label="采购日期" align="center" prop="buyDate" width="180">
+      <el-table-column label="固定资产名称" align="center" prop="assetName"  v-if="columns[0].visible"/>
+      <el-table-column label="平台资产编号" align="center" prop="assetCode"  v-if="columns[1].visible"/>
+      <el-table-column label="财务资产编号" align="center" prop="financialAssetCode" width="110" v-if="columns[2].visible"/>
+      <el-table-column label="保管人" align="center" prop="responsiblePersonName"  v-if="columns[3].visible"/>
+      <el-table-column label="保管人工号" align="center" prop="responsiblePersonCode" width="110"  v-if="columns[4].visible"/>
+      <el-table-column label="保管部门" align="center" prop="responsiblePersonDept"  v-if="columns[5].visible"/>
+      <el-table-column label="资产分类描述" align="center" prop="category"  v-if="columns[6].visible"/>
+      <el-table-column label="资产状态描述" align="center" prop="assetStatus"  v-if="columns[7].visible"/>
+      <el-table-column label="出厂编号" align="center" prop="factoryNo"  v-if="columns[8].visible"/>
+      <el-table-column label="规格型号" align="center" prop="standard"  v-if="columns[9].visible"/>
+      <el-table-column label="单位" align="center" prop="measure"  v-if="columns[10].visible"/>
+      <el-table-column label="采购人" align="center" prop="buyer"  v-if="columns[11].visible"/>
+      <el-table-column label="采购日期" align="center" prop="buyDate" width="180"  v-if="columns[12].visible">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.buyDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="资产总价值" align="center" prop="totalValue" />
-      <el-table-column label="净值" align="center" prop="netWorth" />
-      <el-table-column label="保修期（月）" align="center" prop="warranty" />
-      <el-table-column label="预计使用寿命（月）" align="center" prop="canUseMonths" />
-      <el-table-column label="预计使用寿命（年）" align="center" prop="canUseYears" />
-      <el-table-column label="资本化日期/资产价值录入日期" align="center" prop="capitalizationDate" width="180">
+      <el-table-column label="资产总价值" align="center" prop="totalValue"  v-if="columns[13].visible"/>
+      <el-table-column label="净值" align="center" prop="netWorth"  v-if="columns[14].visible"/>
+      <el-table-column label="保修期（月）" align="center" prop="warranty"  v-if="columns[15].visible"/>
+      <el-table-column label="预计寿命（月）" align="center" prop="canUseMonths"  v-if="columns[16].visible"/>
+      <el-table-column label="预计寿命（年）" align="center" prop="canUseYears"  v-if="columns[17].visible"/>
+      <el-table-column label="资本化日期" align="center" prop="capitalizationDate" width="180" v-if="columns[18].visible">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.capitalizationDate, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="资产原值币制" align="center" prop="monetaryUnit" />
-      <el-table-column label="公司代码" align="center" prop="companyCode" />
-      <el-table-column label="公司代码描述" align="center" prop="companyName" />
-      <el-table-column label="存放地点" align="center" prop="location" />
-      <el-table-column label="供应商" align="center" prop="provider" />
-      <el-table-column label="数量" align="center" prop="amount" />
-      <el-table-column label="品牌" align="center" prop="brand" />
-      <el-table-column label="成本中心" align="center" prop="costCenter" />
-      <el-table-column label="成本中心描述" align="center" prop="costCenterName" />
-      <el-table-column label="管理部门描述" align="center" prop="manageDept" />
-      <el-table-column label="合同单号" align="center" prop="contractNo" />
-      <el-table-column label="申请人" align="center" prop="proposer" />
-      <el-table-column label="资产使用场景" align="center" prop="usageScenario" />
-      <el-table-column label="备注" align="center" prop="comment" />
+      <el-table-column label="资产原值币制" align="center" prop="monetaryUnit" v-if="columns[19].visible"/>
+      <el-table-column label="公司代码" align="center" prop="companyCode" v-if="columns[20].visible"/>
+      <el-table-column label="公司代码描述" align="center" prop="companyName" v-if="columns[21].visible"/>
+      <el-table-column label="存放地点" align="center" prop="location" v-if="columns[22].visible"/>
+      <el-table-column label="供应商" align="center" prop="provider" v-if="columns[23].visible"/>
+      <el-table-column label="数量" align="center" prop="amount" v-if="columns[24].visible"/>
+      <el-table-column label="品牌" align="center" prop="brand" v-if="columns[25].visible"/>
+      <el-table-column label="成本中心" align="center" prop="costCenter" v-if="columns[26].visible"/>
+      <el-table-column label="成本中心描述" align="center" prop="costCenterName" v-if="columns[27].visible"/>
+      <el-table-column label="管理部门描述" align="center" prop="manageDept" v-if="columns[28].visible"/>
+      <el-table-column label="合同单号" align="center" prop="contractNo" v-if="columns[29].visible"/>
+      <el-table-column label="申请人" align="center" prop="proposer" v-if="columns[30].visible"/>
+      <el-table-column label="资产使用场景" align="center" prop="usageScenario" v-if="columns[31].visible"/>
+      <el-table-column label="备注" align="center" prop="comment" v-if="columns[32].visible"/>
       <!-- <el-table-column label="盘点状态" align="center" prop="inventoryStatus">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_counting_status" :value="scope.row.inventoryStatus" />
@@ -284,7 +283,139 @@ export default {
         costCenter: null
       },
       //显隐列
-      columns: [],
+      columns: [{
+        key: 1,
+        label: "固定资产名称",
+        visible: true
+      }, {
+        key: 2,
+        label: "平台资产编号",
+        visible: true
+      }, {
+        key: 3,
+        label: "财务资产编号",
+        visible: true
+      }, {
+        key: 4,
+        label: "保管人",
+        visible: true
+      }, {
+        key: 5,
+        label: "保管人工号",
+        visible: true
+      }, {
+        key: 6,
+        label: "保管部门",
+        visible: true
+      }, {
+        key: 7,
+        label: "资产分类描述",
+        visible: true
+      }, {
+        key: 8,
+        label: "资产状态描述",
+        visible: true
+      }, {
+        key: 9,
+        label: "出厂编号",
+        visible: true
+      }, {
+        key: 10,
+        label: "规格型号",
+        visible: true
+      }, {
+        key: 11,
+        label: "单位",
+        visible: true
+      }, {
+        key: 12,
+        label: "采购人",
+        visible: true
+      }, {
+        key: 13,
+        label: "采购日期",
+        visible: true
+      }, {
+        key: 14,
+        label: "资产总价值",
+        visible: true
+      }, {
+        key: 15,
+        label: "净值",
+        visible: true
+      }, {
+        key: 16,
+        label: "保修期（月）",
+        visible: true
+      }, {
+        key: 17,
+        label: "预计寿命（月）",
+        visible: true
+      }, {
+        key: 18,
+        label: "预计寿命（年）",
+        visible: true
+      }, {
+        key: 19,
+        label: "资本化日期",
+        visible: true
+      }, {
+        key: 20,
+        label: "资产原值币制",
+        visible: true
+      }, {
+        key: 21,
+        label: "公司代码",
+        visible: true
+      }, {
+        key: 22,
+        label: "公司代码描述",
+        visible: true
+      }, {
+        key: 23,
+        label: "存放地点",
+        visible: true
+      }, {
+        key: 24,
+        label: "供应商",
+        visible: true
+      }, {
+        key: 25,
+        label: "数量",
+        visible: true
+      }, {
+        key: 26,
+        label: "品牌",
+        visible: true
+      }, {
+        key: 27,
+        label: "成本中心",
+        visible: true
+      }, {
+        key: 28,
+        label: "成本中心描述",
+        visible: true
+      }, {
+        key: 29,
+        label: "管理部门描述",
+        visible: true
+      }, {
+        key: 30,
+        label: "合同单号",
+        visible: true
+      }, {
+        key: 31,
+        label: "申请人",
+        visible: true
+      }, {
+        key: 32,
+        label: "资产使用场景",
+        visible: true
+      }, {
+        key: 33,
+        label: "备注",
+        visible: true
+      }],
       // 用户导入参数
       upload: {
         // 是否显示弹出层（用户导入）
@@ -308,15 +439,18 @@ export default {
     };
   },
   created() {
-    if (this.$store.state.assetCard.redirect) {
-      this.$store.commit('SET_Redirect', false);
-      this.$router.go(-1)
+    var columns = this.$cache.local.get(this.$route.path + '-columns');
+    if (columns) {
+      this.columns = JSON.parse(columns)
     }
     this.getList();
   },
   watch: {
-    columns() {
-      this.$store.commit("SET_ASSET_COLUMNS", this.columns);
+    columns: {
+      handler: function () {
+        this.$cache.local.set(this.$route.path + '-columns', JSON.stringify(this.columns))
+      },
+      deep: true,
     }
   },
   methods: {
@@ -330,51 +464,51 @@ export default {
       });
     },
     // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
-    },
+    // cancel() {
+    //   this.open = false;
+    //   this.reset();
+    // },
     // 表单重置
-    reset() {
-      this.form = {
-        assetId: null,
-        assetName: null,
-        assetCode: null,
-        financialAssetCode: null,
-        responsiblePersonCode: null,
-        category: null,
-        assetStatus: "0",
-        factoryNo: null,
-        standard: null,
-        measure: null,
-        buyer: null,
-        buyDate: null,
-        netWorth: null,
-        warranty: null,
-        canUseMonths: null,
-        canUseYears: null,
-        capitalizationDate: null,
-        monetaryUnit: null,
-        companyCode: null,
-        companyName: null,
-        location: null,
-        provider: null,
-        amount: null,
-        brand: null,
-        costCenter: null,
-        costCenterName: null,
-        manageDept: null,
-        contractNo: null,
-        proposer: null,
-        usageScenario: null,
-        comment: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null
-      };
-      this.resetForm("form");
-    },
+    // reset() {
+    //   this.form = {
+    //     assetId: null,
+    //     assetName: null,
+    //     assetCode: null,
+    //     financialAssetCode: null,
+    //     responsiblePersonCode: null,
+    //     category: null,
+    //     assetStatus: "0",
+    //     factoryNo: null,
+    //     standard: null,
+    //     measure: null,
+    //     buyer: null,
+    //     buyDate: null,
+    //     netWorth: null,
+    //     warranty: null,
+    //     canUseMonths: null,
+    //     canUseYears: null,
+    //     capitalizationDate: null,
+    //     monetaryUnit: null,
+    //     companyCode: null,
+    //     companyName: null,
+    //     location: null,
+    //     provider: null,
+    //     amount: null,
+    //     brand: null,
+    //     costCenter: null,
+    //     costCenterName: null,
+    //     manageDept: null,
+    //     contractNo: null,
+    //     proposer: null,
+    //     usageScenario: null,
+    //     comment: null,
+    //     createBy: null,
+    //     createTime: null,
+    //     updateBy: null,
+    //     updateTime: null
+    //   };
+    //   this.resetForm("form");
+    // },
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
@@ -397,11 +531,11 @@ export default {
       this.$router.push({ path: "/asset/assetCard", query: { assetCode: row.assetCode } })
     },
     /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加资产表";
-    },
+    // handleAdd() {
+    //   this.reset();
+    //   this.open = true;
+    //   this.title = "添加资产表";
+    // },
     /** 修改按钮操作 */
     // handleUpdate(row) {
     //   this.reset();
@@ -483,3 +617,4 @@ export default {
   }
 };
 </script>
+

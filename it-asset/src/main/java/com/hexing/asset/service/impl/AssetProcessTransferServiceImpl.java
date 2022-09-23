@@ -125,7 +125,7 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
                 .setProcessType(DingTalkAssetProcessType.PROCESS_TRANSFER.getCode())
                 .setAssetCode(assetCode)
                 .setUserCode(userCode)
-                .setUserName(user.getUserName())
+                .setUserName(user.getNickName())
                 .setCreateTime(new Date());
         assetProcessMapper.insert(process);
         // 新增更换流程记录
@@ -133,7 +133,7 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
                 .setProcessId(process.getId())
                 .setInstanceId(instanceId)
                 .setUserCode(userCode)
-                .setUserName(user.getUserName())
+                .setUserName(user.getNickName())
                 .setAssetCode(assetCode)
                 .setCreateTime(new Date());
         assetProcessTransferMapper.insert(processTransfer);

@@ -302,6 +302,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (StringUtils.isNotBlank(asset.getLocation())) {
             wrapper.eq(Asset::getLocation, asset.getLocation());
         }
+        if (StringUtils.isNotBlank(asset.getResponsiblePersonName())) {
+            wrapper.eq(Asset::getResponsiblePersonName, asset.getResponsiblePersonName());
+        }
         if (StringUtils.isNotBlank(asset.getCostCenter())) {
             wrapper.eq(Asset::getCostCenter, asset.getCostCenter());
         }

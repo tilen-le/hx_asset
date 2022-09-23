@@ -266,8 +266,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     int update = assetMapper.update(null,
                             new LambdaUpdateWrapper<Asset>()
                                     .eq(Asset::getAssetCode, updateInfo.getString("assetCode"))
-                                    .set(StringUtils.isNotEmpty(location), Asset::getLocation, location)
-                                    .set(StringUtils.isNotEmpty(recipient), Asset::getResponsiblePersonCode, recipient));
+                                    .set(Asset::getLocation, location)
+                                    .set(Asset::getResponsiblePersonCode, recipient)
+                                    .set(Asset::getResponsiblePersonName, recipientInfo.getNickName()));
                     if (update == 0) {
                         throw new ServiceException("更新未成功");
                     }

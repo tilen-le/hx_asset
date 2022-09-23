@@ -9,7 +9,9 @@ import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetProcessExchange;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.mapper.AssetProcessMapper;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessTransferMapper;
@@ -30,6 +32,8 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
     private AssetProcessTransferMapper assetProcessTransferMapper;
     @Autowired
     private AssetProcessMapper assetProcessMapper;
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     /**
      * 查询资产转移流程
@@ -116,10 +120,12 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
     @Transactional
     public void saveProcess(String instanceId, String userCode, String assetCode) {
         // 新增主流程记录
+        SysUser user = sysUserMapper.getUserByUserName(userCode);
         AssetProcess process = new AssetProcess()
                 .setProcessType(DingTalkAssetProcessType.PROCESS_TRANSFER.getCode())
                 .setAssetCode(assetCode)
                 .setUserCode(userCode)
+                .setUserName(user.getUserName())
                 .setCreateTime(new Date());
         assetProcessMapper.insert(process);
         // 新增更换流程记录
@@ -127,6 +133,7 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
                 .setProcessId(process.getId())
                 .setInstanceId(instanceId)
                 .setUserCode(userCode)
+                .setUserName(user.getUserName())
                 .setAssetCode(assetCode)
                 .setCreateTime(new Date());
         assetProcessTransferMapper.insert(processTransfer);

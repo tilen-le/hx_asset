@@ -347,9 +347,16 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetMapper.updateById(asset);
     }
 
+    /**
+     * 根据公司代码和财务资产编码更新资产信息
+     *
+     * @param asset
+     * @return
+     */
+
     @Override
-    public int updateAssetByAssetCode(Asset asset) {
-        return 0;
+    public int updateAssetByCompanyCodeAndFinancialAssetCode(Asset asset) {
+        return assetMapper.updateAssetByCompanyCodeAndFinancialAssetCode(asset);
     }
 
     /**
@@ -423,11 +430,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         successNum++;
                     }
                 } else {
-                    LambdaUpdateWrapper<Asset> updateWrapper = new LambdaUpdateWrapper<>();
-                    updateWrapper.eq(Asset::getFinancialAssetCode, asset.getFinancialAssetCode())
-                            .eq(Asset::getCompanyCode, asset.getCompanyCode());
                     asset.setResponsiblePersonName(user.getNickName()); // 更新资产保管人信息
-                    int update = assetMapper.update(asset, updateWrapper);
+                    int update = assetMapper.updateAssetByCompanyCodeAndFinancialAssetCode(asset);
                     if (update > 0) {
                         successNum++;
                     } else {
@@ -458,8 +462,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 throw new ServiceException("SAP同步出错：" + e.getMessage());
             }
         }
+        if (!isUpdateSupport) {
+            message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");
+        } else {
+            message.insert(0, "数据更新完成，共 " + assetList.size() + " 条，成功更新 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");
+        }
 
-        message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");
         return message.toString();
     }
 

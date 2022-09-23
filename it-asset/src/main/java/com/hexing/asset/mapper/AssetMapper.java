@@ -38,6 +38,15 @@ public interface AssetMapper extends BaseMapper<Asset>
      */
     public int insertAsset(Asset asset);
 
+
+    /**
+     * 根据公司代码和财务资产编码更新资产信息
+     *
+     * @param asset
+     * @return
+     */
+    public int updateAssetByCompanyCodeAndFinancialAssetCode(Asset asset);
+
     /**
      * 删除资产表
      *

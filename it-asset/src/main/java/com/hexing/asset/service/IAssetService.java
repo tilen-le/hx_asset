@@ -86,12 +86,12 @@ public interface IAssetService extends IService<Asset>
     public int updateAsset(Asset asset);
 
     /**
-     * 修改资产表
+     * 根据公司代码和财务资产编码更新资产信息
      *
-     * @param asset 资产表
-     * @return 结果
+     * @param asset
+     * @return
      */
-    public int updateAssetByAssetCode(Asset asset);
+    public int updateAssetByCompanyCodeAndFinancialAssetCode(Asset asset);
 
     /**
      * 删除资产表信息

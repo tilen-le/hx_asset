@@ -38,11 +38,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="usageScenario"    column="usage_scenario"    />
         <result property="comment"    column="comment"    />
         <result property="createBy"    column="create_by"    />
-        <result property="inventoryStatus"    column="inventory_status"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
     </resultMap>
 
     <sql id="selectAssetVo">
@@ -184,13 +182,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateAsset" parameterType="Asset">
+    <update id="updateAssetByCompanyCodeAndFinancialAssetCode" parameterType="Asset">
         update asset
         <trim prefix="SET" suffixOverrides=",">
             <if test="assetName != null">asset_name = #{assetName},</if>
             <if test="assetCode != null">asset_code = #{assetCode},</if>
-            <if test="financialAssetCode != null">financial_asset_code = #{financialAssetCode},</if>
+            <!--<if test="financialAssetCode != null">financial_asset_code = #{financialAssetCode},</if>-->
             <if test="responsiblePersonCode != null">responsible_person_code = #{responsiblePersonCode},</if>
+            <if test="responsiblePersonName != null">responsible_person_name = #{responsiblePersonName},</if>
             <if test="category != null">category = #{category},</if>
             <if test="assetStatus != null">asset_status = #{assetStatus},</if>
             <if test="factoryNo != null">factory_no = #{factoryNo},</if>
@@ -205,8 +204,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="canUseYears != null">can_use_years = #{canUseYears},</if>
             <if test="capitalizationDate != null">capitalization_date = #{capitalizationDate},</if>
             <if test="monetaryUnit != null">monetary_unit = #{monetaryUnit},</if>
-            <if test="companyCode != null">company_code = #{companyCode},</if>
-            <if test="companyName != null">company_name = #{companyName},</if>
+            <!--<if test="companyCode != null">company_code = #{companyCode},</if>-->
+            <!--<if test="companyName != null">company_name = #{companyName},</if>-->
             <if test="location != null">location = #{location},</if>
             <if test="provider != null">provider = #{provider},</if>
             <if test="amount != null">amount = #{amount},</if>
@@ -219,13 +218,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="usageScenario != null">usage_scenario = #{usageScenario},</if>
             <if test="comment != null">comment = #{comment},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
-            <if test="inventoryStatus != null">inventory_status = #{inventoryStatus},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
         </trim>
-        where asset_id = #{assetId}
+        where company_code = #{companyCode} and financial_asset_code = #{financialAssetCode}
     </update>
 
     <delete id="deleteAssetByAssetId" parameterType="Long">

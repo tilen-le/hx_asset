@@ -2,6 +2,7 @@ package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -20,6 +21,7 @@ import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
@@ -98,16 +100,15 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 根据资产编号更新资产信息，对应领用流程和归还流程
+     * 资产领用
      */
-    @PostMapping(value = "/updateAssetCardByAssetCode")
+    @PostMapping(value = "/assetReceive")
     @Transactional
-    public Result updateAssetCardByAssetCode(@RequestBody JSONObject params) {
+    public Result assetReceive(@RequestBody JSONObject params) {
         params = params.getJSONObject("data");
 
         String processType = params.getString("processType");                           /* 资产管理流程类型 */
         String userCode = params.getString("userCode");                                 /* 流程发起人工号 */
-        String responsiblePersonCode = params.getString("responsiblePersonCode");       /* 代领用/代归还流程发起人工号 */
         String instanceId = params.getString("instanceId");
 
         Asset asset = JSONObject.toJavaObject(params, Asset.class);
@@ -116,34 +117,12 @@ public class DingTalkAssetController extends BaseController {
             asset.setResponsiblePersonCode(userCode);
             SysUser user = sysUserService.getUserByUserName(userCode);
             asset.setResponsiblePersonName(user.getNickName());
-
-            assetProcessReceiveService
-                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_RECEIVE.getCode());
-        } else if (DingTalkAssetProcessType.PROCESS_BACK.getCode().equals(processType)) {   /* 归还流程 */
-            asset.setResponsiblePersonCode(userCode);
-            SysUser user = sysUserService.getUserByUserName(userCode);
-            asset.setResponsiblePersonName(user.getNickName());
-
-            assetProcessBackService
-                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_BACK.getCode());
-        } else if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(processType)) { /* 代领用流程 */
-            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-            asset.setResponsiblePersonName(user.getNickName());
-
-            assetProcessReceiveService
-                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode());
-        } else if (DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode().equals(processType)) {  /* 代归还流程 */
-            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-            asset.setResponsiblePersonName(user.getNickName());
-
-            assetProcessBackService
-                    .saveProcess(instanceId, userCode, asset.getAssetCode(), DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode());
         }
-
-        Asset temp = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, asset.getAssetCode()));
-        if (ObjectUtil.isNull(temp)) {
-            return Result.error(500, "该平台资产编码对应资产不存在");
+        if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(processType)) { /* 代领用流程 */
+            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode()); /* 代领用流程发起人工号 */
+            asset.setResponsiblePersonName(user.getNickName());
         }
+        assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode(), processType);
 
         boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
                 .eq(Asset::getAssetCode, asset.getAssetCode())
@@ -155,8 +134,45 @@ public class DingTalkAssetController extends BaseController {
         if (success) {
             return Result.success("更新成功");
         } else {
-            return Result.success("更新失败");
+            throw new ServiceException("更新失败");
         }
+
+    }
+
+    /**
+     * 资产归还
+     */
+    @PostMapping(value = "/assetBack")
+    @Transactional
+    public Result assetBack(@RequestBody JSONObject params) {
+        params = params.getJSONObject("data");
+
+        String processType = params.getString("processType");                           /* 资产管理流程类型 */
+        String instanceId = params.getString("instanceId");
+        String userCode = params.getString("userCode");                                 /* 流程发起人工号 */
+        String responsiblePersonCode = params.getString("responsiblePersonCode");       /* 保管人工号（资产管理员工号） */
+        JSONArray assetList = params.getJSONArray("assets");
+
+        SysUser responsiblePerson = sysUserService.getUserByUserName(responsiblePersonCode);
+
+        for (Object o : assetList) {
+            JSONObject entity = (JSONObject) o;
+            String assetCode = entity.getString("assetCode");
+            String location = entity.getString("location");
+
+            boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
+                    .eq(Asset::getAssetCode, assetCode)
+                    .set(Asset::getLocation, location)
+                    .set(Asset::getResponsiblePersonCode, responsiblePersonCode)
+                    .set(Asset::getResponsiblePersonName, responsiblePerson.getNickName()));
+
+            if (!success) {
+                throw new ServiceException("归还失败");
+            }
+            assetProcessBackService.saveProcess(instanceId, userCode, assetCode, processType);
+        }
+
+        return Result.success("归还成功");
     }
 
     /**

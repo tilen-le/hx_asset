@@ -51,7 +51,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" :columns="columns"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" @row-click="showAssetCard">
+    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" @row-dblclick="showAssetCard">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="固定资产名称" align="center" prop="assetName"  v-if="columns[0].visible"/>
       <el-table-column label="平台资产编号" align="center" prop="assetCode"  v-if="columns[1].visible"/>

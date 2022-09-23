@@ -43,7 +43,7 @@ spring:
     encoding: utf-8
   profiles:
 #    active: prod
-      active: druid
+    active: druid
 #    active: @environment@
   # 文件上传
   servlet:

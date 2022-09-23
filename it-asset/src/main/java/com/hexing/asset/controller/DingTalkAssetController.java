@@ -126,10 +126,12 @@ public class DingTalkAssetController extends BaseController {
 
         boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
                 .eq(Asset::getAssetCode, asset.getAssetCode())
-                .set(StringUtils.isNotEmpty(asset.getAssetStatus()), Asset::getAssetStatus, asset.getAssetStatus())
-                .set(StringUtils.isNotEmpty(asset.getResponsiblePersonCode()), Asset::getResponsiblePersonCode, asset.getResponsiblePersonCode())
-                .set(StringUtils.isNotEmpty(asset.getResponsiblePersonName()), Asset::getResponsiblePersonName, asset.getResponsiblePersonName())
-                .set(StringUtils.isNotEmpty(asset.getLocation()), Asset::getAssetStatus, asset.getAssetStatus()));
+                .set(Asset::getAssetStatus, asset.getAssetStatus())
+                .set(Asset::getResponsiblePersonCode, asset.getResponsiblePersonCode())
+                .set(Asset::getResponsiblePersonName, asset.getResponsiblePersonName())
+                .set(Asset::getAssetStatus, asset.getAssetStatus())
+                .set(Asset::getUsageScenario, asset.getUsageScenario())
+                .set(Asset::getLocation, asset.getLocation()));
 
         if (success) {
             return Result.success("更新成功");

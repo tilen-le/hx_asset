@@ -8,7 +8,9 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.mapper.AssetProcessMapper;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,8 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
     private AssetProcessExchangeMapper assetProcessExchangeMapper;
     @Autowired
     private AssetProcessMapper assetProcessMapper;
-
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     /**
      * 查询资产更换流程
@@ -116,6 +119,7 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
     @Override
     @Transactional
     public void saveProcess(String instanceId, String userCode, List<String> assetCodeList) {
+        SysUser user = sysUserMapper.getUserByUserName(userCode);
         if (CollectionUtil.isNotEmpty(assetCodeList)) {
             for (String assetCode : assetCodeList) {
                 // 新增主流程记录
@@ -123,6 +127,7 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
                         .setProcessType(DingTalkAssetProcessType.PROCESS_EXCHANGE.getCode())
                         .setAssetCode(assetCode)
                         .setUserCode(userCode)
+                        .setUserName(user.getNickName())
                         .setCreateTime(new Date());
                 assetProcessMapper.insert(process);
                 // 新增更换流程记录
@@ -130,6 +135,7 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
                         .setProcessId(process.getId())
                         .setInstanceId(instanceId)
                         .setUserCode(userCode)
+                        .setUserName(user.getNickName())
                         .setAssetCode(assetCode)
                         .setCreateTime(new Date());
                 assetProcessExchangeMapper.insert(processExchange);

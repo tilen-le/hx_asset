@@ -119,8 +119,8 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
     @Override
     @Transactional
     public void saveProcess(String instanceId, String userCode, String assetCode) {
-        // 新增主流程记录
         SysUser user = sysUserMapper.getUserByUserName(userCode);
+        // 新增主流程记录
         AssetProcess process = new AssetProcess()
                 .setProcessType(DingTalkAssetProcessType.PROCESS_TRANSFER.getCode())
                 .setAssetCode(assetCode)

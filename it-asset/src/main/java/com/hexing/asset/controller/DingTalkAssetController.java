@@ -197,8 +197,7 @@ public class DingTalkAssetController extends BaseController {
     public String selectCountingTaskCode(@RequestBody JSONObject params) {
         JSONObject result = new JSONObject();
         String userCode = params.getString("userCode");
-        List<AssetInventoryTask> taskList = assetInventoryTaskService
-                .selectAssetCountingTaskList(new AssetInventoryTask());
+        List<AssetInventoryTask> taskList = assetInventoryTaskService.list();
         List<String> list = new ArrayList<>();
         for (AssetInventoryTask a : taskList) {
             LocalDateTime localDateTime = LocalDateTime

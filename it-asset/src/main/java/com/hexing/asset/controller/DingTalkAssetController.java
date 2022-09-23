@@ -158,9 +158,8 @@ public class DingTalkAssetController extends BaseController {
         SysUser responsiblePerson = sysUserService.getUserByUserName(responsiblePersonCode);
 
         for (Object o : assetList) {
-            JSONObject entity = (JSONObject) o;
-            String assetCode = entity.getString("assetCode");
-            String location = entity.getString("location");
+            String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
+            String location = JSONUtil.parseObj(o).getStr("location");
 
             boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
                     .eq(Asset::getAssetCode, assetCode)

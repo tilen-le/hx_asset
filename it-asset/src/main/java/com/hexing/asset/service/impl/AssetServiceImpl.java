@@ -347,6 +347,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetMapper.updateById(asset);
     }
 
+    @Override
+    public int updateAssetByAssetCode(Asset asset) {
+        return 0;
+    }
+
     /**
      * 删除资产表信息
      *

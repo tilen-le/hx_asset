@@ -46,6 +46,18 @@ public class AssetProcessController extends BaseController
     }
 
     /**
+     * 查询调拨流程列表
+     */
+    @PreAuthorize("@ss.hasPermi('asset:process:transferList')")
+    @GetMapping("/transferList")
+    public TableDataInfo transferList(AssetProcess assetProcess)
+    {
+        startPage();
+        List<AssetProcess> list = assetProcessService.selectAssetProcessList(assetProcess);
+        return getDataTable(list);
+    }
+
+    /**
      * 导出流程总列表
      */
     @PreAuthorize("@ss.hasPermi('asset:process:export')")

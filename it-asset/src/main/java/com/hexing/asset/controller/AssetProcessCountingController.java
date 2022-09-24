@@ -1,11 +1,13 @@
 package com.hexing.asset.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +55,35 @@ public class AssetProcessCountingController extends BaseController
         List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
         TableDataInfo dataTable = getDataTable(list);
         dataTable.setRows(voList);
+        return dataTable;
+    }
+
+    /**
+     * 盘点统计
+     */
+    @ApiOperation("盘点统计")
+    @GetMapping("/inventoryCount")
+    public AjaxResult inventoryCount(String type,String startDate,String endDate) {
+        List<Map<String,String>>  result = null;
+        if ("年".equals(type)){
+            result = assetProcessCountingService.inventoryCountYear(type,startDate,endDate);
+        }
+        if ("月".equals(type)){
+            result = assetProcessCountingService.inventoryCountMonth(type,startDate,endDate);
+        }
+        return AjaxResult.success(result);
+    }
+
+    /**
+     * 盘点统计列表
+     */
+    @ApiOperation("盘点统计列表")
+    @GetMapping("/inventoryCountList")
+    public TableDataInfo inventoryCountList(String type,String startDate,String endDate)
+    {
+        startPage();
+        List<Map<String,String>> list = assetProcessCountingService.inventoryCountList(type,startDate,endDate);
+        TableDataInfo dataTable = getDataTable(list);
         return dataTable;
     }
 

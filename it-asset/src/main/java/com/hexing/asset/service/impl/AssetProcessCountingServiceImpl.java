@@ -171,6 +171,24 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         return result;
     }
 
+    @Override
+    public  List<Map<String,String>>  inventoryCountYear(String type,String startDate,String endDate) {
+        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountYear(startDate,endDate);
+        return list;
+    }
+
+    @Override
+    public  List<Map<String,String>>  inventoryCountMonth(String type,String startDate,String endDate) {
+        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountMonth(startDate);
+        return list;
+    }
+
+    @Override
+    public List<Map<String,String>> inventoryCountList(String type,String startDate,String endDate)
+    {
+
+        return assetProcessCountingMapper.inventoryCountList(startDate);
+    }
 
     /**
      * 新增资产盘点流程

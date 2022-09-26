@@ -79,7 +79,12 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
             wrapper.eq(AssetProcessCounting::getUserCode, assetProcessCounting.getUserCode());
         }
         if (StringUtils.isNotBlank(assetProcessCounting.getCountingStatus())) {
-            wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
+            if (AssetCountingStatus.COUNTED.getStatus().equals(assetProcessCounting.getCountingStatus())) {
+                wrapper.in(AssetProcessCounting::getCountingStatus,
+                        AssetCountingStatus.COUNTED.getStatus(), AssetCountingStatus.ABNORMAL.getStatus());
+            } else {
+                wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
+            }
         }
         return assetProcessCountingMapper.selectList(wrapper);
     }

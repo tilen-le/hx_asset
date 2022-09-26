@@ -12,14 +12,6 @@ import java.util.Date;
 @Accessors(chain = true)
 public class AssetProcessCountingVO {
 
-    /** 盘点人工号 */
-    @Excel(name = "盘点人工号")
-    private String userCode;
-
-    /** 盘点人 */
-    @Excel(name = "盘点人名称")
-    private String userName;
-
     /** 公司代码描述 */
     @Excel(name = "公司代码描述")
     private String companyName;
@@ -63,6 +55,14 @@ public class AssetProcessCountingVO {
     /** 存放地点 */
     @Excel(name = "存放地点")
     private String location;
+
+    /** 盘点人工号 */
+    @Excel(name = "盘点人工号")
+    private String userCode;
+
+    /** 盘点人 */
+    @Excel(name = "盘点人名称")
+    private String userName;
 
     /** 盘点时间 */
     @Excel(name = "盘点时间")

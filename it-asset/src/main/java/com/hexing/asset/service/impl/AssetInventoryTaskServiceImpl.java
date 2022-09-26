@@ -309,7 +309,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     }
 
     /**
-     * 更新盘点任务状态
+     * 定时任务：更新盘点任务状态
      */
     @Override
     public void updateInventoryTaskStatus() {

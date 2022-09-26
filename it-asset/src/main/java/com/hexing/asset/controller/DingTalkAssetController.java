@@ -216,16 +216,10 @@ public class DingTalkAssetController extends BaseController {
         String userCode = params.getString("userCode");
         List<AssetInventoryTask> taskList = assetInventoryTaskService.list();
         List<String> list = new ArrayList<>();
-        for (AssetInventoryTask a : taskList) {
-            LocalDateTime localDateTime = LocalDateTime
-                    .ofInstant(Instant.ofEpochMilli(a.getEndDate().getTime()), ZoneId.systemDefault());
-            LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
-            Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
-
-            JSONObject countResult = assetProcessCountingService.countingStatusCount(a.getTaskCode());
-            int notCounted = countResult.getIntValue("notCounted");
-            if (a.getInventoryUsers().contains(userCode) && (endMomentOfEndDate.getTime() >= new Date().getTime()) && notCounted != 0) {
-                list.add(a.getTaskName());
+        for (AssetInventoryTask task : taskList) {
+            if (task.getInventoryUsers().contains(userCode)
+                    && CountingTaskStatus.COUNTING.getStatus().equals(task.getStatus())) {
+                list.add(task.getTaskName());
             }
         }
         result.put("result", list.toString());
@@ -268,6 +262,7 @@ public class DingTalkAssetController extends BaseController {
      * 钉钉提交盘点流程
      */
     @PostMapping("/counting/countAsset")
+    @Transactional
     public AjaxResult countAsset(@RequestBody JSONObject params) {
         JSONObject data = params.getObject("data", JSONObject.class);
         String taskName = data.getString("taskName");
@@ -283,16 +278,8 @@ public class DingTalkAssetController extends BaseController {
         String taskCode = task.getTaskCode();
 
         // 盘点任务是否结束
-        LocalDateTime localDateTime = LocalDateTime
-                .ofInstant(Instant.ofEpochMilli(task.getEndDate().getTime()), ZoneId.systemDefault());
-        LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
-        Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
-
-        JSONObject countResult = assetProcessCountingService.countingStatusCount(task.getTaskCode());
-        int notCounted = countResult.getIntValue("notCounted");
-
-        if (new Date().compareTo(endMomentOfEndDate) > 0 || notCounted == 0) {
-            return AjaxResult.error("盘点任务已结束");
+        if (CountingTaskStatus.FINISHED.getStatus().equals(task.getStatus())) {
+            return AjaxResult.error(500, "盘点任务已结束");
         }
 
         String userCode = data.getString("userCode");
@@ -320,6 +307,18 @@ public class DingTalkAssetController extends BaseController {
                         .setComment(comment);
                 assetProcessCountingService.updateById(entity);
             }
+        }
+
+        // 盘点任务状态更新
+        // 若指定盘点任务下待盘记录数为0
+        int notCounted = assetProcessCountingService.count(new LambdaQueryWrapper<AssetProcessCounting>()
+                .eq(AssetProcessCounting::getTaskCode, taskCode)
+                .eq(AssetProcessCounting::getCountingStatus, AssetCountingStatus.NOT_COUNTED.getStatus()));
+        if (notCounted == 0) {
+            // 更新盘点任务状态为已完成
+            assetInventoryTaskService.update(new LambdaUpdateWrapper<AssetInventoryTask>()
+                    .eq(AssetInventoryTask::getTaskCode, taskCode)
+                    .set(AssetInventoryTask::getStatus, CountingTaskStatus.FINISHED.getStatus()));
         }
 
         return AjaxResult.success("盘点成功");

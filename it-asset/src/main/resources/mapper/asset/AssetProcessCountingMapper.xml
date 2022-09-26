@@ -36,15 +36,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="inventoryCountList"  resultType="java.util.Map">
-        SELECT ifnull(b.task_name,"") as taskName,a.isCount,a.x
-        from(
-                select DATE_FORMAT(counting_time,'%m%d') as x ,COUNT(*) as isCount ,task_code
-                from asset_process_counting
-                WHERE counting_time is not null
-                  and <![CDATA[ DATE_FORMAT(counting_time,'%Y') >=  DATE_FORMAT(#{startDate},'%Y')]]>
-                GROUP BY task_code,x
-            ) a
-                LEFT JOIN (SELECT * from asset_inventory_task) b on b.task_code =a.task_code
+        SELECT
+        a.date,
+        ifnull( b.task_name, "" ) AS taskName,
+        ifnull( a.isCount, 0 ) AS isCount
+        FROM
+        (
+        SELECT
+        DATE_FORMAT( counting_time, '%Y年%m月%d日' ) AS date,
+        COUNT(*) AS isCount,
+        task_code
+        FROM
+        asset_process_counting
+        WHERE
+        counting_time IS NOT NULL
+        and <![CDATA[ DATE_FORMAT(counting_time,'%Y') >=  DATE_FORMAT(#{startDate},'%Y')]]>
+        and <![CDATA[ DATE_FORMAT(counting_time,'%Y') <=  DATE_FORMAT(#{endDate},'%Y')]]>
+        GROUP BY
+        date,
+        task_code
+        ) a
+        LEFT JOIN ( SELECT * FROM asset_inventory_task ) b ON b.task_code = a.task_code
     </select>
 
     <select id="inventoryCountYear" resultType="java.util.Map">

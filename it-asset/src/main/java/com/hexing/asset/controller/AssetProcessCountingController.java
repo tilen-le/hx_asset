@@ -1,5 +1,6 @@
 package com.hexing.asset.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -63,15 +64,34 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("盘点统计")
     @GetMapping("/inventoryCount")
-    public AjaxResult inventoryCount(String type,String companyCode,String startDate,String endDate) {
-        List<Map<String,String>>  result = null;
+    public AjaxResult inventoryCount(String type,String startDate,String endDate) {
+        JSONObject jsonObject=new JSONObject();
+        List x =new ArrayList();
+        List isCount =new ArrayList();
+        List isExcept =new ArrayList();
         if ("年".equals(type)){
-            result = assetProcessCountingService.inventoryCountYear(type,companyCode,startDate,endDate);
+            List<Map<String,String>>  result = assetProcessCountingService.inventoryCountYear(startDate,endDate);
+            for(Map m:result){
+                x.add(m.get("y"));
+                isCount.add(m.get("isCount"));
+                isExcept.add(m.get("isExcept"));
+            }
+            jsonObject.put("x",x);
+            jsonObject.put("isCount",isCount);
+            jsonObject.put("isExcept",isExcept);
         }
         if ("月".equals(type)){
-            result = assetProcessCountingService.inventoryCountMonth(type,companyCode,startDate,endDate);
+            List<Map<String,String>>  result = assetProcessCountingService.inventoryCountMonth(startDate,endDate);
+            for(Map m:result){
+                x.add(m.get("y")+"年"+m.get("m")+"月");
+                isCount.add(m.get("isCount"));
+                isExcept.add(m.get("isExcept"));
+            }
+            jsonObject.put("x",x);
+            jsonObject.put("isCount",isCount);
+            jsonObject.put("isExcept",isExcept);
         }
-        return AjaxResult.success(result);
+        return AjaxResult.success(jsonObject);
     }
 
     /**
@@ -79,10 +99,10 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("盘点统计列表")
     @GetMapping("/inventoryCountList")
-    public TableDataInfo inventoryCountList(String type,String startDate,String endDate)
+    public TableDataInfo inventoryCountList(String startDate,String endDate)
     {
         startPage();
-        List<Map<String,String>> list = assetProcessCountingService.inventoryCountList(type,startDate,endDate);
+        List<Map<String,String>> list = assetProcessCountingService.inventoryCountList(startDate,endDate);
         TableDataInfo dataTable = getDataTable(list);
         return dataTable;
     }

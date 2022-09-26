@@ -71,6 +71,6 @@ public interface AssetProcessCountingMapper extends BaseMapper<AssetProcessCount
 
     public List<Map<String,String>> inventoryCountMonth(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
-    public List<Map<String,String>> inventoryCountList(@Param("startDate") String startDate);
+    public List<Map<String,String>> inventoryCountList(@Param("startDate") String startDate, @Param("endDate") String endDate);
 
 }

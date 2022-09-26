@@ -48,37 +48,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="inventoryCountYear" resultType="java.util.Map">
-        select a.x ,IFNULL(a.isCount,0) as isCount,IFNULL(b.isExcept,0) as isExcept
+        select a.y ,IFNULL(a.isCount,0) as isCount,IFNULL(b.isExcept,0) as isExcept
             from (
-                 select YEAR(counting_time) as x ,COUNT(*) as isCount from asset_process_counting
+                 select YEAR(counting_time) as y ,COUNT(*) as isCount from asset_process_counting
                  WHERE counting_time is not null
                    and <![CDATA[ DATE_FORMAT(counting_time,'%Y') >=  DATE_FORMAT(#{startDate},'%Y')]]>
                    and <![CDATA[ DATE_FORMAT(counting_time,'%Y') <=  DATE_FORMAT(#{endDate},'%Y')]]>
-                 GROUP BY x
+                 GROUP BY y
              ) a
                  LEFT JOIN
              (
-                 select YEAR(counting_time)  AS x ,COUNT(*) as isExcept
+                 select YEAR(counting_time)  AS y ,COUNT(*) as isExcept
                  from asset_process_counting
-                 WHERE counting_time is not null and  counting_status ='2' GROUP BY x
-             ) b on a.x=b.x
+                 WHERE counting_time is not null and  counting_status ='2' GROUP BY y
+             ) b on a.y=b.y
     </select>
 
     <select id="inventoryCountMonth" resultType="java.util.Map">
-        select a.x ,IFNULL(a.isCount,0) as isCount,IFNULL(b.isExcept,0) as isExcept
+        select a.y ,a.m ,IFNULL(a.isCount,0) as isCount,IFNULL(b.isExcept,0) as isExcept
         from (
-                 select YEAR(counting_time) as yy, MONTH(counting_time)  AS x, COUNT(*) as isCount
+                 select YEAR(counting_time) as y, MONTH(counting_time)  AS m, COUNT(*) as isCount
                  from asset_process_counting
                  WHERE counting_time is not null
-                 and <![CDATA[ DATE_FORMAT(counting_time,'%Y') =  DATE_FORMAT(#{startDate},'%Y')]]>
-                 GROUP BY yy,x
+                   and <![CDATA[ DATE_FORMAT(counting_time,'%Y') >=  DATE_FORMAT(#{startDate},'%Y')]]>
+                   and <![CDATA[ DATE_FORMAT(counting_time,'%Y') <=  DATE_FORMAT(#{endDate},'%Y')]]>
+                 GROUP BY y,m
              )
                  a
                  LEFT JOIN (
-            select YEAR(counting_time) as yy, MONTH(counting_time) AS x ,COUNT(*) as isExcept
+            select YEAR(counting_time) as y, MONTH(counting_time) AS m ,COUNT(*) as isExcept
             from asset_process_counting
-            WHERE counting_time is not null and  counting_status ='2' GROUP BY yy,x
-        ) b on a.yy=b.yy and a.x=b.x
+            WHERE counting_time is not null and  counting_status ='2' GROUP BY y,m
+        ) b on a.y=b.y and a.m=b.m
     </select>
 
     <insert id="insertAssetProcessCounting" parameterType="AssetProcessCounting" useGeneratedKeys="true" keyProperty="id">

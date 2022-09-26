@@ -172,14 +172,14 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     }
 
     @Override
-    public  List<Map<String,String>>  inventoryCountYear(String type,String startDate,String endDate) {
+    public  List<Map<String,String>>  inventoryCountYear(String type,String companyCode,String startDate,String endDate) {
         List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountYear(startDate,endDate);
         return list;
     }
 
     @Override
-    public  List<Map<String,String>>  inventoryCountMonth(String type,String startDate,String endDate) {
-        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountMonth(startDate);
+    public  List<Map<String,String>>  inventoryCountMonth(String type,String companyCode,String startDate,String endDate) {
+        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountMonth(startDate,endDate);
         return list;
     }
 

@@ -63,13 +63,13 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("盘点统计")
     @GetMapping("/inventoryCount")
-    public AjaxResult inventoryCount(String type,String startDate,String endDate) {
+    public AjaxResult inventoryCount(String type,String companyCode,String startDate,String endDate) {
         List<Map<String,String>>  result = null;
         if ("年".equals(type)){
-            result = assetProcessCountingService.inventoryCountYear(type,startDate,endDate);
+            result = assetProcessCountingService.inventoryCountYear(type,companyCode,startDate,endDate);
         }
         if ("月".equals(type)){
-            result = assetProcessCountingService.inventoryCountMonth(type,startDate,endDate);
+            result = assetProcessCountingService.inventoryCountMonth(type,companyCode,startDate,endDate);
         }
         return AjaxResult.success(result);
     }

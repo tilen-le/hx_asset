@@ -1,26 +1,33 @@
 package com.hexing.asset.controller;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.domain.dto.StatisQueryParam;
+import com.hexing.asset.domain.vo.SimpleStatisticVO;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.service.IAssetProcessService;
+import com.hexing.common.annotation.DataScope;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.core.domain.model.LoginUser;
+import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.ServletUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.framework.web.service.TokenService;
+import com.hexing.system.service.ISysDeptService;
+import com.hexing.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -48,6 +55,12 @@ public class AssetController extends BaseController {
     private IAssetService assetService;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private IAssetProcessService assetProcessService;
+    @Autowired
+    private ISysDeptService sysDeptService;
+    @Autowired
+    private ISysUserService sysUserService;
 
     /**
      * 查询资产列表
@@ -141,5 +154,73 @@ public class AssetController extends BaseController {
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.importTemplateExcel("资产信息导入模板");
     }
+
+    /**
+     * 总资产统计和资产状态统计饼图
+     */
+    @PostMapping("/assetCount")
+    public AjaxResult assetCount(@RequestBody StatisQueryParam params) {
+        // 筛选条件
+        LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+        LambdaQueryWrapper<AssetProcess> assetProcessWrapper = new LambdaQueryWrapper<>();
+
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
+            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+            assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+            assetProcessWrapper.in(AssetProcess::getUserCode, userCodeList);
+        }
+
+        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateBy, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateBy, params.getEndDate());
+        assetProcessWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+
+
+        List<Asset> assetList = assetService.list(assetWrapper);
+
+        Integer totalNum = assetList.size();                                                /* 资产总数 */
+        Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();     /* 资产原值 */
+        Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();    /* 资产净值 */
+        Integer storageNum = totalNum;/* 入库数 */
+
+        List<AssetProcess> assetProcessList = assetProcessService.list(assetProcessWrapper);
+        Long transformNum = assetProcessList.stream()                                       /* 改造数 */
+                .filter(x -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(x.getProcessType()))
+                .count();
+        Long scrapNum = assetProcessList.stream()                                           /* 报废数 */
+                .filter(x -> DingTalkAssetProcessType.PROCESS_SCRAP.getCode().equals(x.getProcessType()))
+                .count();
+        Long sellOutNum = assetProcessList.stream()                                         /* 外卖数 */
+                .filter(x -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(x.getProcessType()))
+                .count();
+
+        Map<String, Object> data = new HashMap<>();
+
+        List<SimpleStatisticVO> mainStatistic = new ArrayList<>();
+        mainStatistic.add(new SimpleStatisticVO("资产总数", totalNum));
+        mainStatistic.add(new SimpleStatisticVO("资产原值", totalValue));
+        mainStatistic.add(new SimpleStatisticVO("资产净值", totalNetWorth));
+        mainStatistic.add(new SimpleStatisticVO("入库数", storageNum));
+        mainStatistic.add(new SimpleStatisticVO("改造数", transformNum));
+        mainStatistic.add(new SimpleStatisticVO("报废数", scrapNum));
+        mainStatistic.add(new SimpleStatisticVO("外卖数", sellOutNum));
+
+        data.put("main", mainStatistic);
+
+        // 饼图
+        Map<String, Long> statusMap = assetList
+                .stream().map(Asset::getAssetStatus)
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+        List<SimpleStatisticVO> statusCount = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : statusMap.entrySet()) {
+            statusCount.add(new SimpleStatisticVO(entry.getKey(), entry.getValue()));
+        }
+
+        data.put("pie", statusCount);
+
+        return AjaxResult.success(data);
+    }
+
 
 }

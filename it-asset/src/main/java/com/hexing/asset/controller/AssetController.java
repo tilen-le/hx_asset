@@ -282,7 +282,7 @@ public class AssetController extends BaseController {
 
     @PostMapping("/assetCountByDept")
     public AjaxResult assetCountByDept(@RequestBody StatisQueryParam params) {
-        List<Map<String, List<SimpleStatisticVO>>> data = new ArrayList<>();
+        List<List<SimpleStatisticVO>> data = new ArrayList<>();
         // 筛选条件
         if (StringUtils.isNotEmpty(params.getDept())) {
             Long deptId = Long.valueOf(params.getDept());
@@ -312,13 +312,13 @@ public class AssetController extends BaseController {
                     Integer totalNum = assetList.size();
                     Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
                     Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
+
                     List<SimpleStatisticVO> tempList = new ArrayList<>();
+                    tempList.add(new SimpleStatisticVO("deptname", dept.getDeptName()));
                     tempList.add(new SimpleStatisticVO("totalNum", totalNum));
                     tempList.add(new SimpleStatisticVO("totalValue", totalValue));
                     tempList.add(new SimpleStatisticVO("totalNetWorth", totalNetWorth));
-                    Map<String, List<SimpleStatisticVO>> temp = new HashMap<>();
-                    temp.put(dept.getDeptName(), tempList);
-                    data.add(temp);
+                    data.add(tempList);
                 }
                 return AjaxResult.success(data);
             } else {                       /* 若为公司下的部门 */
@@ -335,12 +335,11 @@ public class AssetController extends BaseController {
                 Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
                 Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
                 List<SimpleStatisticVO> tempList = new ArrayList<>();
+                tempList.add(new SimpleStatisticVO("deptname", sysDept.getDeptName()));
                 tempList.add(new SimpleStatisticVO("totalNum", totalNum));
                 tempList.add(new SimpleStatisticVO("totalValue", totalValue));
                 tempList.add(new SimpleStatisticVO("totalNetWorth", totalNetWorth));
-                Map<String, List<SimpleStatisticVO>> temp = new HashMap<>();
-                temp.put(sysDept.getDeptName(), tempList);
-                data.add(temp);
+                data.add(tempList);
             }
         }
 

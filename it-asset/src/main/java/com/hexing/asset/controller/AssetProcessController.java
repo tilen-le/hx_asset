@@ -1,6 +1,13 @@
 package com.hexing.asset.controller;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hexing.asset.domain.Asset;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.service.IAssetService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,6 +39,8 @@ public class AssetProcessController extends BaseController
 {
     @Autowired
     private IAssetProcessService assetProcessService;
+    @Autowired
+    private IAssetService assetService;
 
     /**
      * 查询流程总列表
@@ -99,5 +108,29 @@ public class AssetProcessController extends BaseController
     public AjaxResult remove(@PathVariable Long[] ids)
     {
         return toAjax(assetProcessService.deleteAssetProcessByIds(ids));
+    }
+
+    @PostMapping("/processCount")
+    public AjaxResult processCount() {
+
+        // 入库
+
+        // 报废
+        LambdaQueryWrapper<AssetProcess> scrapWrapper = new LambdaQueryWrapper<>();
+        scrapWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SCRAP.getCode());
+        List<AssetProcess> scrapProcess = assetProcessService.list(scrapWrapper);
+        List<String> scrapAssetCodeList = scrapProcess.stream()
+                .map(AssetProcess::getAssetCode).distinct().collect(Collectors.toList());
+        List<Asset> scrapAssetList = assetService.list(new LambdaQueryWrapper<Asset>()
+                .in(Asset::getResponsiblePersonCode, scrapAssetCodeList));
+
+
+
+        // 外卖
+
+        // 改造
+
+
+        return null;
     }
 }

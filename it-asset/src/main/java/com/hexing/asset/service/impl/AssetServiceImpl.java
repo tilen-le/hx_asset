@@ -464,7 +464,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .filter(x -> StringUtils.isNotEmpty(x.getAssetCode()))
                         .collect(Collectors.toList());
                 if (CollectionUtil.isNotEmpty(assets)) {
-                    syncAssetCodeToSAP(assets);
+//                    syncAssetCodeToSAP(assets);
                 }
             } catch (Exception e) {
                 log.error("", e);

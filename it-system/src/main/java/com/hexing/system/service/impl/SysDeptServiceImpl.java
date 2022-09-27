@@ -314,6 +314,11 @@ public class SysDeptServiceImpl implements ISysDeptService
         return deptMapper.selectDeptList(sysDept);
     }
 
+    @Override
+    public List<SysDept> queryChildDeptList(SysDept sysDept) {
+        return deptMapper.selectDeptList(sysDept);
+    }
+
     /**
      * 递归列表
      */

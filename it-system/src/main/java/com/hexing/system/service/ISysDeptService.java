@@ -130,6 +130,8 @@ public interface ISysDeptService
     //获取本部门及子部门
     List<SysDept> selectChildDeptList(SysDept sysDept);
 
+    List<SysDept> queryChildDeptList(SysDept sysDept);
+
     // 获取部门ID和部门名称映射表
     Map<String, String> getDeptIdDeptNameMap();
 }

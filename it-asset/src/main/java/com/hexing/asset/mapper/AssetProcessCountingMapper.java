@@ -1,7 +1,12 @@
 package com.hexing.asset.mapper;
 
 import java.util.List;
+import java.util.Map;
+
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hexing.asset.domain.vo.AssetProcessCountingVO;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 import com.hexing.asset.domain.AssetProcessCounting;
 
@@ -61,4 +66,11 @@ public interface AssetProcessCountingMapper extends BaseMapper<AssetProcessCount
      * @return 结果
      */
     public int deleteAssetProcessCountingByIds(Long[] ids);
+
+    public List<Map<String,String>> inventoryCountYear(@Param("startDate") String startDate, @Param("endDate") String endDate);
+
+    public List<Map<String,String>> inventoryCountMonth(@Param("startDate") String startDate, @Param("endDate") String endDate);
+
+    public List<Map<String,String>> inventoryCountList(@Param("startDate") String startDate, @Param("endDate") String endDate);
+
 }

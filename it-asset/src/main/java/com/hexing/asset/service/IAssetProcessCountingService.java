@@ -1,6 +1,7 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.AssetProcessCounting;
@@ -72,4 +73,10 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
     public int deleteAssetProcessCountingById(Long id);
 
     JSONObject countingStatusCount(String taskCode);
+
+    List<Map<String,String>> inventoryCountYear(String startDate, String endDate);
+
+    List<Map<String,String>> inventoryCountMonth(String startDate, String endDate);
+
+    List<Map<String,String>> inventoryCountList(String startDate, String endDate);
 }

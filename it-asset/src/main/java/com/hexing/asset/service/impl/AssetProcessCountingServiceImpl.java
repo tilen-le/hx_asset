@@ -79,7 +79,12 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
             wrapper.eq(AssetProcessCounting::getUserCode, assetProcessCounting.getUserCode());
         }
         if (StringUtils.isNotBlank(assetProcessCounting.getCountingStatus())) {
-            wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
+            if (AssetCountingStatus.COUNTED.getStatus().equals(assetProcessCounting.getCountingStatus())) {
+                wrapper.in(AssetProcessCounting::getCountingStatus,
+                        AssetCountingStatus.COUNTED.getStatus(), AssetCountingStatus.ABNORMAL.getStatus());
+            } else {
+                wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
+            }
         }
         return assetProcessCountingMapper.selectList(wrapper);
     }
@@ -171,6 +176,23 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         return result;
     }
 
+    @Override
+    public  List<Map<String,String>>  inventoryCountYear(String startDate,String endDate) {
+        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountYear(startDate,endDate);
+        return list;
+    }
+
+    @Override
+    public  List<Map<String,String>>  inventoryCountMonth(String startDate,String endDate) {
+        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountMonth(startDate,endDate);
+        return list;
+    }
+
+    @Override
+    public List<Map<String,String>> inventoryCountList(String startDate,String endDate)
+    {
+        return assetProcessCountingMapper.inventoryCountList(startDate,endDate);
+    }
 
     /**
      * 新增资产盘点流程

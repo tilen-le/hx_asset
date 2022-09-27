@@ -198,11 +198,13 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             String codeOfNewAsset = params.getJSONObject("after").getString("assetCode");
 
             // 老资产
+            SysUser adminUser = sysUserService.getUserByUserName(adminId);
             int updateOfOld = assetMapper.update(null,
                     new LambdaUpdateWrapper<Asset>()
                             .eq(Asset::getAssetCode, codeOfOldAsset)
                             .set(Asset::getLocation, locationOfNewAsset)
                             .set(Asset::getResponsiblePersonCode, adminId)
+                            .set(Asset::getResponsiblePersonName, adminUser.getNickName())
                             .set(Asset::getAssetStatus, AssetStatus.UNUSED.getName())
                             .set(Asset::getUpdateBy, userCode)
                             .set(Asset::getUpdateTime, new Date()));
@@ -211,12 +213,15 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 throw new ServiceException("老资产更新失败");
             }
 
+            // 新资产
+            SysUser user = sysUserService.getUserByUserName(userCode);
             int updateOfNew = assetMapper.update(null,
                     new LambdaUpdateWrapper<Asset>()
                             .eq(Asset::getAssetCode, codeOfNewAsset)
                             .set(Asset::getAssetStatus, AssetStatus.USING.getName())
                             .set(Asset::getLocation, locationOfOldAsset)
                             .set(Asset::getResponsiblePersonCode, userCode)
+                            .set(Asset::getResponsiblePersonName, user.getNickName())
                             .set(Asset::getUpdateBy, userCode)
                             .set(Asset::getUpdateTime, new Date()));
             if (updateOfNew == 0) {
@@ -266,8 +271,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     int update = assetMapper.update(null,
                             new LambdaUpdateWrapper<Asset>()
                                     .eq(Asset::getAssetCode, updateInfo.getString("assetCode"))
-                                    .set(StringUtils.isNotEmpty(location), Asset::getLocation, location)
-                                    .set(StringUtils.isNotEmpty(recipient), Asset::getResponsiblePersonCode, recipient));
+                                    .set(Asset::getLocation, location)
+                                    .set(Asset::getResponsiblePersonCode, recipient)
+                                    .set(Asset::getResponsiblePersonName, recipientInfo.getNickName()));
                     if (update == 0) {
                         throw new ServiceException("更新未成功");
                     }
@@ -300,6 +306,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         if (StringUtils.isNotBlank(asset.getLocation())) {
             wrapper.eq(Asset::getLocation, asset.getLocation());
+        }
+        if (StringUtils.isNotBlank(asset.getResponsiblePersonName())) {
+            wrapper.eq(Asset::getResponsiblePersonName, asset.getResponsiblePersonName());
         }
         if (StringUtils.isNotBlank(asset.getCostCenter())) {
             wrapper.eq(Asset::getCostCenter, asset.getCostCenter());

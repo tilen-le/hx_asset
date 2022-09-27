@@ -1,23 +1,15 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <!-- <el-form-item label="流程总表id" prop="processId">
-        <el-input
-          v-model="queryParams.processId"
-          placeholder="请输入流程总表id"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item> -->
-      <el-form-item label="实例ID" prop="instanceId">
-        <el-input
-          v-model="queryParams.instanceId"
-          placeholder="请输入实例ID"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="流程类型" prop="processType">
+        <el-select v-model="queryParams.processType" placeholder="请选择流程类型" clearable size="small">
+          <el-option
+            v-for="dict in dict.type.dingtalk_asset_process_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item label="发起人工号" prop="userCode">
         <el-input
@@ -28,10 +20,10 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="平台资产编码" prop="assetCode">
+      <el-form-item label="资产编码" prop="assetCode">
         <el-input
           v-model="queryParams.assetCode"
-          placeholder="请输入平台资产编码"
+          placeholder="请输入资产编码"
           clearable
           size="small"
           @keyup.enter.native="handleQuery"
@@ -51,7 +43,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['asset:transform:add']"
+          v-hasPermi="['asset:process:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -62,7 +54,7 @@
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['asset:transform:edit']"
+          v-hasPermi="['asset:process:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -73,7 +65,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['asset:transform:remove']"
+          v-hasPermi="['asset:process:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -84,20 +76,23 @@
           size="mini"
           :loading="exportLoading"
           @click="handleExport"
-          v-hasPermi="['asset:transform:export']"
+          v-hasPermi="['asset:process:export']"
         >导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="transformList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="processList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <!-- <el-table-column label="平台资产编码" align="center" prop="id" />
-      <el-table-column label="流程总表id" align="center" prop="processId" /> -->
-      <el-table-column label="实例ID" align="center" prop="instanceId" />
+      <!-- <el-table-column label="资产编码" align="center" prop="id" /> -->
+      <el-table-column label="流程类型" align="center" prop="processType">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.dingtalk_asset_process_type" :value="scope.row.processType"/>
+        </template>
+      </el-table-column>
       <el-table-column label="发起人工号" align="center" prop="userCode" />
       <el-table-column label="发起人名称" align="center" prop="userName" />
-      <el-table-column label="平台资产编码" align="center" prop="assetCode" />
+      <el-table-column label="资产编码" align="center" prop="assetCode" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -105,14 +100,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['asset:transform:edit']"
+            v-hasPermi="['asset:process:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['asset:transform:remove']"
+            v-hasPermi="['asset:process:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -126,20 +121,24 @@
       @pagination="getList"
     />
 
-    <!-- 添加或修改资产改造流程对话框 -->
+    <!-- 添加或修改流程总对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="流程总表id" prop="processId">
-          <el-input v-model="form.processId" placeholder="请输入流程总表id" />
-        </el-form-item>
-        <el-form-item label="实例ID" prop="instanceId">
-          <el-input v-model="form.instanceId" placeholder="请输入实例ID" />
+        <el-form-item label="流程类型" prop="processType">
+          <el-select v-model="form.processType" placeholder="请选择流程类型">
+            <el-option
+              v-for="dict in dict.type.dingtalk_asset_process_type"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="发起人工号" prop="userCode">
           <el-input v-model="form.userCode" placeholder="请输入发起人工号" />
         </el-form-item>
-        <el-form-item label="平台资产编码" prop="assetCode">
-          <el-input v-model="form.assetCode" placeholder="请输入平台资产编码" />
+        <el-form-item label="资产编码" prop="assetCode">
+          <el-input v-model="form.assetCode" placeholder="请输入资产编码" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -151,10 +150,11 @@
 </template>
 
 <script>
-import { listTransform, getTransform, delTransform, addTransform, updateTransform, exportTransform } from "@/api/asset/transform";
+import { listProcess, getProcess, delProcess, addProcess, updateProcess, exportProcess } from "@/api/asset/process";
 
 export default {
-  name: "Transform",
+  name: "Process",
+  dicts: ['dingtalk_asset_process_type'],
   data() {
     return {
       // 遮罩层
@@ -171,8 +171,8 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 资产改造流程表格数据
-      transformList: [],
+      // 流程总表格数据
+      processList: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -181,8 +181,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        processId: null,
-        instanceId: null,
+        processType: null,
         userCode: null,
         assetCode: null,
       },
@@ -197,11 +196,11 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询资产改造流程列表 */
+    /** 查询流程总列表 */
     getList() {
       this.loading = true;
-      listTransform(this.queryParams).then(response => {
-        this.transformList = response.rows;
+      listProcess(this.queryParams).then(response => {
+        this.processList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
@@ -215,8 +214,7 @@ export default {
     reset() {
       this.form = {
         id: null,
-        processId: null,
-        instanceId: null,
+        processType: null,
         userCode: null,
         assetCode: null,
         createTime: null,
@@ -244,16 +242,16 @@ export default {
     handleAdd() {
       this.reset();
       this.open = true;
-      this.title = "添加资产改造流程";
+      this.title = "添加流程总";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids
-      getTransform(id).then(response => {
+      getProcess(id).then(response => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改资产改造流程";
+        this.title = "修改流程总";
       });
     },
     /** 提交按钮 */
@@ -261,13 +259,13 @@ export default {
       this.$refs["form"].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
-            updateTransform(this.form).then(response => {
+            updateProcess(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
               this.getList();
             });
           } else {
-            addTransform(this.form).then(response => {
+            addProcess(this.form).then(response => {
               this.$modal.msgSuccess("新增成功");
               this.open = false;
               this.getList();
@@ -279,8 +277,8 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm("提示", "确认","取消",'是否确认删除资产改造流程编号为"' + ids + '"的数据项？').then(function() {
-        return delTransform(ids);
+      this.$modal.confirm('是否确认删除流程总编号为"' + ids + '"的数据项？').then(function() {
+        return delProcess(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
@@ -289,9 +287,9 @@ export default {
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$modal.confirm("提示", "确认","取消",'是否确认导出所有资产改造流程数据项？').then(() => {
+      this.$modal.confirm('是否确认导出所有流程总数据项？').then(() => {
         this.exportLoading = true;
-        return exportTransform(queryParams);
+        return exportProcess(queryParams);
       }).then(response => {
         this.$download.name(response.msg);
         this.exportLoading = false;

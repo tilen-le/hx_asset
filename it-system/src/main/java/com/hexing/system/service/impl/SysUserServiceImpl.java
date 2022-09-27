@@ -90,7 +90,7 @@ public class SysUserServiceImpl implements ISysUserService
     }
 
     @Override
-    public List selectUserByDeptId(List deptId)
+    public List<String> selectUserByDeptId(List<String> deptId)
     {
         return userMapper.selectUserByDeptId(deptId);
     }

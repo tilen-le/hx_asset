@@ -61,7 +61,7 @@ public interface ISysDeptService
      */
     Map<Long, SysDept> selectDeptByIds(List<Long> deptIds);
 
-    public List selectDeptByParentId(Long deptId);
+    public List<String> selectDeptByParentId(Long deptId);
 
     /**
      * 根据ID查询所有子部门（正常状态）

@@ -2,8 +2,11 @@ package com.hexing.asset.service.impl;
 
 import java.util.List;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessMapper;
@@ -31,7 +34,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Override
     public AssetProcess selectAssetProcessById(Long id)
     {
-        return assetProcessMapper.selectAssetProcessById(id);
+        return assetProcessMapper.selectById(id);
     }
 
     /**
@@ -43,7 +46,17 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Override
     public List<AssetProcess> selectAssetProcessList(AssetProcess assetProcess)
     {
-        return assetProcessMapper.selectAssetProcessList(assetProcess);
+        LambdaQueryWrapper<AssetProcess> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(assetProcess.getProcessType())) {
+            wrapper.eq(AssetProcess::getProcessType, assetProcess.getProcessType());
+        }
+        if (StringUtils.isNotBlank(assetProcess.getAssetCode())) {
+            wrapper.eq(AssetProcess::getAssetCode, assetProcess.getAssetCode());
+        }
+        if (StringUtils.isNotBlank(assetProcess.getUserName())) {
+            wrapper.like(AssetProcess::getUserName, assetProcess.getUserName());
+        }
+        return assetProcessMapper.selectList(wrapper);
     }
 
     /**

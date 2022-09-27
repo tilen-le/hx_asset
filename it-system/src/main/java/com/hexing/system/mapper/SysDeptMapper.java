@@ -44,7 +44,7 @@ public interface SysDeptMapper
      */
     List<SysDept> selectDeptByIds(List<Long> deptIds);
 
-    public List selectDeptByParentId(Long deptId);
+    public List<String> selectDeptByParentId(Long deptId);
 
     /**
      * 根据ID查询所有子部门

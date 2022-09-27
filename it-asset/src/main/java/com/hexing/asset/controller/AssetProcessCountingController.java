@@ -1,11 +1,14 @@
 package com.hexing.asset.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +56,54 @@ public class AssetProcessCountingController extends BaseController
         List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
         TableDataInfo dataTable = getDataTable(list);
         dataTable.setRows(voList);
+        return dataTable;
+    }
+
+    /**
+     * 盘点统计
+     */
+    @ApiOperation("盘点统计")
+    @GetMapping("/inventoryCount")
+    public AjaxResult inventoryCount(String type,String startDate,String endDate) {
+        JSONObject jsonObject=new JSONObject();
+        List x =new ArrayList();
+        List isCount =new ArrayList();
+        List isExcept =new ArrayList();
+        if ("年".equals(type)){
+            List<Map<String,String>>  result = assetProcessCountingService.inventoryCountYear(startDate,endDate);
+            for(Map m:result){
+                x.add(m.get("y"));
+                isCount.add(m.get("isCount"));
+                isExcept.add(m.get("isExcept"));
+            }
+            jsonObject.put("x",x);
+            jsonObject.put("isCount",isCount);
+            jsonObject.put("isExcept",isExcept);
+        }
+        if ("月".equals(type)){
+            List<Map<String,String>>  result = assetProcessCountingService.inventoryCountMonth(startDate,endDate);
+            for(Map m:result){
+                x.add(m.get("y")+"年"+m.get("m")+"月");
+                isCount.add(m.get("isCount"));
+                isExcept.add(m.get("isExcept"));
+            }
+            jsonObject.put("x",x);
+            jsonObject.put("isCount",isCount);
+            jsonObject.put("isExcept",isExcept);
+        }
+        return AjaxResult.success(jsonObject);
+    }
+
+    /**
+     * 盘点统计列表
+     */
+    @ApiOperation("盘点统计列表")
+    @GetMapping("/inventoryCountList")
+    public TableDataInfo inventoryCountList(String startDate,String endDate)
+    {
+        startPage();
+        List<Map<String,String>> list = assetProcessCountingService.inventoryCountList(startDate,endDate);
+        TableDataInfo dataTable = getDataTable(list);
         return dataTable;
     }
 

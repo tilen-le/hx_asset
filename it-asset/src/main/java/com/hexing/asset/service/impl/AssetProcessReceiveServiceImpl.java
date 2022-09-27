@@ -8,7 +8,9 @@ import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetProcessTransfer;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.mapper.AssetProcessMapper;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.system.mapper.SysUserMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessReceiveMapper;
@@ -29,6 +31,8 @@ public class AssetProcessReceiveServiceImpl extends ServiceImpl<AssetProcessRece
     private AssetProcessReceiveMapper assetProcessReceiveMapper;
     @Autowired
     private AssetProcessMapper assetProcessMapper;
+    @Autowired
+    private SysUserMapper sysUserMapper;
 
     /**
      * 查询资产领用流程
@@ -114,11 +118,13 @@ public class AssetProcessReceiveServiceImpl extends ServiceImpl<AssetProcessRece
     @Override
     @Transactional
     public void saveProcess(String instanceId, String userCode, String assetCode, String type) {
+        SysUser user = sysUserMapper.getUserByUserName(userCode);
         // 新增主流程记录
         AssetProcess process = new AssetProcess()
                 .setProcessType(DingTalkAssetProcessType.PROCESS_RECEIVE.getCode())
                 .setAssetCode(assetCode)
                 .setUserCode(userCode)
+                .setUserName(user.getNickName())
                 .setCreateTime(new Date());
         if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(type)) {
             process.setProcessType(DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode());
@@ -129,6 +135,7 @@ public class AssetProcessReceiveServiceImpl extends ServiceImpl<AssetProcessRece
                 .setProcessId(process.getId())
                 .setInstanceId(instanceId)
                 .setUserCode(userCode)
+                .setUserName(user.getNickName())
                 .setAssetCode(assetCode)
                 .setCreateTime(new Date());
         assetProcessReceiveMapper.insert(processReceive);

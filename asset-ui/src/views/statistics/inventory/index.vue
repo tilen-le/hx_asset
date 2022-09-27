@@ -38,7 +38,6 @@ import echarts from 'echarts'
 import DeptTreeSelect from "@/components/DeptTreeSelect/index"
 import { inventoryCount, inventoryCountList } from "@/api/statistics/counting"
 export default {
-  // 查询参数
   components: { DeptTreeSelect },
   data() {
     return {

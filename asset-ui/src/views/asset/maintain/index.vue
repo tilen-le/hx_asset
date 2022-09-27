@@ -96,6 +96,7 @@
       <el-table-column label="流程总表id" align="center" prop="processId" />
       <el-table-column label="实例ID" align="center" prop="instanceId" />
       <el-table-column label="发起人工号" align="center" prop="userCode" />
+      <el-table-column label="发起人名称" align="center" prop="userName" />
       <el-table-column label="平台资产编码" align="center" prop="assetCode" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">

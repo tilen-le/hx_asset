@@ -53,8 +53,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isNotBlank(assetProcess.getAssetCode())) {
             wrapper.eq(AssetProcess::getAssetCode, assetProcess.getAssetCode());
         }
-        if (StringUtils.isNotBlank(assetProcess.getUserName())) {
-            wrapper.like(AssetProcess::getUserName, assetProcess.getUserName());
+        if (StringUtils.isNotBlank(assetProcess.getUserCode())) {
+            wrapper.eq(AssetProcess::getUserCode, assetProcess.getUserCode());
         }
         return assetProcessMapper.selectList(wrapper);
     }

@@ -333,15 +333,17 @@ public class DingTalkAssetController extends BaseController {
         System.out.println("params: " + params);
         JSONObject data = params.getObject("data", JSONObject.class);
         String userCode = data.getString("userCode");
+        String userName = data.getString("userName");
         String processType = data.getString("processType");
         String instanceId = data.getString("instanceId");
         String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
         for (Object o : assetList) {
-            String  assetCode = o.toString();
+            String  assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             AssetProcess assetProcess = new AssetProcess();
             assetProcess.setAssetCode(assetCode);
             assetProcess.setUserCode(userCode);
+            assetProcess.setUserName(userName);
             assetProcess.setProcessType(processType);
             assetProcess.setCreateTime(new Date());
             assetProcessService.insertAssetProcess(assetProcess);
@@ -350,6 +352,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setAssetCode(assetCode);
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
+            entity.setUserName(userName);
             entity.setFileInfo(fileInfo);
             entity.setInstanceId(instanceId);
             entity.setCreateTime(new Date());
@@ -367,15 +370,17 @@ public class DingTalkAssetController extends BaseController {
         System.out.println("params: " + params);
         JSONObject data = params.getObject("data", JSONObject.class);
         String userCode = data.getString("userCode");
+        String userName = data.getString("userName");
         String processType = data.getString("processType");
         String instanceId = data.getString("instanceId");
         String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
         for (Object o : assetList) {
-            String  assetCode = o.toString();
+            String  assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             AssetProcess assetProcess = new AssetProcess();
             assetProcess.setAssetCode(assetCode);
             assetProcess.setUserCode(userCode);
+            assetProcess.setUserName(userName);
             assetProcess.setProcessType(processType);
             assetProcess.setCreateTime(new Date());
             assetProcessService.insertAssetProcess(assetProcess);
@@ -384,6 +389,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setAssetCode(assetCode);
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
+            entity.setUserName(userName);
             entity.setFileInfo(fileInfo);
             entity.setInstanceId(instanceId);
             entity.setCreateTime(new Date());
@@ -402,15 +408,17 @@ public class DingTalkAssetController extends BaseController {
         System.out.println("params: " + params);
         JSONObject data = params.getObject("data", JSONObject.class);
         String userCode = data.getString("userCode");
+        String userName = data.getString("userName");
         String processType = data.getString("processType");
         String instanceId = data.getString("instanceId");
         String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
         for (Object o : assetList) {
-            String  assetCode = o.toString();
+            String  assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             AssetProcess assetProcess = new AssetProcess();
             assetProcess.setAssetCode(assetCode);
             assetProcess.setUserCode(userCode);
+            assetProcess.setUserName(userName);
             assetProcess.setProcessType(processType);
             assetProcess.setCreateTime(new Date());
             assetProcessService.insertAssetProcess(assetProcess);
@@ -419,6 +427,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setAssetCode(assetCode);
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
+            entity.setUserName(userName);
             entity.setInstanceId(instanceId);
             entity.setFileInfo(fileInfo);
             entity.setCreateTime(new Date());

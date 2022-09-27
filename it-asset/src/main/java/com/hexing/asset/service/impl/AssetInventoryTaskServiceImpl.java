@@ -243,6 +243,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             AssetProcess assetProcess = new AssetProcess();
             assetProcess.setAssetCode(assetCode.toString());
             assetProcess.setUserCode(userName);
+            assetProcess.setUserName(user);
             assetProcess.setProcessType("1000");
             assetProcess.setCreateTime(new Date());
             assetProcessList.add(assetProcess);

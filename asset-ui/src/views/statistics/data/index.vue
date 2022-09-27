@@ -79,6 +79,7 @@ export default {
       deptTotalValue: {}
     }
   },
+  mounted() { this.getAssetCount() },
   methods: {
     refreshData() { },
     getAssetCount() {

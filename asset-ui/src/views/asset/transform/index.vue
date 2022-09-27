@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="流程总表id" prop="processId">
+      <!-- <el-form-item label="流程总表id" prop="processId">
         <el-input
           v-model="queryParams.processId"
           placeholder="请输入流程总表id"
@@ -9,7 +9,7 @@
           size="small"
           @keyup.enter.native="handleQuery"
         />
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item label="实例ID" prop="instanceId">
         <el-input
           v-model="queryParams.instanceId"
@@ -92,8 +92,8 @@
 
     <el-table v-loading="loading" :data="transformList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="平台资产编码" align="center" prop="id" />
-      <el-table-column label="流程总表id" align="center" prop="processId" />
+      <!-- <el-table-column label="平台资产编码" align="center" prop="id" />
+      <el-table-column label="流程总表id" align="center" prop="processId" /> -->
       <el-table-column label="实例ID" align="center" prop="instanceId" />
       <el-table-column label="发起人工号" align="center" prop="userCode" />
       <el-table-column label="发起人名称" align="center" prop="userName" />

@@ -84,7 +84,7 @@
 
     <el-table v-loading="loading" :data="processList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="资产编码" align="center" prop="id" />
+      <!-- <el-table-column label="资产编码" align="center" prop="id" /> -->
       <el-table-column label="流程类型" align="center" prop="processType">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.dingtalk_asset_process_type" :value="scope.row.processType"/>

@@ -50,6 +50,11 @@
         <line-chart :chartData="deptTotalValue" height="250px"></line-chart>
       </el-col>
     </el-row>
+    <el-row>
+      <el-col :span="8">
+        <line-chart :chartData="pieOptions" height="250px"></line-chart>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
@@ -71,6 +76,7 @@ export default {
       dateRange: [],
       cardData: [],
       chart: null,
+      pieOptions: {},
       categoryNumCount: {},
       netWorthCategoryCount: {},
       totalValueCategoryCount: {},
@@ -85,8 +91,7 @@ export default {
     getAssetCount() {
       assetCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
         this.cardData = response.data.main
-        console.log('饼图数据')
-        console.log(response.data.pie)
+        this.pieOptions = this.getPieOptions(response.data.pie)
       })
       assetCountByCategory(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
         this.categoryNumCount = this.getOptions('数量', response.data.categoryNumCount)
@@ -176,6 +181,24 @@ export default {
         ]
       };
       return option
+    },
+    getPieOptions(data) {
+      return {
+        tooltip: {
+          trigger: 'item'
+        },
+        legend: {
+          orient: 'vertical',
+          left: 'left'
+        },
+        series: [
+          {
+            type: 'pie',
+            radius: '50%',
+            data: data,
+          }
+        ]
+      };
     }
   }
 }

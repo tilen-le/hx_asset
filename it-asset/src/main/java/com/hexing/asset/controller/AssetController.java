@@ -590,5 +590,154 @@ public class AssetController extends BaseController {
         return AjaxResult.success(data);
     }
 
+    @PostMapping("/assetProcessTypeDeptNumCount")
+    public AjaxResult assetProcessTypeDeptNumCount(@RequestBody StatisQueryParam params) {
+        List<SimpleStatisticVO> data = new ArrayList<>();
+        List<String> xAxisValue = new ArrayList<>();
+        List<Long> storageNumCountList = new ArrayList<>();
+        List<Long> scrapProcessNumCountList = new ArrayList<>();
+        List<Long> sellOutProcessNumCountList = new ArrayList<>();
+        List<Long> transformProcessNumCountList = new ArrayList<>();
+
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            Long deptId = Long.valueOf(params.getDept());
+            SysDept sysDept = sysDeptService.selectDeptById(deptId);
+            if (ObjectUtil.isNull(sysDept)) {
+                return AjaxResult.error("系统无该组织架构信息");
+            }
+            // 若为公司
+            if (sysDept.getParentId() == 0L) {  /* 若为公司 */
+                // 查询所有下一级部门
+                SysDept deptQuery = new SysDept();
+                deptQuery.setParentId(deptId);
+                List<SysDept> childDeptList = sysDeptService.queryChildDeptList(deptQuery);
+                if (CollUtil.isEmpty(childDeptList)) {
+                    return AjaxResult.error("该组织架构下无子部门");
+                }
+                for (SysDept dept : childDeptList) {
+                    // 入库
+                    LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+                    assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateTime, params.getStartDate())
+                            .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateTime, params.getEndDate());
+                    List<String> deptIdList = sysDeptService.selectDeptByParentId(dept.getDeptId());
+                    deptIdList.add(String.valueOf(dept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
+                    List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+                    List<Asset> assetList = new ArrayList<>();
+                    if (CollectionUtil.isNotEmpty(userCodeList)) {
+                        assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+                        assetList = assetService.list(assetWrapper);
+                    }
+                    if (CollectionUtil.isEmpty(assetList)) continue;
+                    xAxisValue.add(dept.getDeptName());
+                    storageNumCountList.add((long) assetList.size());
+                    // 报废
+                    LambdaQueryWrapper<AssetProcess> scrapAssetWrapper = new LambdaQueryWrapper<>();
+                    scrapAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SCRAP.getCode());
+                    scrapAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                            .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+                    scrapAssetWrapper.in(AssetProcess::getAssetCode,
+                            assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+                    List<AssetProcess> scrapProcessList = assetProcessService.list(scrapAssetWrapper);
+                    List<String> scrapAssetCode = scrapProcessList.stream()
+                            .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+                    Long scrapAssetNum = assetList.stream().filter(x -> scrapAssetCode.contains(x.getAssetCode())).count();
+                    scrapProcessNumCountList.add(scrapAssetNum);
+                    // 外卖
+                    LambdaQueryWrapper<AssetProcess> sellOutAssetWrapper = new LambdaQueryWrapper<>();
+                    sellOutAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode());
+                    sellOutAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                            .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+                    sellOutAssetWrapper.in(AssetProcess::getAssetCode,
+                            assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+                    List<AssetProcess> sellOutProcessList = assetProcessService.list(sellOutAssetWrapper);
+                    List<String> sellOutAssetCode = sellOutProcessList.stream()
+                            .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+                    Long sellOutAssetNum = assetList.stream().filter(x -> sellOutAssetCode.contains(x.getAssetCode())).count();
+                    sellOutProcessNumCountList.add(sellOutAssetNum);
+                    // 改造
+                    LambdaQueryWrapper<AssetProcess> transformAssetWrapper = new LambdaQueryWrapper<>();
+                    transformAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode());
+                    transformAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                            .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+                    transformAssetWrapper.in(AssetProcess::getAssetCode,
+                            assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+                    List<AssetProcess> transformProcessList = assetProcessService.list(transformAssetWrapper);
+                    List<String> transformAssetCode = transformProcessList.stream()
+                            .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+                    Long transformAssetNum = assetList.stream().filter(x -> transformAssetCode.contains(x.getAssetCode())).count();
+                    transformProcessNumCountList.add(transformAssetNum);
+
+                }
+                data.add(new SimpleStatisticVO("x", xAxisValue));
+                data.add(new SimpleStatisticVO("入库", storageNumCountList));
+                data.add(new SimpleStatisticVO("报废", scrapProcessNumCountList));
+                data.add(new SimpleStatisticVO("外卖", sellOutProcessNumCountList));
+                data.add(new SimpleStatisticVO("改造", transformProcessNumCountList));
+
+                return AjaxResult.success(data);
+            } else {                       /* 若为公司下的部门 */
+                // 入库
+                LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+                assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateTime, params.getStartDate())
+                        .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateTime, params.getEndDate());
+                List<String> deptIdList = sysDeptService.selectDeptByParentId(sysDept.getDeptId());
+                deptIdList.add(String.valueOf(sysDept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
+                List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+                List<Asset> assetList = new ArrayList<>();
+                if (CollectionUtil.isNotEmpty(userCodeList)) {
+                    assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+                    assetList = assetService.list(assetWrapper);
+                }
+                xAxisValue.add(sysDept.getDeptName());
+                storageNumCountList.add((long) assetList.size());
+                // 报废
+                LambdaQueryWrapper<AssetProcess> scrapAssetWrapper = new LambdaQueryWrapper<>();
+                scrapAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SCRAP.getCode());
+                scrapAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                        .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+                scrapAssetWrapper.in(AssetProcess::getAssetCode,
+                        assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+                List<AssetProcess> scrapProcessList = assetProcessService.list(scrapAssetWrapper);
+                List<String> scrapAssetCode = scrapProcessList.stream()
+                        .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+                Long scrapAssetNum = assetList.stream().filter(x -> scrapAssetCode.contains(x.getAssetCode())).count();
+                scrapProcessNumCountList.add(scrapAssetNum);
+                // 外卖
+                LambdaQueryWrapper<AssetProcess> sellOutAssetWrapper = new LambdaQueryWrapper<>();
+                sellOutAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode());
+                sellOutAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                        .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+                sellOutAssetWrapper.in(AssetProcess::getAssetCode,
+                        assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+                List<AssetProcess> sellOutProcessList = assetProcessService.list(sellOutAssetWrapper);
+                List<String> sellOutAssetCode = sellOutProcessList.stream()
+                        .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+                Long sellOutAssetNum = assetList.stream().filter(x -> sellOutAssetCode.contains(x.getAssetCode())).count();
+                sellOutProcessNumCountList.add(sellOutAssetNum);
+                // 改造
+                LambdaQueryWrapper<AssetProcess> transformAssetWrapper = new LambdaQueryWrapper<>();
+                transformAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode());
+                transformAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                        .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+                transformAssetWrapper.in(AssetProcess::getAssetCode,
+                        assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+                List<AssetProcess> transformProcessList = assetProcessService.list(transformAssetWrapper);
+                List<String> transformAssetCode = transformProcessList.stream()
+                        .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+                Long transformAssetNum = assetList.stream().filter(x -> transformAssetCode.contains(x.getAssetCode())).count();
+                transformProcessNumCountList.add(transformAssetNum);
+
+                data.add(new SimpleStatisticVO("x", xAxisValue));
+                data.add(new SimpleStatisticVO("入库", storageNumCountList));
+                data.add(new SimpleStatisticVO("报废", scrapProcessNumCountList));
+                data.add(new SimpleStatisticVO("外卖", sellOutProcessNumCountList));
+                data.add(new SimpleStatisticVO("改造", transformProcessNumCountList));
+
+                return AjaxResult.success(data);
+            }
+        }
+
+        return AjaxResult.success(data);
+    }
 
 }

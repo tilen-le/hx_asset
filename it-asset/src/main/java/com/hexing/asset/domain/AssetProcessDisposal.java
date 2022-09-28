@@ -58,4 +58,7 @@ public class AssetProcessDisposal
 
     /** 文件信息 */
     private String fileInfo;
+
+    /** 类型 500报废；510外卖 */
+    private String type;
 }

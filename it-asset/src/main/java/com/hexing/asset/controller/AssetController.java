@@ -169,77 +169,79 @@ public class AssetController extends BaseController {
     public AjaxResult assetCount(@RequestBody StatisQueryParam params) {
         Map<String, Object> data = new HashMap<>();
 
+        if (StringUtils.isEmpty(params.getDept())) {
+            return AjaxResult.error("未指定组织范围");
+        }
+        if (ObjectUtil.isEmpty(params.getStartDate()) || ObjectUtil.isEmpty(params.getEndDate())) {
+            return AjaxResult.error("未指定起止日期");
+        }
+
         // 筛选条件
         LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
         LambdaQueryWrapper<AssetProcess> assetProcessWrapper = new LambdaQueryWrapper<>();
 
-        if (StringUtils.isNotEmpty(params.getDept())) {
-            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
-            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
-            assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
-        }
+        List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
+        List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+        assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
 
-        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
-                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
-//        assetProcessWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
-//                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
-
+        // 资产的起止日期筛选对应字段为“资本化日期/资产价值录入日期”
+        assetWrapper.ge(Asset::getCapitalizationDate, params.getStartDate())
+                .le(Asset::getCapitalizationDate, params.getEndDate());
 
         List<Asset> assetList = assetService.list(assetWrapper);
-        if (CollectionUtil.isEmpty(assetList)) {
-            List<SimpleStatisticVO> mainStatistic = new ArrayList<>();
-            mainStatistic.add(new SimpleStatisticVO("资产总数", 0));
-            mainStatistic.add(new SimpleStatisticVO("资产原值", 0));
-            mainStatistic.add(new SimpleStatisticVO("资产净值", 0));
-            mainStatistic.add(new SimpleStatisticVO("入库数", 0));
-            mainStatistic.add(new SimpleStatisticVO("改造数", 0));
-            mainStatistic.add(new SimpleStatisticVO("报废数", 0));
-            mainStatistic.add(new SimpleStatisticVO("外卖数", 0));
-            data.put("main", mainStatistic);
-            data.put("pie", null);
-            return AjaxResult.success(data);
+
+        int totalNum = 0;           /* 资产总数 */
+        double totalValue = 0;      /* 资产原值 */
+        double totalNetWorth = 0;   /* 资产净值 */
+        int storageNum = 0;         /* 入库数 */
+        long transformNum = 0;      /* 改造数 */
+        long scrapNum = 0;          /* 报废数 */
+        long sellOutNum = 0;        /* 外卖数 */
+
+        List<SimpleStatisticVO> statusCount = new ArrayList<>();
+
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            totalNum = assetList.size();
+            totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
+            totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
+            storageNum = totalNum;
+
+            assetProcessWrapper
+                    .in(AssetProcess::getAssetCode
+                            ,assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()))
+                    .ge(AssetProcess::getCreateTime, params.getStartDate())
+                    .le(AssetProcess::getCreateTime, params.getEndDate());
+            List<AssetProcess> assetProcessList = assetProcessService.list(assetProcessWrapper);
+            transformNum = assetProcessList.stream()
+                    .filter(x -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(x.getProcessType()))
+                    .count();
+            scrapNum = assetProcessList.stream()
+                    .filter(x -> DingTalkAssetProcessType.PROCESS_SCRAP.getCode().equals(x.getProcessType()))
+                    .count();
+            sellOutNum = assetProcessList.stream()
+                    .filter(x -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(x.getProcessType()))
+                    .count();
+
+            // 饼图
+            Map<String, Long> statusMap = assetList.stream()
+                    .map(Asset::getAssetStatus)
+                    .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
+
+            for (Map.Entry<String, Long> entry : statusMap.entrySet()) {
+                statusCount.add(new SimpleStatisticVO(entry.getKey(), entry.getValue()));
+            }
         }
-        Integer totalNum = assetList.size();                                                /* 资产总数 */
-        Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();     /* 资产原值 */
-        Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();    /* 资产净值 */
-        Integer storageNum = totalNum;/* 入库数 */
-
-
-        assetProcessWrapper.in(AssetProcess::getAssetCode, assetList.stream().map(Asset::getAssetCode).collect(Collectors.toSet()));
-        List<AssetProcess> assetProcessList = assetProcessService.list(assetProcessWrapper);
-        Long transformNum = assetProcessList.stream()                                       /* 改造数 */
-                .filter(x -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(x.getProcessType()))
-                .map(AssetProcess::getAssetCode)
-                .distinct()
-                .count();
-        Long scrapNum = assetProcessList.stream()                                           /* 报废数 */
-                .filter(x -> DingTalkAssetProcessType.PROCESS_SCRAP.getCode().equals(x.getProcessType()))
-                .count();
-        Long sellOutNum = assetProcessList.stream()                                         /* 外卖数 */
-                .filter(x -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(x.getProcessType()))
-                .count();
-
 
         List<SimpleStatisticVO> mainStatistic = new ArrayList<>();
         mainStatistic.add(new SimpleStatisticVO("资产总数", totalNum));
-        mainStatistic.add(new SimpleStatisticVO("资产原值", totalValue));
-        mainStatistic.add(new SimpleStatisticVO("资产净值", totalNetWorth));
+        mainStatistic.add(new SimpleStatisticVO("资产原值(元)", totalValue));
+        mainStatistic.add(new SimpleStatisticVO("资产净值(元)", totalNetWorth));
         mainStatistic.add(new SimpleStatisticVO("入库数", storageNum));
         mainStatistic.add(new SimpleStatisticVO("改造数", transformNum));
         mainStatistic.add(new SimpleStatisticVO("报废数", scrapNum));
         mainStatistic.add(new SimpleStatisticVO("外卖数", sellOutNum));
 
         data.put("main", mainStatistic);
-
-        // 饼图
-        Map<String, Long> statusMap = assetList
-                .stream().map(Asset::getAssetStatus)
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        List<SimpleStatisticVO> statusCount = new ArrayList<>();
-        for (Map.Entry<String, Long> entry : statusMap.entrySet()) {
-            statusCount.add(new SimpleStatisticVO(entry.getKey(), entry.getValue()));
-        }
-
         data.put("pie", statusCount);
 
         return AjaxResult.success(data);

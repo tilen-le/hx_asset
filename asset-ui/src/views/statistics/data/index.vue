@@ -5,14 +5,14 @@
         <dept-tree-select v-model="queryParams.dept" style="width:300px"></dept-tree-select>
       </el-form-item>
       <el-form-item label="统计类型" prop="type">
-        <el-select v-model="queryParams.type" placeholder="请选择统计类型" @change="refreshData">
+        <el-select v-model="queryParams.type" placeholder="请选择统计类型">
           <el-option value="年">年</el-option>
           <el-option value="月">月</el-option>
         </el-select>
       </el-form-item>
       <el-form-item label="起止日期">
         <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-          end-placeholder="结束日期" value-format="yyyy-MM-dd" @change="refreshData">
+          end-placeholder="结束日期" value-format="yyyy-MM-dd">
         </el-date-picker>
       </el-form-item>
       <el-form-item>
@@ -22,7 +22,7 @@
     <el-row class="statistics-cards">
       <div v-if="cardData.length ==0" style="text-align:center;width:100%">暂无数据</div>
       <el-card v-for="item in cardData" :key="item.name">
-        {{item.name}}<br />{{numFixed(item.value,2) }}
+        {{item.name}}<br />{{numFixed(item.value,0) }}
       </el-card>
     </el-row>
 
@@ -57,6 +57,9 @@
       <el-col :span="8">
         <line-chart :chartData="process_category" height="250px"></line-chart>
       </el-col>
+      <el-col :span="8">
+        <line-chart :chartData="process_dept" height="250px"></line-chart>
+      </el-col>
     </el-row>
     <el-row>
       <el-col :span="8">
@@ -71,13 +74,16 @@
 import DeptTreeSelect from "@/components/DeptTreeSelect/index"
 import LineChart from "@/views/dashboard/LineChart.vue"
 import { numFixed } from "@/utils"
-import { assetCount, assetCountByCategory, assetCountByDept, assetProcessTypeTimeNumCount, assetProcessTypeCategoryNumCount } from "@/api/statistics/data"
+import {
+  assetCount, assetCountByCategory, assetCountByDept, assetProcessTypeTimeNumCount,
+  assetProcessTypeCategoryNumCount, assetProcessTypeDeptNumCount
+} from "@/api/statistics/data"
 export default {
   components: { DeptTreeSelect, LineChart },
   data() {
     return {
       queryParams: {
-        dept: null,
+        dept: 20003060,//默认利沃得
         type: '月',// 年/月
       },
       dateRange: [],
@@ -91,13 +97,20 @@ export default {
       deptNetWorth: {},
       deptTotalValue: {},
       process_time: {},
-      process_category:{}
+      process_category: {},
+      process_dept: {}
     }
   },
-  mounted() { this.getAssetCount() },
+  mounted() {
+    var firstDay = new Date();
+    firstDay.setDate(1);
+    firstDay.setMonth(0);
+    this.dateRange = [this.parseTime(firstDay, '{y}-{m}-{d}'), this.parseTime(new Date(), '{y}-{m}-{d}')]
+    this.getAssetCount()
+  },
   methods: {
     numFixed: numFixed,
-    refreshData() { },
+    //  获取各图表数据
     getAssetCount() {
       assetCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
         this.cardData = response.data.main
@@ -139,6 +152,9 @@ export default {
       assetProcessTypeCategoryNumCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
         this.process_category = this.getMultiLineOptions('title', response.data)
       })
+      assetProcessTypeDeptNumCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
+        this.process_dept = this.getMultiLineOptions('title', response.data)
+      })
     },
     getOptions(title, data) {
       var xData = []
@@ -153,11 +169,17 @@ export default {
         tooltip: {
           trigger: 'axis'
         },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
         xAxis: {
           type: 'category',
           data: xData,
           axisLabel: {
-            rotate: 30
+            rotate: 10
           }
         },
         yAxis: {
@@ -178,11 +200,17 @@ export default {
         tooltip: {
           trigger: 'axis'
         },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
         xAxis: {
           type: 'category',
           data: xData,
           axisLabel: {
-            rotate: 30
+            rotate: 10
           }
         },
         yAxis: {

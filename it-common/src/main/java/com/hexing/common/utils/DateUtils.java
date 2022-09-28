@@ -4,7 +4,11 @@ import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 /**
@@ -176,5 +180,35 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
         LocalDateTime localDateTime = LocalDateTime.of(temporalAccessor, LocalTime.of(0, 0, 0));
         ZonedDateTime zdt = localDateTime.atZone(ZoneId.systemDefault());
         return Date.from(zdt.toInstant());
+    }
+
+    /**
+     * 获取两个日期之间的所有月份
+     *
+     * @param minDate 开始日期
+     * @param maxDate 结束日期
+     * @return
+     * @throws ParseException
+     */
+    public static List<String> getMonthBetween(Date minDate, Date maxDate) throws ParseException {
+        ArrayList<String> result = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");//格式化为年月
+
+        Calendar min = Calendar.getInstance();
+        Calendar max = Calendar.getInstance();
+
+        min.setTime(minDate);
+        min.set(min.get(Calendar.YEAR), min.get(Calendar.MONTH), 1);
+
+        max.setTime(maxDate);
+        max.set(max.get(Calendar.YEAR), max.get(Calendar.MONTH), 2);
+
+        Calendar curr = min;
+        while (curr.before(max)) {
+            result.add(sdf.format(curr.getTime()));
+            curr.add(Calendar.MONTH, 1);
+        }
+
+        return result;
     }
 }

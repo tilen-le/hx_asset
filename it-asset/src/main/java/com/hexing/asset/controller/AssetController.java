@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -13,6 +14,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.dto.StatisQueryParam;
 import com.hexing.asset.domain.vo.SimpleStatisticVO;
+import com.hexing.asset.enums.AssetStatisticType;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.annotation.DataScope;
@@ -173,25 +175,27 @@ public class AssetController extends BaseController {
             List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
             List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
             assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
-            assetProcessWrapper.in(AssetProcess::getUserCode, userCodeList);
         }
 
-        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateBy, params.getStartDate())
-                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateBy, params.getEndDate());
-        assetProcessWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
-                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
+//        assetProcessWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+//                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
 
 
         List<Asset> assetList = assetService.list(assetWrapper);
-
         Integer totalNum = assetList.size();                                                /* 资产总数 */
         Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();     /* 资产原值 */
         Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();    /* 资产净值 */
         Integer storageNum = totalNum;/* 入库数 */
 
+
+        assetProcessWrapper.in(AssetProcess::getAssetCode, assetList.stream().map(Asset::getAssetCode).collect(Collectors.toSet()));
         List<AssetProcess> assetProcessList = assetProcessService.list(assetProcessWrapper);
         Long transformNum = assetProcessList.stream()                                       /* 改造数 */
                 .filter(x -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(x.getProcessType()))
+                .map(AssetProcess::getAssetCode)
+                .distinct()
                 .count();
         Long scrapNum = assetProcessList.stream()                                           /* 报废数 */
                 .filter(x -> DingTalkAssetProcessType.PROCESS_SCRAP.getCode().equals(x.getProcessType()))
@@ -227,20 +231,25 @@ public class AssetController extends BaseController {
         return AjaxResult.success(data);
     }
 
+    /**
+     * 根据资产分类描述统计数量/原值/净值
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("/assetCountByCategory")
-    public AjaxResult assetCountByCategory(/*@RequestBody StatisQueryParam params*/) {
+    public AjaxResult assetCountByCategory(@RequestBody StatisQueryParam params) {
         // 筛选条件
         LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
 
-//        if (StringUtils.isNotEmpty(params.getDept())) {
-//            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
-//            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
-//            assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
-//        }
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
+            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+            assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+        }
 
-//        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateBy, params.getStartDate())
-//                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateBy, params.getEndDate());
-
+        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
 
         List<Asset> assetList = assetService.list(assetWrapper);
 
@@ -280,6 +289,12 @@ public class AssetController extends BaseController {
         return AjaxResult.success(data);
     }
 
+    /**
+     * 根据部门统计数量/原值/净值
+     *
+     * @param params
+     * @return
+     */
     @PostMapping("/assetCountByDept")
     public AjaxResult assetCountByDept(@RequestBody StatisQueryParam params) {
         List<List<SimpleStatisticVO>> data = new ArrayList<>();
@@ -301,6 +316,8 @@ public class AssetController extends BaseController {
                 }
                 for (SysDept dept : childDeptList) {
                     LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+                    assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
+                            .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
                     List<String> deptIdList = sysDeptService.selectDeptByParentId(dept.getDeptId());
                     deptIdList.add(String.valueOf(dept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
                     List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
@@ -323,6 +340,8 @@ public class AssetController extends BaseController {
                 return AjaxResult.success(data);
             } else {                       /* 若为公司下的部门 */
                 LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+                assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
+                        .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
                 List<String> deptIdList = sysDeptService.selectDeptByParentId(sysDept.getDeptId());
                 deptIdList.add(String.valueOf(sysDept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
                 List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
@@ -345,5 +364,147 @@ public class AssetController extends BaseController {
 
         return AjaxResult.success(data);
     }
+
+    /**
+     *
+     *
+     * @param params
+     * @return
+     */
+    @PostMapping("/assetProcessTypeTimeNumCount")
+    public AjaxResult assetProcessTypeTimeNumCount(@RequestBody StatisQueryParam params) {
+
+        List<SimpleStatisticVO> data = new ArrayList<>();
+
+        // 入库
+        LambdaQueryWrapper<Asset> storageAssetWrapper = new LambdaQueryWrapper<>();
+        storageAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateTime, params.getEndDate());
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
+            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+            storageAssetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+        }
+        List<Asset> storageAssetList = assetService.list(storageAssetWrapper);
+        Map<String, Long> storageTimeNumCount = new HashMap<>();
+        if (AssetStatisticType.MONTH.equals(params.getType())) {
+            storageTimeNumCount = storageAssetList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy-MM"), Collectors.counting())
+                    );
+        } else if (AssetStatisticType.YEAR.equals(params.getType())) {
+            storageTimeNumCount = storageAssetList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy"), Collectors.counting())
+                    );
+        }
+
+        // 报废
+        LambdaQueryWrapper<AssetProcess> scrapAssetWrapper = new LambdaQueryWrapper<>();
+        scrapAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SCRAP.getCode());
+        scrapAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            scrapAssetWrapper.in(AssetProcess::getAssetCode,
+                    storageAssetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        }
+        List<AssetProcess> scrapProcessList = assetProcessService.list(scrapAssetWrapper);
+        Map<String, Long> scrapProcessNumCount = new HashMap<>();
+        if (AssetStatisticType.MONTH.equals(params.getType())) {
+            scrapProcessNumCount = scrapProcessList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy-MM"), Collectors.counting())
+                    );
+        } else if (AssetStatisticType.YEAR.equals(params.getType())) {
+            scrapProcessNumCount = scrapProcessList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy"), Collectors.counting())
+                    );
+        }
+
+        // 外卖
+        LambdaQueryWrapper<AssetProcess> sellOutAssetWrapper = new LambdaQueryWrapper<>();
+        sellOutAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode());
+        sellOutAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            sellOutAssetWrapper.in(AssetProcess::getAssetCode,
+                    storageAssetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        }
+        List<AssetProcess> sellOutProcessList = assetProcessService.list(sellOutAssetWrapper);
+        Map<String, Long> sellOutProcessNumCount = new HashMap<>();
+        if (AssetStatisticType.MONTH.equals(params.getType())) {
+            sellOutProcessNumCount = sellOutProcessList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy-MM"), Collectors.counting())
+                    );
+        } else if (AssetStatisticType.YEAR.equals(params.getType())) {
+            sellOutProcessNumCount = sellOutProcessList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy"), Collectors.counting())
+                    );
+        }
+
+        // 改造
+        LambdaQueryWrapper<AssetProcess> transformAssetWrapper = new LambdaQueryWrapper<>();
+        transformAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode());
+        transformAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            transformAssetWrapper.in(AssetProcess::getAssetCode,
+                    storageAssetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        }
+        List<AssetProcess> transformProcessList = assetProcessService.list(transformAssetWrapper);
+        Map<String, Long> transformProcessNumCount=new HashMap<>();
+        if (AssetStatisticType.MONTH.equals(params.getType())) {
+            transformProcessNumCount = transformProcessList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy-MM"), Collectors.counting())
+                    );
+        } else if (AssetStatisticType.YEAR.equals(params.getType())) {
+            transformProcessNumCount = transformProcessList.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCreateTime(), "yyyy"), Collectors.counting())
+                    );
+        }
+
+//        {2022-09=124, 2022-06=5, 2022-07=2, 2021-08=3}
+//        {2022-09=3}
+//        {2022-09=1}
+//        {2022-09=6}
+
+        List<String> monthBetween = new ArrayList<>();
+        if (ObjectUtil.isNotNull(params.getStartDate()) || ObjectUtil.isNotNull(params.getEndDate())) {
+            try {
+                monthBetween = DateUtils.getMonthBetween(params.getStartDate(), params.getEndDate());
+            } catch (Exception e) {
+                logger.error("", e);
+            }
+        }
+
+        List<Long> storageTimeNumCountList = new ArrayList<>();
+        List<Long> scrapProcessNumCountList = new ArrayList<>();
+        List<Long> sellOutProcessNumCountList = new ArrayList<>();
+        List<Long> transformProcessNumCountList = new ArrayList<>();
+        if (CollectionUtil.isNotEmpty(monthBetween)) {
+            for (String month : monthBetween) {
+                storageTimeNumCountList.add(storageTimeNumCount.getOrDefault(month, 0L));
+                scrapProcessNumCountList.add(scrapProcessNumCount.getOrDefault(month, 0L));
+                sellOutProcessNumCountList.add(sellOutProcessNumCount.getOrDefault(month, 0L));
+                transformProcessNumCountList.add(transformProcessNumCount.getOrDefault(month, 0L));
+            }
+        }
+
+        data.add(new SimpleStatisticVO("x", monthBetween));
+        data.add(new SimpleStatisticVO("storageTimeNumCount", storageTimeNumCountList));
+        data.add(new SimpleStatisticVO("scrapProcessNumCount", scrapProcessNumCountList));
+        data.add(new SimpleStatisticVO("sellOutProcessNumCount", sellOutProcessNumCountList));
+        data.add(new SimpleStatisticVO("transformProcessNumCount", transformProcessNumCountList));
+
+        return AjaxResult.success(data);
+    }
+
+
+
 
 }

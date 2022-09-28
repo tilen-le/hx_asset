@@ -335,7 +335,6 @@ public class DingTalkAssetController extends BaseController {
         String userCode = data.getString("userCode");
         String userName = data.getString("userName");
         String processType = data.getString("processType");
-        String type = data.getString("type");
         String instanceId = data.getString("instanceId");
         String fileInfo = data.getString("fileInfo");
         JSONArray assetList = data.getJSONArray("assets");
@@ -354,7 +353,7 @@ public class DingTalkAssetController extends BaseController {
             entity.setProcessId(assetProcess.getId());
             entity.setUserCode(userCode);
             entity.setUserName(userName);
-            entity.setType(type);
+            entity.setType(processType);
             entity.setFileInfo(fileInfo);
             entity.setInstanceId(instanceId);
             entity.setCreateTime(new Date());

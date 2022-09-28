@@ -42,3 +42,12 @@ export function assetProcessTypeCategoryNumCount(data) {
     data: data,
   });
 }
+
+//  入库/报废/外卖/改造-数量和部门折线图统计
+export function assetProcessTypeDeptNumCount(data) {
+  return request({
+    url: "/asset/assetProcessTypeDeptNumCount",
+    method: "post",
+    data: data,
+  });
+}

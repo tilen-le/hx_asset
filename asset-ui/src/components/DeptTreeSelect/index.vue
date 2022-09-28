@@ -20,6 +20,11 @@ export default {
       deptOptions: [],
     }
   },
+  created() {
+    if(this.value){
+      this.getTreeSelect()
+    }
+  },
   watch: {
     val() {
       this.inValue = this.value

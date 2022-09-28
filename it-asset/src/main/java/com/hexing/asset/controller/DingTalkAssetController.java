@@ -294,6 +294,7 @@ public class DingTalkAssetController extends BaseController {
             w.eq(AssetProcessCounting::getAssetCode, assetCode)
                     .eq(AssetProcessCounting::getTaskCode, taskCode);
             AssetProcessCounting entity = assetProcessCountingService.getOne(w);
+            if (ObjectUtil.isNull(entity)) continue; // 若为异常数据，则跳过
             String status = entity.getCountingStatus();
             if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
                 if (StringUtils.isNotEmpty(comment)) {

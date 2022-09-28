@@ -167,6 +167,8 @@ public class AssetController extends BaseController {
      */
     @PostMapping("/assetCount")
     public AjaxResult assetCount(@RequestBody StatisQueryParam params) {
+        Map<String, Object> data = new HashMap<>();
+
         // 筛选条件
         LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
         LambdaQueryWrapper<AssetProcess> assetProcessWrapper = new LambdaQueryWrapper<>();
@@ -184,6 +186,19 @@ public class AssetController extends BaseController {
 
 
         List<Asset> assetList = assetService.list(assetWrapper);
+        if (CollectionUtil.isEmpty(assetList)) {
+            List<SimpleStatisticVO> mainStatistic = new ArrayList<>();
+            mainStatistic.add(new SimpleStatisticVO("资产总数", 0));
+            mainStatistic.add(new SimpleStatisticVO("资产原值", 0));
+            mainStatistic.add(new SimpleStatisticVO("资产净值", 0));
+            mainStatistic.add(new SimpleStatisticVO("入库数", 0));
+            mainStatistic.add(new SimpleStatisticVO("改造数", 0));
+            mainStatistic.add(new SimpleStatisticVO("报废数", 0));
+            mainStatistic.add(new SimpleStatisticVO("外卖数", 0));
+            data.put("main", mainStatistic);
+            data.put("pie", null);
+            return AjaxResult.success(data);
+        }
         Integer totalNum = assetList.size();                                                /* 资产总数 */
         Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();     /* 资产原值 */
         Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();    /* 资产净值 */
@@ -204,7 +219,6 @@ public class AssetController extends BaseController {
                 .filter(x -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(x.getProcessType()))
                 .count();
 
-        Map<String, Object> data = new HashMap<>();
 
         List<SimpleStatisticVO> mainStatistic = new ArrayList<>();
         mainStatistic.add(new SimpleStatisticVO("资产总数", totalNum));

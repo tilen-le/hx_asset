@@ -22,7 +22,7 @@
     <el-row class="statistics-cards">
       <div v-if="cardData.length ==0" style="text-align:center;width:100%">暂无数据</div>
       <el-card v-for="item in cardData" :key="item.name">
-        {{item.name}}<br />{{item.value}}
+        {{item.name}}<br />{{numFixed(item.value,2) }}
       </el-card>
     </el-row>
 
@@ -52,6 +52,14 @@
     </el-row>
     <el-row>
       <el-col :span="8">
+        <line-chart :chartData="process_time" height="250px"></line-chart>
+      </el-col>
+      <el-col :span="8">
+        <line-chart :chartData="process_category" height="250px"></line-chart>
+      </el-col>
+    </el-row>
+    <el-row>
+      <el-col :span="8">
         <line-chart :chartData="pieOptions" height="250px"></line-chart>
       </el-col>
     </el-row>
@@ -62,15 +70,14 @@
 // import echarts from 'echarts'
 import DeptTreeSelect from "@/components/DeptTreeSelect/index"
 import LineChart from "@/views/dashboard/LineChart.vue"
-import { assetCount, assetCountByCategory, assetCountByDept } from "@/api/statistics/data.js"
+import { numFixed } from "@/utils"
+import { assetCount, assetCountByCategory, assetCountByDept, assetProcessTypeTimeNumCount, assetProcessTypeCategoryNumCount } from "@/api/statistics/data"
 export default {
   components: { DeptTreeSelect, LineChart },
   data() {
     return {
       queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        // dept: null,
+        dept: null,
         type: '月',// 年/月
       },
       dateRange: [],
@@ -82,11 +89,14 @@ export default {
       totalValueCategoryCount: {},
       deptCount: {},
       deptNetWorth: {},
-      deptTotalValue: {}
+      deptTotalValue: {},
+      process_time: {},
+      process_category:{}
     }
   },
   mounted() { this.getAssetCount() },
   methods: {
+    numFixed: numFixed,
     refreshData() { },
     getAssetCount() {
       assetCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
@@ -123,6 +133,12 @@ export default {
         this.deptNetWorth = this.getOptions2("净值", deptname, totalNetWorth);
         this.deptTotalValue = this.getOptions2("原值", deptname, totalValue);
       })
+      assetProcessTypeTimeNumCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
+        this.process_time = this.getMultiLineOptions('title', response.data)
+      })
+      assetProcessTypeCategoryNumCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
+        this.process_category = this.getMultiLineOptions('title', response.data)
+      })
     },
     getOptions(title, data) {
       var xData = []
@@ -132,7 +148,6 @@ export default {
         xData.push(item.name)
         yData.push(item.value)
       }
-      console.log(xData)
       var option = {
         title: { text: title },
         tooltip: {
@@ -181,6 +196,49 @@ export default {
         ]
       };
       return option
+    },
+    getMultiLineOptions(title, data) {
+      var option = {
+        title: {
+          //text: 'Stacked Line'
+        },
+        tooltip: {
+          trigger: 'axis'
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '3%',
+          containLabel: true
+        },
+        toolbox: {
+          feature: {
+            saveAsImage: {}
+          }
+        },
+        xAxis: {
+          type: 'category',
+          boundaryGap: false,
+          data: []
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: []
+      };
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        if (item.name == 'x') {
+          option.xAxis.data = item.value;
+        } else {
+          option.series.push({
+            name: item.name,
+            type: 'line',
+            data: item.value
+          })
+        }
+      }
+      return option;
     },
     getPieOptions(data) {
       return {

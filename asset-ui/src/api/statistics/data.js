@@ -24,3 +24,21 @@ export function assetCountByDept(data) {
     data: data,
   });
 }
+
+//  入库/报废/外卖/改造-数量和时间折线图统计
+export function assetProcessTypeTimeNumCount(data) {
+  return request({
+    url: "/asset/assetProcessTypeTimeNumCount",
+    method: "post",
+    data: data,
+  });
+}
+
+//  入库/报废/外卖/改造-数量和类别折线图统计
+export function assetProcessTypeCategoryNumCount(data) {
+  return request({
+    url: "/asset/assetProcessTypeCategoryNumCount",
+    method: "post",
+    data: data,
+  });
+}

@@ -506,6 +506,7 @@ public class AssetController extends BaseController {
 
     @PostMapping("/assetProcessTypeCategoryNumCount")
     public AjaxResult assetProcessTypeCategoryNumCount(@RequestBody StatisQueryParam params) {
+        //  入库
         List<SimpleStatisticVO> data = new ArrayList<>();
         LambdaQueryWrapper<Asset> storageAssetWrapper = new LambdaQueryWrapper<>();
         storageAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateTime, params.getStartDate())
@@ -519,11 +520,72 @@ public class AssetController extends BaseController {
         Map<String, Long> storageCategoryNumCount = storageAssetList.stream()
                 .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
 
+        // 报废
+        LambdaQueryWrapper<AssetProcess> scrapAssetWrapper = new LambdaQueryWrapper<>();
+        scrapAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SCRAP.getCode());
+        scrapAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        scrapAssetWrapper.in(AssetProcess::getAssetCode,
+                storageAssetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        List<AssetProcess> scrapProcessList = assetProcessService.list(scrapAssetWrapper);
+        List<String> scrapAssetCode = scrapProcessList.stream()
+                .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+        Map<String, Long> scrapProcessNumCount = storageAssetList.stream()
+                .filter(x -> scrapAssetCode.contains(x.getAssetCode()))
+                .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
 
 
+        // 外卖
+        LambdaQueryWrapper<AssetProcess> sellOutAssetWrapper = new LambdaQueryWrapper<>();
+        sellOutAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode());
+        sellOutAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        sellOutAssetWrapper.in(AssetProcess::getAssetCode,
+                storageAssetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        List<AssetProcess> sellOutProcessList = assetProcessService.list(sellOutAssetWrapper);
+        List<String> sellOutAssetCode = sellOutProcessList.stream()
+                .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+        Map<String, Long> sellOutProcessNumCount = storageAssetList.stream()
+                .filter(x -> sellOutAssetCode.contains(x.getAssetCode()))
+                .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
 
+        // 改造
+        LambdaQueryWrapper<AssetProcess> transformAssetWrapper = new LambdaQueryWrapper<>();
+        transformAssetWrapper.eq(AssetProcess::getProcessType, DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode());
+        transformAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), AssetProcess::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), AssetProcess::getCreateTime, params.getEndDate());
+        transformAssetWrapper.in(AssetProcess::getAssetCode,
+                storageAssetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        List<AssetProcess> transformProcessList = assetProcessService.list(transformAssetWrapper);
+        List<String> transformAssetCode = transformProcessList.stream()
+                .map(AssetProcess::getAssetCode).collect(Collectors.toList());
+        Map<String, Long> transformProcessNumCount = storageAssetList.stream()
+                .filter(x -> transformAssetCode.contains(x.getAssetCode()))
+                .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
 
+//        {固定资产-电脑及软件=1, 固定资产-其他设备=19, 固定资产-机器设备=52, 固定资产-运输设备=2, 固定资产-办公设备=2, 固定资产-电子设备=58}
+//        {固定资产-电子设备=1}
+//        {固定资产-电子设备=1}
+//        {固定资产-电子设备=1}
 
+        Set<String> xAxisValue = storageCategoryNumCount.keySet();
+
+        List<Long> storageNumCountList = new ArrayList<>();
+        List<Long> scrapProcessNumCountList = new ArrayList<>();
+        List<Long> sellOutProcessNumCountList = new ArrayList<>();
+        List<Long> transformProcessNumCountList = new ArrayList<>();
+        for (String val : xAxisValue) {
+            storageNumCountList.add(storageCategoryNumCount.getOrDefault(val, 0L));
+            scrapProcessNumCountList.add(scrapProcessNumCount.getOrDefault(val, 0L));
+            sellOutProcessNumCountList.add(sellOutProcessNumCount.getOrDefault(val, 0L));
+            transformProcessNumCountList.add(transformProcessNumCount.getOrDefault(val, 0L));
+        }
+
+        data.add(new SimpleStatisticVO("x", xAxisValue));
+        data.add(new SimpleStatisticVO("入库", storageNumCountList));
+        data.add(new SimpleStatisticVO("报废", scrapProcessNumCountList));
+        data.add(new SimpleStatisticVO("外卖", sellOutProcessNumCountList));
+        data.add(new SimpleStatisticVO("改造", transformProcessNumCountList));
 
         return AjaxResult.success(data);
     }

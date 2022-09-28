@@ -366,7 +366,7 @@ public class AssetController extends BaseController {
     }
 
     /**
-     *
+     * 入库/报废/外卖/改造-数量和时间折线图统计
      *
      * @param params
      * @return
@@ -496,15 +496,37 @@ public class AssetController extends BaseController {
         }
 
         data.add(new SimpleStatisticVO("x", monthBetween));
-        data.add(new SimpleStatisticVO("storageTimeNumCount", storageTimeNumCountList));
-        data.add(new SimpleStatisticVO("scrapProcessNumCount", scrapProcessNumCountList));
-        data.add(new SimpleStatisticVO("sellOutProcessNumCount", sellOutProcessNumCountList));
-        data.add(new SimpleStatisticVO("transformProcessNumCount", transformProcessNumCountList));
+        data.add(new SimpleStatisticVO("入库", storageTimeNumCountList));
+        data.add(new SimpleStatisticVO("报废", scrapProcessNumCountList));
+        data.add(new SimpleStatisticVO("外卖", sellOutProcessNumCountList));
+        data.add(new SimpleStatisticVO("改造", transformProcessNumCountList));
 
         return AjaxResult.success(data);
     }
 
+    @PostMapping("/assetProcessTypeCategoryNumCount")
+    public AjaxResult assetProcessTypeCategoryNumCount(@RequestBody StatisQueryParam params) {
+        List<SimpleStatisticVO> data = new ArrayList<>();
+        LambdaQueryWrapper<Asset> storageAssetWrapper = new LambdaQueryWrapper<>();
+        storageAssetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCreateTime, params.getStartDate())
+                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCreateTime, params.getEndDate());
+        if (StringUtils.isNotEmpty(params.getDept())) {
+            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
+            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+            storageAssetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+        }
+        List<Asset> storageAssetList = assetService.list(storageAssetWrapper);
+        Map<String, Long> storageCategoryNumCount = storageAssetList.stream()
+                .collect(Collectors.groupingBy(Asset::getCategory, Collectors.counting()));
 
+
+
+
+
+
+
+        return AjaxResult.success(data);
+    }
 
 
 }

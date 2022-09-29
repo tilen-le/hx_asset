@@ -22,9 +22,19 @@
       </el-header>
       <el-main :height="tableHeight+30">
         <el-table :height="tableHeight" v-loading="loading" :data="countList">
-          <el-table-column label="日期" align="center" prop="date" />
-          <el-table-column label="盘点任务名称" align="center" prop="taskName" />
-          <el-table-column label="已盘点" align="center" prop="isCount" />
+          <el-table-column label="平台资产编号" align="center" prop="assetCode" />
+          <el-table-column label="盘点人工号" align="center" prop="userCode" />
+          <el-table-column label="盘点人" align="center" prop="userName" />
+          <el-table-column label="盘点时间" align="center" prop="countingTime" width="200">
+            <template slot-scope="scope">
+              <span>{{ parseTime(scope.row.countingTime) }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column label="盘点状态" align="center" prop="countingStatus">
+            <template slot-scope="scope">
+              <dict-tag :options="dict.type.asset_counting_status" :value="scope.row.countingStatus" />
+            </template>
+          </el-table-column>
         </el-table>
         <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
           @pagination="getList" />
@@ -38,6 +48,7 @@ import echarts from 'echarts'
 import DeptTreeSelect from "@/components/DeptTreeSelect/index"
 import { inventoryCount, inventoryCountList } from "@/api/statistics/counting"
 export default {
+  dicts: ['asset_counting_status'],
   components: { DeptTreeSelect },
   data() {
     return {

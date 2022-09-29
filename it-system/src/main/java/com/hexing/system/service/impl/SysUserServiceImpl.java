@@ -669,7 +669,7 @@ public class SysUserServiceImpl implements ISysUserService
                 SysUser sysUser = new SysUser();
                 sysUser.setUserName(odoUser.getCode());
                 sysUser.setNickName(odoUser.getName());
-                sysUser.setPassword(SecurityUtils.encryptPassword(initPassword));
+//                sysUser.setPassword(SecurityUtils.encryptPassword(initPassword));
                 if (StringUtils.isNotBlank(odoUser.getDept_code())) {
                     sysUser.setDeptId(Long.parseLong(odoUser.getDept_code()));
                 }

@@ -55,6 +55,11 @@ spring:
                 wall:
                     config:
                         multi-statement-allow: true
+    ldap:
+        urls: ldap://192.168.2.202:389
+        base: ou=海兴集团,DC=hzhx,DC=local
+        username: administrator
+        password: Admin@.Hxpass0rd
     # redis 配置
     redis:
         # 地址

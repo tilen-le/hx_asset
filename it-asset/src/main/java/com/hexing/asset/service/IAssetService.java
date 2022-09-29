@@ -116,4 +116,8 @@ public interface IAssetService extends IService<Asset>
      */
     String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName);
 
+    /**
+     * 根据部门ID查询部门下所有员工保管的资产
+     */
+    List<Asset> selectAssetListByDeptId(Long deptId);
 }

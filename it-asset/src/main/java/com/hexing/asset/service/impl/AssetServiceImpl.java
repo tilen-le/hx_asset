@@ -613,4 +613,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
     }
 
+    /**
+     * TODO 根据部门ID查询该部门下所有员工名下的资产
+     */
+
 }

@@ -258,14 +258,19 @@ public class AssetController extends BaseController {
         // 筛选条件
         LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
 
-        if (StringUtils.isNotEmpty(params.getDept())) {
-            List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
-            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
-            assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+        if (StringUtils.isEmpty(params.getDept())) {
+            return AjaxResult.error("未指定组织范围");
+        }
+        if (ObjectUtil.isEmpty(params.getStartDate()) || ObjectUtil.isEmpty(params.getEndDate())) {
+            return AjaxResult.error("未指定起止日期");
         }
 
-        assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
-                .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
+        List<String> deptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(params.getDept()));
+        List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+        assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+
+        assetWrapper.ge(Asset::getCapitalizationDate, params.getStartDate())
+                .le(Asset::getCapitalizationDate, params.getEndDate());
 
         List<Asset> assetList = assetService.list(assetWrapper);
 
@@ -296,8 +301,7 @@ public class AssetController extends BaseController {
                     return new SimpleStatisticVO(key, value);
                 }).collect(Collectors.toList());
 
-
-        Map<String, Object> data = new HashMap<>();
+        Map<String, List<SimpleStatisticVO>> data = new HashMap<>();
         data.put("categoryNumCount", categoryNumCount);
         data.put("totalValueCategoryCount", totalValueCategoryCount);
         data.put("netWorthCategoryCount", netWorthCategoryCount);
@@ -313,69 +317,61 @@ public class AssetController extends BaseController {
      */
     @PostMapping("/assetCountByDept")
     public AjaxResult assetCountByDept(@RequestBody StatisQueryParam params) {
-        List<List<SimpleStatisticVO>> data = new ArrayList<>();
-        // 筛选条件
-        if (StringUtils.isNotEmpty(params.getDept())) {
-            Long deptId = Long.valueOf(params.getDept());
-            SysDept sysDept = sysDeptService.selectDeptById(deptId);
-            if (ObjectUtil.isNull(sysDept)) {
-                return AjaxResult.error("系统无该组织架构信息");
-            }
-            // 若为公司
-            if (sysDept.getParentId() == 0L) {  /* 若为公司 */
-                // 查询所有下一级部门
-                SysDept deptQuery = new SysDept();
-                deptQuery.setParentId(deptId);
-                List<SysDept> childDeptList = sysDeptService.queryChildDeptList(deptQuery);
-                if (CollUtil.isEmpty(childDeptList)) {
-                    return AjaxResult.error("该组织架构下无子部门");
-                }
-                for (SysDept dept : childDeptList) {
-                    LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
-                    assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
-                            .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
-                    List<String> deptIdList = sysDeptService.selectDeptByParentId(dept.getDeptId());
-                    deptIdList.add(String.valueOf(dept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
-                    List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
-                    List<Asset> assetList = new ArrayList<>();
-                    if (CollectionUtil.isNotEmpty(userCodeList)) {
-                        assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
-                        assetList = assetService.list(assetWrapper);
-                    }
-                    Integer totalNum = assetList.size();
-                    Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
-                    Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
 
-                    List<SimpleStatisticVO> tempList = new ArrayList<>();
-                    tempList.add(new SimpleStatisticVO("deptname", dept.getDeptName()));
-                    tempList.add(new SimpleStatisticVO("totalNum", totalNum));
-                    tempList.add(new SimpleStatisticVO("totalValue", totalValue));
-                    tempList.add(new SimpleStatisticVO("totalNetWorth", totalNetWorth));
-                    data.add(tempList);
-                }
-                return AjaxResult.success(data);
-            } else {                       /* 若为公司下的部门 */
-                LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
-                assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
-                        .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
-                List<String> deptIdList = sysDeptService.selectDeptByParentId(sysDept.getDeptId());
-                deptIdList.add(String.valueOf(sysDept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
-                List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
-                List<Asset> assetList = new ArrayList<>();
-                if (CollectionUtil.isNotEmpty(userCodeList)) {
-                    assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
-                    assetList = assetService.list(assetWrapper);
-                }
-                Integer totalNum = assetList.size();
-                Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
-                Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
-                List<SimpleStatisticVO> tempList = new ArrayList<>();
-                tempList.add(new SimpleStatisticVO("deptname", sysDept.getDeptName()));
-                tempList.add(new SimpleStatisticVO("totalNum", totalNum));
-                tempList.add(new SimpleStatisticVO("totalValue", totalValue));
-                tempList.add(new SimpleStatisticVO("totalNetWorth", totalNetWorth));
-                data.add(tempList);
+        Map<String, List<SimpleStatisticVO>> data = new HashMap<>();
+
+        final String NUM_DEPT_COUNT = "numDeptCount";
+        final String TOTAL_VALUE_DEPT_COUNT = "totalValueDeptCount";
+        final String TOTAL_NET_WORTH = "totalNetWorth";
+
+        if (StringUtils.isEmpty(params.getDept())) {
+            return AjaxResult.error("未指定组织范围");
+        }
+        if (ObjectUtil.isEmpty(params.getStartDate()) || ObjectUtil.isEmpty(params.getEndDate())) {
+            return AjaxResult.error("未指定起止日期");
+        }
+
+        Long deptId = Long.valueOf(params.getDept());
+        SysDept sysDept = sysDeptService.selectDeptById(deptId);
+        if (ObjectUtil.isNull(sysDept)) {
+            return AjaxResult.error("系统无该组织架构信息");
+        }
+
+        List<SysDept> childDeptList = new ArrayList<>();
+        childDeptList.add(sysDept);
+        if (sysDept.getParentId() == 0L) {
+            // 查询所有下一级部门
+            SysDept deptQuery = new SysDept();
+            deptQuery.setParentId(deptId);
+            childDeptList = sysDeptService.queryChildDeptList(deptQuery);
+            if (CollUtil.isEmpty(childDeptList)) {
+                return AjaxResult.error("该组织架构下无子部门");
             }
+        }
+
+        data.put(NUM_DEPT_COUNT, new ArrayList<>());
+        data.put(TOTAL_VALUE_DEPT_COUNT, new ArrayList<>());
+        data.put(TOTAL_NET_WORTH, new ArrayList<>());
+        for (SysDept dept : childDeptList) {
+            LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+            assetWrapper.ge(ObjectUtil.isNotNull(params.getStartDate()), Asset::getCapitalizationDate, params.getStartDate())
+                    .le(ObjectUtil.isNotNull(params.getEndDate()), Asset::getCapitalizationDate, params.getEndDate());
+            List<String> deptIdList = sysDeptService.selectDeptByParentId(dept.getDeptId());
+            deptIdList.add(String.valueOf(dept.getDeptId())); // 将当前部门的ID也包含在其子孙部门的ID列表中
+            List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+            List<Asset> assetList = new ArrayList<>();
+            if (CollectionUtil.isNotEmpty(userCodeList)) {
+                assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+                assetList = assetService.list(assetWrapper);
+            }
+
+            Integer totalNum = assetList.size();
+            Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
+            Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
+
+            data.get(NUM_DEPT_COUNT).add(new SimpleStatisticVO(dept.getDeptName(), totalNum));
+            data.get(TOTAL_VALUE_DEPT_COUNT).add(new SimpleStatisticVO(dept.getDeptName(), totalValue));
+            data.get(TOTAL_NET_WORTH).add(new SimpleStatisticVO(dept.getDeptName(), totalNetWorth));
         }
 
         return AjaxResult.success(data);

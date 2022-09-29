@@ -74,9 +74,7 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
 
     JSONObject countingStatusCount(String taskCode);
 
-    List<Map<String,String>> inventoryCountYear(String startDate, String endDate);
+    List<AssetProcessCounting> inventoryCountList(String startDate, String endDate);
 
-    List<Map<String,String>> inventoryCountMonth(String startDate, String endDate);
-
-    List<Map<String,String>> inventoryCountList(String startDate, String endDate);
+    JSONObject inventoryCount(String type,String startDate, String endDate);
 }

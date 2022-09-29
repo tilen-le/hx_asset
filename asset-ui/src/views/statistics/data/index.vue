@@ -122,29 +122,9 @@ export default {
         this.totalValueCategoryCount = this.getOptions('原值', response.data.totalValueCategoryCount)
       })
       assetCountByDept(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
-        var deptname = [];
-        var totalNum = [];
-        var totalValue = [];
-        var totalNetWorth = [];
-        response.data.forEach(item => {
-          item.forEach(i => {
-            switch (i.name) {
-              case "deptname": deptname.push(i.value);
-                break;
-              case "totalNum": totalNum.push(i.value);
-                break;
-              case "totalNetWorth": totalNetWorth.push(i.value);
-                break;
-              case "totalValue": totalValue.push(i.value);
-                break;
-              default:
-                throw new Exception("数据错误")
-            }
-          })
-        });
-        this.deptCount = this.getOptions2("数量", deptname, totalNum);
-        this.deptNetWorth = this.getOptions2("净值", deptname, totalNetWorth);
-        this.deptTotalValue = this.getOptions2("原值", deptname, totalValue);
+        this.deptCount = this.getOptions("数量", response.data.numDeptCount);
+        this.deptNetWorth = this.getOptions("净值", response.data.totalNetWorth);
+        this.deptTotalValue = this.getOptions("原值", response.data.totalValueDeptCount);
       })
       assetProcessTypeTimeNumCount(this.addDateRange(this.queryParams, this.dateRange, "start_end")).then(response => {
         this.process_time = this.getMultiLineOptions('title', response.data)
@@ -194,37 +174,37 @@ export default {
       };
       return option
     },
-    getOptions2(title, xData, yData) {
-      var option = {
-        title: { text: title },
-        tooltip: {
-          trigger: 'axis'
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          data: xData,
-          axisLabel: {
-            rotate: 10
-          }
-        },
-        yAxis: {
-          type: 'value'
-        },
-        series: [
-          {
-            data: yData,
-            type: 'bar'
-          }
-        ]
-      };
-      return option
-    },
+    // getOptions2(title, xData, yData) {
+    //   var option = {
+    //     title: { text: title },
+    //     tooltip: {
+    //       trigger: 'axis'
+    //     },
+    //     grid: {
+    //       left: '3%',
+    //       right: '4%',
+    //       bottom: '3%',
+    //       containLabel: true
+    //     },
+    //     xAxis: {
+    //       type: 'category',
+    //       data: xData,
+    //       axisLabel: {
+    //         rotate: 10
+    //       }
+    //     },
+    //     yAxis: {
+    //       type: 'value'
+    //     },
+    //     series: [
+    //       {
+    //         data: yData,
+    //         type: 'bar'
+    //       }
+    //     ]
+    //   };
+    //   return option
+    // },
     getMultiLineOptions(title, data) {
       var option = {
         title: {

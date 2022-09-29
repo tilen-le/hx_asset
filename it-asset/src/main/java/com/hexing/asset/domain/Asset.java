@@ -51,12 +51,13 @@ public class Asset
     @Excel(name = "*财务资产编号")
     private String financialAssetCode;
 
-    /** 保管人姓名 */
-    private String responsiblePersonName;
-
     /** 保管人工号（老工号） */
     @Excel(name = "*保管人工号")
     private String responsiblePersonCode;
+
+    /** 保管人姓名 */
+    @Excel(name = "保管人姓名", type= Excel.Type.EXPORT)
+    private String responsiblePersonName;
 
     /** 保管部门 */
     @TableField(exist = false)

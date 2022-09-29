@@ -1,16 +1,11 @@
 package com.hexing.asset.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +25,6 @@ import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.common.core.page.TableDataInfo;
 
-import static com.hexing.common.utils.PageUtil.startPage;
 
 /**
  * 资产盘点流程Controller
@@ -68,33 +62,8 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("盘点统计")
     @GetMapping("/inventoryCount")
-    public AjaxResult inventoryCount(String type,String startDate,String endDate) {
-        JSONObject jsonObject=new JSONObject();
-        List x =new ArrayList();
-        List isCount =new ArrayList();
-        List isExcept =new ArrayList();
-        if ("年".equals(type)){
-            List<Map<String,String>>  result = assetProcessCountingService.inventoryCountYear(startDate,endDate);
-            for(Map m:result){
-                x.add(m.get("y"));
-                isCount.add(m.get("isCount"));
-                isExcept.add(m.get("isExcept"));
-            }
-            jsonObject.put("x",x);
-            jsonObject.put("isCount",isCount);
-            jsonObject.put("isExcept",isExcept);
-        }
-        if ("月".equals(type)){
-            List<Map<String,String>>  result = assetProcessCountingService.inventoryCountMonth(startDate,endDate);
-            for(Map m:result){
-                x.add(m.get("y")+"年"+m.get("m")+"月");
-                isCount.add(m.get("isCount"));
-                isExcept.add(m.get("isExcept"));
-            }
-            jsonObject.put("x",x);
-            jsonObject.put("isCount",isCount);
-            jsonObject.put("isExcept",isExcept);
-        }
+    public AjaxResult inventoryCount(String type,String startDate, String endDate) {
+        JSONObject jsonObject = assetProcessCountingService.inventoryCount(type, startDate, endDate);
         return AjaxResult.success(jsonObject);
     }
 
@@ -106,11 +75,7 @@ public class AssetProcessCountingController extends BaseController
     public TableDataInfo inventoryCountList(String startDate,String endDate)
     {
         startPage();
-        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.ge(AssetProcessCounting::getCreateTime,startDate);
-        wrapper.le(AssetProcessCounting::getCreateTime,endDate);
-        wrapper.orderByAsc(AssetProcessCounting::getCreateTime);
-        List<AssetProcessCounting> list = assetProcessCountingMapper.selectList(wrapper);
+        List<AssetProcessCounting> list = assetProcessCountingService.inventoryCountList(startDate, endDate);
         TableDataInfo dataTable = getDataTable(list);
         return dataTable;
     }

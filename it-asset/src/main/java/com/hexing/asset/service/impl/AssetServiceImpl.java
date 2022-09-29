@@ -613,4 +613,19 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
     }
 
+    /**
+     * 根据部门ID查询部门下所有员工保管的资产
+     */
+    public List<Asset> selectAssetListByDeptId(Long deptId) {
+        LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
+        List<String> deptIdList = sysDeptService.selectDeptByParentId(deptId);
+        SysDept sysDept = sysDeptService.selectDeptById(deptId);
+        // 若不为公司
+        if (sysDept.getParentId() != 0L) {
+            deptIdList.add(Long.toString(deptId));
+        }
+        List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
+        assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+        return this.list(assetWrapper);
+    }
 }

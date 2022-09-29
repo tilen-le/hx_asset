@@ -107,18 +107,23 @@ export default {
     }
   },
   mounted() {
+    var firstDay = new Date();
+    firstDay.setDate(1);
+    firstDay.setMonth(0);
+    this.dateRange = [this.parseTime(firstDay, '{y}-{m}-{d}'), this.parseTime(new Date(), '{y}-{m}-{d}')]
     this.$nextTick(() => {
       this.tableHeight = document.body.offsetHeight - 480;
       this.initChart()
-      this.chart.showLoading({
-        text: '暂无数据',
-        showSpinner: false,    // 隐藏加载中的转圈动图
-        textColor: '#9d9d9d',
-        maskColor: 'rgba(255, 255, 255, 0.8)',
-        fontSize: '25px',
-        fontWeight: 'bold',
-        fontFamily: 'Microsoft YaHei'
-      });
+      this.refreshData()
+      // this.chart.showLoading({
+      //   text: '暂无数据',
+      //   showSpinner: false,    // 隐藏加载中的转圈动图
+      //   textColor: '#9d9d9d',
+      //   maskColor: 'rgba(255, 255, 255, 0.8)',
+      //   fontSize: '25px',
+      //   fontWeight: 'bold',
+      //   fontFamily: 'Microsoft YaHei'
+      // });
     })
     var _this = this
     window.onresize = function () {
@@ -141,7 +146,7 @@ export default {
         this.option.series[0].data = response.data.isCount
         this.option.series[1].data = response.data.isExcept
         this.chart.setOption(this.option)
-        this.chart.hideLoading()
+        // this.chart.hideLoading()
       })
     },
     //获取表格数据

@@ -1,9 +1,12 @@
 package com.hexing.asset.service.impl;
 
+import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -177,23 +180,85 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     }
 
     @Override
-    public  List<Map<String,String>>  inventoryCountYear(String startDate,String endDate) {
-        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountYear(startDate,endDate);
-        return list;
-    }
-
-    @Override
-    public  List<Map<String,String>>  inventoryCountMonth(String startDate,String endDate) {
-        List<Map<String,String>>  list = assetProcessCountingMapper.inventoryCountMonth(startDate,endDate);
-        return list;
-    }
-
-    @Override
-    public List<Map<String,String>> inventoryCountList(String startDate,String endDate)
+    public List<AssetProcessCounting> inventoryCountList(String startDate,String endDate)
     {
-        return assetProcessCountingMapper.inventoryCountList(startDate,endDate);
+        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
+        wrapper.ge(AssetProcessCounting::getCreateTime,startDate);
+        wrapper.le(AssetProcessCounting::getCreateTime,endDate);
+        wrapper.orderByAsc(AssetProcessCounting::getCreateTime);
+        List<AssetProcessCounting> list = assetProcessCountingMapper.selectList(wrapper);
+        return list;
     }
 
+    @Override
+    public JSONObject inventoryCount(String type,String startDate,String endDate)
+    {
+        JSONObject jsonObject=new JSONObject();
+        List x =new ArrayList();
+        List isCount =new ArrayList();
+        List isExcept =new ArrayList();
+        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
+        wrapper.ge(AssetProcessCounting::getCreateTime,startDate);
+        wrapper.le(AssetProcessCounting::getCreateTime,endDate);
+        List<AssetProcessCounting> list = assetProcessCountingMapper.selectList(wrapper).stream()
+                .filter(i -> ObjectUtil.isNotNull(i.getCountingTime()))
+                .collect(Collectors.toList());
+        if ("年".equals(type)){
+            Map<String, Long> isCountList = list.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCountingTime(), "yyyy"), Collectors.counting())
+                    );
+            Map<String, Long> isExceptList = list.stream()
+                    .filter(o -> "2".equals(o.getCountingStatus()))
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCountingTime(), "yyyy"), Collectors.counting())
+                    );
+            List<String> yearBetween = null;
+            try {
+                yearBetween = DateUtils.getDatePeriodFromTwoTime(startDate, endDate,type);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (CollectionUtil.isNotEmpty(yearBetween)) {
+                for (String year : yearBetween) {
+                    x.add(year);
+                    isCount.add(isCountList.getOrDefault(year, 0L));
+                    isExcept.add(isExceptList.getOrDefault(year, 0L));
+                }
+            }
+            jsonObject.put("x",x);
+            jsonObject.put("isCount",isCount);
+            jsonObject.put("isExcept",isExcept);
+        }
+        if ("月".equals(type)){
+            Map<String, Long> isCountList = list.stream()
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCountingTime(), "yyyy-MM"), Collectors.counting())
+                    );
+            Map<String, Long> isExceptList = list.stream()
+                    .filter(o -> "2".equals(o.getCountingStatus()))
+                    .collect(
+                            Collectors.groupingBy(o -> DateUtil.format(o.getCountingTime(), "yyyy-MM"), Collectors.counting())
+                    );
+            List<String> monthBetween = null;
+            try {
+                monthBetween = DateUtils.getDatePeriodFromTwoTime(startDate, endDate,type);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            if (CollectionUtil.isNotEmpty(monthBetween)) {
+                for (String month : monthBetween) {
+                    x.add(month);
+                    isCount.add(isCountList.getOrDefault(month, 0L));
+                    isExcept.add(isExceptList.getOrDefault(month, 0L));
+                }
+            }
+            jsonObject.put("x",x);
+            jsonObject.put("isCount",isCount);
+            jsonObject.put("isExcept",isExcept);
+        }
+        return jsonObject;
+    }
     /**
      * 新增资产盘点流程
      *

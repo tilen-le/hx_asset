@@ -4,6 +4,7 @@ import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -209,6 +210,30 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
             curr.add(Calendar.MONTH, 1);
         }
 
+        return result;
+    }
+
+    public static List<String> getDatePeriodFromTwoTime(String startTime, String endTime,String type) throws ParseException {
+        ArrayList<String> result = new ArrayList<>();
+        Date startDate = new SimpleDateFormat("yyyy-MM").parse(startTime);
+        Date endDate = new SimpleDateFormat("yyyy-MM").parse(endTime);
+        LocalDate start = Instant.ofEpochMilli(startDate.getTime()).atZone(ZoneOffset.ofHours(8)).toLocalDate();
+        LocalDate end = Instant.ofEpochMilli(endDate.getTime()).atZone(ZoneOffset.ofHours(8)).toLocalDate();
+
+        if ("年".equals(type)){
+            Year startYear = Year.from(start);
+            Year endYear= Year.from(end);
+            for (int i = 0; i <= ChronoUnit.YEARS.between(startYear,endYear); i++) {
+                result.add(startYear.plusYears(i).toString());
+            }
+
+        }else if ("月".equals(type)){
+            YearMonth startMonth = YearMonth.from(start);
+            YearMonth endMonth= YearMonth.from(end);
+            for (int i = 0; i <= ChronoUnit.MONTHS.between(startMonth,endMonth); i++) {
+                result.add(startMonth.plusMonths(i).toString());
+            }
+        }
         return result;
     }
 

@@ -187,7 +187,9 @@
       }).then(response => {
         this.$download.name(response.msg);
         this.exportLoading = false;
-      }).catch(() => { });
+      }).catch(() => {
+        this.exportLoading = false;
+      });
     }
   }
 };

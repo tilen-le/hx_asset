@@ -67,10 +67,4 @@ public interface AssetProcessCountingMapper extends BaseMapper<AssetProcessCount
      */
     public int deleteAssetProcessCountingByIds(Long[] ids);
 
-    public List<Map<String,String>> inventoryCountYear(@Param("startDate") String startDate, @Param("endDate") String endDate);
-
-    public List<Map<String,String>> inventoryCountMonth(@Param("startDate") String startDate, @Param("endDate") String endDate);
-
-    public List<Map<String,String>> inventoryCountList(@Param("startDate") String startDate, @Param("endDate") String endDate);
-
 }

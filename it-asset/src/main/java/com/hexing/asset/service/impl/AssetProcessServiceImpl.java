@@ -1,12 +1,16 @@
 package com.hexing.asset.service.impl;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.system.service.ISysDictDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessMapper;
@@ -24,7 +28,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 {
     @Autowired
     private AssetProcessMapper assetProcessMapper;
-
+    @Autowired
+    private ISysDictDataService sysDictDataService;
     /**
      * 查询流程总
      *
@@ -56,6 +61,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isNotBlank(assetProcess.getUserCode())) {
             wrapper.eq(AssetProcess::getUserCode, assetProcess.getUserCode());
         }
+        List<SysDictData> dictDataList = sysDictDataService.selectDictDataByType("dingtalk_asset_process_type");
+        List<String> processTypeList = dictDataList.stream().map(SysDictData::getDictValue).collect(Collectors.toList());
+        wrapper.in(AssetProcess::getProcessType, processTypeList);
         return assetProcessMapper.selectList(wrapper);
     }
 

@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
+import com.hexing.asset.mapper.AssetProcessCountingMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
@@ -43,6 +45,8 @@ public class AssetProcessCountingController extends BaseController
 {
     @Autowired
     private IAssetProcessCountingService assetProcessCountingService;
+    @Autowired
+    private AssetProcessCountingMapper assetProcessCountingMapper;
 
     /**
      * 查询资产盘点流程列表
@@ -102,7 +106,11 @@ public class AssetProcessCountingController extends BaseController
     public TableDataInfo inventoryCountList(String startDate,String endDate)
     {
         startPage();
-        List<Map<String,String>> list = assetProcessCountingService.inventoryCountList(startDate,endDate);
+        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
+        wrapper.ge(AssetProcessCounting::getCreateTime,startDate);
+        wrapper.le(AssetProcessCounting::getCreateTime,endDate);
+        wrapper.orderByAsc(AssetProcessCounting::getCreateTime);
+        List<AssetProcessCounting> list = assetProcessCountingMapper.selectList(wrapper);
         TableDataInfo dataTable = getDataTable(list);
         return dataTable;
     }

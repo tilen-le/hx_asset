@@ -1,8 +1,13 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.dto.StatisQueryParam;
+
 /**
  * 流程总Service接口
  *
@@ -58,4 +63,6 @@ public interface IAssetProcessService extends IService<AssetProcess>
      * @return 结果
      */
     public int deleteAssetProcessById(Long id);
+
+    List<AssetProcess> queryAssetProcessForStatisticByType(String processType, StatisQueryParam params, List<Asset> assetList);
 }

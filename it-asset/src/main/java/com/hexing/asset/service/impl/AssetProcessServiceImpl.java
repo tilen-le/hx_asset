@@ -4,13 +4,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.asset.domain.dto.StatisQueryParam;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDictDataService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessMapper;
@@ -114,5 +118,16 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     public int deleteAssetProcessById(Long id)
     {
         return assetProcessMapper.deleteAssetProcessById(id);
+    }
+
+    @Override
+    public List<AssetProcess> queryAssetProcessForStatisticByType(String processType, StatisQueryParam params, List<Asset> assetList) {
+        LambdaQueryWrapper<AssetProcess> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetProcess::getProcessType, processType);
+        wrapper.ge(AssetProcess::getCreateTime, params.getStartDate())
+                .le(AssetProcess::getCreateTime, params.getEndDate());
+        wrapper.in(AssetProcess::getAssetCode,
+                assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
+        return this.list(wrapper);
     }
 }

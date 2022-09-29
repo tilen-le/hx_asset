@@ -616,6 +616,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     /**
      * 根据部门ID查询部门下所有员工保管的资产
      */
+    @Override
     public List<Asset> selectAssetListByDeptId(Long deptId) {
         LambdaQueryWrapper<Asset> assetWrapper = new LambdaQueryWrapper<>();
         List<String> deptIdList = sysDeptService.selectDeptByParentId(deptId);
@@ -625,7 +626,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             deptIdList.add(Long.toString(deptId));
         }
         List<String> userCodeList = sysUserService.selectUserByDeptId(deptIdList);
-        assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
-        return this.list(assetWrapper);
+        if (CollectionUtil.isNotEmpty(userCodeList)) {
+            assetWrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+            return this.list(assetWrapper);
+        } else {
+            return new ArrayList<>();
+        }
     }
+
 }

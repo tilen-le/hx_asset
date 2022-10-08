@@ -57,4 +57,10 @@ public class AssetProcessTransform
 
     /** 文件信息 */
     private String fileInfo;
+
+    /** 补充文件信息 */
+    private String fileInfoAdd;
+
+    /** 状态 */
+    private String status;
 }

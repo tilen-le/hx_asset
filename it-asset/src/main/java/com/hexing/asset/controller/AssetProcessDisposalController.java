@@ -46,6 +46,16 @@ public class AssetProcessDisposalController extends BaseController
     }
 
     /**
+     * 下载附件
+     */
+//    @PreAuthorize("@ss.hasPermi('asset:disposal:downLoadFile')")
+    @PostMapping("/downLoadFile")
+    public AjaxResult downLoadFile(AssetProcessDisposal assetProcessDisposal)
+    {
+        return toAjax(assetProcessDisposalService.downLoadFile(assetProcessDisposal));
+    }
+
+    /**
      * 导出资产处置流程列表
      */
     @PreAuthorize("@ss.hasPermi('asset:disposal:export')")

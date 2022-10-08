@@ -1,6 +1,8 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.AssetProcessTransform;
 import com.baomidou.mybatisplus.extension.service.IService;
 /**
@@ -58,4 +60,6 @@ public interface IAssetProcessTransformService extends IService<AssetProcessTran
      * @return 结果
      */
     public int deleteAssetProcessTransformById(Long id);
+
+    public int transformAssets(JSONObject param);
 }

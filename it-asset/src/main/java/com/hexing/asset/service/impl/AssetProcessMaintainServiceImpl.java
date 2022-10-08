@@ -1,10 +1,15 @@
 package com.hexing.asset.service.impl;
 
+import java.util.Date;
 import java.util.List;
 
+import cn.hutool.json.JSONUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.AssetProcessDisposal;
+import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +29,8 @@ public class AssetProcessMaintainServiceImpl extends ServiceImpl<AssetProcessMai
 {
     @Autowired
     private AssetProcessMaintainMapper assetProcessMaintainMapper;
-
+    @Autowired
+    private IAssetProcessService assetProcessService;
     /**
      * 查询资产维修流程
      *
@@ -106,5 +112,51 @@ public class AssetProcessMaintainServiceImpl extends ServiceImpl<AssetProcessMai
     public int deleteAssetProcessMaintainById(Long id)
     {
         return assetProcessMaintainMapper.deleteAssetProcessMaintainById(id);
+    }
+
+    @Override
+    public int maintainAssets(JSONObject params){
+        JSONObject data = params.getObject("data", JSONObject.class);
+        String instanceId = data.getString("instanceId");
+        String userCode = data.getString("userCode");
+        String userName = data.getString("userName");
+        String processType = data.getString("processType");
+        JSONArray assetList = data.getJSONArray("assets");
+        if (data.containsKey("fileInfo")){
+            String fileInfo = data.getJSONArray("fileInfo").toString();
+            fileInfo = AssetProcessDisposalServiceImpl.downLoadFile(fileInfo,instanceId);
+            for (Object o : assetList) {
+                String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
+                AssetProcess assetProcess = new AssetProcess();
+                assetProcess.setAssetCode(assetCode);
+                assetProcess.setUserCode(userCode);
+                assetProcess.setUserName(userName);
+                assetProcess.setProcessType(processType);
+                assetProcess.setCreateTime(new Date());
+                assetProcessService.insertAssetProcess(assetProcess);
+
+                AssetProcessMaintain entity = new AssetProcessMaintain();
+                entity.setAssetCode(assetCode);
+                entity.setProcessId(assetProcess.getId());
+                entity.setUserCode(userCode);
+                entity.setUserName(userName);
+                entity.setFileInfo(fileInfo);
+                entity.setInstanceId(instanceId);
+                entity.setCreateTime(new Date());
+                insertAssetProcessMaintain(entity);
+            }
+        }else {
+            String fileInfoAdd = data.getJSONArray("fileInfoAdd").toString();
+            fileInfoAdd =AssetProcessDisposalServiceImpl.downLoadFile(fileInfoAdd,instanceId);
+            LambdaQueryWrapper<AssetProcessMaintain> w = new LambdaQueryWrapper<>();
+            for (Object o : assetList) {
+                String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
+                w.eq(AssetProcessMaintain::getAssetCode, assetCode).eq(AssetProcessMaintain::getInstanceId, instanceId);
+                AssetProcessMaintain entity = getOne(w);
+                entity.setUpdateTime(new Date());
+                updateById(entity);
+            }
+        }
+        return 1;
     }
 }

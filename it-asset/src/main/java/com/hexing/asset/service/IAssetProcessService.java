@@ -2,6 +2,7 @@ package com.hexing.asset.service;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;

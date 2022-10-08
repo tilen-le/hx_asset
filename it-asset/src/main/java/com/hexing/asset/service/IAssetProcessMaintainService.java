@@ -1,6 +1,8 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.AssetProcessMaintain;
 import com.baomidou.mybatisplus.extension.service.IService;
 /**
@@ -58,4 +60,7 @@ public interface IAssetProcessMaintainService extends IService<AssetProcessMaint
      * @return 结果
      */
     public int deleteAssetProcessMaintainById(Long id);
+
+
+    public int maintainAssets(JSONObject param);
 }

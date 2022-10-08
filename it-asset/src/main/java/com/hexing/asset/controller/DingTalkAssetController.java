@@ -332,34 +332,7 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/disposalAssets")
     public AjaxResult disposalAssets(@RequestBody JSONObject params) {
         System.out.println("params: " + params);
-        JSONObject data = params.getObject("data", JSONObject.class);
-        String userCode = data.getString("userCode");
-        String userName = data.getString("userName");
-        String processType = data.getString("processType");
-        String instanceId = data.getString("instanceId");
-        String fileInfo = data.getString("fileInfo");
-        JSONArray assetList = data.getJSONArray("assets");
-        for (Object o : assetList) {
-            String  assetCode = JSONUtil.parseObj(o).getStr("assetCode");
-            AssetProcess assetProcess = new AssetProcess();
-            assetProcess.setAssetCode(assetCode);
-            assetProcess.setUserCode(userCode);
-            assetProcess.setUserName(userName);
-            assetProcess.setProcessType(processType);
-            assetProcess.setCreateTime(new Date());
-            assetProcessService.insertAssetProcess(assetProcess);
-
-            AssetProcessDisposal entity = new AssetProcessDisposal();
-            entity.setAssetCode(assetCode);
-            entity.setProcessId(assetProcess.getId());
-            entity.setUserCode(userCode);
-            entity.setUserName(userName);
-            entity.setType(processType);
-            entity.setFileInfo(fileInfo);
-            entity.setInstanceId(instanceId);
-            entity.setCreateTime(new Date());
-            disposalService.insertAssetProcessDisposal(entity);
-        }
+        disposalService.disposalAssets(params);
         return AjaxResult.success("处置成功");
     }
 
@@ -370,34 +343,7 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/transformAssets")
     public AjaxResult transformAssets(@RequestBody JSONObject params) {
         System.out.println("params: " + params);
-        JSONObject data = params.getObject("data", JSONObject.class);
-        String userCode = data.getString("userCode");
-        String userName = data.getString("userName");
-        String processType = data.getString("processType");
-        String instanceId = data.getString("instanceId");
-        String fileInfo = data.getString("fileInfo");
-        JSONArray assetList = data.getJSONArray("assets");
-        for (Object o : assetList) {
-            String  assetCode = JSONUtil.parseObj(o).getStr("assetCode");
-            AssetProcess assetProcess = new AssetProcess();
-            assetProcess.setAssetCode(assetCode);
-            assetProcess.setUserCode(userCode);
-            assetProcess.setUserName(userName);
-            assetProcess.setProcessType(processType);
-            assetProcess.setCreateTime(new Date());
-            assetProcessService.insertAssetProcess(assetProcess);
-
-            AssetProcessTransform entity = new AssetProcessTransform();
-            entity.setAssetCode(assetCode);
-            entity.setProcessId(assetProcess.getId());
-            entity.setUserCode(userCode);
-            entity.setUserName(userName);
-            entity.setFileInfo(fileInfo);
-            entity.setInstanceId(instanceId);
-            entity.setCreateTime(new Date());
-            transformService.insertAssetProcessTransform(entity);
-        }
-
+        transformService.transformAssets(params);
         return AjaxResult.success("改造成功");
     }
 
@@ -408,33 +354,7 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/maintainAssets")
     public AjaxResult maintainAssets(@RequestBody JSONObject params) {
         System.out.println("params: " + params);
-        JSONObject data = params.getObject("data", JSONObject.class);
-        String userCode = data.getString("userCode");
-        String userName = data.getString("userName");
-        String processType = data.getString("processType");
-        String instanceId = data.getString("instanceId");
-        String fileInfo = data.getString("fileInfo");
-        JSONArray assetList = data.getJSONArray("assets");
-        for (Object o : assetList) {
-            String  assetCode = JSONUtil.parseObj(o).getStr("assetCode");
-            AssetProcess assetProcess = new AssetProcess();
-            assetProcess.setAssetCode(assetCode);
-            assetProcess.setUserCode(userCode);
-            assetProcess.setUserName(userName);
-            assetProcess.setProcessType(processType);
-            assetProcess.setCreateTime(new Date());
-            assetProcessService.insertAssetProcess(assetProcess);
-
-            AssetProcessMaintain entity = new AssetProcessMaintain();
-            entity.setAssetCode(assetCode);
-            entity.setProcessId(assetProcess.getId());
-            entity.setUserCode(userCode);
-            entity.setUserName(userName);
-            entity.setInstanceId(instanceId);
-            entity.setFileInfo(fileInfo);
-            entity.setCreateTime(new Date());
-            maintainService.insertAssetProcessMaintain(entity);
-        }
+        maintainService.maintainAssets(params);
         return AjaxResult.success("维修成功");
     }
     /**

@@ -1,6 +1,8 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+
+import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.AssetProcessDisposal;
 import com.baomidou.mybatisplus.extension.service.IService;
 /**
@@ -35,6 +37,8 @@ public interface IAssetProcessDisposalService extends IService<AssetProcessDispo
      */
     public int insertAssetProcessDisposal(AssetProcessDisposal assetProcessDisposal);
 
+    public int downLoadFile(AssetProcessDisposal assetProcessDisposal);
+
     /**
      * 修改资产处置流程
      *
@@ -58,4 +62,7 @@ public interface IAssetProcessDisposalService extends IService<AssetProcessDispo
      * @return 结果
      */
     public int deleteAssetProcessDisposalById(Long id);
+
+
+    public int disposalAssets(JSONObject param);
 }

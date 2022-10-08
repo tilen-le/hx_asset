@@ -180,4 +180,21 @@ public class AsyncFactory
             return null;
         }
     }
+    //拥有下载附加的权限
+    public static String getDingToken_one() {
+        try {
+            DingTalkClient getToeknClient = new DefaultDingTalkClient("https://oapi.dingtalk.com/gettoken");
+            OapiGettokenRequest req = new OapiGettokenRequest();
+            req.setAppkey("dingdg5xw8bs25xrhc3x");
+            req.setAppsecret("9kJHco5VvVDQ9bmLojiPOpLNQW_B_3vwFtc4eUIzh0lj8rw1H1cpz_RrabnUf9T_");
+            req.setHttpMethod("GET");
+            OapiGettokenResponse rsp = getToeknClient.execute(req);
+            String token = rsp.getAccessToken();
+            return token;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
 }

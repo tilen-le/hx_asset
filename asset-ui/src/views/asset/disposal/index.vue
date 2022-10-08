@@ -87,6 +87,17 @@
       <el-table-column label="发起人工号" align="center" prop="userCode" />
       <el-table-column label="发起人名称" align="center" prop="userName" />
       <el-table-column label="平台资产编码" align="center" prop="assetCode" />
+      <el-table-column label="附件1" align="center" prop="fileInfo">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-download" @click="download(scope.row.fileInfo)">下载
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="附件2" align="center" prop="fileInfoAdd">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-download" @click="download(scope.row.fileInfoAdd)">下载</el-button>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -284,6 +295,12 @@ export default {
         this.$download.name(response.msg);
         this.exportLoading = false;
       }).catch(() => {});
+    },
+    /** 下载附件 */
+    download(fileInfo) {
+      this.$message.success(fileInfo);
+      const file = JSON.parse(fileInfo)
+      this.$download.resource(file[0].url)
     }
   }
 };

@@ -89,13 +89,13 @@
       <el-table-column label="平台资产编码" align="center" prop="assetCode" />
       <el-table-column label="附件1" align="center" prop="fileInfo">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-download" @click="download(scope.row.fileInfo)">下载
+          <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfo)">查看
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="附件2" align="center" prop="fileInfoAdd">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-download" @click="download(scope.row.fileInfoAdd)">下载</el-button>
+          <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfoAdd)">查看</el-button>
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -147,6 +147,12 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="附件" :visible.sync="fileDialog" append-to-body>
+      <el-row v-for="file in fileList" :key="file.url" style="margin-top:8px">
+        {{file.name}}<el-button size="mini" style="float:right" @click="download(file)">下载</el-button>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
@@ -189,7 +195,9 @@ export default {
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      fileDialog: false,
+      fileList: []
     };
   },
   created() {
@@ -296,10 +304,14 @@ export default {
         this.exportLoading = false;
       }).catch(() => {});
     },
+    /** 下载弹窗 */
+    openDownload(fileInfo){
+      this.fileList = JSON.parse(fileInfo)
+      this.fileDialog = true;
+    },
     /** 下载附件 */
-    download(fileInfo) {
-      const file = JSON.parse(fileInfo)
-      this.$download.resource(file[0].url, file[0].name)
+    download(file) {
+      this.$download.resource(file.url, file.name)
     }
   }
 };

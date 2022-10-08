@@ -298,9 +298,8 @@ export default {
     },
     /** 下载附件 */
     download(fileInfo) {
-      this.$message.success(fileInfo);
       const file = JSON.parse(fileInfo)
-      this.$download.resource(file[0].url)
+      this.$download.resource(file[0].url, file[0].name)
     }
   }
 };

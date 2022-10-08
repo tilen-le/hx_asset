@@ -17,7 +17,7 @@ export default {
       this.saveAs(blob, decodeURI(res.headers['download-filename']))
     })
   },
-  resource(resource) {
+  resource(resource, name) {
     var url = baseURL + "/common/download/resource?resource=" + encodeURI(resource);
     axios({
       method: 'get',
@@ -26,7 +26,7 @@ export default {
       headers: { 'Authorization': 'Bearer ' + getToken() }
     }).then(res => {
       const blob = new Blob([res.data])
-      this.saveAs(blob, decodeURI(res.headers['download-filename']))
+      this.saveAs(blob, name ? name : decodeURI(res.headers['download-filename']))
     })
   },
   zip(url, name) {

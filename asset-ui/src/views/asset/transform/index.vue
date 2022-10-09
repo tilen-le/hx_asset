@@ -28,6 +28,16 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
+          <el-option
+            v-for="dict in dict.type.asset_process_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -87,6 +97,22 @@
       <el-table-column label="发起人工号" align="center" prop="userCode" />
       <el-table-column label="发起人名称" align="center" prop="userName" />
       <el-table-column label="平台资产编码" align="center" prop="assetCode" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.asset_process_status" :value="scope.row.status" />
+        </template>
+      </el-table-column>
+      <el-table-column label="附件1" align="center" prop="fileInfo">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfo)">查看
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="附件2" align="center" prop="fileInfoAdd">
+        <template slot-scope="scope">
+          <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfoAdd)">查看</el-button>
+        </template>
+      </el-table-column>
       <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -136,6 +162,12 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog title="附件" :visible.sync="fileDialog" append-to-body>
+      <el-row v-for="file in fileList" :key="file.url" style="margin-top:8px">
+        {{file.name}}<el-button size="mini" style="float:right" @click="download(file)">下载</el-button>
+      </el-row>
+    </el-dialog>
   </div>
 </template>
 
@@ -144,6 +176,7 @@ import { listTransform, getTransform, delTransform, addTransform, updateTransfor
 
 export default {
   name: "Transform",
+  dicts: ['asset_process_status'],
   data() {
     return {
       // 遮罩层
@@ -173,12 +206,15 @@ export default {
         instanceId: null,
         userCode: null,
         assetCode: null,
+        status: null
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      fileDialog: false,
+      fileList: []
     };
   },
   created() {
@@ -284,6 +320,15 @@ export default {
         this.$download.name(response.msg);
         this.exportLoading = false;
       }).catch(() => {});
+    },
+    /** 下载弹窗 */
+    openDownload(fileInfo){
+      this.fileList = JSON.parse(fileInfo)
+      this.fileDialog = true;
+    },
+    /** 下载附件 */
+    download(file) {
+      this.$download.resource(file.url, file.name)
     }
   }
 };

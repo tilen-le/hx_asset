@@ -83,9 +83,9 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping(value = "/queryAssetCard")
     public JSONObject queryAssetCard(@RequestBody Asset asset) {
         Result result = assetService.queryAssetCard(asset);
-        JSONObject R = new JSONObject();
-        R.put("result", result);
-        return R;
+        JSONObject r = new JSONObject();
+        r.put("result", result);
+        return r;
     }
 
     /**
@@ -94,9 +94,9 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
     public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody JSONObject params) {
         Result result = assetService.queryPersonInfoAndAssetsByUserCode(params);
-        JSONObject R = new JSONObject();
-        R.put("result", result);
-        return R;
+        JSONObject r = new JSONObject();
+        r.put("result", result);
+        return r;
     }
 
     /**
@@ -294,7 +294,10 @@ public class DingTalkAssetController extends BaseController {
             w.eq(AssetProcessCounting::getAssetCode, assetCode)
                     .eq(AssetProcessCounting::getTaskCode, taskCode);
             AssetProcessCounting entity = assetProcessCountingService.getOne(w);
-            if (ObjectUtil.isNull(entity)) continue; // 若为异常数据，则跳过
+            // 若为异常数据，则跳过
+            if (ObjectUtil.isNull(entity)) {
+                continue;
+            }
             String status = entity.getCountingStatus();
             if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
                 if (StringUtils.isNotEmpty(comment)) {

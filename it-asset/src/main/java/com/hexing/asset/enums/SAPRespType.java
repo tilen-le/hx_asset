@@ -7,7 +7,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum SAPRespType {
 
+    /**
+     * 成功
+     */
     SUCCESS("S", "成功"),
+    /**
+     * 失败
+     */
     ERROR("E", "失败"),
     ;
 

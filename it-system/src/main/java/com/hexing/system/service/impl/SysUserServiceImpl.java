@@ -611,6 +611,7 @@ public class SysUserServiceImpl implements ISysUserService
         return Collections.emptyList();
     }
 
+    @Override
     @DataScope(deptAlias = "d", userAlias = "u", dataType = "4")
     public List<SysUser> selectChildUserList(SysUser sysUser)
     {
@@ -709,6 +710,7 @@ public class SysUserServiceImpl implements ISysUserService
         return userList;
     }
 
+    @Override
     public Map<String, SysUser> getUsernameUserObjMap() {
         List<SysUser> allUserList = userMapper.getAllUserList();
         Map<String,SysUser> usernameNicknameMap = new HashMap<>();

@@ -8,7 +8,13 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum CountingTaskStatus {
 
+    /**
+     * 盘点中
+     */
     COUNTING("0", "盘点中"),
+    /**
+     * 已完成
+     */
     FINISHED("1", "已完成"),
     ;
 

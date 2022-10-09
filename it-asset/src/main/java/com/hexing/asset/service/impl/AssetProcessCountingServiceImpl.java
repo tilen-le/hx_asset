@@ -92,7 +92,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         return assetProcessCountingMapper.selectList(wrapper);
     }
 
-
+    @Override
     public List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list) {
         List<AssetProcessCountingVO> voList = new ArrayList<>();
 

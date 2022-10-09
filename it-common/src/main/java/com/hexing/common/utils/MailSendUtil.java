@@ -16,7 +16,7 @@ public class MailSendUtil {
 
     @Autowired
     public void setJavaMailSender(JavaMailSender javaMailSender) {
-        this.javaMailSender = javaMailSender;
+        MailSendUtil.javaMailSender = javaMailSender;
     }
 
     public static void sendSimpleMail(String from, String to, String subject, String context) {

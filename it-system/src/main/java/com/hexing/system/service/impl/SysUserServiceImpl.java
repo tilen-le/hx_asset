@@ -74,7 +74,7 @@ public class SysUserServiceImpl implements ISysUserService
     @Value("${uip.uipTransfer}")
     private String uipTransfer;
 
-    private static final String initPassword = "hx.123";
+    private static final String ININT_PASSWORD = "hx.123";
 
     /**
      * 根据条件分页查询用户列表
@@ -94,6 +94,7 @@ public class SysUserServiceImpl implements ISysUserService
     {
         return userMapper.selectUserByDeptId(deptId);
     }
+
     /**
      * 根据条件分页查询已分配用户角色列表
      *
@@ -670,7 +671,7 @@ public class SysUserServiceImpl implements ISysUserService
                 SysUser sysUser = new SysUser();
                 sysUser.setUserName(odoUser.getCode());
                 sysUser.setNickName(odoUser.getName());
-                sysUser.setPassword(SecurityUtils.encryptPassword(initPassword));
+                sysUser.setPassword(SecurityUtils.encryptPassword(ININT_PASSWORD));
                 if (StringUtils.isNotBlank(odoUser.getDept_code())) {
                     sysUser.setDeptId(Long.parseLong(odoUser.getDept_code()));
                 }

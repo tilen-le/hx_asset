@@ -12,13 +12,13 @@ import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.exceptions.ApiException;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiProcessinstanceFileUrlGetRequest;
 import com.dingtalk.api.response.OapiProcessinstanceFileUrlGetResponse;
 import com.hexing.asset.domain.*;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.config.RuoYiConfig;
 import com.hexing.common.utils.DateUtils;
@@ -82,6 +82,9 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
         }
         if (StringUtils.isNotBlank(assetProcessDisposal.getInstanceId())) {
             wrapper.eq(AssetProcessDisposal::getInstanceId, assetProcessDisposal.getInstanceId());
+        }
+        if (StringUtils.isNotBlank(assetProcessDisposal.getStatus())) {
+            wrapper.eq(AssetProcessDisposal::getStatus, assetProcessDisposal.getStatus());
         }
         return assetProcessDisposalMapper.selectList(wrapper);
     }
@@ -201,7 +204,7 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
                 entity.setUserName(userName);
                 entity.setType(processType);
                 entity.setFileInfo(fileInfo);
-                entity.setStatus("处置中");
+                entity.setStatus(DingTalkAssetProcessType.PROCESS_STATUS_UNCOMPLETED.getCode());
                 entity.setInstanceId(instanceId);
                 entity.setCreateTime(new Date());
                 insertAssetProcessDisposal(entity);
@@ -215,7 +218,7 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
                 w.eq(AssetProcessDisposal::getAssetCode, assetCode).eq(AssetProcessDisposal::getInstanceId, instanceId);
                 AssetProcessDisposal entity = getOne(w);
                 entity.setFileInfoAdd(fileInfoAdd);
-                entity.setStatus("完成");
+                entity.setStatus(DingTalkAssetProcessType.PROCESS_STATUS_COMPLETED.getCode());
                 entity.setUpdateTime(new Date());
                 updateById(entity);
             }

@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
@@ -141,7 +142,7 @@ public class AssetProcessTransformServiceImpl extends ServiceImpl<AssetProcessTr
                 entity.setUserCode(userCode);
                 entity.setUserName(userName);
                 entity.setFileInfo(fileInfo);
-                entity.setStatus("改造中");
+                entity.setStatus(DingTalkAssetProcessType.PROCESS_STATUS_UNCOMPLETED.getCode());
                 entity.setInstanceId(instanceId);
                 entity.setCreateTime(new Date());
                 insertAssetProcessTransform(entity);
@@ -155,7 +156,7 @@ public class AssetProcessTransformServiceImpl extends ServiceImpl<AssetProcessTr
                 w.eq(AssetProcessTransform::getAssetCode, assetCode).eq(AssetProcessTransform::getInstanceId, instanceId);
                 AssetProcessTransform entity = getOne(w);
                 entity.setFileInfoAdd(fileInfoAdd);
-                entity.setStatus("完成");
+                entity.setStatus(DingTalkAssetProcessType.PROCESS_STATUS_COMPLETED.getCode());
                 entity.setUpdateTime(new Date());
                 updateById(entity);
             }

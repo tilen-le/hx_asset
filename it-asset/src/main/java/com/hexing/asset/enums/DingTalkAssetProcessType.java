@@ -16,6 +16,8 @@ public enum DingTalkAssetProcessType {
     PROCESS_SCRAP("500", "处置流程（报废）"),
     PROCESS_SALE_OUT("510", "处置流程（外卖）"),
     PROCESS_TRANSFORM("600", "改造流程"),
+    PROCESS_STATUS_UNCOMPLETED("0", "进行中"),
+    PROCESS_STATUS_COMPLETED("1", "已完成"),
     ;
 
     private final String code;

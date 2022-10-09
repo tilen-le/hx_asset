@@ -1,6 +1,11 @@
 package com.hexing.asset.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.hexing.common.core.domain.entity.SysDictData;
+import com.hexing.system.service.ISysDictDataService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +37,8 @@ public class AssetProcessDisposalController extends BaseController
 {
     @Autowired
     private IAssetProcessDisposalService assetProcessDisposalService;
-
+    @Autowired
+    private ISysDictDataService sysDictDataService;
     /**
      * 查询资产处置流程列表
      */
@@ -64,6 +70,22 @@ public class AssetProcessDisposalController extends BaseController
     public AjaxResult export(AssetProcessDisposal assetProcessDisposal)
     {
         List<AssetProcessDisposal> list = assetProcessDisposalService.selectAssetProcessDisposalList(assetProcessDisposal);
+
+        List<SysDictData> dictDataStatusList = sysDictDataService.selectDictDataByType("asset_process_status");
+        List<SysDictData> dictDataTypeList = sysDictDataService.selectDictDataByType("ding_asset_process_type");
+        Map<String,String> dictMap =new HashMap();
+        for (SysDictData sysDictData :dictDataStatusList){
+            dictMap.put(sysDictData.getDictValue(),sysDictData.getDictLabel());
+        }
+        for (SysDictData sysDictData :dictDataTypeList){
+            dictMap.put(sysDictData.getDictValue(),sysDictData.getDictLabel());
+        }
+        for (AssetProcessDisposal disposal :list){
+            if (dictMap.containsKey(disposal.getStatus())){
+                disposal.setStatus(dictMap.get(disposal.getStatus()));
+                disposal.setType(dictMap.get(disposal.getType()));
+            }
+        }
         ExcelUtil<AssetProcessDisposal> util = new ExcelUtil<AssetProcessDisposal>(AssetProcessDisposal.class);
         return util.exportExcel(list, "资产处置流程数据");
     }

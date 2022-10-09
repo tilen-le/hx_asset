@@ -4,6 +4,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
+import com.hexing.common.utils.StringUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -63,6 +64,9 @@ public class AssetProcessCountingController extends BaseController
     @ApiOperation("盘点统计")
     @GetMapping("/inventoryCount")
     public AjaxResult inventoryCount(String type,String startDate, String endDate) {
+        if (StringUtils.isEmpty(startDate)||StringUtils.isEmpty(endDate)){
+            return AjaxResult.error("起止日期未设置");
+        }
         JSONObject jsonObject = assetProcessCountingService.inventoryCount(type, startDate, endDate);
         return AjaxResult.success(jsonObject);
     }

@@ -1,6 +1,11 @@
 package com.hexing.asset.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.hexing.common.core.domain.entity.SysDictData;
+import com.hexing.system.service.ISysDictDataService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +37,8 @@ public class AssetProcessTransformController extends BaseController
 {
     @Autowired
     private IAssetProcessTransformService assetProcessTransformService;
-
+    @Autowired
+    private ISysDictDataService sysDictDataService;
     /**
      * 查询资产改造流程列表
      */
@@ -54,6 +60,16 @@ public class AssetProcessTransformController extends BaseController
     public AjaxResult export(AssetProcessTransform assetProcessTransform)
     {
         List<AssetProcessTransform> list = assetProcessTransformService.selectAssetProcessTransformList(assetProcessTransform);
+        List<SysDictData> dictDataStatusList = sysDictDataService.selectDictDataByType("asset_process_status");
+        Map<String,String> dictMap =new HashMap();
+        for (SysDictData sysDictData :dictDataStatusList){
+            dictMap.put(sysDictData.getDictValue(),sysDictData.getDictLabel());
+        }
+        for (AssetProcessTransform transform :list){
+            if (dictMap.containsKey(transform.getStatus())){
+                transform.setStatus(dictMap.get(transform.getStatus()));
+            }
+        }
         ExcelUtil<AssetProcessTransform> util = new ExcelUtil<AssetProcessTransform>(AssetProcessTransform.class);
         return util.exportExcel(list, "资产改造流程数据");
     }

@@ -30,7 +30,6 @@ public class AssetProcessDisposal
     private Long id;
 
     /** 流程总表id */
-    @Excel(name = "流程总表id")
     private Long processId;
 
     /** 实例ID */
@@ -42,6 +41,7 @@ public class AssetProcessDisposal
     private String userCode;
 
     /** 发起人名称 */
+    @Excel(name = "发起人姓名")
     private String userName;
 
     /** 平台资产编码 */
@@ -60,11 +60,13 @@ public class AssetProcessDisposal
     private String fileInfo;
 
     /** 类型 500报废；510外卖 */
+    @Excel(name = "类型")
     private String type;
 
     /** 补充文件信息 */
     private String fileInfoAdd;
 
     /** 状态 */
+    @Excel(name = "状态")
     private String status;
 }

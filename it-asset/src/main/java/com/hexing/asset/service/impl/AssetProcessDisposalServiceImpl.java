@@ -86,6 +86,9 @@ public class AssetProcessDisposalServiceImpl extends ServiceImpl<AssetProcessDis
         if (StringUtils.isNotBlank(assetProcessDisposal.getStatus())) {
             wrapper.eq(AssetProcessDisposal::getStatus, assetProcessDisposal.getStatus());
         }
+        if (StringUtils.isNotBlank(assetProcessDisposal.getType())) {
+            wrapper.eq(AssetProcessDisposal::getType, assetProcessDisposal.getType());
+        }
         return assetProcessDisposalMapper.selectList(wrapper);
     }
 

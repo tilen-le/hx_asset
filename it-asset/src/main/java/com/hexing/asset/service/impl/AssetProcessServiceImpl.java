@@ -22,6 +22,8 @@ import com.hexing.asset.mapper.AssetProcessMapper;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.service.IAssetProcessService;
 
+import static com.hexing.common.utils.PageUtil.startPage;
+
 /**
  * 流程总Service业务层处理
  *
@@ -72,6 +74,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         List<SysDictData> dictDataList = sysDictDataService.selectDictDataByType("dingtalk_asset_process_type");
         List<String> processTypeList = dictDataList.stream().map(SysDictData::getDictValue).collect(Collectors.toList());
         wrapper.in(AssetProcess::getProcessType, processTypeList);
+        startPage();
         return assetProcessMapper.selectList(wrapper);
     }
 

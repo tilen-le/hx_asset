@@ -14,8 +14,10 @@ import com.hexing.asset.domain.vo.SimpleStatisticVO;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDept;
+import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDeptService;
+import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +55,8 @@ public class AssetProcessController extends BaseController {
     private ISysDeptService sysDeptService;
     @Autowired
     private ISysUserService sysUserService;
+    @Autowired
+    private ISysDictDataService sysDictDataService;
 
     /**
      * 查询流程总列表
@@ -73,8 +77,18 @@ public class AssetProcessController extends BaseController {
     @GetMapping("/export")
     public AjaxResult export(AssetProcess assetProcess) {
         List<AssetProcess> list = assetProcessService.selectAssetProcessList(assetProcess);
+        List<SysDictData> dictDataStatusList = sysDictDataService.selectDictDataByType("dingtalk_asset_process_type");
+        Map<String,String> dictMap =new HashMap();
+        for (SysDictData sysDictData :dictDataStatusList){
+            dictMap.put(sysDictData.getDictValue(),sysDictData.getDictLabel());
+        }
+        for (AssetProcess process :list){
+            if (dictMap.containsKey(process.getProcessType())){
+                process.setProcessType(dictMap.get(process.getProcessType()));
+            }
+        }
         ExcelUtil<AssetProcess> util = new ExcelUtil<AssetProcess>(AssetProcess.class);
-        return util.exportExcel(list, "流程总数据");
+        return util.exportExcel(list, "资产调拨流程数据");
     }
 
     /**

@@ -257,4 +257,18 @@ public class DateUtils extends org.apache.commons.lang3.time.DateUtils
         }
         return result;
     }
+
+    /**
+     * 获取指定日期的最后一刻
+     * 例如 2022-09-23 的最后一刻为 2022-09-23 23:59:59
+     *
+     * @param date
+     * @return
+     */
+    public static LocalDateTime getLastMomentOfDate(Date date) {
+        LocalDateTime localDateTime = LocalDateTime
+                .ofInstant(Instant.ofEpochMilli(date.getTime()), ZoneId.systemDefault());
+        return localDateTime.with(LocalTime.MAX);
+    }
+
 }

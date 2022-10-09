@@ -79,6 +79,9 @@ public class AssetProcessCountingController extends BaseController
     public TableDataInfo inventoryCountList(String startDate,String endDate)
     {
         startPage();
+        if (StringUtils.isEmpty(startDate)||StringUtils.isEmpty(endDate)){
+            return new TableDataInfo();
+        }
         List<AssetProcessCounting> list = assetProcessCountingService.inventoryCountList(startDate, endDate);
         TableDataInfo dataTable = getDataTable(list);
         return dataTable;

@@ -2,12 +2,11 @@ package com.hexing.asset.service;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.dto.StatisQueryParam;
+import com.hexing.asset.domain.vo.AssetLifeCycleNodeVO;
 
 /**
  * 流程总Service接口
@@ -66,4 +65,13 @@ public interface IAssetProcessService extends IService<AssetProcess>
     public int deleteAssetProcessById(Long id);
 
     List<AssetProcess> queryAssetProcessForStatisticByType(String processType, StatisQueryParam params, List<Asset> assetList);
+
+    /**
+     * 获取资产的生命周期
+     *
+     * @param assetCode 平台资产编号
+     * @return
+     */
+    List<AssetLifeCycleNodeVO> getAssetLifeCycle(String assetCode);
+
 }

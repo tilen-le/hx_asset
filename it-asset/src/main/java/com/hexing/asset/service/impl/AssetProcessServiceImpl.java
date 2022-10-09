@@ -1,19 +1,20 @@
 package com.hexing.asset.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetInventoryTask;
 import com.hexing.asset.domain.dto.StatisQueryParam;
-import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.domain.vo.AssetLifeCycleNodeVO;
 import com.hexing.common.core.domain.entity.SysDictData;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDictDataService;
+import com.hexing.system.service.ISysUserService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     private AssetProcessMapper assetProcessMapper;
     @Autowired
     private ISysDictDataService sysDictDataService;
+    @Autowired
+    private ISysUserService sysUserService;
+
     /**
      * 查询流程总
      *
@@ -130,4 +134,33 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList()));
         return this.list(wrapper);
     }
+
+    /**
+     * 获取资产的生命周期
+     *
+     * @param assetCode 平台资产编号
+     * @return
+     */
+    @Override
+    public List<AssetLifeCycleNodeVO> getAssetLifeCycle(String assetCode) {
+        LambdaQueryWrapper<AssetProcess> wrapper = new LambdaQueryWrapper<>();
+        // 查询资产的所有流程 按照创建时间进行升序排序
+        wrapper.eq(AssetProcess::getAssetCode, assetCode)
+                .orderByAsc(AssetProcess::getCreateTime);
+        List<AssetProcess> assetProcessList = this.list(wrapper);
+        List<AssetLifeCycleNodeVO> assetLifeCycleNodeVOList = new ArrayList<>();
+        for (AssetProcess assetProcess : assetProcessList) {
+            AssetLifeCycleNodeVO vo = new AssetLifeCycleNodeVO();
+            BeanUtils.copyProperties(assetProcess, vo);
+            assetLifeCycleNodeVOList.add(vo);
+        }
+
+        for (AssetLifeCycleNodeVO vo : assetLifeCycleNodeVOList) {
+            SysUser user = sysUserService.getUserByUserName(vo.getUserCode());
+            vo.setUserName(user.getNickName());
+        }
+
+        return assetLifeCycleNodeVOList;
+    }
+
 }

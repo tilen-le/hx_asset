@@ -7,20 +7,16 @@ import java.util.stream.Collectors;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.dto.StatisQueryParam;
+import com.hexing.asset.domain.vo.AssetLifeCycleNodeVO;
 import com.hexing.asset.domain.vo.SimpleStatisticVO;
 import com.hexing.asset.enums.AssetStatisticType;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.IAssetProcessService;
-import com.hexing.common.annotation.DataScope;
 import com.hexing.common.core.domain.entity.SysDept;
-import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.ServletUtils;
@@ -30,7 +26,6 @@ import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +38,6 @@ import com.hexing.asset.service.IAssetService;
 import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.swing.*;
-
-import static com.hexing.common.utils.PageUtil.startPage;
 
 /**
  * 资产表Controller
@@ -108,6 +99,14 @@ public class AssetController extends BaseController {
         }
         return AjaxResult.success(asset);
     }
+
+    @ApiOperation("查询资产生命周期")
+    @GetMapping("/getLifeCycle/{assetCode}")
+    public AjaxResult getLifeCycle(@PathVariable String assetCode) {
+        List<AssetLifeCycleNodeVO> assetLifeCycle = assetProcessService.getAssetLifeCycle(assetCode);
+        return AjaxResult.success(assetLifeCycle);
+    }
+
 
     /**
      * 新增资产表

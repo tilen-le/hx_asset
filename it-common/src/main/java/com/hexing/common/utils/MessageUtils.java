@@ -29,9 +29,9 @@ public class MessageUtils {
         String language = getLanguage();
         if (StringUtils.isNotBlank(language)) {
             //手动或者自动对应
-            if (language.equals("en")) {
+            if ("en".equals(language)) {
                 locale = Locale.US;
-            } else if (language.equals("zh")) {
+            } else if ("zh".equals(language)) {
                 locale = Locale.SIMPLIFIED_CHINESE;
             } else {
                 locale = LocaleContextHolder.getLocale();

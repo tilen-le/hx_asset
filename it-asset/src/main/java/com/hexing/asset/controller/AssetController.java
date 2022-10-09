@@ -103,6 +103,9 @@ public class AssetController extends BaseController {
     @GetMapping(value = "/getInfo/{assetCode}")
     public AjaxResult getInfo(@PathVariable String assetCode) {
         Asset asset = assetService.selectAssetByAssetCode(assetCode);
+        if (ObjectUtil.isEmpty(asset)) {
+            return AjaxResult.error("资产不存在");
+        }
         return AjaxResult.success(asset);
     }
 

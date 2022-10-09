@@ -94,6 +94,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         QueryWrapper<Asset> wrapper = new QueryWrapper<>();
         wrapper.eq("asset_code", assetCode);
         Asset asset = assetMapper.selectOne(wrapper);
+        if (ObjectUtil.isEmpty(asset)) {
+            return null;
+        }
         Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
         Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
 

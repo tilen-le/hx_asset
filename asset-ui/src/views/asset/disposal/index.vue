@@ -55,7 +55,7 @@
           v-hasPermi="['asset:disposal:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -76,7 +76,7 @@
           @click="handleDelete"
           v-hasPermi="['asset:disposal:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -113,7 +113,7 @@
           <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfoAdd)">查看</el-button>
         </template>
       </el-table-column>
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -130,7 +130,7 @@
             v-hasPermi="['asset:disposal:remove']"
           >删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination

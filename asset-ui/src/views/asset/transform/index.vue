@@ -45,7 +45,7 @@
           v-hasPermi="['asset:transform:add']"
         >新增</el-button>
       </el-col>
-      <el-col :span="1.5">
+      <!-- <el-col :span="1.5">
         <el-button
           type="success"
           plain
@@ -66,7 +66,7 @@
           @click="handleDelete"
           v-hasPermi="['asset:transform:remove']"
         >删除</el-button>
-      </el-col>
+      </el-col> -->
       <el-col :span="1.5">
         <el-button
           type="warning"
@@ -87,7 +87,7 @@
       <el-table-column label="发起人工号" align="center" prop="userCode" />
       <el-table-column label="发起人名称" align="center" prop="userName" />
       <el-table-column label="平台资产编码" align="center" prop="assetCode" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
@@ -104,7 +104,7 @@
             v-hasPermi="['asset:transform:remove']"
           >删除</el-button>
         </template>
-      </el-table-column>
+      </el-table-column> -->
     </el-table>
 
     <pagination

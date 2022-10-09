@@ -319,11 +319,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                 .eq(AssetInventoryTask::getStatus, CountingTaskStatus.COUNTING.getStatus()));
         for (AssetInventoryTask task : taskList) {
             // 是否满足完成条件：当前时间大于盘点任务结束时间
-            LocalDateTime localDateTime = LocalDateTime
-                    .ofInstant(Instant.ofEpochMilli(task.getEndDate().getTime()), ZoneId.systemDefault());
-            LocalDateTime endOfDay = localDateTime.with(LocalTime.MAX);
-            Date endMomentOfEndDate = Date.from(endOfDay.atZone(ZoneId.systemDefault()).toInstant());
-            if (new Date().compareTo(endMomentOfEndDate) > 0) {
+            LocalDateTime lastMomentOfDate = DateUtils.getLastMomentOfDate(task.getEndDate());
+            if (LocalDateTime.now().isAfter(lastMomentOfDate)) {
                 task.setStatus(CountingTaskStatus.FINISHED.getStatus());
             }
         }

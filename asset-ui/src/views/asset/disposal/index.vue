@@ -28,6 +28,16 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
+          <el-option
+            v-for="dict in dict.type.asset_process_status"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -87,6 +97,11 @@
       <el-table-column label="发起人工号" align="center" prop="userCode" />
       <el-table-column label="发起人名称" align="center" prop="userName" />
       <el-table-column label="平台资产编码" align="center" prop="assetCode" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.asset_process_status" :value="scope.row.status" />
+        </template>
+      </el-table-column>
       <el-table-column label="附件1" align="center" prop="fileInfo">
         <template slot-scope="scope">
           <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfo)">查看
@@ -161,6 +176,7 @@ import { listDisposal, getDisposal, delDisposal, addDisposal, updateDisposal, ex
 
 export default {
   name: "Disposal",
+  dicts: ['asset_process_status'],
   data() {
     return {
       // 遮罩层
@@ -190,6 +206,7 @@ export default {
         instanceId: null,
         userCode: null,
         assetCode: null,
+        status: null
       },
       // 表单参数
       form: {},

@@ -317,9 +317,9 @@ public class AssetController extends BaseController {
 
         Map<String, List<SimpleStatisticVO>> data = new HashMap<>();
 
-        final String NUM_DEPT_COUNT = "numDeptCount";
-        final String TOTAL_VALUE_DEPT_COUNT = "totalValueDeptCount";
-        final String TOTAL_NET_WORTH = "totalNetWorth";
+        String numDeptCount = "numDeptCount";
+        String totalValueDeptCount = "totalValueDeptCount";
+        String netWorthTotal = "totalNetWorth";
 
         if (StringUtils.isEmpty(params.getDept())) {
             return AjaxResult.error("未指定组织范围");
@@ -346,9 +346,9 @@ public class AssetController extends BaseController {
             }
         }
 
-        data.put(NUM_DEPT_COUNT, new ArrayList<>());
-        data.put(TOTAL_VALUE_DEPT_COUNT, new ArrayList<>());
-        data.put(TOTAL_NET_WORTH, new ArrayList<>());
+        data.put(numDeptCount, new ArrayList<>());
+        data.put(totalValueDeptCount, new ArrayList<>());
+        data.put(netWorthTotal, new ArrayList<>());
         for (SysDept dept : childDeptList) {
             List<Asset> assetList = assetService.selectAssetListByDeptId(dept.getDeptId());
             if (CollectionUtil.isEmpty(assetList)) {
@@ -362,9 +362,9 @@ public class AssetController extends BaseController {
             Double totalValue = assetList.stream().mapToDouble(Asset::getTotalValue).sum();
             Double totalNetWorth = assetList.stream().mapToDouble(Asset::getNetWorth).sum();
 
-            data.get(NUM_DEPT_COUNT).add(new SimpleStatisticVO(dept.getDeptName(), totalNum));
-            data.get(TOTAL_VALUE_DEPT_COUNT).add(new SimpleStatisticVO(dept.getDeptName(), totalValue));
-            data.get(TOTAL_NET_WORTH).add(new SimpleStatisticVO(dept.getDeptName(), totalNetWorth));
+            data.get(numDeptCount).add(new SimpleStatisticVO(dept.getDeptName(), totalNum));
+            data.get(totalValueDeptCount).add(new SimpleStatisticVO(dept.getDeptName(), totalValue));
+            data.get(netWorthTotal).add(new SimpleStatisticVO(dept.getDeptName(), totalNetWorth));
         }
 
         return AjaxResult.success(data);

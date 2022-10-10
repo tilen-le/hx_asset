@@ -2,6 +2,7 @@ package com.hexing.framework.security;
 
 import com.alibaba.fastjson.JSON;
 import com.hexing.common.core.domain.model.LoginUser;
+import com.hexing.common.enums.UserType;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.OkHttpUtil;
 import com.hexing.common.utils.StringUtils;
@@ -35,7 +36,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         UserDetails node = userDetailsService.loadUserByUsername(username);
         // 此处钉钉域账号登录验证模式
         String userType = ((LoginUser) node).getUser().getUserType();
-        if ("1".equals(userType)) {
+        if (UserType.DINGTALK_USER.getCode().equals(userType)) {
             boolean authAD = authAD(username, password);
             if (!authAD) {
                 throw new ServiceException("账户密码AD认证异常");

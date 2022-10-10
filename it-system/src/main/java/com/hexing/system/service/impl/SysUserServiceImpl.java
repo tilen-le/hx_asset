@@ -7,6 +7,8 @@ import com.hexing.common.constant.UserConstants;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysRole;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.enums.UserStatus;
+import com.hexing.common.enums.UserType;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.MessageUtils;
 import com.hexing.common.utils.SecurityUtils;
@@ -675,8 +677,8 @@ public class SysUserServiceImpl implements ISysUserService
                 if (StringUtils.isNotBlank(odoUser.getDept_code())) {
                     sysUser.setDeptId(Long.parseLong(odoUser.getDept_code()));
                 }
-                sysUser.setUserType("1");
-                sysUser.setStatus("1");
+                sysUser.setUserType(UserType.DINGTALK_USER.getCode());
+                sysUser.setStatus(UserStatus.DISABLE.getCode());
                 userMapper.insertUser(sysUser);
             }
         }

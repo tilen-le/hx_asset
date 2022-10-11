@@ -11,6 +11,7 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.StatisQueryParam;
 import com.hexing.asset.domain.vo.AssetLifeCycleVO;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
@@ -36,6 +37,8 @@ import static com.hexing.common.utils.PageUtil.startPage;
 public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, AssetProcess> implements IAssetProcessService {
     @Autowired
     private AssetProcessMapper assetProcessMapper;
+    @Autowired
+    private IAssetService assetService;
     @Autowired
     private ISysDictDataService sysDictDataService;
     @Autowired
@@ -155,6 +158,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 assetProcess.setUserName(user.getNickName());
             }
             vo.setAssetProcessList(assetProcessList);
+
+            Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
+            vo.setAssetStatus(asset.getAssetStatus());
+
             vo.setMaintainCount(assetProcessList.stream()
                     .filter(e -> DingTalkAssetProcessType.PROCESS_MAINTAIN.getCode().equals(e.getProcessType()))
                     .count());
@@ -164,6 +171,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setSellOutCount(assetProcessList.stream()
                     .filter(e -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(e.getProcessType()))
                     .count());
+
         }
 
         return vo;

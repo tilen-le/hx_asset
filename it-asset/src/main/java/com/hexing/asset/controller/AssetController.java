@@ -105,7 +105,7 @@ public class AssetController extends BaseController {
 
     @ApiOperation("查询资产生命周期")
     @GetMapping("/getLifeCycle/{assetCode}")
-    public AjaxResult getLifeCycle(@Validated @PathVariable String assetCode) {
+    public AjaxResult getLifeCycle(@Validated @PathVariable String assetCode/*, BindingResult bindingResult*/) {
 //        ValidateUtils.validAll(bindingResult);
         AssetLifeCycleVO assetLifeCycle = assetProcessService.getAssetLifeCycle(assetCode);
         return AjaxResult.success(assetLifeCycle);

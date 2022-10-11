@@ -16,6 +16,9 @@ public class AssetLifeCycleVO {
     /** 资产流程列表 */
     @ApiModelProperty(value="资产流程列表", name="assetProcessList")
     List<AssetProcess> assetProcessList;
+    /** 资产状态 */
+    @ApiModelProperty(value="资产状态", name="assetStatus")
+    String assetStatus;
     /** 维修次数 */
     @ApiModelProperty(value="维修次数", name="maintainCount")
     private Long maintainCount;

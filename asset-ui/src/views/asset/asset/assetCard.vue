@@ -50,10 +50,10 @@ var EditableProps = [
   "usageScenario",
   "comment",
 ];
-import { getAsset, updateAsset } from "@/api/asset/asset";
+import { getAsset, getLifeCycle, updateAsset } from "@/api/asset/asset";
 import { allUser } from "@/api/system/user";
 export default {
-  dicts: ["asset_counting_status"],
+  dicts: ["asset_counting_status","ding_asset_process_type"],
   data() {
     return {
       assetColumns: [
@@ -202,8 +202,16 @@ export default {
   },
   created() {
     this.refreshData();
+    this.getLifeCycle();
   },
   methods: {
+    getLifeCycle() {
+      var assetCode = this.$route.query.assetCode;
+      getLifeCycle(assetCode).then((response) => {
+        console.log("getLifeCycle::::::")
+        console.log(response);
+      })
+    },
     refreshData() {
       var assetCode = this.$route.query.assetCode;
       getAsset(assetCode).then((response) => {

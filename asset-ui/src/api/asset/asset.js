@@ -59,3 +59,11 @@ export function exportAsset(query) {
     params: query
   })
 }
+
+// 生命周期
+export function getLifeCycle(assetCode){
+  return request({
+    url: '/asset/getLifeCycle/'+assetCode,
+    method: 'get',
+  })
+}

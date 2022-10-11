@@ -42,6 +42,8 @@ import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.common.core.page.TableDataInfo;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * 资产表Controller
  *
@@ -105,8 +107,7 @@ public class AssetController extends BaseController {
 
     @ApiOperation("查询资产生命周期")
     @GetMapping("/getLifeCycle/{assetCode}")
-    public AjaxResult getLifeCycle(@Validated @PathVariable String assetCode/*, BindingResult bindingResult*/) {
-//        ValidateUtils.validAll(bindingResult);
+    public AjaxResult getLifeCycle(@PathVariable String assetCode) {
         AssetLifeCycleVO assetLifeCycle = assetProcessService.getAssetLifeCycle(assetCode);
         return AjaxResult.success(assetLifeCycle);
     }

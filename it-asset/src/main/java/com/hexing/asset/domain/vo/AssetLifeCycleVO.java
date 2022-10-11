@@ -11,21 +11,21 @@ import java.util.List;
 
 @Data
 @Accessors(chain = true)
-@ApiModel(value = "生命周期VO类", description = "生命周期VO类")
+@ApiModel(value = "AssetLifeCycleVO")
 public class AssetLifeCycleVO {
     /** 资产流程列表 */
-    @ApiModelProperty(value="资产流程列表", name="assetProcessList")
-    List<AssetProcess> assetProcessList;
+    @ApiModelProperty(value="资产流程列表")
+    private List<AssetProcess> assetProcessList;
     /** 资产状态 */
-    @ApiModelProperty(value="资产状态", name="assetStatus")
-    String assetStatus;
+    @ApiModelProperty(value="资产状态")
+    private String assetStatus;
     /** 维修次数 */
-    @ApiModelProperty(value="维修次数", name="maintainCount")
+    @ApiModelProperty(value="维修次数")
     private Long maintainCount;
     /** 改造次数 */
-    @ApiModelProperty(value="改造次数", name="transformCount")
+    @ApiModelProperty(value="改造次数")
     private Long transformCount;
     /** 外卖次数 */
-    @ApiModelProperty(value="外卖次数", name="sellOutCount")
+    @ApiModelProperty(value="外卖次数")
     private Long sellOutCount;
 }

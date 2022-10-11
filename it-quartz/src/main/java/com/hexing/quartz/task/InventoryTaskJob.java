@@ -11,7 +11,7 @@ public class InventoryTaskJob {
     @Resource
     private IAssetInventoryTaskService assetInventoryTaskService;
 
-    private void updateInventoryTaskStatus() {
+    public void updateInventoryTaskStatus() {
         assetInventoryTaskService.updateInventoryTaskStatus();
     }
 

@@ -83,6 +83,7 @@ spring:
                 # #连接池最大阻塞等待时间（使用负值表示没有限制）
                 max-wait: -1ms
 ruoyi:
-    profile: D:/ruoyi/uploadPath
+#    profile: D:/ruoyi/uploadPath
+    profile: /profile
 uip:
     uipTransfer: http://192.168.3.158:8080/UIP/uip/uipManage/dataOper

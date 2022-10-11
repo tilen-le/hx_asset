@@ -9,6 +9,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.domain.AssetProcessDisposal;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.utils.DateUtils;
@@ -62,6 +63,9 @@ public class AssetProcessTransformServiceImpl extends ServiceImpl<AssetProcessTr
         }
         if (StringUtils.isNotBlank(assetProcessTransform.getInstanceId())) {
             wrapper.eq(AssetProcessTransform::getInstanceId, assetProcessTransform.getInstanceId());
+        }
+        if (StringUtils.isNotBlank(assetProcessTransform.getStatus())) {
+            wrapper.eq(AssetProcessTransform::getStatus, assetProcessTransform.getStatus());
         }
         return assetProcessTransformMapper.selectList(wrapper);
     }

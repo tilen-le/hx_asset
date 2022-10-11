@@ -36,8 +36,8 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         // 此处钉钉域账号登录验证模式
         String userType = ((LoginUser) node).getUser().getUserType();
         if ("1".equals(userType)) {
-            boolean authAD = authAD(username, password);
-            if (!authAD) {
+            boolean authAd = authAd(username, password);
+            if (!authAd) {
                 throw new ServiceException("账户密码AD认证异常");
             }
         } else {
@@ -53,7 +53,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return true;
     }
 
-    private boolean authAD(String username, String password) {
+    private boolean authAd(String username, String password) {
         if (StringUtils.isAnyBlank(username, password)) {
             throw new ServiceException("用户名密码不能为空");
         }

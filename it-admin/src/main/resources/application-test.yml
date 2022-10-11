@@ -6,7 +6,8 @@ spring:
         druid:
             # 主库数据源
             master:
-                url: jdbc:mysql://192.168.108.179:3306/hx_asset?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                # 地址192.168.108.179
+                url: jdbc:mysql://localhost:3306/hx_asset?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
                 username: root
                 password: HX.123456
             # 从库数据源
@@ -62,8 +63,8 @@ spring:
         password: Admin@.Hxpass0rd
     # redis 配置
     redis:
-        # 地址
-        host: 192.168.108.179
+        # 地址192.168.108.176
+        host: 192.168.108.176
         # 端口，默认为6379
         port: 6379
         # 数据库索引

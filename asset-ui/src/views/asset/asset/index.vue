@@ -244,7 +244,7 @@
 </template>
 
 <script>
-import { listAsset, delAsset, addAsset, updateAsset, exportAsset, importTemplate } from "@/api/asset/asset";
+import { listAsset, delAsset, exportAsset, importTemplate } from "@/api/asset/asset";
 import { getToken } from '@/utils/auth'
 export default {
   name: "Asset",

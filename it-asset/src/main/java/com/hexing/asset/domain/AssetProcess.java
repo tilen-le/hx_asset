@@ -1,6 +1,7 @@
 package com.hexing.asset.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -38,6 +39,7 @@ public class AssetProcess
 
     /** 发起人名称 */
     @Excel(name = "发起人姓名")
+    @TableField(exist = false)
     private String userName;
 
     /** 资产编码 */
@@ -51,5 +53,9 @@ public class AssetProcess
     /** 更新时间 */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
+
+    /** 附件信息 */
+    @TableField(exist = false)
+    private String fileInfo;
 
 }

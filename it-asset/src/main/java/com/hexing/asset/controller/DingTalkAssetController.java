@@ -2,18 +2,15 @@ package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hexing.asset.domain.*;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.*;
-import com.hexing.asset.service.impl.AssetServiceImpl;
 import com.hexing.common.annotation.RepeatSubmit;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -23,23 +20,21 @@ import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.ValidateUtils;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
-import org.apache.commons.lang3.time.DateFormatUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -48,6 +43,7 @@ import java.util.stream.Collectors;
 /**
  * 开放给钉钉端的rest接口
  */
+@Api(tags="钉钉连接器")
 @RestController
 @RequestMapping("/api/dingtalk/asset")
 public class DingTalkAssetController extends BaseController {
@@ -80,6 +76,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 根据资产编号查询资产信息
      */
+    @ApiOperation("根据资产编号查询资产信息")
     @PostMapping(value = "/queryAssetCard")
     public JSONObject queryAssetCard(@RequestBody Asset asset) {
         Result result = assetService.queryAssetCard(asset);
@@ -91,6 +88,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 根据工号,管理部门查询保管人信息及名下资产
      */
+    @ApiOperation("根据工号,管理部门查询保管人信息及名下资产")
     @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
     public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody JSONObject params) {
         Result result = assetService.queryPersonInfoAndAssetsByUserCode(params);
@@ -102,6 +100,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 资产领用
      */
+    @ApiOperation("资产领用流程")
     @PostMapping(value = "/assetReceive")
     @Transactional
     public Result assetReceive(@RequestBody JSONObject params) {
@@ -144,6 +143,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 资产归还
      */
+    @ApiOperation("资产归还流程")
     @PostMapping(value = "/assetBack")
     @Transactional
     public Result assetBack(@RequestBody JSONObject params) {
@@ -179,6 +179,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 资产更换
      */
+    @ApiOperation("资产更换流程")
     @PostMapping(value = "/updateAssetExchange")
     public Result updateAssetExchange(@RequestBody JSONObject params) {
         return assetService.updateAssetExchange(params);
@@ -187,6 +188,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 资产转移
      */
+    @ApiOperation("资产转移流程")
     @PostMapping(value = "/updateAssetTransfer")
     public Result updateAssetTransfer(@RequestBody JSONObject params) {
         return assetService.updateAssetTransfer(params);
@@ -195,6 +197,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 查询所有存放地点
      */
+    @ApiOperation("查询所有存放地点")
     @PostMapping(value = "/queryAllAssetAddresses")
     public JSONObject queryAllAssetAddresses() {
         String dictType = "asset_location";
@@ -210,6 +213,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 查询盘点任务编码
      */
+    @ApiOperation("查询盘点任务编码")
     @PostMapping("/selectCountingTaskCode")
     public String selectCountingTaskCode(@RequestBody JSONObject params) {
         JSONObject result = new JSONObject();
@@ -229,6 +233,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 扫码盘点时，查询资产信息
      */
+    @ApiOperation("扫码查询资产信息")
     @PostMapping("/counting/getAssetInfo")
     public AjaxResult getAssetInfo(@RequestBody JSONObject params) {
         String assetCode = params.getString("assetCode");
@@ -261,6 +266,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 钉钉提交盘点流程
      */
+    @ApiOperation("资产盘点流程")
     @PostMapping("/counting/countAsset")
     @Transactional
     public AjaxResult countAsset(@RequestBody JSONObject params) {
@@ -331,6 +337,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 员工处置资产流程
      */
+    @ApiOperation("资产处置流程")
     @Transactional
     @PostMapping("/disposalAssets")
     public AjaxResult disposalAssets(@RequestBody JSONObject params) {
@@ -342,6 +349,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 员工改造资产流程
      */
+    @ApiOperation("资产改造流程")
     @Transactional
     @PostMapping("/transformAssets")
     public AjaxResult transformAssets(@RequestBody JSONObject params) {
@@ -353,6 +361,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 员工维修资产流程
      */
+    @ApiOperation("资产维修流程")
     @Transactional
     @PostMapping("/maintainAssets")
     public AjaxResult maintainAssets(@RequestBody JSONObject params) {
@@ -363,6 +372,7 @@ public class DingTalkAssetController extends BaseController {
     /**
      * 新增盘点任务
      */
+    @ApiOperation("新增盘点任务")
     @PostMapping("/createCountingTask")
     @RepeatSubmit(interval = 10000, message = "请勿重复提交")
     public AjaxResult createCountingTask(@RequestBody JSONObject params) {

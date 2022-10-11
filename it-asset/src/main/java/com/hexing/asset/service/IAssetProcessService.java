@@ -6,7 +6,7 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.dto.StatisQueryParam;
-import com.hexing.asset.domain.vo.AssetLifeCycleNodeVO;
+import com.hexing.asset.domain.vo.AssetLifeCycleVO;
 
 /**
  * 流程总Service接口
@@ -72,6 +72,6 @@ public interface IAssetProcessService extends IService<AssetProcess>
      * @param assetCode 平台资产编号
      * @return
      */
-    List<AssetLifeCycleNodeVO> getAssetLifeCycle(String assetCode);
+    AssetLifeCycleVO getAssetLifeCycle(String assetCode);
 
 }

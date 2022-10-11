@@ -4,11 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.StatisQueryParam;
-import com.hexing.asset.domain.vo.AssetLifeCycleNodeVO;
+import com.hexing.asset.domain.vo.AssetLifeCycleVO;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
@@ -31,10 +34,11 @@ import static com.hexing.common.utils.PageUtil.startPage;
  * @date 2022-09-08
  */
 @Service
-public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, AssetProcess> implements IAssetProcessService
-{
+public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, AssetProcess> implements IAssetProcessService {
     @Autowired
     private AssetProcessMapper assetProcessMapper;
+    @Autowired
+    private IAssetService assetService;
     @Autowired
     private ISysDictDataService sysDictDataService;
     @Autowired
@@ -47,8 +51,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return 流程总
      */
     @Override
-    public AssetProcess selectAssetProcessById(Long id)
-    {
+    public AssetProcess selectAssetProcessById(Long id) {
         return assetProcessMapper.selectById(id);
     }
 
@@ -59,8 +62,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return 流程总
      */
     @Override
-    public List<AssetProcess> selectAssetProcessList(AssetProcess assetProcess)
-    {
+    public List<AssetProcess> selectAssetProcessList(AssetProcess assetProcess) {
         LambdaQueryWrapper<AssetProcess> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(assetProcess.getProcessType())) {
             wrapper.eq(AssetProcess::getProcessType, assetProcess.getProcessType());
@@ -85,8 +87,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return 结果
      */
     @Override
-    public int insertAssetProcess(AssetProcess assetProcess)
-    {
+    public int insertAssetProcess(AssetProcess assetProcess) {
         return assetProcessMapper.insert(assetProcess);
     }
 
@@ -97,8 +98,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return 结果
      */
     @Override
-    public int updateAssetProcess(AssetProcess assetProcess)
-    {
+    public int updateAssetProcess(AssetProcess assetProcess) {
         assetProcess.setUpdateTime(DateUtils.getNowDate());
         return assetProcessMapper.updateAssetProcess(assetProcess);
     }
@@ -110,8 +110,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return 结果
      */
     @Override
-    public int deleteAssetProcessByIds(Long[] ids)
-    {
+    public int deleteAssetProcessByIds(Long[] ids) {
         return assetProcessMapper.deleteAssetProcessByIds(ids);
     }
 
@@ -122,8 +121,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return 结果
      */
     @Override
-    public int deleteAssetProcessById(Long id)
-    {
+    public int deleteAssetProcessById(Long id) {
         return assetProcessMapper.deleteAssetProcessById(id);
     }
 
@@ -145,25 +143,38 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
      * @return
      */
     @Override
-    public List<AssetLifeCycleNodeVO> getAssetLifeCycle(String assetCode) {
+    public AssetLifeCycleVO getAssetLifeCycle(String assetCode) {
         LambdaQueryWrapper<AssetProcess> wrapper = new LambdaQueryWrapper<>();
         // 查询资产的所有流程 按照创建时间进行升序排序
         wrapper.eq(AssetProcess::getAssetCode, assetCode)
                 .orderByAsc(AssetProcess::getCreateTime);
         List<AssetProcess> assetProcessList = this.list(wrapper);
-        List<AssetLifeCycleNodeVO> assetLifeCycleNodeVOList = new ArrayList<>();
-        for (AssetProcess assetProcess : assetProcessList) {
-            AssetLifeCycleNodeVO vo = new AssetLifeCycleNodeVO();
-            BeanUtils.copyProperties(assetProcess, vo);
-            assetLifeCycleNodeVOList.add(vo);
+
+        AssetLifeCycleVO vo = new AssetLifeCycleVO();
+
+        if (CollectionUtil.isNotEmpty(assetProcessList)) {
+            for (AssetProcess assetProcess : assetProcessList) {
+                SysUser user = sysUserService.getUserByUserName(assetProcess.getUserCode());
+                assetProcess.setUserName(user.getNickName());
+            }
+            vo.setAssetProcessList(assetProcessList);
+
+            Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
+            vo.setAssetStatus(asset.getAssetStatus());
+
+            vo.setMaintainCount(assetProcessList.stream()
+                    .filter(e -> DingTalkAssetProcessType.PROCESS_MAINTAIN.getCode().equals(e.getProcessType()))
+                    .count());
+            vo.setTransformCount(assetProcessList.stream()
+                    .filter(e -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(e.getProcessType()))
+                    .count());
+            vo.setSellOutCount(assetProcessList.stream()
+                    .filter(e -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(e.getProcessType()))
+                    .count());
+
         }
 
-        for (AssetLifeCycleNodeVO vo : assetLifeCycleNodeVOList) {
-            SysUser user = sysUserService.getUserByUserName(vo.getUserCode());
-            vo.setUserName(user.getNickName());
-        }
-
-        return assetLifeCycleNodeVOList;
+        return vo;
     }
 
 }

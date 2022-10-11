@@ -44,6 +44,10 @@ public enum DingTalkAssetProcessType {
      */
     PROCESS_TRANSFORM("600", "改造流程"),
     /**
+     * 改造流程
+     */
+    PROCESS_MAINTAIN("700", "维修流程"),
+    /**
      * 进行中
      */
     PROCESS_STATUS_UNCOMPLETED("0", "进行中"),

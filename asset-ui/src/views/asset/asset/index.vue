@@ -528,7 +528,7 @@ export default {
     },
     // 跳转资产卡片
     showAssetCard(row) {
-      this.$router.push({ path: "/asset/lifeCycle", query: { assetCode: row.assetCode } })
+      this.$router.push({ path: "/asset/assetCard", query: { assetCode: row.assetCode } })
     },
     /** 新增按钮操作 */
     // handleAdd() {

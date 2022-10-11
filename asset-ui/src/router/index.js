@@ -170,9 +170,9 @@ export const constantRoutes = [
     hidden: true,
     children: [
       {
-        path: '/asset/lifeCycle',
-        component: (resolve) => require(['@/views/asset/asset/lifeCycle'], resolve),
-        name: 'lifeCycle',
+        path: '/asset/assetCard',
+        component: (resolve) => require(['@/views/asset/asset/assetCard'], resolve),
+        name: 'assetCard',
         meta: { title: '资产卡片'}
       }
     ]

@@ -36,6 +36,23 @@
         </template>
       </tr>
     </table>
+    <el-row style="margin-left:5%">该资产目前状态：{{assetStatus}}，此前已进行维修{{maintainCount}}次，改造{{transformCount}}次，外卖{{sellOutCount}}次</el-row>
+    <el-timeline :reverse="true">
+      <el-timeline-item v-for="item in timelineData" :key="item.id" :timestamp="item.createTime" placement="top">
+        <el-row>
+          <el-col :span="4">
+            {{selectDictLabel(dict.type.ding_asset_process_type,item.processType)}}&nbsp;
+          </el-col>
+          <el-col :span="4">
+            提交人：{{item.userName}}
+          </el-col>
+          <el-col :span="6">
+            <el-button size="mini">详情</el-button>
+            <el-button size="mini">附件</el-button>
+          </el-col>
+        </el-row>
+      </el-timeline-item>
+    </el-timeline>
   </div>
 </template>
 
@@ -53,7 +70,7 @@ var EditableProps = [
 import { getAsset, getLifeCycle, updateAsset } from "@/api/asset/asset";
 import { allUser } from "@/api/system/user";
 export default {
-  dicts: ["asset_counting_status","ding_asset_process_type"],
+  dicts: ["asset_counting_status", "ding_asset_process_type"],
   data() {
     return {
       assetColumns: [
@@ -193,6 +210,12 @@ export default {
       form: {},
       userOptions: [],
       onEdit: false,
+      // 资产生命周期数据
+      assetStatus: "",
+      maintainCount: 0,
+      transformCount: 0,
+      sellOutCount: 0,
+      timelineData: []
     };
   },
   computed: {
@@ -202,21 +225,20 @@ export default {
   },
   created() {
     this.refreshData();
-    this.getLifeCycle();
   },
   methods: {
-    getLifeCycle() {
-      var assetCode = this.$route.query.assetCode;
-      getLifeCycle(assetCode).then((response) => {
-        console.log("getLifeCycle::::::")
-        console.log(response);
-      })
-    },
     refreshData() {
       var assetCode = this.$route.query.assetCode;
       getAsset(assetCode).then((response) => {
         this.form = response.data;
       });
+      getLifeCycle(assetCode).then((response) => {
+        this.assetStatus = response.data.assetStatus
+        this.maintainCount = response.data.maintainCount
+        this.transformCount = response.data.transformCount
+        this.sellOutCount = response.data.sellOutCount
+        this.timelineData = response.data.assetProcessList
+      })
     },
     isOnEdit(index) {
       return (

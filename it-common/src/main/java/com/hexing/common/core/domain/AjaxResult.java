@@ -4,12 +4,15 @@ import java.util.HashMap;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.utils.MessageUtils;
 import com.hexing.common.utils.StringUtils;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 /**
  * 操作消息提醒
  *
  * @author ruoyi
  */
+@ApiModel(value = "Ajax请求响应结果", description = "Ajax请求响应结果")
 public class AjaxResult extends HashMap<String, Object>
 {
     private static final long serialVersionUID = 1L;

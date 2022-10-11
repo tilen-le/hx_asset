@@ -11,7 +11,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.dto.StatisQueryParam;
-import com.hexing.asset.domain.vo.AssetLifeCycleNodeVO;
+import com.hexing.asset.domain.vo.AssetLifeCycleVO;
 import com.hexing.asset.domain.vo.SimpleStatisticVO;
 import com.hexing.asset.enums.AssetStatisticType;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
@@ -21,6 +21,7 @@ import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.ServletUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.ValidateUtils;
 import com.hexing.framework.web.service.TokenService;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysUserService;
@@ -28,6 +29,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
@@ -102,8 +105,9 @@ public class AssetController extends BaseController {
 
     @ApiOperation("查询资产生命周期")
     @GetMapping("/getLifeCycle/{assetCode}")
-    public AjaxResult getLifeCycle(@PathVariable String assetCode) {
-        List<AssetLifeCycleNodeVO> assetLifeCycle = assetProcessService.getAssetLifeCycle(assetCode);
+    public AjaxResult getLifeCycle(@Validated @PathVariable String assetCode) {
+//        ValidateUtils.validAll(bindingResult);
+        AssetLifeCycleVO assetLifeCycle = assetProcessService.getAssetLifeCycle(assetCode);
         return AjaxResult.success(assetLifeCycle);
     }
 

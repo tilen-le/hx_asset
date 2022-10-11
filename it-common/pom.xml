@@ -133,6 +133,11 @@
             <artifactId>okhttp</artifactId>
             <version>3.12.2</version>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-models</artifactId>
+            <version>1.6.2</version>
+        </dependency>
     </dependencies>
 
 </project>

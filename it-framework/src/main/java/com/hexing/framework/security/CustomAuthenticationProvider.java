@@ -49,6 +49,11 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         return new UsernamePasswordAuthenticationToken(node, password, node.getAuthorities());
     }
 
+    @Override
+    public boolean supports(Class<?> aClass) {
+        return true;
+    }
+
 
     private boolean authAd(String username, String password) {
         if (StringUtils.isAnyBlank(username, password)) {

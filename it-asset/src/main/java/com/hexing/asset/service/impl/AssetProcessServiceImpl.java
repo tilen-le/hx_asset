@@ -152,27 +152,35 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 
         AssetLifeCycleVO vo = new AssetLifeCycleVO();
 
+        Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
+
+        AssetProcess importNode = new AssetProcess();
+        importNode.setProcessType("000");
+        importNode.setCreateTime(asset.getCreateTime());
+        importNode.setUserCode(asset.getCreateBy());
+        assetProcessList.add(0, importNode);
+
         if (CollectionUtil.isNotEmpty(assetProcessList)) {
             for (AssetProcess assetProcess : assetProcessList) {
                 SysUser user = sysUserService.getUserByUserName(assetProcess.getUserCode());
                 assetProcess.setUserName(user.getNickName());
             }
-            vo.setAssetProcessList(assetProcessList);
-
-            Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
-            vo.setAssetStatus(asset.getAssetStatus());
-
-            vo.setMaintainCount(assetProcessList.stream()
-                    .filter(e -> DingTalkAssetProcessType.PROCESS_MAINTAIN.getCode().equals(e.getProcessType()))
-                    .count());
-            vo.setTransformCount(assetProcessList.stream()
-                    .filter(e -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(e.getProcessType()))
-                    .count());
-            vo.setSellOutCount(assetProcessList.stream()
-                    .filter(e -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(e.getProcessType()))
-                    .count());
-
         }
+
+        vo.setAssetStatus(asset.getAssetStatus());
+
+        vo.setAssetProcessList(assetProcessList);
+
+        vo.setMaintainCount(CollectionUtil.isNotEmpty(assetProcessList) ? assetProcessList.stream()
+                .filter(e -> DingTalkAssetProcessType.PROCESS_MAINTAIN.getCode().equals(e.getProcessType()))
+                .count() : 0L);
+        vo.setTransformCount(CollectionUtil.isNotEmpty(assetProcessList) ? assetProcessList.stream()
+                .filter(e -> DingTalkAssetProcessType.PROCESS_TRANSFORM.getCode().equals(e.getProcessType()))
+                .count() : 0L);
+        vo.setSellOutCount(CollectionUtil.isNotEmpty(assetProcessList) ? assetProcessList.stream()
+                .filter(e -> DingTalkAssetProcessType.PROCESS_SALE_OUT.getCode().equals(e.getProcessType()))
+                .count() : 0L);
+
 
         return vo;
     }

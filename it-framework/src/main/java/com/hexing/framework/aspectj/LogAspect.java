@@ -160,7 +160,7 @@ public class LogAspect
      */
     private String argsArrayToString(Object[] paramsArray)
     {
-        String params = "";
+        StringBuilder params = new StringBuilder();
         if (paramsArray != null && paramsArray.length > 0)
         {
             for (Object o : paramsArray)
@@ -170,7 +170,7 @@ public class LogAspect
                     try
                     {
                         Object jsonObj = JSON.toJSON(o);
-                        params += jsonObj.toString() + " ";
+                        params.append(jsonObj.toString()).append(" ");
                     }
                     catch (Exception e)
                     {
@@ -178,7 +178,7 @@ public class LogAspect
                 }
             }
         }
-        return params.trim();
+        return params.toString().trim();
     }
 
     /**

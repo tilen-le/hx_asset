@@ -81,8 +81,9 @@ public class AssetController extends BaseController {
     /**
      * 导出资产表列表
      */
+    @ApiOperation("导出资产表列表")
     @PreAuthorize("@ss.hasPermi('asset:asset:export')")
-    @Log(title = "资产表", businessType = BusinessType.EXPORT)
+    @Log(title = "导出资产表列表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public AjaxResult export(Asset asset) {
         List<Asset> list = assetService.selectAssetList(asset);
@@ -116,8 +117,9 @@ public class AssetController extends BaseController {
     /**
      * 新增资产表
      */
+    @ApiOperation("新增资产表")
     @PreAuthorize("@ss.hasPermi('asset:asset:add')")
-    @Log(title = "资产表", businessType = BusinessType.INSERT)
+    @Log(title = "新增资产表", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody Asset asset) {
         return toAjax(assetService.insertAsset(asset));
@@ -126,8 +128,9 @@ public class AssetController extends BaseController {
     /**
      * 修改资产表
      */
+    @ApiOperation("修改资产表")
     @PreAuthorize("@ss.hasPermi('asset:asset:edit')")
-    @Log(title = "资产表", businessType = BusinessType.UPDATE)
+    @Log(title = "修改资产表", businessType = BusinessType.UPDATE)
     @PutMapping("/update")
     public AjaxResult edit(@RequestBody Asset asset) {
         return toAjax(assetService.updateAsset(asset));
@@ -138,16 +141,18 @@ public class AssetController extends BaseController {
      *
      * @editor 80015306
      */
+    @ApiOperation("删除资产表")
     @PreAuthorize("@ss.hasPermi('asset:asset:remove')")
-    @Log(title = "资产表", businessType = BusinessType.DELETE)
+    @Log(title = "删除资产表", businessType = BusinessType.DELETE)
     @DeleteMapping("/{assetCodes}")
     public AjaxResult remove(@PathVariable List<String> assetCodes) {
         return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
     }
 
     /**
-     * 资产导入
+     * 资产信息导入
      */
+    @ApiOperation("资产信息导入")
     @PreAuthorize("@ss.hasPermi('asset:asset:import')")
     @Log(title = "资产信息导入", businessType = BusinessType.IMPORT)
     @PostMapping("/importData")
@@ -163,6 +168,7 @@ public class AssetController extends BaseController {
     /**
      * 资产导入模板下载
      */
+    @ApiOperation("资产导入模板下载")
     @PreAuthorize("@ss.hasPermi('asset:asset:template')")
     @GetMapping("/importTemplate")
     public AjaxResult importTemplate() {
@@ -173,6 +179,7 @@ public class AssetController extends BaseController {
     /**
      * 总资产统计和资产状态统计饼图
      */
+    @ApiOperation("总资产统计和资产状态统计饼图")
     @PostMapping("/assetCount")
     public AjaxResult assetCount(@RequestBody StatisQueryParam params) {
         Map<String, Object> data = new HashMap<>();
@@ -258,6 +265,7 @@ public class AssetController extends BaseController {
     /**
      * 根据资产分类描述统计数量/原值/净值
      */
+    @ApiOperation("根据资产分类描述统计数量/原值/净值")
     @PostMapping("/assetCountByCategory")
     public AjaxResult assetCountByCategory(@RequestBody StatisQueryParam params) {
         // 筛选条件
@@ -317,6 +325,7 @@ public class AssetController extends BaseController {
     /**
      * 根据部门统计数量/原值/净值
      */
+    @ApiOperation("根据部门统计数量/原值/净值")
     @PostMapping("/assetCountByDept")
     public AjaxResult assetCountByDept(@RequestBody StatisQueryParam params) {
 
@@ -378,6 +387,7 @@ public class AssetController extends BaseController {
     /**
      * 入库/报废/外卖/改造-数量和时间折线图统计
      */
+    @ApiOperation("入库/报废/外卖/改造-数量和时间折线图统计")
     @PostMapping("/assetProcessTypeTimeNumCount")
     public AjaxResult assetProcessTypeTimeNumCount(@RequestBody StatisQueryParam params) {
 
@@ -491,6 +501,7 @@ public class AssetController extends BaseController {
     /**
      * 入库/报废/外卖/改造-数量和类别折线图统计
      */
+    @ApiOperation("入库/报废/外卖/改造-数量和类别折线图统计")
     @PostMapping("/assetProcessTypeCategoryNumCount")
     public AjaxResult assetProcessTypeCategoryNumCount(@RequestBody StatisQueryParam params) {
 
@@ -569,6 +580,7 @@ public class AssetController extends BaseController {
     /**
      * 入库/报废/外卖/改造-数量和部门折线图统计
      */
+    @ApiOperation("入库/报废/外卖/改造-数量和部门折线图统计")
     @PostMapping("/assetProcessTypeDeptNumCount")
     public AjaxResult assetProcessTypeDeptNumCount(@RequestBody StatisQueryParam params) {
 

@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.extension.api.R;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
@@ -19,18 +20,21 @@ import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetProcessExchangeService;
 import com.hexing.asset.service.IAssetProcessTransferService;
 import com.hexing.asset.service.IAssetService;
+import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.mapper.SysDictDataMapper;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.formula.functions.MatrixFunction;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -80,6 +84,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private IAssetProcessExchangeService assetProcessExchangeService;
     @Autowired
     private IAssetProcessTransferService assetProcessTransferService;
+    @Autowired
+    private IAssetUpdateLogService assetUpdateLogService;
+
 
     @Value("${uip.uipTransfer}")
     private String uipTransfer;
@@ -353,10 +360,19 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 结果
      */
     @Override
-    public int updateAsset(Asset asset)
+    public int updateAsset(Asset asset, String processId)
     {
+        // 资产更新日志记录
+        Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetId, asset.getAssetId()));
+        assetUpdateLogService.saveLog(entity, processId);
+
+        // 更新资产信息
         asset.setUpdateTime(DateUtils.getNowDate());
-        return assetMapper.updateById(asset);
+        int changed = assetMapper.updateById(asset);
+
+        // TODO 若SAP指定的字段发生修改则后同步给SAP
+
+        return changed;
     }
 
     /**

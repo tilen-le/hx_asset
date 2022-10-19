@@ -129,11 +129,11 @@ public class AssetController extends BaseController {
      * 修改资产表
      */
     @ApiOperation("修改资产表")
-    @PreAuthorize("@ss.hasPermi('asset:asset:edit')")
+//    @PreAuthorize("@ss.hasPermi('asset:asset:edit')")
     @Log(title = "修改资产表", businessType = BusinessType.UPDATE)
     @PutMapping("/update")
     public AjaxResult edit(@RequestBody Asset asset) {
-        return toAjax(assetService.updateAsset(asset));
+        return toAjax(assetService.updateAsset(asset, null));
     }
 
     /**

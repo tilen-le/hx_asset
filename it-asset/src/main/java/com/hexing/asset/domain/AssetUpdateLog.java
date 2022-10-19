@@ -1,6 +1,9 @@
 package com.hexing.asset.domain;
 
 import java.util.Date;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -24,11 +27,12 @@ public class AssetUpdateLog
     private static final long serialVersionUID = 1L;
 
     /** 主键id */
+    @TableId(type = IdType.AUTO)
     private Long id;
 
     /** 资产id */
     @Excel(name = "资产id")
-    private Long assetId;
+    private String assetId;
 
     /** 固定资产名称 */
     @Excel(name = "固定资产名称")
@@ -81,22 +85,22 @@ public class AssetUpdateLog
 
     /** 资产总价值 */
     @Excel(name = "资产总价值")
-    private Long totalValue;
+    private Double totalValue;
 
     /** 净值 */
     @Excel(name = "净值")
-    private Long netWorth;
+    private Double netWorth;
 
     /** 保修期（月） */
-    @Excel(name = "保修期", readConverterExp = "月=")
+    @Excel(name = "保修期（月）")
     private Integer warranty;
 
     /** 预计使用寿命（月） */
-    @Excel(name = "预计使用寿命", readConverterExp = "月=")
+    @Excel(name = "预计使用寿命（月）")
     private Integer canUseMonths;
 
     /** 预计使用寿命（年） */
-    @Excel(name = "预计使用寿命", readConverterExp = "年=")
+    @Excel(name = "预计使用寿命（年）")
     private Integer canUseYears;
 
     /** 资本化日期/资产价值录入日期 */

@@ -1,12 +1,13 @@
 package com.hexing.asset.service.impl;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,81 +18,33 @@ import org.springframework.stereotype.Service;
  * @date 2022-10-19
  */
 @Service
-public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper, AssetUpdateLog> implements IAssetUpdateLogService
-{
+public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper, AssetUpdateLog> implements IAssetUpdateLogService {
+
     @Autowired
     private AssetUpdateLogMapper assetUpdateLogMapper;
 
     /**
-     * 查询资产信息更新日志
+     * 创建资产信息更新日志
      *
-     * @param id 资产信息更新日志主键
-     * @return 资产信息更新日志
+     * @param asset 资产旧信息
+     * @param processId 主流程id
+     * @return
      */
     @Override
-    public AssetUpdateLog selectAssetUpdateLogById(Long id)
-    {
-        return assetUpdateLogMapper.selectAssetUpdateLogById(id);
+    public boolean saveLog(Asset asset, String processId) {
+        AssetUpdateLog log = new AssetUpdateLog();
+        BeanUtils.copyProperties(asset, log);
+
+        if (StringUtils.isNotBlank(processId)) {
+            log.setProcessId(processId);
+        } else {
+            // 若processId为空，则说明是在网站上修改了资产信息
+//            log.setUpdateBy(SecurityUtils.getUsername());
+            log.setUpdateBy("test");
+        }
+
+        log.setUpdateTime(DateUtils.getNowDate());
+        return this.save(log);
     }
 
-    /**
-     * 查询资产信息更新日志列表
-     *
-     * @param assetUpdateLog 资产信息更新日志
-     * @return 资产信息更新日志
-     */
-    @Override
-    public List<AssetUpdateLog> selectAssetUpdateLogList(AssetUpdateLog assetUpdateLog)
-    {
-        return assetUpdateLogMapper.selectAssetUpdateLogList(assetUpdateLog);
-    }
-
-    /**
-     * 新增资产信息更新日志
-     *
-     * @param assetUpdateLog 资产信息更新日志
-     * @return 结果
-     */
-    @Override
-    public int insertAssetUpdateLog(AssetUpdateLog assetUpdateLog)
-    {
-        return assetUpdateLogMapper.insertAssetUpdateLog(assetUpdateLog);
-    }
-
-    /**
-     * 修改资产信息更新日志
-     *
-     * @param assetUpdateLog 资产信息更新日志
-     * @return 结果
-     */
-    @Override
-    public int updateAssetUpdateLog(AssetUpdateLog assetUpdateLog)
-    {
-        assetUpdateLog.setUpdateTime(DateUtils.getNowDate());
-        return assetUpdateLogMapper.updateAssetUpdateLog(assetUpdateLog);
-    }
-
-    /**
-     * 批量删除资产信息更新日志
-     *
-     * @param ids 需要删除的资产信息更新日志主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetUpdateLogByIds(Long[] ids)
-    {
-        return assetUpdateLogMapper.deleteAssetUpdateLogByIds(ids);
-    }
-
-    /**
-     * 删除资产信息更新日志信息
-     *
-     * @param id 资产信息更新日志主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetUpdateLogById(Long id)
-    {
-        return assetUpdateLogMapper.deleteAssetUpdateLogById(id);
-    }
 }

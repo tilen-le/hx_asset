@@ -118,7 +118,7 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
      */
     @Override
     @Transactional
-    public void saveProcess(String instanceId, String userCode, String assetCode) {
+    public int saveProcess(String instanceId, String userCode, String assetCode) {
         SysUser user = sysUserMapper.getUserByUserName(userCode);
         // 新增主流程记录
         AssetProcess process = new AssetProcess()
@@ -127,7 +127,7 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
                 .setUserCode(userCode)
                 .setUserName(user.getNickName())
                 .setCreateTime(new Date());
-        assetProcessMapper.insert(process);
+        int processId = assetProcessMapper.insert(process);
         // 新增更换流程记录
         AssetProcessTransfer processTransfer = new AssetProcessTransfer()
                 .setProcessId(process.getId())
@@ -137,5 +137,6 @@ public class AssetProcessTransferServiceImpl extends ServiceImpl<AssetProcessTra
                 .setAssetCode(assetCode)
                 .setCreateTime(new Date());
         assetProcessTransferMapper.insert(processTransfer);
+        return processId;
     }
 }

@@ -182,49 +182,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateAssetByCompanyCodeAndFinancialAssetCode" parameterType="Asset">
-        update asset
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="assetName != null">asset_name = #{assetName},</if>
-            <if test="assetCode != null">asset_code = #{assetCode},</if>
-            <!--<if test="financialAssetCode != null">financial_asset_code = #{financialAssetCode},</if>-->
-            <if test="responsiblePersonCode != null">responsible_person_code = #{responsiblePersonCode},</if>
-            <if test="responsiblePersonName != null">responsible_person_name = #{responsiblePersonName},</if>
-            <if test="category != null">category = #{category},</if>
-            <if test="assetStatus != null">asset_status = #{assetStatus},</if>
-            <if test="factoryNo != null">factory_no = #{factoryNo},</if>
-            <if test="standard != null">standard = #{standard},</if>
-            <if test="measure != null">measure = #{measure},</if>
-            <if test="buyer != null">buyer = #{buyer},</if>
-            <if test="buyDate != null">buy_date = #{buyDate},</if>
-            <if test="netWorth != null">net_worth = #{netWorth},</if>
-            <if test="totalValue != null">total_value = #{totalValue},</if>
-            <if test="warranty != null">warranty = #{warranty},</if>
-            <if test="canUseMonths != null">can_use_months = #{canUseMonths},</if>
-            <if test="canUseYears != null">can_use_years = #{canUseYears},</if>
-            <if test="capitalizationDate != null">capitalization_date = #{capitalizationDate},</if>
-            <if test="monetaryUnit != null">monetary_unit = #{monetaryUnit},</if>
-            <!--<if test="companyCode != null">company_code = #{companyCode},</if>-->
-            <!--<if test="companyName != null">company_name = #{companyName},</if>-->
-            <if test="location != null">location = #{location},</if>
-            <if test="provider != null">provider = #{provider},</if>
-            <if test="amount != null">amount = #{amount},</if>
-            <if test="brand != null">brand = #{brand},</if>
-            <if test="costCenter != null">cost_center = #{costCenter},</if>
-            <if test="costCenterName != null">cost_center_name = #{costCenterName},</if>
-            <if test="manageDept != null">manage_dept = #{manageDept},</if>
-            <if test="contractNo != null">contract_no = #{contractNo},</if>
-            <if test="proposer != null">proposer = #{proposer},</if>
-            <if test="usageScenario != null">usage_scenario = #{usageScenario},</if>
-            <if test="comment != null">comment = #{comment},</if>
-            <if test="createBy != null">create_by = #{createBy},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
-            <if test="updateBy != null">update_by = #{updateBy},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-        </trim>
-        where company_code = #{companyCode} and financial_asset_code = #{financialAssetCode}
-    </update>
-
     <delete id="deleteAssetByAssetId" parameterType="Long">
         delete from asset where asset_id = #{assetId}
     </delete>

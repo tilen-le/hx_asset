@@ -86,14 +86,6 @@ public interface IAssetService extends IService<Asset>
     public int updateAsset(Asset asset, String processId);
 
     /**
-     * 根据公司代码和财务资产编码更新资产信息
-     *
-     * @param asset
-     * @return
-     */
-    public int updateAssetByCompanyCodeAndFinancialAssetCode(Asset asset);
-
-    /**
      * 删除资产表信息
      *
      * @param assetId 资产表主键

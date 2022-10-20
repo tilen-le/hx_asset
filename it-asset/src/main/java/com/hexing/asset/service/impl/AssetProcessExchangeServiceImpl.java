@@ -118,29 +118,26 @@ public class AssetProcessExchangeServiceImpl extends ServiceImpl<AssetProcessExc
      */
     @Override
     @Transactional
-    public void saveProcess(String instanceId, String userCode, List<String> assetCodeList) {
+    public int saveProcess(String instanceId, String userCode, String assetCode) {
         SysUser user = sysUserMapper.getUserByUserName(userCode);
-        if (CollectionUtil.isNotEmpty(assetCodeList)) {
-            for (String assetCode : assetCodeList) {
-                // 新增主流程记录
-                AssetProcess process = new AssetProcess()
-                        .setProcessType(DingTalkAssetProcessType.PROCESS_EXCHANGE.getCode())
-                        .setAssetCode(assetCode)
-                        .setUserCode(userCode)
-                        .setUserName(user.getNickName())
-                        .setCreateTime(new Date());
-                assetProcessMapper.insert(process);
-                // 新增更换流程记录
-                AssetProcessExchange processExchange = new AssetProcessExchange()
-                        .setProcessId(process.getId())
-                        .setInstanceId(instanceId)
-                        .setUserCode(userCode)
-                        .setUserName(user.getNickName())
-                        .setAssetCode(assetCode)
-                        .setCreateTime(new Date());
-                assetProcessExchangeMapper.insert(processExchange);
-            }
-        }
+        // 新增主流程记录
+        AssetProcess process = new AssetProcess()
+                .setProcessType(DingTalkAssetProcessType.PROCESS_EXCHANGE.getCode())
+                .setAssetCode(assetCode)
+                .setUserCode(userCode)
+                .setUserName(user.getNickName())
+                .setCreateTime(new Date());
+        int processId = assetProcessMapper.insert(process);
+        // 新增更换流程记录
+        AssetProcessExchange processExchange = new AssetProcessExchange()
+                .setProcessId(process.getId())
+                .setInstanceId(instanceId)
+                .setUserCode(userCode)
+                .setUserName(user.getNickName())
+                .setAssetCode(assetCode)
+                .setCreateTime(new Date());
+        assetProcessExchangeMapper.insert(processExchange);
+        return processId;
     }
 
 }

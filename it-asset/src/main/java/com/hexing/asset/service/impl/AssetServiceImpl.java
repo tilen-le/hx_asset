@@ -137,6 +137,18 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             if (StringUtils.isBlank(assetCode)) {
                 return new Result(500, "平台资产编号为空");
             }
+            if (!assetCode.startsWith("[")) {
+                wrapper.eq(Asset::getAssetCode, assetCode);
+                if (StringUtils.isNotBlank(asset.getManageDept())) {
+                    wrapper.eq(Asset::getManageDept, asset.getManageDept());
+                }
+                asset = assetMapper.selectOne(wrapper);
+                return Result.success(asset);
+            }
+            assetCode = assetCode.substring(assetCode.indexOf("[") + 2, assetCode.lastIndexOf("]") - 1);
+            if (assetCode.contains(",")) {
+                assetCode = assetCode.replaceAll("\",\"", ";");
+            }
             // 资产编号1;资产编号2;... 的情况
             if (assetCode.contains(";")) {
                 List<String> assetCodes = Arrays.asList(assetCode.split(";"));
@@ -162,6 +174,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         try {
             // 查询保管人信息
             String userCode = params.getString("userCode");
+            if (userCode.startsWith("S")) {
+                userCode = userCode.substring(1);
+            }
             SysUser user = sysUserService.selectUserByUserName(userCode);
             if (user == null) {
                 return new Result(500, "未查询到此保管人");

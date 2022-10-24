@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hexing.asset.domain.*;
 import com.hexing.asset.domain.dto.ProcessCommonDTO;
 import com.hexing.asset.domain.dto.ReceiveProcessDTO;
+import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.*;
 import com.hexing.asset.service.*;
 import com.hexing.common.annotation.RepeatSubmit;
@@ -87,7 +88,7 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("根据工号,管理部门查询保管人信息及名下资产")
     @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
-    public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody JSONObject params) {
+    public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody UserAssetInfoDTO params) {
         Result result = assetService.queryPersonInfoAndAssetsByUserCode(params);
         JSONObject r = new JSONObject();
         r.put("result", result);

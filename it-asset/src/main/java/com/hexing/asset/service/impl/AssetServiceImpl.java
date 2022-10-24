@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetUpdateLog;
+import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
@@ -98,8 +99,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      */
     @Override
     public Asset selectAssetByAssetCode(String assetCode) {
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        wrapper.eq("asset_code", assetCode);
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Asset::getAssetCode, assetCode);
         Asset asset = assetMapper.selectOne(wrapper);
         if (ObjectUtil.isEmpty(asset)) {
             return null;
@@ -170,14 +171,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     @Override
-    public Result queryPersonInfoAndAssetsByUserCode(JSONObject params) {
+    public Result queryPersonInfoAndAssetsByUserCode(UserAssetInfoDTO params) {
         try {
             // 查询保管人信息
-            String userCode = params.getString("userCode");
-            if (userCode.startsWith("S")) {
-                userCode = userCode.substring(1);
-            }
-            SysUser user = sysUserService.selectUserByUserName(userCode);
+            SysUser user = sysUserService.selectUserByUserName(params.getUserCode());
             if (user == null) {
                 return new Result(500, "未查询到此保管人");
             }
@@ -188,18 +185,16 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
 
             LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Asset::getResponsiblePersonCode, userCode);
-            String manageDept = params.getString("manageDept");
-            if (StringUtils.isNotBlank(manageDept)) {
-                wrapper.eq(Asset::getManageDept, manageDept);
-            }
+            wrapper.eq(Asset::getResponsiblePersonCode, params.getUserCode())
+                    .eq(StringUtils.isNotBlank(params.getManageDept()), Asset::getManageDept, params.getManageDept());
             List<Asset> assets = assetMapper.selectList(wrapper);
+            if (CollectionUtil.isNotEmpty(assets)) {
+                assets.forEach(asset -> asset.setResponsiblePersonDept(dept.getDeptName()));
+            }
 
-            JSONObject data = new JSONObject();
-            data.put("userCode", user.getUserName());
-            data.put("manageDept", dept.getDeptName());
-            data.put("assets", assets);
-            return Result.success(data);
+            params.setAssets(assets);
+
+            return Result.success(params);
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(500, "出错");

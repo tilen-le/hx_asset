@@ -5,6 +5,7 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysUser;
 
@@ -50,7 +51,7 @@ public interface IAssetService extends IService<Asset>
      * @param
      * @return 人员资产查询
      */
-    Result queryPersonInfoAndAssetsByUserCode(JSONObject params);
+    Result queryPersonInfoAndAssetsByUserCode(UserAssetInfoDTO params);
 
     /**
      * 资产变更

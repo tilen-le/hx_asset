@@ -20,6 +20,7 @@ import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
+import com.hexing.common.utils.CommonUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
@@ -215,9 +216,12 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("查询盘点任务编码")
     @PostMapping("/selectCountingTaskCode")
-    public String selectCountingTaskCode(@RequestBody JSONObject params) {
+    public JSONObject selectCountingTaskCode(@RequestBody JSONObject params) {
         JSONObject result = new JSONObject();
         String userCode = params.getString("userCode");
+        if (userCode.startsWith("S")){
+            userCode = userCode.substring(1);
+        }
         List<AssetInventoryTask> taskList = assetInventoryTaskService.list();
         List<String> list = new ArrayList<>();
         for (AssetInventoryTask task : taskList) {
@@ -226,8 +230,10 @@ public class DingTalkAssetController extends BaseController {
                 list.add(task.getTaskName());
             }
         }
-        result.put("result", list.toString());
-        return result.toString();
+        JSONObject addressList = new JSONObject();
+        addressList.put("data", list);
+        result.put("result", addressList);;
+        return result;
     }
 
     /**
@@ -239,27 +245,42 @@ public class DingTalkAssetController extends BaseController {
         String assetCode = params.getString("assetCode");
         String taskName = params.getString("taskName");
         if (StringUtils.isEmpty(taskName)) {
-            return AjaxResult.error(500, "盘点任务名称未选择");
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error("盘点任务名称未选择",asset);
         }
         AssetInventoryTask task = assetInventoryTaskService
                 .getOne(new LambdaQueryWrapper<AssetInventoryTask>().eq(AssetInventoryTask::getTaskName, taskName));
         if (ObjectUtil.isNull(task)) {
-            return AjaxResult.error(500, "该盘点任务名称对应的盘点任务不存在");
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "该盘点任务名称对应的盘点任务不存在",asset);
         }
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
                 .eq(AssetProcessCounting::getAssetCode, assetCode);
         AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
-        if (entity == null) {
-            return AjaxResult.error(500, "所盘点资产不在当前任务盘点范围内");
+        if (ObjectUtil.isNull(entity)) {
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "所盘点资产不在当前任务盘点范围内",asset);
         }
         if (!AssetCountingStatus.NOT_COUNTED.getStatus().equals(entity.getCountingStatus())) {
-            return AjaxResult.error(500, "该资产在当前任务中已被盘点过");
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "该资产在当前任务中已被盘点过",asset);
         }
         Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
-        SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-        SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
-        asset.setResponsiblePersonDept(dept.getDeptName());
+        if (ObjectUtil.isNull(asset)) {
+            Asset asset1 = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "该资产不存在",asset1);
+        }
+        if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())){
+            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+            if (ObjectUtil.isNotNull(user)&&StringUtils.isNotEmpty(user.getDeptId().toString())){
+                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+                if (ObjectUtil.isNotNull(dept)){
+                    asset.setResponsiblePersonDept(dept.getDeptName());
+                }
+            }
+        }
+
         return AjaxResult.success("", asset);
     }
 

@@ -7,6 +7,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hexing.asset.domain.*;
+import com.hexing.asset.domain.dto.ExchangeProcessDTO;
 import com.hexing.asset.domain.dto.ProcessCommonDTO;
 import com.hexing.asset.domain.dto.ReceiveProcessDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
@@ -182,7 +183,7 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("资产更换流程")
     @PostMapping(value = "/updateAssetExchange")
-    public Result updateAssetExchange(@RequestBody JSONObject params) {
+    public Result updateAssetExchange(@RequestBody ProcessCommonDTO<ExchangeProcessDTO> params) {
         return assetService.updateAssetExchange(params);
     }
 

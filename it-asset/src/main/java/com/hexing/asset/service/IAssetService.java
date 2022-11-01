@@ -5,6 +5,8 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.dto.ExchangeProcessDTO;
+import com.hexing.asset.domain.dto.ProcessCommonDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysUser;
@@ -59,7 +61,7 @@ public interface IAssetService extends IService<Asset>
      * @param params
      * @return
      */
-    Result updateAssetExchange(JSONObject params);
+    Result updateAssetExchange(ProcessCommonDTO<ExchangeProcessDTO> params);
 
     /**
      * 资产转移

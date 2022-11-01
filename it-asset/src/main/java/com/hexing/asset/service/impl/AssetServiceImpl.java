@@ -13,6 +13,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetUpdateLog;
+import com.hexing.asset.domain.dto.ExchangeProcessDTO;
+import com.hexing.asset.domain.dto.ProcessCommonDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
@@ -203,20 +205,20 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
     @Override
     @Transactional
-    public Result updateAssetExchange(JSONObject params) {
+    public Result updateAssetExchange(ProcessCommonDTO<ExchangeProcessDTO> params) {
         try {
-            params = params.getJSONObject("data");
+            ExchangeProcessDTO data = params.getData();
 
-            String adminId = params.getString("adminCode"); // 资产管理员工号
-            String userCode = params.getString("userCode"); // 流程申请人工号
+            String adminId = data.getAdminCode(); // 资产管理员工号
+            String userCode = data.getUserCode(); // 流程申请人工号
 
-            String locationOfOldAsset = params.getJSONObject("before").getString("location");
-            String codeOfOldAsset = params.getJSONObject("before").getString("assetCode");
+            String locationOfOldAsset = data.getBefore().getLocation();;
+            String codeOfOldAsset = data.getBefore().getAssetCode();
 
-            String locationOfNewAsset = params.getJSONObject("after").getString("location");
-            String codeOfNewAsset = params.getJSONObject("after").getString("assetCode");
+            String locationOfNewAsset = data.getAfter().getLocation();
+            String codeOfNewAsset = data.getAfter().getAssetCode();
 
-            String instanceId = params.getString("instanceId");
+            String instanceId = data.getInstanceId();
 
             // 老资产
             int oldAssetProcessId = assetProcessExchangeService.saveProcess(instanceId, userCode, codeOfOldAsset);

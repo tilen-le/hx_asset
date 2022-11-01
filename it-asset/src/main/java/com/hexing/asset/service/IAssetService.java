@@ -5,6 +5,9 @@ import java.util.List;
 import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.dto.ExchangeProcessDTO;
+import com.hexing.asset.domain.dto.ProcessCommonDTO;
+import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysUser;
 
@@ -50,7 +53,7 @@ public interface IAssetService extends IService<Asset>
      * @param
      * @return 人员资产查询
      */
-    Result queryPersonInfoAndAssetsByUserCode(JSONObject params);
+    Result queryPersonInfoAndAssetsByUserCode(UserAssetInfoDTO params);
 
     /**
      * 资产变更
@@ -58,7 +61,7 @@ public interface IAssetService extends IService<Asset>
      * @param params
      * @return
      */
-    Result updateAssetExchange(JSONObject params);
+    Result updateAssetExchange(ProcessCommonDTO<ExchangeProcessDTO> params);
 
     /**
      * 资产转移
@@ -84,14 +87,6 @@ public interface IAssetService extends IService<Asset>
      * @return 结果
      */
     public int updateAsset(Asset asset, String processId);
-
-    /**
-     * 根据公司代码和财务资产编码更新资产信息
-     *
-     * @param asset
-     * @return
-     */
-    public int updateAssetByCompanyCodeAndFinancialAssetCode(Asset asset);
 
     /**
      * 删除资产表信息

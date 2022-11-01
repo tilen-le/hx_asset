@@ -66,5 +66,5 @@ public interface IAssetProcessTransferService extends IService<AssetProcessTrans
      * @param userCode 发起人工号
      * @param assetCode 平台资产编号
      */
-    void saveProcess(String instanceId, String userCode, String assetCode);
+    int saveProcess(String instanceId, String userCode, String assetCode);
 }

@@ -117,7 +117,7 @@ public class AssetProcessBackServiceImpl extends ServiceImpl<AssetProcessBackMap
      */
     @Override
     @Transactional
-    public void saveProcess(String instanceId, String userCode, String assetCode, String type) {
+    public int saveProcess(String instanceId, String userCode, String assetCode, String type) {
         SysUser user = sysUserMapper.getUserByUserName(userCode);
         // 新增主流程记录
         AssetProcess process = new AssetProcess()
@@ -129,7 +129,7 @@ public class AssetProcessBackServiceImpl extends ServiceImpl<AssetProcessBackMap
         if (DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode().equals(type)) {
             process.setProcessType(DingTalkAssetProcessType.PROCESS_BACK_BY_ADMIN.getCode());
         }
-        assetProcessMapper.insert(process);
+        int processId = assetProcessMapper.insert(process);
         // 新增归还流程记录
         AssetProcessBack processBack = new AssetProcessBack()
                 .setProcessId(process.getId())
@@ -139,6 +139,7 @@ public class AssetProcessBackServiceImpl extends ServiceImpl<AssetProcessBackMap
                 .setAssetCode(assetCode)
                 .setCreateTime(new Date());
         assetProcessBackMapper.insert(processBack);
+        return processId;
     }
 
 }

@@ -7,9 +7,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.hexing.asset.domain.*;
-import com.hexing.asset.enums.AssetCountingStatus;
-import com.hexing.asset.enums.CountingTaskStatus;
-import com.hexing.asset.enums.DingTalkAssetProcessType;
+import com.hexing.asset.domain.dto.ExchangeProcessDTO;
+import com.hexing.asset.domain.dto.ProcessCommonDTO;
+import com.hexing.asset.domain.dto.ReceiveProcessDTO;
+import com.hexing.asset.domain.dto.UserAssetInfoDTO;
+import com.hexing.asset.enums.*;
 import com.hexing.asset.service.*;
 import com.hexing.common.annotation.RepeatSubmit;
 import com.hexing.common.core.controller.BaseController;
@@ -19,8 +21,8 @@ import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
+import com.hexing.common.utils.CommonUtils;
 import com.hexing.common.utils.StringUtils;
-import com.hexing.common.utils.ValidateUtils;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
@@ -28,8 +30,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 /**
  * 开放给钉钉端的rest接口
  */
-@Api(tags="钉钉连接器")
+@Api(tags="钉钉接口")
 @RestController
 @RequestMapping("/api/dingtalk/asset")
 public class DingTalkAssetController extends BaseController {
@@ -90,7 +90,7 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("根据工号,管理部门查询保管人信息及名下资产")
     @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
-    public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody JSONObject params) {
+    public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody UserAssetInfoDTO params) {
         Result result = assetService.queryPersonInfoAndAssetsByUserCode(params);
         JSONObject r = new JSONObject();
         r.put("result", result);
@@ -103,36 +103,37 @@ public class DingTalkAssetController extends BaseController {
     @ApiOperation("资产领用流程")
     @PostMapping(value = "/assetReceive")
     @Transactional
-    public Result assetReceive(@RequestBody JSONObject params) {
-        params = params.getJSONObject("data");
+    public Result assetReceive(@RequestBody ProcessCommonDTO<ReceiveProcessDTO> params) {
 
-        String processType = params.getString("processType");                           /* 资产管理流程类型 */
-        String userCode = params.getString("userCode");                                 /* 流程发起人工号 */
-        String instanceId = params.getString("instanceId");
+        String processType = params.getData().getProcessType();
+        String userCode = params.getData().getUserCode();
+        String instanceId = params.getData().getInstanceId();
+        String assetCode = params.getData().getAssetCode();
 
-        Asset asset = JSONObject.toJavaObject(params, Asset.class);
+        int processId = assetProcessReceiveService
+                .saveProcess(instanceId, userCode, assetCode, processType);
+
+        Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getAssetCode, assetCode));
+
+
+        entity.setAssetStatus(AssetStatus.USING.getStatus())
+                .setUsageScenario(params.getData().getUsageScenario())
+                .setLocation(params.getData().getLocation());
 
         if (DingTalkAssetProcessType.PROCESS_RECEIVE.getCode().equals(processType)) {       /* 领用流程 */
-            asset.setResponsiblePersonCode(userCode);
+            entity.setResponsiblePersonCode(userCode);
             SysUser user = sysUserService.getUserByUserName(userCode);
-            asset.setResponsiblePersonName(user.getNickName());
+            entity.setResponsiblePersonName(user.getNickName());
         }
         if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(processType)) { /* 代领用流程 */
-            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode()); /* 代领用流程发起人工号 */
-            asset.setResponsiblePersonName(user.getNickName());
+            SysUser user = sysUserService.getUserByUserName(entity.getResponsiblePersonCode()); /* 代领用流程发起人工号 */
+            entity.setResponsiblePersonName(user.getNickName());
         }
-        assetProcessReceiveService.saveProcess(instanceId, userCode, asset.getAssetCode(), processType);
 
-        boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
-                .eq(Asset::getAssetCode, asset.getAssetCode())
-                .set(Asset::getAssetStatus, asset.getAssetStatus())
-                .set(Asset::getResponsiblePersonCode, asset.getResponsiblePersonCode())
-                .set(Asset::getResponsiblePersonName, asset.getResponsiblePersonName())
-                .set(Asset::getAssetStatus, asset.getAssetStatus())
-                .set(Asset::getUsageScenario, asset.getUsageScenario())
-                .set(Asset::getLocation, asset.getLocation()));
+        int update = assetService.updateAsset(entity, Integer.toString(processId));
 
-        if (success) {
+        if (update > 0) {
             return Result.success("更新成功");
         } else {
             throw new ServiceException("更新失败");
@@ -161,16 +162,17 @@ public class DingTalkAssetController extends BaseController {
             String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             String location = JSONUtil.parseObj(o).getStr("location");
 
-            boolean success = assetService.update(new LambdaUpdateWrapper<Asset>()
-                    .eq(Asset::getAssetCode, assetCode)
-                    .set(Asset::getLocation, location)
-                    .set(Asset::getResponsiblePersonCode, responsiblePersonCode)
-                    .set(Asset::getResponsiblePersonName, responsiblePerson.getNickName()));
+            int processId = assetProcessBackService.saveProcess(instanceId, userCode, assetCode, processType);
 
-            if (!success) {
+            Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
+            entity.setResponsiblePersonCode(responsiblePersonCode)
+                    .setResponsiblePersonName(responsiblePerson.getNickName())
+                    .setLocation(location);
+            int update = assetService.updateAsset(entity, Integer.toString(processId));
+
+            if (!(update > 0)) {
                 throw new ServiceException("归还失败");
             }
-            assetProcessBackService.saveProcess(instanceId, userCode, assetCode, processType);
         }
 
         return Result.success("归还成功");
@@ -181,7 +183,7 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("资产更换流程")
     @PostMapping(value = "/updateAssetExchange")
-    public Result updateAssetExchange(@RequestBody JSONObject params) {
+    public Result updateAssetExchange(@RequestBody ProcessCommonDTO<ExchangeProcessDTO> params) {
         return assetService.updateAssetExchange(params);
     }
 
@@ -215,9 +217,12 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("查询盘点任务编码")
     @PostMapping("/selectCountingTaskCode")
-    public String selectCountingTaskCode(@RequestBody JSONObject params) {
+    public JSONObject selectCountingTaskCode(@RequestBody JSONObject params) {
         JSONObject result = new JSONObject();
         String userCode = params.getString("userCode");
+        if (userCode.startsWith("S")){
+            userCode = userCode.substring(1);
+        }
         List<AssetInventoryTask> taskList = assetInventoryTaskService.list();
         List<String> list = new ArrayList<>();
         for (AssetInventoryTask task : taskList) {
@@ -226,8 +231,10 @@ public class DingTalkAssetController extends BaseController {
                 list.add(task.getTaskName());
             }
         }
-        result.put("result", list.toString());
-        return result.toString();
+        JSONObject addressList = new JSONObject();
+        addressList.put("data", list);
+        result.put("result", addressList);;
+        return result;
     }
 
     /**
@@ -239,27 +246,42 @@ public class DingTalkAssetController extends BaseController {
         String assetCode = params.getString("assetCode");
         String taskName = params.getString("taskName");
         if (StringUtils.isEmpty(taskName)) {
-            return AjaxResult.error(500, "盘点任务名称未选择");
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error("盘点任务名称未选择",asset);
         }
         AssetInventoryTask task = assetInventoryTaskService
                 .getOne(new LambdaQueryWrapper<AssetInventoryTask>().eq(AssetInventoryTask::getTaskName, taskName));
         if (ObjectUtil.isNull(task)) {
-            return AjaxResult.error(500, "该盘点任务名称对应的盘点任务不存在");
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "该盘点任务名称对应的盘点任务不存在",asset);
         }
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
                 .eq(AssetProcessCounting::getAssetCode, assetCode);
         AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
-        if (entity == null) {
-            return AjaxResult.error(500, "所盘点资产不在当前任务盘点范围内");
+        if (ObjectUtil.isNull(entity)) {
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "所盘点资产不在当前任务盘点范围内",asset);
         }
         if (!AssetCountingStatus.NOT_COUNTED.getStatus().equals(entity.getCountingStatus())) {
-            return AjaxResult.error(500, "该资产在当前任务中已被盘点过");
+            Asset asset = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "该资产在当前任务中已被盘点过",asset);
         }
         Asset asset = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
-        SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-        SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
-        asset.setResponsiblePersonDept(dept.getDeptName());
+        if (ObjectUtil.isNull(asset)) {
+            Asset asset1 = CommonUtils.toNullStr(new Asset());
+            return AjaxResult.error( "该资产不存在",asset1);
+        }
+        if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())){
+            SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+            if (ObjectUtil.isNotNull(user)&&StringUtils.isNotEmpty(user.getDeptId().toString())){
+                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+                if (ObjectUtil.isNotNull(dept)){
+                    asset.setResponsiblePersonDept(dept.getDeptName());
+                }
+            }
+        }
+
         return AjaxResult.success("", asset);
     }
 

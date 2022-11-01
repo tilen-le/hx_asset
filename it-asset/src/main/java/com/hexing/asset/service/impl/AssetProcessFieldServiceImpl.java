@@ -26,14 +26,14 @@ public class AssetProcessFieldServiceImpl extends ServiceImpl<AssetProcessFieldM
     private AssetProcessFieldMapper assetProcessFieldMapper;
 
     /**
-     * 查询【请填写功能名称】
+     * 查询流程字段详细信息
      *
-     * @param id 【请填写功能名称】主键
-     * @return 【请填写功能名称】
+     * @param id 流程字段主键
+     * @return 流程字段对象
      */
     @Override
     public AssetProcessField selectAssetProcessFieldById(Long id) {
-        return assetProcessFieldMapper.selectAssetProcessFieldById(id);
+        return assetProcessFieldMapper.selectById(id);
     }
 
     /**

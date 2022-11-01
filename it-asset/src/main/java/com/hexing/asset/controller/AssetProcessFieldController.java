@@ -2,8 +2,10 @@ package com.hexing.asset.controller;
 
 import java.util.List;
 
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcessField;
 import com.hexing.asset.service.IAssetProcessFieldService;
+import com.hexing.common.utils.bean.BeanTool;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,9 +51,9 @@ public class AssetProcessFieldController extends BaseController {
         return getDataTable(list);
     }
 
-    /**
-     * 导出【请填写功能名称】列表
-     */
+//    /**
+//     * 导出【请填写功能名称】列表
+//     */
 //    @PreAuthorize("@ss.hasPermi('mature:field:export')")
 //    @Log(title = "【请填写功能名称】", businessType = BusinessType.EXPORT)
 //    @GetMapping("/export")
@@ -61,14 +63,12 @@ public class AssetProcessFieldController extends BaseController {
 //        return util.exportExcel(list, "【请填写功能名称】数据");
 //    }
 
-    /**
-     * 获取【请填写功能名称】详细信息
-     */
-//    @PreAuthorize("@ss.hasPermi('mature:field:query')")
-//    @GetMapping(value = "/{id}")
-//    public AjaxResult getInfo(@PathVariable("id") Long id) {
-//        return AjaxResult.success(assetProcessFieldService.selectAssetProcessFieldById(id));
-//    }
+    @PreAuthorize("@ss.hasPermi('process:field:query')")
+    @GetMapping(value = "/{id}")
+    @ApiOperation("获取流程字段详细信息")
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
+        return AjaxResult.success(assetProcessFieldService.selectAssetProcessFieldById(id));
+    }
 
     @PreAuthorize("@ss.hasPermi('process:field:add')")
     @Log(title = "新增流程字段", businessType = BusinessType.INSERT)
@@ -86,9 +86,9 @@ public class AssetProcessFieldController extends BaseController {
         return toAjax(assetProcessFieldService.updateAssetProcessField(assetProcessField));
     }
 
-    /**
-     * 禁用流程字段
-     */
+//    /**
+//     * 禁用流程字段
+//     */
 //    @PreAuthorize("@ss.hasPermi('mature:field:remove')")
 //    @Log(title = "【请填写功能名称】", businessType = BusinessType.DELETE)
 //    @DeleteMapping("/{ids}")

@@ -84,14 +84,12 @@ public class AssetProcessFieldController extends BaseController {
         return toAjax(assetProcessFieldService.updateAssetProcessField(assetProcessField));
     }
 
-//    /**
-//     * 禁用流程字段
-//     */
-//    @PreAuthorize("@ss.hasPermi('mature:field:remove')")
-//    @Log(title = "【请填写功能名称】", businessType = BusinessType.DELETE)
-//    @DeleteMapping("/{ids}")
-//    public AjaxResult remove(@PathVariable Long[] ids) {
-//        return toAjax(assetProcessFieldService.deleteAssetProcessFieldByIds(ids));
-//    }
+    @PreAuthorize("@ss.hasPermi('process:field:remove')")
+    @Log(title = "删除流程字段", businessType = BusinessType.DELETE)
+    @DeleteMapping("/{ids}")
+    @ApiOperation("删除流程字段")
+    public AjaxResult remove(@PathVariable Long[] ids) {
+        return toAjax(assetProcessFieldService.deleteAssetProcessFieldByIds(ids));
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.hexing.asset.service.impl;
 
+import java.util.Arrays;
 import java.util.List;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -74,14 +75,14 @@ public class AssetProcessFieldServiceImpl extends ServiceImpl<AssetProcessFieldM
     }
 
     /**
-     * 批量删除【请填写功能名称】
+     * 批量删除流程字段
      *
-     * @param ids 需要删除的【请填写功能名称】主键
+     * @param ids 需要删除的流程字段主键
      * @return 结果
      */
     @Override
     public int deleteAssetProcessFieldByIds(Long[] ids) {
-        return assetProcessFieldMapper.deleteAssetProcessFieldByIds(ids);
+        return assetProcessFieldMapper.deleteBatchIds(Arrays.asList(ids));
     }
 
     /**

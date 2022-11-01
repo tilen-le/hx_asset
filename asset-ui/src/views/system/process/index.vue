@@ -3,10 +3,15 @@
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="流程类型编号" prop="processType">
         <el-select v-model="queryParams.processType" placeholder="请选择流程类型编号" clearable size="small">
-          <el-option label="请选择字典生成" value="" />
+          <el-option
+            v-for="dict in dict.type.dingtalk_asset_process_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
         </el-select>
       </el-form-item>
-      <el-form-item label="字段键名" prop="fieldKey">
+      <!-- <el-form-item label="字段键名" prop="fieldKey">
         <el-input
           v-model="queryParams.fieldKey"
           placeholder="请输入字段键名"
@@ -28,7 +33,7 @@
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
           <el-option label="请选择字典生成" value="" />
         </el-select>
-      </el-form-item>
+      </el-form-item> -->
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -57,35 +62,17 @@
           v-hasPermi="['mature:field:edit']"
         >修改</el-button>
       </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['mature:field:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          :loading="exportLoading"
-          @click="handleExport"
-          v-hasPermi="['mature:field:export']"
-        >导出</el-button>
-      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
     <el-table v-loading="loading" :data="fieldList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="流程类型编号" align="center" prop="processType" />
+      <el-table-column label="流程类型编号" align="center" prop="processType" >
+        <template slot-scope="scope">
+          <dict-tag :options="dict.type.dingtalk_asset_process_type" :value="scope.row.processType" />
+        </template>
+      </el-table-column>
       <el-table-column label="字段键名" align="center" prop="fieldKey" />
       <el-table-column label="字段标签" align="center" prop="fieldLabel" />
       <el-table-column label="状态" align="center" prop="status" />
@@ -99,13 +86,13 @@
             @click="handleUpdate(scope.row)"
             v-hasPermi="['mature:field:edit']"
           >修改</el-button>
-          <el-button
+          <!-- <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
             v-hasPermi="['mature:field:remove']"
-          >删除</el-button>
+          >删除</el-button> -->
         </template>
       </el-table-column>
     </el-table>
@@ -123,7 +110,12 @@
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="流程类型编号" prop="processType">
           <el-select v-model="form.processType" placeholder="请选择流程类型编号">
-            <el-option label="请选择字典生成" value="" />
+            <el-option
+            v-for="dict in dict.type.dingtalk_asset_process_type"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="字段键名" prop="fieldKey">
@@ -150,10 +142,11 @@
 </template>
 
 <script>
-import { listField, getField, delField, addField, updateField, exportField } from "@/api/process/field";
+import { listField, addField, updateField } from "@/api/process/field";
 
 export default {
   name: "Field",
+  dicts: ['dingtalk_asset_process_type'],
   data() {
     return {
       // 遮罩层
@@ -251,6 +244,7 @@ export default {
     handleUpdate(row) {
       this.reset();
       const id = row.id || this.ids
+      //TODO
       getField(id).then(response => {
         this.form = response.data;
         this.open = true;
@@ -278,15 +272,15 @@ export default {
       });
     },
     /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除【请填写功能名称】编号为"' + ids + '"的数据项？').then(function() {
-        return delField(ids);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
-    },
+    // handleDelete(row) {
+    //   const ids = row.id || this.ids;
+    //   this.$modal.confirm('是否确认删除【请填写功能名称】编号为"' + ids + '"的数据项？').then(function() {
+    //     return delField(ids);
+    //   }).then(() => {
+    //     this.getList();
+    //     this.$modal.msgSuccess("删除成功");
+    //   }).catch(() => {});
+    // },
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;

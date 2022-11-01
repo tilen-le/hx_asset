@@ -70,14 +70,7 @@ public class AssetProcessFieldServiceImpl extends ServiceImpl<AssetProcessFieldM
      */
     @Override
     public int updateAssetProcessField(AssetProcessField processField) {
-        AssetProcessField entity = assetProcessFieldMapper
-                .selectOne(new LambdaQueryWrapper<AssetProcessField>().eq(AssetProcessField::getId, processField.getId()));
-        entity.setProcessType(processField.getProcessType())
-                .setFieldKey(processField.getFieldKey())
-                .setFieldLabel(processField.getFieldLabel())
-                .setStatus(processField.getStatus())
-                .setRemark(processField.getRemark());
-        return assetProcessFieldMapper.updateById(entity);
+        return assetProcessFieldMapper.updateById(processField);
     }
 
     /**

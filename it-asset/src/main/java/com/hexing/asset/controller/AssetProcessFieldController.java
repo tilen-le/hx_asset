@@ -39,9 +39,7 @@ public class AssetProcessFieldController extends BaseController {
     @Autowired
     private IAssetProcessFieldService assetProcessFieldService;
 
-    /**
-     * 查询流程字段列表
-     */
+
     @PreAuthorize("@ss.hasPermi('process:field:list')")
     @GetMapping("/list")
     @ApiOperation("查询流程字段列表")

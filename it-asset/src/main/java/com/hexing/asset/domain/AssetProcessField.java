@@ -51,4 +51,32 @@ public class AssetProcessField {
     @Excel(name = "备注")
     private String remark;
 
+    /** 显示/隐藏 */
+    @ApiModelProperty(value = "显示/隐藏")
+    private String visible;
+
+    /** 字典 */
+    @ApiModelProperty(value = "字典")
+    private String dictType;
+
+    /** 时间戳格式 */
+    @ApiModelProperty(value = "时间戳格式")
+    private String timeFormat;
+
+    /** 是否查询 */
+    @ApiModelProperty(value = "是否查询")
+    private String queryable;
+
+    /** 是否可编辑 */
+    @ApiModelProperty(value = "是否可编辑")
+    private String editable;
+
+    /** 排序 */
+    @ApiModelProperty(value = "排序")
+    private String orderNum;
+
+    /** 列宽 */
+    @ApiModelProperty(value = "列宽")
+    private String width;
+
 }

@@ -10,12 +10,12 @@ export function listField(query) {
 }
 
 // 查询【请填写功能名称】详细
-// export function getField(id) {
-//   return request({
-//     url: '/mature/field/' + id,
-//     method: 'get'
-//   })
-// }
+export function getField(id) {
+  return request({
+    url: '/asset/process/field/' + id,
+    method: 'get'
+  })
+}
 
 // 新增【请填写功能名称】
 export function addField(data) {
@@ -36,12 +36,12 @@ export function updateField(data) {
 }
 
 // 删除【请填写功能名称】
-// export function delField(id) {
-//   return request({
-//     url: '/mature/field/' + id,
-//     method: 'delete'
-//   })
-// }
+export function delField(id) {
+  return request({
+    url: '/asset/process/field/' + id,
+    method: 'delete'
+  })
+}
 
 // 导出【请填写功能名称】
 // export function exportField(query) {

@@ -279,8 +279,17 @@ export default {
   },
   created() {
     const dictId = this.$route.params && this.$route.params.dictId;
-    this.getType(dictId);
     this.getTypeList();
+    if (dictId.match(/\d/)) {
+      this.getType(dictId);
+    } else {
+      listType({ dictType: dictId }).then(response => {
+        const Id = response.rows.find(item => item.dictType === dictId)?.dictId
+        if(Id){
+          this.getType(Id);
+        }
+      });
+    }
   },
   methods: {
     /** 查询字典类型详细 */

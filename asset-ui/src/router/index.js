@@ -118,7 +118,7 @@ export const constantRoutes = [
     hidden: true,
     children: [
       {
-        path: 'index/:dictId(\\d+)',
+        path: 'index/:dictId',
         component: (resolve) => require(['@/views/system/dict/data'], resolve),
         name: 'Data',
         meta: { title: '字典数据', activeMenu: '/system/dict'}

@@ -39,19 +39,6 @@
       </el-table-column>
       <el-table-column label="字段键名" align="center" prop="fieldKey" />
       <el-table-column label="字段标签" align="center" prop="fieldLabel" />
-      <el-table-column label="状态" align="center" prop="status"></el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.status" active-value="1" inactive-value="0"
-            @change="handleStatusChange(scope.row, 'status')"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="显示/隐藏" align="center" prop="visible">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.visible" active-value="1" inactive-value="0"
-            @change="handleStatusChange(scope.row, 'visible')"></el-switch>
-        </template>
-      </el-table-column>
       <el-table-column label="字典" align="center" prop="dictType">
         <template slot-scope="scope">
           <router-link :to="'/system/dict-data/index/' + scope.row.dictType" class="link-type">
@@ -60,6 +47,14 @@
         </template>
       </el-table-column>
       <el-table-column label="时间戳格式" align="center" prop="timeFormat" />
+      <el-table-column label="排序" align="center" prop="orderNum" />
+      <el-table-column label="列宽" align="center" prop="width" />
+      <el-table-column label="显示/隐藏" align="center" prop="visible">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.visible" active-value="1" inactive-value="0"
+            @change="handleStatusChange(scope.row, 'visible')"></el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="是否查询" align="center" prop="queryable">
         <template slot-scope="scope">
           <el-switch v-model="scope.row.queryable" active-value="1" inactive-value="0"
@@ -72,8 +67,12 @@
             @change="handleStatusChange(scope.row, 'editable')"></el-switch>
         </template>
       </el-table-column>
-      <el-table-column label="排序" align="center" prop="orderNum" />
-      <el-table-column label="列宽" align="center" prop="width" />
+      <el-table-column label="状态" align="center" prop="status">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.status" active-value="1" inactive-value="0"
+            @change="handleStatusChange(scope.row, 'status')"></el-switch>
+        </template>
+      </el-table-column>
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -90,50 +89,52 @@
       @pagination="getList" />
 
     <!-- 添加或修改【流程字段配置】对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body @open.once="getTypeList">
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="流程类型编号" prop="processType">
-          <el-select v-model="form.processType" placeholder="请选择流程类型编号">
-            <el-option v-for="dict in dict.type.dingtalk_asset_process_type" :key="dict.value" :label="dict.label"
-              :value="dict.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="字段键名" prop="fieldKey">
-          <el-input v-model="form.fieldKey" placeholder="请输入字段键名" />
-        </el-form-item>
-        <el-form-item label="字段标签" prop="fieldLabel">
-          <el-input v-model="form.fieldLabel" placeholder="请输入字段标签" />
-        </el-form-item>
-        <el-form-item label="状态">
-          <el-switch v-model="form.status" active-value="1" inactive-value="0" />
-        </el-form-item>
-        <el-form-item label="显示/隐藏" prop="visible">
-          <el-switch v-model="form.visible" active-value="1" inactive-value="0" />
-        </el-form-item>
-        <el-form-item label="字典" prop="dictType">
-          <el-select v-model="form.dictType" placeholder="请选择字典" clearable>
-            <el-option v-for="item in typeOptions" :key="item.dictId" :label="item.dictName" :value="item.dictType" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="时间戳格式" prop="timeFormat">
-          <el-input v-model="form.timeFormat" placeholder="请输入时间戳格式" clearable />
-        </el-form-item>
-        <el-form-item label="是否查询" prop="queryable">
-          <el-switch v-model="form.queryable" active-value="1" inactive-value="0" />
-        </el-form-item>
-        <el-form-item label="是否可编辑" prop="editable">
-          <el-switch v-model="form.editable" active-value="1" inactive-value="0" />
-        </el-form-item>
-        <el-form-item label="排序" prop="orderNum">
-          <el-input-number v-model="form.orderNum" :step="1" step-strictly />
-        </el-form-item>
-        <el-form-item label="列宽" prop="width">
-          <el-input v-model="form.width" placeholder="请输入列宽" type="number" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" placeholder="请输入备注" />
-        </el-form-item>
-      </el-form>
+    <el-dialog :title="title" :visible.sync="open" width="700px" @open.once="getTypeList">
+      <div class="dialog-body">
+        <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+          <el-form-item label="流程类型编号" prop="processType">
+            <el-select v-model="form.processType" placeholder="请选择流程类型编号">
+              <el-option v-for="dict in dict.type.dingtalk_asset_process_type" :key="dict.value" :label="dict.label"
+                :value="dict.value" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="字段键名" prop="fieldKey">
+            <el-input v-model="form.fieldKey" placeholder="请输入字段键名" />
+          </el-form-item>
+          <el-form-item label="字段标签" prop="fieldLabel">
+            <el-input v-model="form.fieldLabel" placeholder="请输入字段标签" />
+          </el-form-item>
+          <el-form-item label="状态">
+            <el-switch v-model="form.status" active-value="1" inactive-value="0" />
+          </el-form-item>
+          <el-form-item label="显示/隐藏" prop="visible">
+            <el-switch v-model="form.visible" active-value="1" inactive-value="0" />
+          </el-form-item>
+          <el-form-item label="字典" prop="dictType">
+            <el-select v-model="form.dictType" placeholder="请选择字典" clearable>
+              <el-option v-for="item in typeOptions" :key="item.dictId" :label="item.dictName" :value="item.dictType" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="时间戳格式" prop="timeFormat">
+            <el-input v-model="form.timeFormat" placeholder="请输入时间戳格式" clearable />
+          </el-form-item>
+          <el-form-item label="是否查询" prop="queryable">
+            <el-switch v-model="form.queryable" active-value="1" inactive-value="0" />
+          </el-form-item>
+          <el-form-item label="是否可编辑" prop="editable">
+            <el-switch v-model="form.editable" active-value="1" inactive-value="0" />
+          </el-form-item>
+          <el-form-item label="排序" prop="orderNum">
+            <el-input-number v-model="form.orderNum" :step="1" step-strictly />
+          </el-form-item>
+          <el-form-item label="列宽" prop="width">
+            <el-input v-model="form.width" placeholder="请输入列宽" type="number" />
+          </el-form-item>
+          <el-form-item label="备注" prop="remark">
+            <el-input v-model="form.remark" placeholder="请输入备注" />
+          </el-form-item>
+        </el-form>
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -292,7 +293,7 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除【流程字段配置】编号为"' + ids + '"的数据项？').then(function () {
+      this.$modal.confirm("删除", "确认", "取消", '确认删除？').then(function () {
         return delField(ids);
       }).then(() => {
         this.getList();
@@ -317,3 +318,11 @@ export default {
   }
 };
 </script>
+
+<style scoped>
+.dialog-body{
+  height: calc(65vh);
+  padding:0 20px;
+  overflow: auto;
+}
+</style>

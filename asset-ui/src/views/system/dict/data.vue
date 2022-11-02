@@ -284,7 +284,7 @@ export default {
       this.getType(dictId);
     } else {
       listType({ dictType: dictId }).then(response => {
-        const Id = response.rows.find(item => item.dictType === dictId)?.dictId
+        const Id = response.rows?.find(item => item.dictType === dictId)?.dictId
         if(Id){
           this.getType(Id);
         }

@@ -3,7 +3,7 @@
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="流程类型编号" prop="processType">
         <el-select v-model="queryParams.processType" placeholder="请选择流程类型编号" clearable size="small">
-          <el-option v-for="dict in dict.type.dingtalk_asset_process_type" :key="dict.value" :label="dict.label"
+          <el-option v-for="dict in dict.type.asset_process" :key="dict.value" :label="dict.label"
             :value="dict.value" />
         </el-select>
       </el-form-item>
@@ -34,7 +34,7 @@
       <!-- <el-table-column label="主键" align="center" prop="id" /> -->
       <el-table-column label="流程类型编号" align="center" prop="processType">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.dingtalk_asset_process_type" :value="scope.row.processType" />
+          <dict-tag :options="dict.type.asset_process" :value="scope.row.processType" />
         </template>
       </el-table-column>
       <el-table-column label="字段键名" align="center" prop="fieldKey" />
@@ -94,7 +94,7 @@
         <el-form ref="form" :model="form" :rules="rules" label-width="80px">
           <el-form-item label="流程类型编号" prop="processType">
             <el-select v-model="form.processType" placeholder="请选择流程类型编号">
-              <el-option v-for="dict in dict.type.dingtalk_asset_process_type" :key="dict.value" :label="dict.label"
+              <el-option v-for="dict in dict.type.asset_process" :key="dict.value" :label="dict.label"
                 :value="dict.value" />
             </el-select>
           </el-form-item>
@@ -149,7 +149,7 @@ import { listType } from "@/api/system/dict/type";
 
 export default {
   name: "Field",
-  dicts: ["dingtalk_asset_process_type"],
+  dicts: ["asset_process"],
   data() {
     return {
       // 遮罩层

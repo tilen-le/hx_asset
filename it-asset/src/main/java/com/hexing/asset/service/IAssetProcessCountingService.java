@@ -77,4 +77,9 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
     List<AssetProcessCounting> inventoryCountList(String startDate, String endDate);
 
     JSONObject inventoryCount(String type,String startDate, String endDate);
+
+    /**
+     * 批量添加资产盘点流程信息
+     */
+    void saveBatch(List<AssetProcessCounting> processCountingList);
 }

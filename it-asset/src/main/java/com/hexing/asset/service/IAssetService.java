@@ -115,4 +115,16 @@ public interface IAssetService extends IService<Asset>
      * 根据部门ID查询部门下所有员工保管的资产
      */
     List<Asset> selectAssetListByDeptId(Long deptId);
+
+    /**
+     * 根据工号查询员工资产
+     * @param userCodeList
+     * @return
+     */
+    List<Asset> selectAssetByUserName(List<String> userCodeList);
+
+    /**
+     * 查询部门下所有员工名下的资产
+     */
+    List<Asset> selectAssetByDeptId(Long deptId);
 }

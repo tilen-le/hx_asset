@@ -18,6 +18,7 @@ import com.hexing.asset.mapper.AssetProcessMapper;
 import com.hexing.asset.service.IAssetInventoryTaskService;
 import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.asset.service.IAssetProcessService;
+import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
@@ -66,7 +67,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     private AssetMapper assetMapper;
     @Autowired
     private AssetProcessMapper assetProcessMapper;
-
+    @Autowired
+    private IAssetService assetService;
     @Autowired
     private IAssetProcessCountingService assetProcessCountingService;
     @Autowired
@@ -159,111 +161,85 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     }
 
     /**
+     * 生成盘点任务编码
+     */
+    private String generateTaskCode() {
+        String taskCode = DateUtils.dateTimeNow();
+        taskCode += RandomUtil.randomString(4);
+        return taskCode;
+    }
+
+    /**
      * 新增盘点任务
      */
     @Override
     @Transactional
-    public int insertAssetCountingTask(AssetInventoryTask task) {
-        QueryWrapper<Asset> wrapper = new QueryWrapper<>();
-        wrapper.setEntity(new Asset());
-
-        LambdaQueryWrapper<AssetInventoryTask> lambdaQueryWrapper =new LambdaQueryWrapper<>();
-        lambdaQueryWrapper.eq(AssetInventoryTask::getTaskName,task.getTaskName());
-        List<AssetInventoryTask> assetInventoryTasks = assetInventoryTaskMapper.selectList(lambdaQueryWrapper);
-        if (assetInventoryTasks.size()>0){
+    public boolean insertAssetCountingTask(AssetInventoryTask task) {
+        // 盘点任务开始结束时间校验
+        if (task.getEndDate().before(DateUtils.getNowDate())) {
+            throw new ServiceException("盘点结束时间设置错误");
+        }
+        if (task.getEndDate().before(task.getStartDate())) {
+            throw new ServiceException("盘点开始结束时间设置错误");
+        }
+        // 盘点任务名称重复性校验
+        if (ObjectUtil.isNull(assetInventoryTaskMapper.selectOne(new LambdaQueryWrapper<AssetInventoryTask>()
+                .eq(AssetInventoryTask::getTaskName, task.getTaskName())))) {
             throw new ServiceException("盘点任务名称重复");
         }
 
-        Long deptId = Long.valueOf(task.getInventoryDept());
-        //查询所以子部门
-        List sysDeptList = sysDeptService.selectDeptByParentId(deptId);
-        sysDeptList.add(deptId.toString());
-        //查询部门所有人员
-        List sysUserList = sysUserService.selectUserByDeptId(sysDeptList);
-        List<List> userCodeList = new ArrayList();
-        while(sysUserList.size()>1000){
-            userCodeList.add(sysUserList.subList(0,1000));
-            sysUserList = sysUserList.subList(1000,sysUserList.size());
-        }
-        if (sysUserList.size()>0){
-            userCodeList.add(sysUserList);
-        }
-        //查询人员资产
-        List list = new ArrayList();
-        for (List userCode:userCodeList){
-            List assetList = assetMapper.selectAssetsByUserCodes(userCode);
-            for (Object assetCode : assetList) {
-                if (ObjectUtil.isNotNull(assetCode)){
-                    list.add(assetCode.toString());
-                }
-            }
-        }
-        task.setCreateTime(new Date());
-        String str = DateUtils.dateTimeNow();
-        str += RandomUtil.randomString(4);
-        task.setTaskCode(str);
+        // 查询部门下所有员工名下的资产
+        List<Asset> assetList = assetService.selectAssetByDeptId(Long.valueOf(task.getInventoryDept()));
+        List<String> assetCodeList = assetList.stream().map(Asset::getAssetCode).collect(Collectors.toList());
 
-//        String beginDateTime = DateFormatUtils.format(task.getStartDate(), "yyyy-MM-dd 00:00:00");
-//        String endDateTime = DateFormatUtils.format(task.getEndDate(), "yyyy-MM-dd 23:59:59");
-//
-//        try {
-//            task.setStartDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(beginDateTime));
-//            task.setEndDate(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(endDateTime));
-//        } catch (Exception e) {
-//            log.error("盘点任务始末时间设置出错", e);
-//        }
-        String date = DateFormatUtils.format(new Date(), "yyyy-MM-dd");
-        try {
-            Date parse = new SimpleDateFormat("yyyy-MM-dd").parse(date);
-            if (task.getEndDate().getTime() < parse.getTime()) {
-                throw new ServiceException("盘点结束时间设置错误");
-            }
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        if (task.getEndDate().getTime() < task.getStartDate().getTime()) {
-            throw new ServiceException("盘点开始结束时间设置错误");
-        }
-        String userName = SecurityUtils.getLoginUser().getUser().getUserName();
-        String user = SecurityUtils.getLoginUser().getUser().getNickName();
-        task.setCreateBy(userName);
-        task.setCreatorName(user);
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userName = SecurityUtils.getLoginUser().getUser().getNickName();
+
+        task.setStatus(CountingTaskStatus.COUNTING.getStatus());
+        task.setTaskCode(generateTaskCode());
         if (!CollectionUtils.isEmpty(task.getInventoryUserList())) {
-            task.setInventoryUsers(task.getInventoryUserList().stream().collect(Collectors.joining(",")));
+            task.setInventoryUsers(String.join(",", task.getInventoryUserList()));
         }
-        if (list.size()>0){
-            task.setStatus(CountingTaskStatus.COUNTING.getStatus());
-        }else {
+        task.setCreateBy(userCode);
+        task.setCreatorName(userName);
+        task.setCreateTime(DateUtils.getNowDate());
+
+        if (assetCodeList.size() == 0) {
             task.setStatus(CountingTaskStatus.FINISHED.getStatus());
-        }
-        assetInventoryTaskMapper.insert(task);//创建盘点任务
-
-        List<AssetProcess> assetProcessList =new ArrayList<>();
-        for(Object assetCode:list){
-            AssetProcess assetProcess = new AssetProcess();
-            assetProcess.setAssetCode(assetCode.toString());
-            assetProcess.setUserCode(userName);
-            assetProcess.setUserName(user);
-            assetProcess.setProcessType("1000");
-            assetProcess.setCreateTime(new Date());
-            assetProcessList.add(assetProcess);
-        }
-        if (assetProcessList.size()>0){
-            assetProcessService.saveBatch(assetProcessList);//创建总流程
+            this.save(task);
+            return true;
         }
 
-        List<AssetProcessCounting> assetProcessCountingList =new ArrayList<>();
-        for(AssetProcess assetProcess:assetProcessList){
+        // 创建盘点任务
+        this.save(task);
+
+        // 创建盘点流程
+        List<AssetProcessCounting> assetProcessCountingList = new ArrayList<>();
+        for (String assetCode : assetCodeList) {
             AssetProcessCounting entity = new AssetProcessCounting();
-            entity.setTaskCode(task.getTaskCode());
-            entity.setAssetCode(assetProcess.getAssetCode());
-            entity.setProcessId(assetProcess.getId());
-            entity.setCreateTime(new Date());
-            entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
+            entity.setTaskCode(task.getTaskCode())
+                    .setAssetCode(assetCode)
+//                    .setProcessId(assetProcess.getId())
+                    .setCreateTime(DateUtils.getNowDate())
+                    .setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             assetProcessCountingList.add(entity);
         }
-        if (assetProcessCountingList.size()>0){
+        if (assetProcessCountingList.size() > 0) {
             assetProcessCountingService.saveBatch(assetProcessCountingList);//创建盘点资产流程
+        }
+
+        List<AssetProcess> assetProcessList = new ArrayList<>();
+        for (String assetCode : assetCodeList) {
+            AssetProcess assetProcess = new AssetProcess();
+            assetProcess.setAssetCode(assetCode)
+                    .setUserCode(userCode)
+                    .setUserName(userName)
+                    .setProcessType("1000")
+                    .setCreateTime(DateUtils.getNowDate());
+            assetProcessList.add(assetProcess);
+        }
+        if (assetProcessList.size() > 0) {
+            assetProcessService.saveBatch(assetProcessList);//创建总流程
         }
 
         List<String> inventoryUserList = task.getInventoryUserList();
@@ -272,7 +248,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                 + "   \n盘点结束时间 :" + DateUtils.parseDateToStr("YYYY-MM-dd", task.getEndDate());
         AsyncManager.me().execute(AsyncFactory.sendDingNotice(inventoryUserList, title));
 
-        return 1;
+        return true;
     }
 
     /**

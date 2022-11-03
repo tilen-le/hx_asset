@@ -33,7 +33,7 @@ public interface IAssetInventoryTaskService extends IService<AssetInventoryTask>
      * 新增盘点任务
      * @return 结果
      */
-    public int insertAssetCountingTask(AssetInventoryTask assetInventoryTask);
+    public boolean insertAssetCountingTask(AssetInventoryTask assetInventoryTask);
 
     /**
      * 修改盘点任务

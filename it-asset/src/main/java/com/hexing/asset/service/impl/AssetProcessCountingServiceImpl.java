@@ -1,5 +1,6 @@
 package com.hexing.asset.service.impl;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -11,13 +12,19 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetProcessField;
+import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.enums.AssetCountingStatus;
+import com.hexing.asset.enums.AssetProcessType;
+import com.hexing.asset.service.IAssetProcessFieldService;
+import com.hexing.asset.service.IAssetProcessVariableService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +50,10 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     private IAssetService assetService;
     @Autowired
     private ISysDeptService deptService;
+    @Autowired
+    private IAssetProcessVariableService processVariableService;
+    @Autowired
+    private IAssetProcessFieldService processFieldService;
 
     /**
      * 查询资产盘点流程
@@ -305,6 +316,31 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     public int deleteAssetProcessCountingById(Long id)
     {
         return assetProcessCountingMapper.deleteAssetProcessCountingById(id);
+    }
+
+    @Override
+    public void saveBatch(List<AssetProcessCounting> processCountingList) {
+        List<AssetProcessField> processFieldList = processFieldService.list(new LambdaQueryWrapper<AssetProcessField>()
+                .eq(AssetProcessField::getProcessType, AssetProcessType.ASSET_COUNTING.getCode()));
+        Map<String, AssetProcessField> fieldMap = processFieldList.stream()
+                .collect(Collectors.toMap(AssetProcessField::getFieldKey, x -> x));
+        for (AssetProcessCounting processCounting : processCountingList) {
+            List<AssetProcessVariable> varList = new ArrayList<>();
+            Field[] declaredFields = processCounting.getClass().getDeclaredFields();
+            try {
+                for (Field field : declaredFields) {
+                    field.setAccessible(Boolean.TRUE);
+                    AssetProcessVariable var = new AssetProcessVariable();
+                    var.setProcessId(processCounting.getTaskCode())
+                            .setFieldId(String.valueOf(fieldMap.get(field.getName()).getId()))
+                            .setFieldValue(String.valueOf(field.get(processCounting)));
+                    varList.add(var);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+            processVariableService.saveBatch(varList);
+        }
     }
 
 }

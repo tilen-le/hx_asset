@@ -651,4 +651,43 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
     }
 
+    /**
+     * 根据工号查询员工资产
+     */
+    @Override
+    public List<Asset> selectAssetByUserName(List<String> userCodeList) {
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        wrapper.in(Asset::getResponsiblePersonCode, userCodeList);
+        return this.list(wrapper);
+    }
+
+    /**
+     * 查询部门下所有员工名下的资产
+     */
+    @Override
+    public List<Asset> selectAssetByDeptId(Long deptId) {
+        //查询所有子部门
+        List<String> sysDeptIdList = sysDeptService.selectDeptByParentId(deptId);
+        sysDeptIdList.add(deptId.toString());
+
+        //查询部门所有人员
+        List<String> sysUserList = sysUserService.selectUserByDeptId(sysDeptIdList);
+
+        List<List<String>> userCodeListCollection = new ArrayList<>();
+        while (sysUserList.size() > 1000) {
+            userCodeListCollection.add(sysUserList.subList(0, 1000));
+            sysUserList = sysUserList.subList(1000, sysUserList.size());
+        }
+        if (sysUserList.size() > 0) {
+            userCodeListCollection.add(sysUserList);
+        }
+
+        List<Asset> assetList = new ArrayList<>();
+        for (List<String> userCodeList : userCodeListCollection) {
+            assetList.addAll(this.selectAssetByUserName(userCodeList));
+        }
+
+        return assetList;
+    }
+
 }

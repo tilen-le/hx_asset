@@ -44,7 +44,7 @@ public class AssetProcessField {
     private String fieldLabel;
 
     @ApiModelProperty(value = "状态（0：启用，1：禁用）")
-    @Excel(name = "状态")
+    @Excel(name = "状态", readConverterExp="0：启用，1：禁用")
     private String status;
 
     @ApiModelProperty(value = "备注")

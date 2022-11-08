@@ -10,19 +10,19 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetProcessField;
-import com.hexing.asset.domain.AssetProcessVariable;
+import com.hexing.asset.domain.*;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.AssetProcessType;
-import com.hexing.asset.service.IAssetProcessFieldService;
-import com.hexing.asset.service.IAssetProcessVariableService;
-import com.hexing.asset.service.IAssetService;
+import com.hexing.asset.mapper.AssetsProcessMapper;
+import com.hexing.asset.service.*;
+import com.hexing.asset.utils.ProcessUtil;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDeptService;
@@ -30,8 +30,7 @@ import com.hexing.system.service.ISysUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
-import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.service.IAssetProcessCountingService;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 资产盘点流程Service业务层处理
@@ -40,8 +39,7 @@ import com.hexing.asset.service.IAssetProcessCountingService;
  * @date 2022-09-08
  */
 @Service
-public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCountingMapper, AssetProcessCounting> implements IAssetProcessCountingService
-{
+public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCountingMapper, AssetProcessCounting> implements IAssetProcessCountingService {
     @Autowired
     private AssetProcessCountingMapper assetProcessCountingMapper;
     @Autowired
@@ -54,6 +52,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     private IAssetProcessVariableService processVariableService;
     @Autowired
     private IAssetProcessFieldService processFieldService;
+    @Autowired
+    private AssetsProcessMapper assetsProcessMapper;
 
     /**
      * 查询资产盘点流程
@@ -62,9 +62,39 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 资产盘点流程
      */
     @Override
-    public AssetProcessCounting selectAssetProcessCountingById(Long id)
-    {
+    public AssetProcessCounting selectAssetProcessCountingById(Long id) {
         return assetProcessCountingMapper.selectAssetProcessCountingById(id);
+    }
+
+    /**
+     * 分页查询资产盘点流程列表
+     *
+     * @param assetProcessCounting 资产盘点流程
+     * @return 资产盘点流程
+     */
+    @Override
+    public List<AssetProcessCounting> selectAssetProcessCountingListPage(AssetProcessCounting assetProcessCounting, Integer pageNum, Integer pageSize) {
+
+        int fieldNum = processFieldService.count(new LambdaQueryWrapper<AssetProcessField>()
+                .eq(AssetProcessField::getProcessType, AssetProcessType.ASSET_COUNTING.getCode()));
+
+        Page<ProcessDO> page = new Page<>(pageNum, (long) pageSize * fieldNum);
+
+        Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
+        String processType = AssetProcessType.ASSET_COUNTING.getCode();
+        Page<ProcessDO> processDOPage = assetsProcessMapper.selectProcessWithCondition(page, processType, params);
+
+        List<ProcessDO> processDOList = processDOPage.getRecords();
+        List<AssetProcessCounting> list = new ArrayList<>();
+        for (ProcessDO processDO : processDOList) {
+            AssetProcessCounting entity = new AssetProcessCounting();
+            for (VariableDO var : processDO.getVariableList()) {
+                BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
+            }
+            list.add(entity);
+        }
+
+        return list;
     }
 
     /**
@@ -74,33 +104,22 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 资产盘点流程
      */
     @Override
-    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting)
-    {
-        // 筛选条件
-        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetProcessCounting::getTaskCode, assetProcessCounting.getTaskCode());
-        if (StringUtils.isNotBlank(assetProcessCounting.getAssetCode())) {
-            wrapper.like(AssetProcessCounting::getAssetCode, assetProcessCounting.getAssetCode());
-        }
-        if (StringUtils.isNotBlank(assetProcessCounting.getUserCode())) {
-//            String userNickName = assetProcessCounting.getUserNickName();
-//            List<SysUser> userList = sysUserService.getUserByNickName(userNickName);
-//            if (CollectionUtil.isNotEmpty(userList)) {
-//                wrapper.in(AssetProcessCounting::getUserCode, userList.stream().map(SysUser::getUserName));
-//            } else {
-//                return Collections.emptyList();
-//            }
-            wrapper.eq(AssetProcessCounting::getUserCode, assetProcessCounting.getUserCode());
-        }
-        if (StringUtils.isNotBlank(assetProcessCounting.getCountingStatus())) {
-            if (AssetCountingStatus.COUNTED.getStatus().equals(assetProcessCounting.getCountingStatus())) {
-                wrapper.in(AssetProcessCounting::getCountingStatus,
-                        AssetCountingStatus.COUNTED.getStatus(), AssetCountingStatus.ABNORMAL.getStatus());
-            } else {
-                wrapper.eq(AssetProcessCounting::getCountingStatus, assetProcessCounting.getCountingStatus());
+    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting) {
+
+        Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
+        String processType = AssetProcessType.ASSET_COUNTING.getCode();
+        List<ProcessDO> processDOList = assetsProcessMapper.selectProcessWithCondition(processType, params);
+
+        List<AssetProcessCounting> list = new ArrayList<>();
+        for (ProcessDO processDO : processDOList) {
+            AssetProcessCounting entity = new AssetProcessCounting();
+            for (VariableDO var : processDO.getVariableList()) {
+                BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
             }
+            list.add(entity);
         }
-        return assetProcessCountingMapper.selectList(wrapper);
+
+        return list;
     }
 
     @Override
@@ -157,9 +176,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     public JSONObject countingStatusCount(String taskCode) {
         JSONObject result = new JSONObject();
 
-        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetProcessCounting::getTaskCode, taskCode);
-        List<AssetProcessCounting> assetProcessCountingList = assetProcessCountingMapper.selectList(wrapper);
+        List<AssetProcessCounting> assetProcessCountingList = this
+                .selectAssetProcessCountingList(new AssetProcessCounting().setTaskCode(taskCode));
 
         int total = 0;
         int notCounted = 0;
@@ -191,30 +209,28 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     }
 
     @Override
-    public List<AssetProcessCounting> inventoryCountList(String startDate,String endDate)
-    {
+    public List<AssetProcessCounting> inventoryCountList(String startDate, String endDate) {
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.ge(AssetProcessCounting::getCreateTime,startDate);
-        wrapper.le(AssetProcessCounting::getCreateTime,endDate);
+        wrapper.ge(AssetProcessCounting::getCreateTime, startDate);
+        wrapper.le(AssetProcessCounting::getCreateTime, endDate);
         wrapper.orderByAsc(AssetProcessCounting::getCreateTime);
         List<AssetProcessCounting> list = assetProcessCountingMapper.selectList(wrapper);
         return list;
     }
 
     @Override
-    public JSONObject inventoryCount(String type,String startDate,String endDate)
-    {
-        JSONObject jsonObject=new JSONObject();
-        List x =new ArrayList();
-        List isCount =new ArrayList();
-        List isExcept =new ArrayList();
+    public JSONObject inventoryCount(String type, String startDate, String endDate) {
+        JSONObject jsonObject = new JSONObject();
+        List x = new ArrayList();
+        List isCount = new ArrayList();
+        List isExcept = new ArrayList();
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.ge(AssetProcessCounting::getCreateTime,startDate);
-        wrapper.le(AssetProcessCounting::getCreateTime,endDate);
+        wrapper.ge(AssetProcessCounting::getCreateTime, startDate);
+        wrapper.le(AssetProcessCounting::getCreateTime, endDate);
         List<AssetProcessCounting> list = assetProcessCountingMapper.selectList(wrapper).stream()
                 .filter(i -> ObjectUtil.isNotNull(i.getCountingTime()))
                 .collect(Collectors.toList());
-        if ("年".equals(type)){
+        if ("年".equals(type)) {
             Map<String, Long> isCountList = list.stream()
                     .collect(
                             Collectors.groupingBy(o -> DateUtil.format(o.getCountingTime(), "yyyy"), Collectors.counting())
@@ -226,7 +242,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     );
             List<String> yearBetween = null;
             try {
-                yearBetween = DateUtils.getDatePeriodFromTwoTime(startDate, endDate,type);
+                yearBetween = DateUtils.getDatePeriodFromTwoTime(startDate, endDate, type);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -237,11 +253,11 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     isExcept.add(isExceptList.getOrDefault(year, 0L));
                 }
             }
-            jsonObject.put("x",x);
-            jsonObject.put("isCount",isCount);
-            jsonObject.put("isExcept",isExcept);
+            jsonObject.put("x", x);
+            jsonObject.put("isCount", isCount);
+            jsonObject.put("isExcept", isExcept);
         }
-        if ("月".equals(type)){
+        if ("月".equals(type)) {
             Map<String, Long> isCountList = list.stream()
                     .collect(
                             Collectors.groupingBy(o -> DateUtil.format(o.getCountingTime(), "yyyy-MM"), Collectors.counting())
@@ -253,7 +269,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     );
             List<String> monthBetween = null;
             try {
-                monthBetween = DateUtils.getDatePeriodFromTwoTime(startDate, endDate,type);
+                monthBetween = DateUtils.getDatePeriodFromTwoTime(startDate, endDate, type);
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -264,21 +280,21 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                     isExcept.add(isExceptList.getOrDefault(month, 0L));
                 }
             }
-            jsonObject.put("x",x);
-            jsonObject.put("isCount",isCount);
-            jsonObject.put("isExcept",isExcept);
+            jsonObject.put("x", x);
+            jsonObject.put("isCount", isCount);
+            jsonObject.put("isExcept", isExcept);
         }
         return jsonObject;
     }
+
     /**
      * 新增资产盘点流程
      *
      * @return 结果
      */
     @Override
-    public int insertAssetProcessCounting(AssetProcessCounting entity)
-    {
-       return assetProcessCountingMapper.insert(entity);
+    public int insertAssetProcessCounting(AssetProcessCounting entity) {
+        return assetProcessCountingMapper.insert(entity);
     }
 
     /**
@@ -288,8 +304,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 结果
      */
     @Override
-    public int updateAssetProcessCounting(AssetProcessCounting assetProcessCounting)
-    {
+    public int updateAssetProcessCounting(AssetProcessCounting assetProcessCounting) {
         assetProcessCounting.setUpdateTime(DateUtils.getNowDate());
         return assetProcessCountingMapper.updateAssetProcessCounting(assetProcessCounting);
     }
@@ -301,8 +316,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 结果
      */
     @Override
-    public int deleteAssetProcessCountingByIds(Long[] ids)
-    {
+    public int deleteAssetProcessCountingByIds(Long[] ids) {
         return assetProcessCountingMapper.deleteAssetProcessCountingByIds(ids);
     }
 
@@ -313,31 +327,40 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
      * @return 结果
      */
     @Override
-    public int deleteAssetProcessCountingById(Long id)
-    {
+    public int deleteAssetProcessCountingById(Long id) {
         return assetProcessCountingMapper.deleteAssetProcessCountingById(id);
     }
 
     @Override
-    public void saveBatch(List<AssetProcessCounting> processCountingList) {
+    public void saveBatch(List<AssetProcessCounting> processCountingList) throws Exception {
+
         List<AssetProcessField> processFieldList = processFieldService.list(new LambdaQueryWrapper<AssetProcessField>()
                 .eq(AssetProcessField::getProcessType, AssetProcessType.ASSET_COUNTING.getCode()));
-        Map<String, AssetProcessField> fieldMap = processFieldList.stream()
-                .collect(Collectors.toMap(AssetProcessField::getFieldKey, x -> x));
+
         for (AssetProcessCounting processCounting : processCountingList) {
+            // 创建资产流程
+            AssetsProcess process = new AssetsProcess();
+            process.setProcessType(AssetProcessType.ASSET_COUNTING.getCode())
+                    .setAssetId(processCounting.getAssetCode())
+                    .setCreateBy(SecurityUtils.getUsername())
+                    .setCreateTime(DateUtils.getNowDate());
+            assetsProcessMapper.insert(process);
+            // 字段值存入流程值表
             List<AssetProcessVariable> varList = new ArrayList<>();
-            Field[] declaredFields = processCounting.getClass().getDeclaredFields();
             try {
-                for (Field field : declaredFields) {
-                    field.setAccessible(Boolean.TRUE);
+                for (AssetProcessField field : processFieldList) {
                     AssetProcessVariable var = new AssetProcessVariable();
-                    var.setProcessId(processCounting.getTaskCode())
-                            .setFieldId(String.valueOf(fieldMap.get(field.getName()).getId()))
-                            .setFieldValue(String.valueOf(field.get(processCounting)));
+                    var.setProcessId(String.valueOf(process.getId()))
+                            .setFieldId(String.valueOf(field.getId()));
+                    if (ObjectUtil.isNotEmpty(BeanTool.getFieldValue(processCounting, field.getFieldKey()))) {
+                        var.setFieldValue(String.valueOf(BeanTool.getFieldValue(processCounting, field.getFieldKey())));
+                    } else {
+                        var.setFieldValue(null);
+                    }
                     varList.add(var);
                 }
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                throw e;
             }
             processVariableService.saveBatch(varList);
         }

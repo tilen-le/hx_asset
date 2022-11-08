@@ -36,28 +36,12 @@ public interface IAssetInventoryTaskService extends IService<AssetInventoryTask>
     public boolean insertAssetCountingTask(AssetInventoryTask assetInventoryTask);
 
     /**
-     * 修改盘点任务
-     *
-     * @param assetInventoryTask 盘点任务
-     * @return 结果
-     */
-    public int updateAssetCountingTask(AssetInventoryTask assetInventoryTask);
-
-    /**
      * 批量删除盘点任务
      *
-     * @param taskIds 需要删除的盘点任务主键集合
+     * @param taskCode 需要删除的盘点任务主键集合
      * @return 结果
      */
     public int deleteAssetCountingTaskByTaskIds(List<String> taskCode);
-
-    /**
-     * 删除盘点任务信息
-     *
-     * @param taskId 盘点任务主键
-     * @return 结果
-     */
-    public int deleteAssetCountingTaskByTaskId(String taskId);
 
     /**
      * 更新盘点任务状态

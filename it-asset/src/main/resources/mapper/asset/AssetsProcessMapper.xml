@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hexing.asset.mapper.AssetsProcessMapper">
+    
+    <resultMap type="AssetsProcess" id="AssetsProcessResult">
+        <result property="id"    column="id"    />
+        <result property="processType"    column="process_type"    />
+        <result property="assetId"    column="asset_id"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+    </resultMap>
+
+    <resultMap id="ProcessDOResultMap" type="ProcessDO">
+        <id column="id" property="id"/>
+        <result column="process_type" property="processType"/>
+        <result column="asset_id" property="assetId"/>
+        <result column="status" property="status"/>
+        <result column="create_by" property="createBy"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="remark" property="remark"/>
+        <collection property="variableList" ofType="VariableDO">
+            <id column="vid" property="id"/>
+            <result column="process_id" property="processId"/>
+            <result column="field_id" property="fieldId"/>
+            <result column="field_key" property="fieldKey"/>
+            <result column="field_value" property="fieldValue"/>
+        </collection>
+    </resultMap>
+
+    <sql id="selectAssetsProcessVo">
+        select id, process_type, asset_id, status, create_by, create_time, update_by, update_time, remark from assets_process
+    </sql>
+
+    <select id="selectProcessWithCondition" resultMap="ProcessDOResultMap">
+        select t1.id, t1.process_type, t1.asset_id, t1.status, t1.create_by, t1.create_time, t1.update_by, t1.update_time, t1.remark,
+                t2.id vid, t2.process_id, t2.field_id, t2.field_value,
+                t3.field_key
+        from assets_process t1
+            left join asset_process_variable t2 on (t1.process_type = #{processType} and t1.id = t2.process_id)
+            left join asset_process_field t3 on t2.field_id = t3.id
+        where
+            t2.process_id in (
+                select m1.id
+                from (
+                    select t1.id,
+                        <foreach collection="params" index="key" item="value" separator=",">
+                            sum(t2.field_value = #{value}) as ${key}
+                        </foreach>
+                    from assets_process t1
+                        left join asset_process_variable t2 on (t1.process_type = #{processType} and t1.id = t2.process_id)
+                        left join asset_process_field t3 on t2.field_id = t3.id
+                    where field_key in
+                        <foreach collection="params.keySet()" index="i" item="key" open="(" close=")" separator=",">
+                            #{key}
+                        </foreach>
+                    group by id
+                ) as m1
+                where
+                <foreach collection="params.keySet()" index="i" item="key" separator="and">
+                    m1.${key} = 1
+                </foreach>
+            )
+    </select>
+
+    <select id="temp" parameterType="map" resultMap="ProcessDOResultMap">
+        select t1.id, t1.process_type, t1.asset_id, t1.status, t1.create_by, t1.create_time, t1.update_by, t1.update_time, t1.remark,
+               t2.id vid, t2.process_id, t2.field_id, t2.field_value,
+               t3.field_key
+        from assets_process t1
+            left join asset_process_variable t2 on (t1.process_type = #{processType} and t1.id = t2.process_id)
+            left join asset_process_field t3 on t2.field_id = t3.id
+        where
+            t2.process_id in (
+                select x1.process_id
+                from asset_process_variable x1
+                    left join asset_process_field x2 on x1.field_id = x2.id
+                <where>
+                    <if test="params != null and params.size() > 0">
+                        <foreach collection="params" index="key" item="value" separator="and">
+                            x2.field_key = #{key} and x1.field_value = #{value}
+                        </foreach>
+                    </if>
+                </where>
+                group by x1.process_id
+            )
+    </select>
+
+    <select id="selectAssetsProcessList" parameterType="AssetsProcess" resultMap="AssetsProcessResult">
+        <include refid="selectAssetsProcessVo"/>
+        <where>  
+            <if test="processType != null  and processType != ''"> and process_type = #{processType}</if>
+            <if test="assetId != null "> and asset_id = #{assetId}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+        </where>
+    </select>
+    
+    <select id="selectAssetsProcessById" parameterType="Long" resultMap="AssetsProcessResult">
+        <include refid="selectAssetsProcessVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertAssetsProcess" parameterType="AssetsProcess">
+        insert into assets_process
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="processType != null and processType != ''">process_type,</if>
+            <if test="assetId != null">asset_id,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="processType != null and processType != ''">#{processType},</if>
+            <if test="assetId != null">#{assetId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <update id="updateAssetsProcess" parameterType="AssetsProcess">
+        update assets_process
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="processType != null and processType != ''">process_type = #{processType},</if>
+            <if test="assetId != null">asset_id = #{assetId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteAssetsProcessById" parameterType="Long">
+        delete from assets_process where id = #{id}
+    </delete>
+
+    <delete id="deleteAssetsProcessByIds" parameterType="String">
+        delete from assets_process where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

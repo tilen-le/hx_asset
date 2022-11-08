@@ -65,32 +65,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 	<select id="selectDeptByParentId" parameterType="Long" resultType="String">
 		select dept_id
-			from (
-		select t1.dept_id,t1.dept_name,
-			CASE
-			WHEN find_in_set(parent_id, @pids) > 0 THEN @pids := concat(@pids, ',', dept_id)
-			ELSE 0
-			END as ischild
-			from (
-					 select
-
-						 dept_id,
-
-						 parent_id,
-
-						 dept_name
-			from sys_dept t
-					 order by
-
-						 parent_id,
-
-						 dept_id ) t1,
-				 (
-
-					 select @pids := #{deptId}) t2 ) t3
-		where
-			ischild != 0
-
+		from (
+				 select t1.dept_id,
+						t1.dept_name,
+						CASE
+							WHEN find_in_set(parent_id, @pids) > 0 THEN @pids := concat(@pids, ',', dept_id)
+							ELSE 0
+							END as ischild
+				 from (
+						  select dept_id, parent_id, dept_name
+						  from sys_dept t
+						  order by parent_id, dept_id
+					  ) t1,
+					  (select @pids := #{deptId}) t2
+			 ) t3
+		where ischild != 0
 	</select>
 
     <select id="checkDeptExistUser" parameterType="Long" resultType="int">

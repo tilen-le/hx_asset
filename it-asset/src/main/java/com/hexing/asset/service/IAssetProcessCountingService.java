@@ -26,12 +26,20 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
     public AssetProcessCounting selectAssetProcessCountingById(Long id);
 
     /**
+     * 分页查询资产盘点流程列表
+     *
+     * @param assetProcessCounting 资产盘点流程
+     * @return 资产盘点流程集合
+     */
+    public List<AssetProcessCounting> selectAssetProcessCountingListPage(AssetProcessCounting assetProcessCounting, Integer pageIndex, Integer pageSize);
+
+    /**
      * 查询资产盘点流程列表
      *
      * @param assetProcessCounting 资产盘点流程
      * @return 资产盘点流程集合
      */
-    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
+    List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
 
     /**
      * 新增资产盘点流程
@@ -81,5 +89,5 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
     /**
      * 批量添加资产盘点流程信息
      */
-    void saveBatch(List<AssetProcessCounting> processCountingList);
+    void saveBatch(List<AssetProcessCounting> processCountingList) throws Exception;
 }

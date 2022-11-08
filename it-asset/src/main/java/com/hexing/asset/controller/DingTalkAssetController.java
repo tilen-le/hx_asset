@@ -258,6 +258,7 @@ public class DingTalkAssetController extends BaseController {
         LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
                 .eq(AssetProcessCounting::getAssetCode, assetCode);
+        // TODO
         AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
         if (ObjectUtil.isNull(entity)) {
             Asset asset = CommonUtils.toNullStr(new Asset());
@@ -391,14 +392,5 @@ public class DingTalkAssetController extends BaseController {
         maintainService.maintainAssets(params);
         return AjaxResult.success("维修成功");
     }
-    /**
-     * 新增盘点任务
-     */
-    @ApiOperation("新增盘点任务")
-    @PostMapping("/createCountingTask")
-    @RepeatSubmit(interval = 10000, message = "请勿重复提交")
-    public AjaxResult createCountingTask(@RequestBody JSONObject params) {
-        AssetInventoryTask task = params.getObject("data", AssetInventoryTask.class);
-        return toAjax(assetInventoryTaskService.insertAssetCountingTask(task));
-    }
+
 }

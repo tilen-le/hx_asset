@@ -1,11 +1,15 @@
 package com.hexing.common.utils.bean;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 
 import java.io.Serializable;
 import java.lang.invoke.SerializedLambda;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -93,6 +97,29 @@ public class BeanTool {
      */
     public static void setFieldValueThrowEx(Object obj, String fieldName, String fieldValue) {
         BeanUtil.setFieldValue(obj, fieldName, fieldValue);
+    }
+
+    /**
+     * 对象转Map
+     */
+    public static Map<String, Object> objectToMap(Object obj) {
+        String SERIAL_VERSION_FIELD_NAME = "serialVersionUID";
+        Map<String, Object> map = new HashMap<>();
+        Field[] fields = obj.getClass().getDeclaredFields();
+        try {
+            for (Field field : fields) {
+                if (SERIAL_VERSION_FIELD_NAME.equals(field.getName())) {
+                    continue;
+                }
+                field.setAccessible(true);
+                if (ObjectUtil.isNotNull(field.get(obj)) && !"".equals(field.get(obj))) {
+                    map.put(field.getName(), field.get(obj));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return map;
     }
 
 

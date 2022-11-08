@@ -59,8 +59,6 @@ import static com.hexing.common.utils.PageUtil.startPage;
 public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTaskMapper, AssetInventoryTask> implements IAssetInventoryTaskService
 {
 
-
-
     @Autowired
     private AssetInventoryTaskMapper assetInventoryTaskMapper;
     @Autowired
@@ -183,7 +181,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             throw new ServiceException("盘点开始结束时间设置错误");
         }
         // 盘点任务名称重复性校验
-        if (ObjectUtil.isNull(assetInventoryTaskMapper.selectOne(new LambdaQueryWrapper<AssetInventoryTask>()
+        if (ObjectUtil.isNotNull(assetInventoryTaskMapper.selectOne(new LambdaQueryWrapper<AssetInventoryTask>()
                 .eq(AssetInventoryTask::getTaskName, task.getTaskName())))) {
             throw new ServiceException("盘点任务名称重复");
         }
@@ -219,27 +217,17 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             AssetProcessCounting entity = new AssetProcessCounting();
             entity.setTaskCode(task.getTaskCode())
                     .setAssetCode(assetCode)
-//                    .setProcessId(assetProcess.getId())
+                    .setUserCode(task.getCreateBy())
                     .setCreateTime(DateUtils.getNowDate())
                     .setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             assetProcessCountingList.add(entity);
         }
         if (assetProcessCountingList.size() > 0) {
-            assetProcessCountingService.saveBatch(assetProcessCountingList);//创建盘点资产流程
-        }
-
-        List<AssetProcess> assetProcessList = new ArrayList<>();
-        for (String assetCode : assetCodeList) {
-            AssetProcess assetProcess = new AssetProcess();
-            assetProcess.setAssetCode(assetCode)
-                    .setUserCode(userCode)
-                    .setUserName(userName)
-                    .setProcessType("1000")
-                    .setCreateTime(DateUtils.getNowDate());
-            assetProcessList.add(assetProcess);
-        }
-        if (assetProcessList.size() > 0) {
-            assetProcessService.saveBatch(assetProcessList);//创建总流程
+            try {
+                assetProcessCountingService.saveBatch(assetProcessCountingList);//创建盘点资产流程
+            } catch (Exception e) {
+                throw new ServiceException("盘点记录生成失败");
+            }
         }
 
         List<String> inventoryUserList = task.getInventoryUserList();
@@ -252,18 +240,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     }
 
     /**
-     * 修改盘点任务
-     *
-     * @param assetInventoryTask 盘点任务
-     * @return 结果
-     */
-    @Override
-    public int updateAssetCountingTask(AssetInventoryTask assetInventoryTask)
-    {
-        return assetInventoryTaskMapper.updateAssetCountingTask(assetInventoryTask);
-    }
-
-    /**
      * 批量删除盘点任务
      * @return 结果
      */
@@ -271,18 +247,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     public int deleteAssetCountingTaskByTaskIds(List<String> taskCode)
     {
         return assetInventoryTaskMapper.deleteBatchIds(taskCode);
-    }
-
-    /**
-     * 删除盘点任务信息
-     *
-     * @param taskId 盘点任务主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetCountingTaskByTaskId(String taskId)
-    {
-        return assetInventoryTaskMapper.deleteAssetCountingTaskByTaskId(taskId);
     }
 
     /**

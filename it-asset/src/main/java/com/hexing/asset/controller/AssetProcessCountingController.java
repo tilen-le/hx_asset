@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.poi.ExcelUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +24,6 @@ import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.enums.BusinessType;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.service.IAssetProcessCountingService;
-import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.common.core.page.TableDataInfo;
 
 
@@ -48,10 +48,11 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("获取盘点记录列表")
     @GetMapping("/list")
-    public TableDataInfo list(AssetProcessCounting assetProcessCounting)
+    public TableDataInfo list(AssetProcessCounting assetProcessCounting, Integer pageNum, Integer pageSize)
     {
-        startPage();
-        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
+//        startPage();
+        List<AssetProcessCounting> list = assetProcessCountingService
+                .selectAssetProcessCountingListPage(assetProcessCounting, pageNum, pageSize);
         List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
         TableDataInfo dataTable = getDataTable(list);
         dataTable.setRows(voList);

@@ -47,7 +47,7 @@ public class AssetProcessFieldServiceImpl extends ServiceImpl<AssetProcessFieldM
     public List<AssetProcessField> selectAssetProcessFieldList(AssetProcessField processField) {
         LambdaQueryWrapper<AssetProcessField> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(processField.getProcessType())) {
-            wrapper.like(AssetProcessField::getProcessType, processField.getProcessType());
+            wrapper.eq(AssetProcessField::getProcessType, processField.getProcessType());
         }
         return assetProcessFieldMapper.selectList(wrapper);
     }

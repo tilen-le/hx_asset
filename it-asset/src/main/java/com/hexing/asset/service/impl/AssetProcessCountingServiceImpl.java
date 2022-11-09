@@ -78,17 +78,17 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         int fieldNum = processFieldService.count(new LambdaQueryWrapper<AssetProcessField>()
                 .eq(AssetProcessField::getProcessType, AssetProcessType.ASSET_COUNTING.getCode()));
 
-        Page<ProcessDO> page = new Page<>(pageNum, (long) pageSize * fieldNum);
+        Page<AssetsProcess> page = new Page<>(pageNum, (long) pageSize * fieldNum);
 
         Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
         String processType = AssetProcessType.ASSET_COUNTING.getCode();
-        Page<ProcessDO> processDOPage = assetsProcessMapper.selectProcessWithCondition(page, processType, params);
+        Page<AssetsProcess> processDOPage = assetsProcessMapper.selectProcessWithCondition(page, processType, params);
 
-        List<ProcessDO> processDOList = processDOPage.getRecords();
+        List<AssetsProcess> processDOList = processDOPage.getRecords();
         List<AssetProcessCounting> list = new ArrayList<>();
-        for (ProcessDO processDO : processDOList) {
+        for (AssetsProcess process : processDOList) {
             AssetProcessCounting entity = new AssetProcessCounting();
-            for (VariableDO var : processDO.getVariableList()) {
+            for (AssetProcessVariable var : process.getVariableList()) {
                 BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
             }
             list.add(entity);
@@ -108,12 +108,12 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
 
         Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
         String processType = AssetProcessType.ASSET_COUNTING.getCode();
-        List<ProcessDO> processDOList = assetsProcessMapper.selectProcessWithCondition(processType, params);
+        List<AssetsProcess> processDOList = assetsProcessMapper.selectProcessWithCondition(processType, params);
 
         List<AssetProcessCounting> list = new ArrayList<>();
-        for (ProcessDO processDO : processDOList) {
+        for (AssetsProcess process : processDOList) {
             AssetProcessCounting entity = new AssetProcessCounting();
-            for (VariableDO var : processDO.getVariableList()) {
+            for (AssetProcessVariable var : process.getVariableList()) {
                 BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
             }
             list.add(entity);

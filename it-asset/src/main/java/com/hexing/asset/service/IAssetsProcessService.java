@@ -1,6 +1,8 @@
 package com.hexing.asset.service;
 
 import java.util.List;
+import java.util.Map;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.AssetsProcess;
 
@@ -20,6 +22,14 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
      */
     public AssetsProcess selectAssetsProcessById(Long id);
 
+
+    /**
+     * 查询资产流程
+     * @param processType 流程类型
+     * @param params 查询参数
+     * @return
+     */
+    Object getOne(String processType, Map<String, Object> params);
     /**
      * 查询资产流程列表
      *
@@ -59,4 +69,6 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
      * @return 结果
      */
     public int deleteAssetsProcessById(Long id);
+
+    List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params);
 }

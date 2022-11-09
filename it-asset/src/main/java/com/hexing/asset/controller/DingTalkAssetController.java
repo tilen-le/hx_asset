@@ -23,6 +23,7 @@ import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.CommonUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
@@ -35,9 +36,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -72,6 +71,8 @@ public class DingTalkAssetController extends BaseController {
     private ISysDeptService sysDeptService;
     @Autowired
     private ISysUserService sysUserService;
+    @Autowired
+    private IAssetsProcessService processService;
 
     /**
      * 根据资产编号查询资产信息
@@ -255,11 +256,12 @@ public class DingTalkAssetController extends BaseController {
             Asset asset = CommonUtils.toNullStr(new Asset());
             return AjaxResult.error( "该盘点任务名称对应的盘点任务不存在",asset);
         }
-        LambdaQueryWrapper<AssetProcessCounting> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
-                .eq(AssetProcessCounting::getAssetCode, assetCode);
-        // TODO
-        AssetProcessCounting entity = assetProcessCountingService.getOne(wrapper);
+
+        Map<String,Object> paramMap = new HashMap<>();
+        paramMap.put("taskCode", task.getTaskCode());
+        paramMap.put("assetCode", assetCode);
+        AssetProcessCounting entity = (AssetProcessCounting) processService.getOne(AssetProcessType.ASSET_COUNTING.getCode(), paramMap);
+
         if (ObjectUtil.isNull(entity)) {
             Asset asset = CommonUtils.toNullStr(new Asset());
             return AjaxResult.error( "所盘点资产不在当前任务盘点范围内",asset);
@@ -293,8 +295,10 @@ public class DingTalkAssetController extends BaseController {
     @PostMapping("/counting/countAsset")
     @Transactional
     public AjaxResult countAsset(@RequestBody JSONObject params) {
+
         JSONObject data = params.getObject("data", JSONObject.class);
         String taskName = data.getString("taskName");
+
         // 判断盘点任务名称是否为空
         if (StringUtils.isEmpty(taskName)) {
             return AjaxResult.error("盘点任务名称为空");
@@ -304,7 +308,6 @@ public class DingTalkAssetController extends BaseController {
         if (ObjectUtil.isNull(task)) {
             return AjaxResult.error(500, "该盘点任务名称对应的盘点任务不存在");
         }
-        String taskCode = task.getTaskCode();
 
         // 盘点任务是否结束
         if (CountingTaskStatus.FINISHED.getStatus().equals(task.getStatus())) {
@@ -319,10 +322,12 @@ public class DingTalkAssetController extends BaseController {
             String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
             // 若备注不为空，则为盘点异常
             String comment = JSONUtil.parseObj(o).getStr("comment");
-            LambdaQueryWrapper<AssetProcessCounting> w = new LambdaQueryWrapper<>();
-            w.eq(AssetProcessCounting::getAssetCode, assetCode)
-                    .eq(AssetProcessCounting::getTaskCode, taskCode);
-            AssetProcessCounting entity = assetProcessCountingService.getOne(w);
+
+            Map<String,Object> paramMap = new HashMap<>();
+            paramMap.put("taskCode", task.getTaskCode());
+            paramMap.put("assetCode", assetCode);
+            AssetProcessCounting entity = (AssetProcessCounting) processService.getOne(AssetProcessType.ASSET_COUNTING.getCode(), paramMap);
+
             // 若为异常数据，则跳过
             if (ObjectUtil.isNull(entity)) {
                 continue;
@@ -345,12 +350,12 @@ public class DingTalkAssetController extends BaseController {
         // 盘点任务状态更新
         // 若指定盘点任务下待盘记录数为0
         int notCounted = assetProcessCountingService.count(new LambdaQueryWrapper<AssetProcessCounting>()
-                .eq(AssetProcessCounting::getTaskCode, taskCode)
+                .eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
                 .eq(AssetProcessCounting::getCountingStatus, AssetCountingStatus.NOT_COUNTED.getStatus()));
         if (notCounted == 0) {
             // 更新盘点任务状态为已完成
             assetInventoryTaskService.update(new LambdaUpdateWrapper<AssetInventoryTask>()
-                    .eq(AssetInventoryTask::getTaskCode, taskCode)
+                    .eq(AssetInventoryTask::getTaskCode, task.getTaskCode())
                     .set(AssetInventoryTask::getStatus, CountingTaskStatus.FINISHED.getStatus()));
         }
 

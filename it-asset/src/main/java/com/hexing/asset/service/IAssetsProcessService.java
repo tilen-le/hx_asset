@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.AssetsProcess;
 
 /**
@@ -30,6 +31,9 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
      * @return
      */
     Object getOne(String processType, Map<String, Object> params);
+
+    List<AssetProcessVariable> selectVariableListByProcessId(String processId);
+
     /**
      * 查询资产流程列表
      *
@@ -71,4 +75,6 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
     public int deleteAssetsProcessById(Long id);
 
     List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params);
+
+    void updateByProcessId(Object obj);
 }

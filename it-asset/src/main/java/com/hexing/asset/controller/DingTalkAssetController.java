@@ -22,6 +22,7 @@ import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.CommonUtils;
+import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDeptService;
@@ -341,24 +342,24 @@ public class DingTalkAssetController extends BaseController {
                 }
                 entity.setUserCode(userCode)
                         .setInstanceId(instanceId)
-                        .setCountingTime(new Date())
+                        .setCountingTime(DateUtils.getNowDate())
                         .setComment(comment);
-                assetProcessCountingService.updateById(entity);
+                processService.updateByProcessId(entity);
             }
         }
 
         // 盘点任务状态更新
         // 若指定盘点任务下待盘记录数为0
-        int notCounted = assetProcessCountingService.count(new LambdaQueryWrapper<AssetProcessCounting>()
-                .eq(AssetProcessCounting::getTaskCode, task.getTaskCode())
-                .eq(AssetProcessCounting::getCountingStatus, AssetCountingStatus.NOT_COUNTED.getStatus()));
-        if (notCounted == 0) {
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("taskCode", task.getTaskCode());
+        paramMap.put("countingStatus", AssetCountingStatus.NOT_COUNTED.getStatus());
+        List<AssetsProcess> notCounted = processService.selectProcessWithCondition(AssetProcessType.ASSET_COUNTING.getCode(), paramMap);
+        if (notCounted.size() == 0) {
             // 更新盘点任务状态为已完成
             assetInventoryTaskService.update(new LambdaUpdateWrapper<AssetInventoryTask>()
                     .eq(AssetInventoryTask::getTaskCode, task.getTaskCode())
                     .set(AssetInventoryTask::getStatus, CountingTaskStatus.FINISHED.getStatus()));
         }
-
         return AjaxResult.success("盘点成功");
     }
 

@@ -1,13 +1,18 @@
 package com.hexing.asset.service.impl;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.AssetsProcess;
+import com.hexing.asset.mapper.AssetProcessVariableMapper;
 import com.hexing.asset.mapper.AssetsProcessMapper;
 import com.hexing.asset.service.IAssetProcessFieldService;
 import com.hexing.asset.service.IAssetProcessVariableService;
@@ -36,7 +41,8 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     private IAssetProcessFieldService fieldService;
     @Autowired
     private ISysDictDataService sysDictDataService;
-
+    @Autowired
+    private AssetProcessVariableMapper processVariableMapper;
     /**
      * 查询资产流程
      *
@@ -60,7 +66,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         final String PROCESS_DICT_TYPE = "asset_process";
         List<SysDictData> dictDataList = sysDictDataService.selectDictDataByType(PROCESS_DICT_TYPE);
         String processClassName = dictDataList
-                .stream().map(SysDictData::getDictValue).filter(processType::equals).findFirst().orElse(null);
+                .stream().filter(x->processType.equals(x.getDictValue())).map(SysDictData::getDictLabelEn).findFirst().orElse(null);
         String fullClassName = "com.hexing.asset.domain." + processClassName;
 
         Object obj = null;
@@ -77,7 +83,58 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
             BeanTool.setFieldValue(obj, var.getFieldKey(), var.getFieldValue());
         }
 
+        try {
+            Field processIdField = obj.getClass().getDeclaredField("processId");
+            processIdField.setAccessible(true);
+            processIdField.set(obj, process.getId());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         return obj;
+    }
+
+    @Override
+    public void updateByProcessId(Object obj) {
+
+        final String FIELD_PROCESS_ID = "processId";
+
+        Field[] fields = obj.getClass().getDeclaredFields();
+        String processId = "";
+        try {
+            Field processIdField = obj.getClass().getDeclaredField(FIELD_PROCESS_ID);
+            processIdField.setAccessible(true);
+            processId = String.valueOf(processIdField.get(obj));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        List<AssetProcessVariable> varList = this.selectVariableListByProcessId(processId);
+
+        for (Field field : fields) {
+            field.setAccessible(true);
+            String fieldName = field.getName();
+            for (AssetProcessVariable var : varList) {
+                if (fieldName.equals(var.getFieldKey())) {
+                    try {
+                        if (ObjectUtil.isNotEmpty(field.get(obj))) {
+                            var.setFieldValue(String.valueOf(field.get(obj)));
+                        } else {
+                            var.setFieldValue(null);
+                        }
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        variableService.updateBatchById(varList);
+    }
+
+    @Override
+    public List<AssetProcessVariable> selectVariableListByProcessId(String processId) {
+        return processMapper.selectVariableListByProcessId(processId);
     }
 
     /**
@@ -160,7 +217,20 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
     @Override
     public List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params) {
-        return processMapper.selectProcessWithCondition(processType, params);
+
+        List<AssetsProcess> processList = processMapper.selectProcessWithCondition(processType, params);
+
+        List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
+                .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
+
+        Map<String, List<AssetProcessVariable>> varMap = varList
+                .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
+
+        for (AssetsProcess process : processList) {
+            process.setVariableList(varMap.get(String.valueOf(process.getId())));
+        }
+
+        return processList;
     }
 
 }

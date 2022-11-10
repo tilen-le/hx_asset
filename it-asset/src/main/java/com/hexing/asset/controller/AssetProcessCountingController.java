@@ -2,8 +2,12 @@ package com.hexing.asset.controller;
 
 import java.util.List;
 import com.alibaba.fastjson.JSONObject;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
+import com.hexing.common.core.page.PageDomain;
+import com.hexing.common.core.page.TableSupport;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
 import io.swagger.annotations.Api;
@@ -48,14 +52,17 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("获取盘点记录列表")
     @GetMapping("/list")
-    public TableDataInfo list(AssetProcessCounting assetProcessCounting, Integer pageNum, Integer pageSize)
+    public TableDataInfo list(AssetProcessCounting assetProcessCounting)
     {
 //        startPage();
+        PageDomain pageDomain = TableSupport.buildPageRequest();
+        Page<Object> page = PageHelper.startPage(pageDomain.getPageNum(), pageDomain.getPageSize());
         List<AssetProcessCounting> list = assetProcessCountingService
-                .selectAssetProcessCountingListPage(assetProcessCounting, pageNum, pageSize);
+                .selectAssetProcessCountingList(assetProcessCounting);
         List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
         TableDataInfo dataTable = getDataTable(list);
         dataTable.setRows(voList);
+        dataTable.setTotal(page.getTotal());
         return dataTable;
     }
 

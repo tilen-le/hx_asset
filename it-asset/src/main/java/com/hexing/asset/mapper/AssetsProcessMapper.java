@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.AssetsProcess;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
@@ -33,6 +34,8 @@ public interface AssetsProcessMapper extends BaseMapper<AssetsProcess>
      * @return 资产流程集合
      */
     public List<AssetsProcess> selectAssetsProcessList(AssetsProcess assetsProcess);
+
+    List<AssetProcessVariable> selectVariableListByProcessId(String processId);
 
     /**
      * 新增资产流程
@@ -65,8 +68,6 @@ public interface AssetsProcessMapper extends BaseMapper<AssetsProcess>
      * @return 结果
      */
     public int deleteAssetsProcessByIds(Long[] ids);
-
-    Page<AssetsProcess> selectProcessWithCondition(Page page, @Param("processType") String processType, @Param("params") Map<String, Object> params);
 
     List<AssetsProcess> selectProcessWithCondition(@Param("processType") String processType, @Param("params") Map<String, Object> params);
 }

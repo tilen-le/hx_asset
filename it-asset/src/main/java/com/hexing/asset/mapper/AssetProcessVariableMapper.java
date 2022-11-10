@@ -3,6 +3,7 @@ package com.hexing.asset.mapper;
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hexing.asset.domain.AssetProcessVariable;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -61,4 +62,7 @@ public interface AssetProcessVariableMapper extends BaseMapper<AssetProcessVaria
      * @return 结果
      */
     public int deleteAssetProcessVariableByIds(Long[] ids);
+
+    List<AssetProcessVariable> selectProcessVariableWithCondition(List<Long> processIdList);
+
 }

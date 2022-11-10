@@ -16,6 +16,7 @@ import com.hexing.asset.domain.*;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.AssetProcessType;
+import com.hexing.asset.mapper.AssetProcessVariableMapper;
 import com.hexing.asset.mapper.AssetsProcessMapper;
 import com.hexing.asset.service.*;
 import com.hexing.asset.utils.ProcessUtil;
@@ -54,6 +55,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     private IAssetProcessFieldService processFieldService;
     @Autowired
     private AssetsProcessMapper assetsProcessMapper;
+    @Autowired
+    private AssetProcessVariableMapper processVariableMapper;
 
     /**
      * 查询资产盘点流程
@@ -67,37 +70,6 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     }
 
     /**
-     * 分页查询资产盘点流程列表
-     *
-     * @param assetProcessCounting 资产盘点流程
-     * @return 资产盘点流程
-     */
-    @Override
-    public List<AssetProcessCounting> selectAssetProcessCountingListPage(AssetProcessCounting assetProcessCounting, Integer pageNum, Integer pageSize) {
-
-        int fieldNum = processFieldService.count(new LambdaQueryWrapper<AssetProcessField>()
-                .eq(AssetProcessField::getProcessType, AssetProcessType.ASSET_COUNTING.getCode()));
-
-        Page<AssetsProcess> page = new Page<>(pageNum, (long) pageSize * fieldNum);
-
-        Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
-        String processType = AssetProcessType.ASSET_COUNTING.getCode();
-        Page<AssetsProcess> processDOPage = assetsProcessMapper.selectProcessWithCondition(page, processType, params);
-
-        List<AssetsProcess> processDOList = processDOPage.getRecords();
-        List<AssetProcessCounting> list = new ArrayList<>();
-        for (AssetsProcess process : processDOList) {
-            AssetProcessCounting entity = new AssetProcessCounting();
-            for (AssetProcessVariable var : process.getVariableList()) {
-                BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
-            }
-            list.add(entity);
-        }
-
-        return list;
-    }
-
-    /**
      * 查询资产盘点流程列表
      *
      * @param assetProcessCounting 资产盘点流程
@@ -108,10 +80,20 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
 
         Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
         String processType = AssetProcessType.ASSET_COUNTING.getCode();
-        List<AssetsProcess> processDOList = assetsProcessMapper.selectProcessWithCondition(processType, params);
+        List<AssetsProcess> processList = assetsProcessMapper.selectProcessWithCondition(processType, params);
+
+        List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
+                        .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
+
+        Map<String, List<AssetProcessVariable>> varMap = varList
+                .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
+
+        for (AssetsProcess process : processList) {
+            process.setVariableList(varMap.get(String.valueOf(process.getId())));
+        }
 
         List<AssetProcessCounting> list = new ArrayList<>();
-        for (AssetsProcess process : processDOList) {
+        for (AssetsProcess process : processList) {
             AssetProcessCounting entity = new AssetProcessCounting();
             for (AssetProcessVariable var : process.getVariableList()) {
                 BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
@@ -121,6 +103,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
 
         return list;
     }
+
 
     @Override
     public List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list) {

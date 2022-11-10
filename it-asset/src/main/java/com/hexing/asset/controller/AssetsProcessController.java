@@ -1,6 +1,7 @@
 package com.hexing.asset.controller;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,14 +9,18 @@ import java.util.stream.Collectors;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.AssetProcessField;
 import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.AssetsProcess;
+import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.service.IAssetProcessFieldService;
 import com.hexing.asset.service.IAssetProcessVariableService;
 import com.hexing.asset.service.IAssetsProcessService;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDictDataService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +46,7 @@ import com.hexing.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/assets/process")
+@Api(tags="流程管理")
 public class AssetsProcessController extends BaseController
 {
     @Autowired
@@ -62,6 +68,16 @@ public class AssetsProcessController extends BaseController
         startPage();
         List<AssetsProcess> list = assetsProcessService.selectAssetsProcessList(assetsProcess);
         return getDataTable(list);
+    }
+
+    @GetMapping("/getOne")
+    @ApiOperation("查询资产流程")
+    public AjaxResult getOne(String taskCode, String assetCode) {
+        String processType = AssetProcessType.ASSET_COUNTING.getCode();
+        Map<String, Object> paramMap = new HashMap<>();
+        paramMap.put("taskCode", taskCode);
+        paramMap.put("assetCode", assetCode);
+        return AjaxResult.success((AssetProcessCounting) assetsProcessService.getOne(processType, paramMap));
     }
 
     /**

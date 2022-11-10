@@ -79,4 +79,13 @@ public class AssetProcessField {
     @ApiModelProperty(value = "列宽")
     private String width;
 
+    /** 列宽 */
+    @ApiModelProperty(value = "是否存储")
+    private String isSave;
+
+    /** 列宽 */
+    @ApiModelProperty(value = "是否多选")
+    private String isMulti;
+
+
 }

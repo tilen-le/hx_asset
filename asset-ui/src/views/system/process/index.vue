@@ -67,6 +67,18 @@
             @change="handleStatusChange(scope.row, 'editable')"></el-switch>
         </template>
       </el-table-column>
+      <el-table-column label="是否多选" align="center" prop="status">
+        <template slot-scope="scope">
+          <el-switch v-model="scope.row.isMulti" active-value="1" inactive-value="0"
+            @change="handleStatusChange(scope.row, 'isMulti')"></el-switch>
+        </template>
+      </el-table-column>
+      <el-table-column label="是否存储" align="center" prop="status">
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.isSave">是</el-tag>
+          <el-tag v-else>否</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
         <template slot-scope="scope">
           <el-switch v-model="scope.row.status" active-value="1" inactive-value="0"
@@ -124,6 +136,12 @@
           <el-form-item label="是否可编辑" prop="editable">
             <el-switch v-model="form.editable" active-value="1" inactive-value="0" />
           </el-form-item>
+          <el-form-item label="是否多选" prop="isMulti">
+            <el-switch v-model="form.isMulti" active-value="1" inactive-value="0" />
+          </el-form-item>
+          <el-form-item label="是否存储" prop="isSave">
+            <el-switch v-model="form.isSave" active-value="1" inactive-value="0" :disabled="inEdit" />
+          </el-form-item>
           <el-form-item label="排序" prop="orderNum">
             <el-input-number v-model="form.orderNum" :step="1" step-strictly />
           </el-form-item>
@@ -170,6 +188,8 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      // 是否修改
+      inEdit: false,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -233,6 +253,8 @@ export default {
         timeFormat: null,
         queryable: "0",
         editable: "0",
+        isMulti: "0",
+        isSave: "0",
         orderNum: null,
         width: null
       };
@@ -257,6 +279,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.inEdit = false;
       this.open = true;
       this.title = "添加【流程字段配置】";
     },
@@ -266,6 +289,7 @@ export default {
       const id = row.id || this.ids
       getField(id).then(response => {
         this.form = response.data;
+        this.inEdit = true;
         this.open = true;
         this.title = "修改【流程字段配置】";
       });
@@ -320,9 +344,9 @@ export default {
 </script>
 
 <style scoped>
-.dialog-body{
+.dialog-body {
   height: calc(65vh);
-  padding:0 20px;
+  padding: 0 20px;
   overflow: auto;
 }
 </style>

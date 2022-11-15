@@ -41,14 +41,13 @@ public class TestDemo {
         }
 
         pdProcessDomain.setProcessType("100");
+        pdProcessDomain.setTaskCode("20221110101638atl5");
+        pdProcessDomain.setUserCode("80010641");
+
         List<AssetProcessField> searchDomain = getSearchDomain(pdProcessDomain);
         List<AssetsProcess> assetsProcesses = searchAssetProcess(searchDomain, pdProcessDomain);
-        //后置处理
         {
-            //关联表查询，以及其他字段显示
-            for (AssetsProcess assetsProcess : assetsProcesses) {
-                List<AssetProcessVariable> variableList = assetsProcess.getVariableList();
-            }
+            //后置处理
         }
 
         return assetsProcesses;

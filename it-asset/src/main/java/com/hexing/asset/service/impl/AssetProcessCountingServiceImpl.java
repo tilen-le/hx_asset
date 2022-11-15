@@ -85,7 +85,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
                         .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
 
-        Map<String, List<AssetProcessVariable>> varMap = varList
+        Map<Long, List<AssetProcessVariable>> varMap = varList
                 .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
 
         for (AssetsProcess process : processList) {
@@ -324,7 +324,7 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
             // 创建资产流程
             AssetsProcess process = new AssetsProcess();
             process.setProcessType(AssetProcessType.ASSET_COUNTING.getCode())
-                    .setAssetId(processCounting.getAssetCode())
+                    .setAssetCode(processCounting.getAssetCode())
                     .setCreateBy(SecurityUtils.getUsername())
                     .setCreateTime(DateUtils.getNowDate());
             assetsProcessMapper.insert(process);
@@ -333,8 +333,8 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
             try {
                 for (AssetProcessField field : processFieldList) {
                     AssetProcessVariable var = new AssetProcessVariable();
-                    var.setProcessId(String.valueOf(process.getId()))
-                            .setFieldId(String.valueOf(field.getId()));
+                    var.setProcessId(process.getId())
+                            .setFieldId(field.getId());
                     if (ObjectUtil.isNotEmpty(BeanTool.getFieldValue(processCounting, field.getFieldKey()))) {
                         var.setFieldValue(String.valueOf(BeanTool.getFieldValue(processCounting, field.getFieldKey())));
                     } else {

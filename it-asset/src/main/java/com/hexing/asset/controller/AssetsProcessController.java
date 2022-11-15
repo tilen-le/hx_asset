@@ -134,7 +134,7 @@ public class AssetsProcessController extends BaseController
         for (Map.Entry<String, Object> entry : params.entrySet()) {
             Long fieldId = fieldMap.get(entry.getKey());
             AssetProcessVariable var = new AssetProcessVariable();
-            var.setFieldId(String.valueOf(fieldId))
+            var.setFieldId(fieldId)
                     .setFieldValue(String.valueOf(entry.getValue()));
             varList.add(var);
         }

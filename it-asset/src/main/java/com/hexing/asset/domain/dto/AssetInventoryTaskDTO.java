@@ -1,6 +1,6 @@
 package com.hexing.asset.domain.dto;
 
-import com.hexing.asset.domain.AssetInventoryTask;
+import com.hexing.assetnew.domain.AssetInventoryTask;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;

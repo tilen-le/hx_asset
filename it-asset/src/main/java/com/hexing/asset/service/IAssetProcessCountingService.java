@@ -49,8 +49,6 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
      */
     public int deleteAssetProcessCountingById(Long id);
 
-    JSONObject countingStatusCount(String taskCode);
-
     List<AssetProcessCounting> inventoryCountList(String startDate, String endDate);
 
     JSONObject inventoryCount(String type,String startDate, String endDate);

@@ -1,17 +1,13 @@
 package com.hexing.asset.domain.dto;
 
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hexing.asset.domain.AssetProcessField;
+import com.hexing.assetnew.domain.AssetProcessField;
 import com.hexing.asset.domain.Process;
-import com.hexing.asset.enums.AssetProcessType;
-import com.hexing.asset.service.IAssetProcessFieldService;
-import com.hexing.asset.service.impl.AssetProcessFieldServiceImpl;
+import com.hexing.assetnew.domain.AssetsProcess;
+import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
 import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,14 +32,14 @@ public class MapperQueryParam {
     public MapperQueryParam() {
     }
 
-    public MapperQueryParam(Process process, List<AssetProcessField> fieldList) {
+    public MapperQueryParam(AssetsProcess process, List<AssetProcessField> fieldList) {
         // 从枚举中查询对应class流程的流程编号
         this.processType = AssetProcessType.getValue(process);
         getSqlConditionList(process, fieldList);
         this.processCondition = BeanTool.objectToMap(process);
     }
 
-    private void getSqlConditionList(Process process, List<AssetProcessField> fieldList) {
+    private void getSqlConditionList(AssetsProcess process, List<AssetProcessField> fieldList) {
         for (AssetProcessField field : fieldList) {
             if (StringUtils.isNotEmpty(field.getRelationTable())) {
                 this.relationTableName = field.getRelationTable();

@@ -1,7 +1,7 @@
 package com.hexing.asset.utils;
 
-import com.hexing.asset.domain.AssetProcessField;
-import com.hexing.asset.domain.AssetProcessVariable;
+import com.hexing.assetnew.domain.AssetProcessField;
+import com.hexing.assetnew.domain.AssetProcessVariable;
 import com.hexing.common.utils.bean.BeanTool;
 
 import java.util.List;

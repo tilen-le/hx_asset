@@ -1,6 +1,6 @@
 package com.hexing.asset.domain.dto;
 
-import com.hexing.asset.domain.Asset;
+import com.hexing.assetnew.domain.Asset;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

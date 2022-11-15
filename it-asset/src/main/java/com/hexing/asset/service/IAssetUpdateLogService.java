@@ -1,7 +1,7 @@
 package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.hexing.asset.domain.Asset;
+import com.hexing.assetnew.domain.Asset;
 import com.hexing.asset.domain.AssetUpdateLog;
 
 /**

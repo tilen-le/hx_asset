@@ -147,6 +147,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         SELECT p.*
         FROM assets_process p
         WHERE 1 = 1
+        <if test="process.id != null and process.id  != ''">
+            AND p.id = #{process.id}
+        </if>
         <if test="process.processType != null and process.processType  != ''">
             AND p.process_type = #{process.processType}
         </if>
@@ -159,7 +162,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="process.assetCode != null and process.assetCode  != ''">
             AND p.asset_code = #{process.assetCode}
         </if>
-<!--        process表如果还有继续加他体哦阿健-->
+<!--        process表如果还有继续加-->
         <foreach collection="params" item="domain">
             AND EXISTS(SELECT 1 FROM asset_process_variable v
             WHERE v.process_id = p.id

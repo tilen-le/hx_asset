@@ -147,7 +147,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         List<AssetProcessVariable> varList = processVariableMapper
                 .selectProcessVariableWithCondition(processList.stream().map(AssetsProcess::getId).collect(Collectors.toList()));
 
-        Map<String, List<AssetProcessVariable>> varMap = varList
+        Map<Long, List<AssetProcessVariable>> varMap = varList
                 .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
 
         List<Map<String, Object>> list = new ArrayList<>();

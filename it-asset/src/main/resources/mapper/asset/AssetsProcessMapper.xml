@@ -3,7 +3,7 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hexing.asset.mapper.AssetsProcessMapper">
-    
+
     <resultMap type="AssetsProcess" id="AssetsProcessResult">
         <result property="id"    column="id"    />
         <result property="processType"    column="process_type"    />
@@ -55,18 +55,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <select id="selectAssetsProcessList" parameterType="AssetsProcess" resultMap="AssetsProcessResult">
         <include refid="selectAssetsProcessVo"/>
-        <where>  
+        <where>
             <if test="processType != null  and processType != ''"> and process_type = #{processType}</if>
             <if test="assetId != null "> and asset_id = #{assetId}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
         </where>
     </select>
-    
+
     <select id="selectAssetsProcessById" parameterType="Long" resultMap="AssetsProcessResult">
         <include refid="selectAssetsProcessVo"/>
         where id = #{id}
     </select>
-        
+
     <insert id="insertAssetsProcess" parameterType="AssetsProcess">
         insert into assets_process
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -113,9 +113,59 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteAssetsProcessByIds" parameterType="String">
-        delete from assets_process where id in 
+        delete from assets_process where id in
         <foreach item="id" collection="array" open="(" separator="," close=")">
             #{id}
         </foreach>
     </delete>
+
+    <select id="selectProcessWithDomain" resultMap="AssetsProcessResult">
+        SELECT p.*
+        FROM assets_process p
+        WHERE 1 = 1
+        <if test="process.id != null and process.id  != ''">
+            AND p.id = #{process.id}
+        </if>
+        <if test="process.processType != null and process.processType  != ''">
+            AND p.process_type = #{process.processType}
+        </if>
+        <if test="process.createBy != null and process.createBy  != ''">
+            AND p.create_by = #{process.createBy}
+        </if>
+        <if test="process.status != null and process.status  != ''">
+            AND p.status = #{process.status}
+        </if>
+        <if test="process.assetCode != null and process.assetCode  != ''">
+            AND p.asset_code = #{process.assetCode}
+        </if>
+<!--        process表如果还有继续加-->
+        <foreach collection="params" item="domain">
+            AND EXISTS(SELECT 1 FROM asset_process_variable v
+            WHERE v.process_id = p.id
+            AND v.field_id = #{domain.id}
+            <choose>
+                <when test="domain.searchMode != null and domain.searchMode == 'like'">
+                    AND v.field_value LIKE CONCAT (('%', #{domain.fieldValue}, '%'))
+                </when>
+                <when test="domain.searchMode != null and domain.searchMode != ''">
+                    AND v.field_value ${domain.searchMode} #{domain.fieldValue}
+                </when>
+                <otherwise>
+                    AND v.field_value = #{domain.fieldValue}
+                </otherwise>
+            </choose>
+            )
+        </foreach>
+    </select>
+
+    <select id="selectVarWithProcessIds" resultType="com.hexing.asset.domain.AssetProcessVariable">
+        SELECT v.id, v.process_id, v.field_id, v.field_value, f.field_key, f.field_label
+        FROM asset_process_variable v
+        LEFT JOIN asset_process_field f ON v.field_id=f.id
+        WHERE v.process_id IN
+        <foreach collection="list" item="processId" open="(" close=")" separator=",">
+            #{processId}
+        </foreach>
+    </select>
+
 </mapper>

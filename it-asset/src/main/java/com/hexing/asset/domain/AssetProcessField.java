@@ -13,6 +13,8 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 import com.hexing.common.core.domain.BaseEntity;
 
+import java.util.Objects;
+
 /**
  * 流程字段对象 asset_process_field
  *
@@ -87,6 +89,11 @@ public class AssetProcessField {
     @ApiModelProperty(value = "是否多选")
     private String isMulti;
 
+    @TableField(exist = false)
+    private Object fieldValue;
+
+    @TableField(exist = false)
+    private String searchMode;
     /** 筛选方式 */
     private String searchPattern;
 

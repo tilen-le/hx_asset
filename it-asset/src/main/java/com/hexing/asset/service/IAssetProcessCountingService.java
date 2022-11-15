@@ -17,21 +17,14 @@ import com.hexing.common.core.domain.AjaxResult;
  */
 public interface IAssetProcessCountingService extends IService<AssetProcessCounting>
 {
-    /**
-     * 查询资产盘点流程
-     *
-     * @param id 资产盘点流程主键
-     * @return 资产盘点流程
-     */
-    public AssetProcessCounting selectAssetProcessCountingById(Long id);
 
     /**
      * 查询资产盘点流程列表
      *
-     * @param assetProcessCounting 资产盘点流程
+     * @param params 查询参数
      * @return 资产盘点流程集合
      */
-    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting);
+//    public List<Map<String, Object>> selectAssetProcessCountingList(Map<String, Object> params);
 
     /**
      * 新增资产盘点流程
@@ -42,27 +35,11 @@ public interface IAssetProcessCountingService extends IService<AssetProcessCount
     public int insertAssetProcessCounting(AssetProcessCounting entity);
 
     /**
-     * 修改资产盘点流程
-     *
-     * @param assetProcessCounting 资产盘点流程
-     * @return 结果
-     */
-    public int updateAssetProcessCounting(AssetProcessCounting assetProcessCounting);
-
-    /**
-     * 批量删除资产盘点流程
-     *
-     * @param ids 需要删除的资产盘点流程主键集合
-     * @return 结果
-     */
-    public int deleteAssetProcessCountingByIds(Long[] ids);
-
-    /**
      *
      * @param list
      * @return
      */
-    List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list);
+//    List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list);
 
     /**
      * 删除资产盘点流程信息

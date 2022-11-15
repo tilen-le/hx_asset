@@ -87,5 +87,13 @@ public class AssetProcessField {
     @ApiModelProperty(value = "是否多选")
     private String isMulti;
 
+    /** 筛选方式 */
+    private String searchPattern;
+
+    /** 关联表 */
+    private String relationTable;
+
+    /** 关联表对应字段 */
+    private String relationTableField;
 
 }

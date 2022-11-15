@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.*;
+import com.hexing.asset.domain.dto.AssetProcessCountingDTO;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.AssetProcessType;
@@ -23,6 +24,7 @@ import com.hexing.asset.utils.ProcessUtil;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.PageUtil;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
@@ -59,28 +61,19 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     private AssetProcessVariableMapper processVariableMapper;
 
     /**
-     * 查询资产盘点流程
-     *
-     * @param id 资产盘点流程主键
-     * @return 资产盘点流程
-     */
-    @Override
-    public AssetProcessCounting selectAssetProcessCountingById(Long id) {
-        return assetProcessCountingMapper.selectAssetProcessCountingById(id);
-    }
-
-    /**
      * 查询资产盘点流程列表
      *
-     * @param assetProcessCounting 资产盘点流程
+     * @param params 资产盘点流程
      * @return 资产盘点流程
      */
-    @Override
-    public List<AssetProcessCounting> selectAssetProcessCountingList(AssetProcessCounting assetProcessCounting) {
+//    @Override
+    public List<Map<String, Object>> selectAssetProcessCountingList(AssetProcessCountingDTO assetProcessCountingDTO) {
 
-        Map<String, Object> params = new HashMap<>(BeanTool.objectToMap(assetProcessCounting));
         String processType = AssetProcessType.ASSET_COUNTING.getCode();
-        List<AssetsProcess> processList = assetsProcessMapper.selectProcessWithCondition(processType, params);
+//        List<AssetsProcess> processList = assetsProcessMapper
+//                .selectProcessWithCondition(processType, assetProcessCountingDTO);
+        List<AssetsProcess> processList = assetsProcessMapper
+                .selectProcessWithCondition(null);
 
         List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
                         .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
@@ -88,79 +81,78 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
         Map<String, List<AssetProcessVariable>> varMap = varList
                 .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
 
+        List<Map<String, Object>> list = new ArrayList<>();
         for (AssetsProcess process : processList) {
-            process.setVariableList(varMap.get(String.valueOf(process.getId())));
-        }
-
-        List<AssetProcessCounting> list = new ArrayList<>();
-        for (AssetsProcess process : processList) {
-            AssetProcessCounting entity = new AssetProcessCounting();
-            for (AssetProcessVariable var : process.getVariableList()) {
-                BeanTool.setFieldValue(entity, var.getFieldKey(), var.getFieldValue());
+            List<AssetProcessVariable> variableList = varMap.get(String.valueOf(process.getId()));
+            Map<String, Object> map = new HashMap<>();
+            for (AssetProcessVariable var : variableList) {
+                map.put(var.getFieldKey(), var.getFieldValue());
             }
-            list.add(entity);
+            list.add(map);
         }
 
         return list;
     }
 
 
-    @Override
-    public List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<AssetProcessCounting> list) {
-        List<AssetProcessCountingVO> voList = new ArrayList<>();
-
-        List<String> assetCodeList = list.stream().map(AssetProcessCounting::getAssetCode).collect(Collectors.toList());
-        Map<String, Asset> assetMap = new HashMap<>();
-        if (CollectionUtil.isNotEmpty(assetCodeList)) {
-            assetMap = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeList))
-                    .stream().collect(Collectors.toMap(Asset::getAssetCode, asset -> asset));
-        }
-        Map<String, SysUser> userMap = sysUserService
-                .getUserByUserNames(list.stream().map(AssetProcessCounting::getUserCode).collect(Collectors.toSet()));
-        Map<String, SysUser> responsiblePersonMap = sysUserService
-                .getUserByUserNames(assetMap.values().stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
-        Map<Long, SysDept> deptMap = deptService
-                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
-
-        for (AssetProcessCounting obj : list) {
-            Asset asset = assetMap.get(obj.getAssetCode());
-            SysUser responsiblePerson = responsiblePersonMap.get(asset.getResponsiblePersonCode());
-            String inventoryPerson = "";
-            if (StringUtils.isNotBlank(obj.getUserCode())) {
-                SysUser userByUserName = userMap.get(obj.getUserCode());
-                if (Objects.nonNull(userByUserName)) {
-                    inventoryPerson = userByUserName.getNickName();
-                }
-            }
-            SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-            AssetProcessCountingVO vo = new AssetProcessCountingVO()
-                    .setUserCode(obj.getUserCode())
-                    .setUserName(inventoryPerson)
-                    .setCompanyName(asset.getCompanyName())
-                    .setAssetCode(asset.getAssetCode())
-                    .setAssetName(asset.getAssetName())
-                    .setFactoryNo(asset.getFactoryNo())
-                    .setStandard(asset.getStandard())
-                    .setUsageScenario(asset.getUsageScenario())
-                    .setManageDept(asset.getManageDept())
-                    .setResponsiblePersonName(responsiblePerson.getNickName())
-                    .setResponsiblePersonCode(responsiblePerson.getUserName())
-                    .setResponsiblePersonDept(dept.getDeptName())
-                    .setLocation(asset.getLocation())
-                    .setCountingTime(obj.getCountingTime())
-                    .setCountingStatus(obj.getCountingStatus())
-                    .setComment(obj.getComment());
-            voList.add(vo);
-        }
-        return voList;
-    }
+//    @Override
+//    public List<AssetProcessCountingVO> toAssetProcessCountingVOList(List<Map<String, Object>> list) {
+//        List<AssetProcessCountingVO> voList = new ArrayList<>();
+//
+//        List<String> assetCodeList = list.stream().map(AssetProcessCounting::getAssetCode).collect(Collectors.toList());
+//        Map<String, Asset> assetMap = new HashMap<>();
+//        if (CollectionUtil.isNotEmpty(assetCodeList)) {
+//            assetMap = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeList))
+//                    .stream().collect(Collectors.toMap(Asset::getAssetCode, asset -> asset));
+//        }
+//        Map<String, SysUser> userMap = sysUserService
+//                .getUserByUserNames(list.stream().map(AssetProcessCounting::getUserCode).collect(Collectors.toSet()));
+//        Map<String, SysUser> responsiblePersonMap = sysUserService
+//                .getUserByUserNames(assetMap.values().stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+//        Map<Long, SysDept> deptMap = deptService
+//                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
+//
+//        for (AssetProcessCounting obj : list) {
+//            Asset asset = assetMap.get(obj.getAssetCode());
+//            SysUser responsiblePerson = responsiblePersonMap.get(asset.getResponsiblePersonCode());
+//            String inventoryPerson = "";
+//            if (StringUtils.isNotBlank(obj.getUserCode())) {
+//                SysUser userByUserName = userMap.get(obj.getUserCode());
+//                if (Objects.nonNull(userByUserName)) {
+//                    inventoryPerson = userByUserName.getNickName();
+//                }
+//            }
+//            SysDept dept = deptMap.get(responsiblePerson.getDeptId());
+//            AssetProcessCountingVO vo = new AssetProcessCountingVO()
+//                    .setUserCode(obj.getUserCode())
+//                    .setUserName(inventoryPerson)
+//                    .setCompanyName(asset.getCompanyName())
+//                    .setAssetCode(asset.getAssetCode())
+//                    .setAssetName(asset.getAssetName())
+//                    .setFactoryNo(asset.getFactoryNo())
+//                    .setStandard(asset.getStandard())
+//                    .setUsageScenario(asset.getUsageScenario())
+//                    .setManageDept(asset.getManageDept())
+//                    .setResponsiblePersonName(responsiblePerson.getNickName())
+//                    .setResponsiblePersonCode(responsiblePerson.getUserName())
+//                    .setResponsiblePersonDept(dept.getDeptName())
+//                    .setLocation(asset.getLocation())
+//                    .setCountingTime(obj.getCountingTime())
+//                    .setCountingStatus(obj.getCountingStatus())
+//                    .setComment(obj.getComment());
+//            voList.add(vo);
+//        }
+//        return voList;
+//    }
 
     @Override
     public JSONObject countingStatusCount(String taskCode) {
         JSONObject result = new JSONObject();
 
-        List<AssetProcessCounting> assetProcessCountingList = this
-                .selectAssetProcessCountingList(new AssetProcessCounting().setTaskCode(taskCode));
+        Map<String, Object> params = new HashMap<>();
+        params.put("taskCode", taskCode);
+//        List<AssetProcessCounting> assetProcessCountingList = this.selectAssetProcessCountingList(params);
+        List<AssetProcessCounting> assetProcessCountingList = null;
 
         int total = 0;
         int notCounted = 0;
@@ -278,29 +270,6 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
     @Override
     public int insertAssetProcessCounting(AssetProcessCounting entity) {
         return assetProcessCountingMapper.insert(entity);
-    }
-
-    /**
-     * 修改资产盘点流程
-     *
-     * @param assetProcessCounting 资产盘点流程
-     * @return 结果
-     */
-    @Override
-    public int updateAssetProcessCounting(AssetProcessCounting assetProcessCounting) {
-        assetProcessCounting.setUpdateTime(DateUtils.getNowDate());
-        return assetProcessCountingMapper.updateAssetProcessCounting(assetProcessCounting);
-    }
-
-    /**
-     * 批量删除资产盘点流程
-     *
-     * @param ids 需要删除的资产盘点流程主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetProcessCountingByIds(Long[] ids) {
-        return assetProcessCountingMapper.deleteAssetProcessCountingByIds(ids);
     }
 
     /**

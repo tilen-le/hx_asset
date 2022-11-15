@@ -1,11 +1,15 @@
 package com.hexing.asset.controller;
 
 import java.util.List;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.hexing.asset.domain.dto.AssetProcessCountingDTO;
 import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
+import com.hexing.asset.service.IAssetsProcessService;
 import com.hexing.common.core.page.PageDomain;
 import com.hexing.common.core.page.TableSupport;
 import com.hexing.common.utils.StringUtils;
@@ -14,14 +18,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -46,23 +43,24 @@ public class AssetProcessCountingController extends BaseController
     private IAssetProcessCountingService assetProcessCountingService;
     @Autowired
     private AssetProcessCountingMapper assetProcessCountingMapper;
+    @Autowired
+    private IAssetsProcessService processService;
 
     /**
      * 查询资产盘点流程列表
      */
     @ApiOperation("获取盘点记录列表")
     @GetMapping("/list")
-    public TableDataInfo list(AssetProcessCounting assetProcessCounting)
+    public TableDataInfo list(AssetProcessCountingDTO assetProcessCountingDTO)
     {
-//        startPage();
-        PageDomain pageDomain = TableSupport.buildPageRequest();
-        Page<Object> page = PageHelper.startPage(pageDomain.getPageNum(), pageDomain.getPageSize());
-        List<AssetProcessCounting> list = assetProcessCountingService
-                .selectAssetProcessCountingList(assetProcessCounting);
-        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
+//        PageDomain pageDomain = TableSupport.buildPageRequest();
+//        Page<Object> page = PageHelper.startPage(pageDomain.getPageNum(), pageDomain.getPageSize());
+        startPage();
+        List<Map<String, Object>> list = processService.list(assetProcessCountingDTO);
+//        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
         TableDataInfo dataTable = getDataTable(list);
-        dataTable.setRows(voList);
-        dataTable.setTotal(page.getTotal());
+//        dataTable.setRows(list);
+//        dataTable.setTotal(page.getTotal());
         return dataTable;
     }
 
@@ -111,54 +109,13 @@ public class AssetProcessCountingController extends BaseController
     @PreAuthorize("@ss.hasPermi('asset:counting:export')")
     @Log(title = "资产盘点流程", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(AssetProcessCounting assetProcessCounting)
+    public AjaxResult export(Map<String, Object> params)
     {
-        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(assetProcessCounting);
-        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
-        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
-        return util.exportExcel(voList, "资产盘点记录");
+//        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(params);
+//        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
+//        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
+//        return util.exportExcel(voList, "资产盘点记录");
+        return null;
     }
 
-    /**
-     * 获取资产盘点流程详细信息
-     */
-    @PreAuthorize("@ss.hasPermi('asset:counting:query')")
-    @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
-        return AjaxResult.success(assetProcessCountingService.selectAssetProcessCountingById(id));
-    }
-
-    /**
-     * 新增资产盘点流程
-     */
-    @PreAuthorize("@ss.hasPermi('asset:counting:add')")
-    @Log(title = "资产盘点流程", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody AssetProcessCounting assetProcessCounting)
-    {
-        return toAjax(assetProcessCountingService.insertAssetProcessCounting(assetProcessCounting));
-    }
-
-    /**
-     * 修改资产盘点流程
-     */
-    @PreAuthorize("@ss.hasPermi('asset:counting:edit')")
-    @Log(title = "资产盘点流程", businessType = BusinessType.UPDATE)
-    @PutMapping
-    public AjaxResult edit(@RequestBody AssetProcessCounting assetProcessCounting)
-    {
-        return toAjax(assetProcessCountingService.updateAssetProcessCounting(assetProcessCounting));
-    }
-
-    /**
-     * 删除资产盘点流程
-     */
-    @PreAuthorize("@ss.hasPermi('asset:counting:remove')")
-    @Log(title = "资产盘点流程", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
-        return toAjax(assetProcessCountingService.deleteAssetProcessCountingByIds(ids));
-    }
 }

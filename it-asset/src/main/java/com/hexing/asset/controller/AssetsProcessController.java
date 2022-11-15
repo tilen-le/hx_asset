@@ -23,14 +23,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -46,9 +39,8 @@ import com.hexing.common.core.page.TableDataInfo;
  */
 @RestController
 @RequestMapping("/assets/process")
-@Api(tags="流程管理")
-public class AssetsProcessController extends BaseController
-{
+@Api(tags = "流程管理")
+public class AssetsProcessController extends BaseController {
     @Autowired
     private IAssetsProcessService assetsProcessService;
     @Autowired
@@ -63,10 +55,10 @@ public class AssetsProcessController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('assets:process:list')")
     @GetMapping("/list")
-    public TableDataInfo list(AssetsProcess assetsProcess)
-    {
+    public TableDataInfo list(@RequestParam Map<String, Object> params) {
         startPage();
-        List<AssetsProcess> list = assetsProcessService.selectAssetsProcessList(assetsProcess);
+//        List<AssetsProcess> list = assetsProcessService.selectProcessWithCondition(params);
+        List<AssetsProcess> list = null;
         return getDataTable(list);
     }
 
@@ -86,11 +78,11 @@ public class AssetsProcessController extends BaseController
     @PreAuthorize("@ss.hasPermi('assets:process:export')")
     @Log(title = "资产流程", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(AssetsProcess assetsProcess)
-    {
-        List<AssetsProcess> list = assetsProcessService.selectAssetsProcessList(assetsProcess);
-        ExcelUtil<AssetsProcess> util = new ExcelUtil<AssetsProcess>(AssetsProcess.class);
-        return util.exportExcel(list, "资产流程数据");
+    public AjaxResult export(AssetsProcess assetsProcess) {
+//        List<AssetsProcess> list = assetsProcessService.selectAssetsProcessList(assetsProcess);
+//        ExcelUtil<AssetsProcess> util = new ExcelUtil<AssetsProcess>(AssetsProcess.class);
+//        return util.exportExcel(list, "资产流程数据");
+        return null;
     }
 
 
@@ -99,9 +91,9 @@ public class AssetsProcessController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('assets:process:query')")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
-    {
-        return AjaxResult.success(assetsProcessService.selectAssetsProcessById(id));
+    public AjaxResult getInfo(@PathVariable("id") Long id) {
+//        return AjaxResult.success(assetsProcessService.selectAssetsProcessById(id));
+        return null;
     }
 
     /**
@@ -125,7 +117,7 @@ public class AssetsProcessController extends BaseController
         AssetsProcess process = new AssetsProcess();
         // 根据流程类型查询字典数据表，获取流程类型编号
 
-        assetsProcessService.insertAssetsProcess(process);
+//        assetsProcessService.insertAssetsProcess(process);
 
         Map<String, Long> fieldMap = fieldList
                 .stream().collect(Collectors.toMap(AssetProcessField::getFieldKey, AssetProcessField::getId));
@@ -159,9 +151,9 @@ public class AssetsProcessController extends BaseController
     @PreAuthorize("@ss.hasPermi('assets:process:edit')")
     @Log(title = "资产流程", businessType = BusinessType.UPDATE)
     @PutMapping
-    public AjaxResult edit(@RequestBody AssetsProcess assetsProcess)
-    {
-        return toAjax(assetsProcessService.updateAssetsProcess(assetsProcess));
+    public AjaxResult edit(@RequestBody AssetsProcess assetsProcess) {
+//        return toAjax(assetsProcessService.updateAssetsProcess(assetsProcess));
+        return null;
     }
 
     /**
@@ -169,9 +161,9 @@ public class AssetsProcessController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('assets:process:remove')")
     @Log(title = "资产流程", businessType = BusinessType.DELETE)
-	@DeleteMapping("/{ids}")
-    public AjaxResult remove(@PathVariable Long[] ids)
-    {
-        return toAjax(assetsProcessService.deleteAssetsProcessByIds(ids));
+    @DeleteMapping("/{ids}")
+    public AjaxResult remove(@PathVariable Long[] ids) {
+//        return toAjax(assetsProcessService.deleteAssetsProcessByIds(ids));
+        return null;
     }
 }

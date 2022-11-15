@@ -1,28 +1,31 @@
 package com.hexing.asset.service.impl;
 
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.domain.AssetProcessVariable;
-import com.hexing.asset.domain.AssetsProcess;
+import com.hexing.asset.domain.Process;
+import com.hexing.asset.domain.*;
+import com.hexing.asset.domain.dto.MapperQueryParam;
+import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.mapper.AssetProcessVariableMapper;
 import com.hexing.asset.mapper.AssetsProcessMapper;
 import com.hexing.asset.service.IAssetProcessFieldService;
 import com.hexing.asset.service.IAssetProcessVariableService;
+import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.IAssetsProcessService;
 import com.hexing.common.core.domain.entity.SysDictData;
-import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDictDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 资产流程Service业务层处理
@@ -43,17 +46,9 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     private ISysDictDataService sysDictDataService;
     @Autowired
     private AssetProcessVariableMapper processVariableMapper;
-    /**
-     * 查询资产流程
-     *
-     * @param id 资产流程主键
-     * @return 资产流程
-     */
-    @Override
-    public AssetsProcess selectAssetsProcessById(Long id)
-    {
-        return processMapper.selectAssetsProcessById(id);
-    }
+    @Autowired
+    private IAssetService assetService;
+
 
     /**
      * 查询资产流程
@@ -139,97 +134,66 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
     /**
      * 查询资产流程列表
-     *
-     * @param process 资产流程
-     * @return 资产流程
      */
     @Override
-    public List<AssetsProcess> selectAssetsProcessList(AssetsProcess process)
-    {
-//        LambdaQueryWrapper<AssetsProcess> processWrapper = new LambdaQueryWrapper<>();
-//        if (StringUtils.isNotBlank(process.getProcessType())) {
-//            processWrapper.eq(AssetsProcess::getProcessType, process.getProcessType());
-//        }
-//        List<AssetsProcess> processList = list(processWrapper);
-//
-//        LambdaQueryWrapper<AssetProcessVariable> variableWrapper = new LambdaQueryWrapper<>();
-//
-//        variableWrapper.in(AssetProcessVariable::getProcessId,
-//                processList.stream().map(AssetsProcess::getId).collect(Collectors.toList()));
-//        List<AssetProcessVariable> variableList = variableService.list(variableWrapper);
+    public List<Map<String, Object>> list(Process assetProcess) {
 
+        // 封装MapperQueryParam
+        List<AssetProcessField> fieldList = fieldService.list(new LambdaQueryWrapper<AssetProcessField>()
+                .eq(AssetProcessField::getProcessType, AssetProcessType.getValue(assetProcess)));
+        MapperQueryParam param = new MapperQueryParam(assetProcess, fieldList);
+        List<AssetsProcess> processList = processMapper.selectProcessWithCondition(param);
 
-
-
-
-        return null;
-    }
-
-    /**
-     * 新增资产流程
-     *
-     * @param assetsProcess 资产流程
-     * @return 结果
-     */
-    @Override
-    public int insertAssetsProcess(AssetsProcess assetsProcess)
-    {
-        assetsProcess.setCreateTime(DateUtils.getNowDate());
-        return processMapper.insertAssetsProcess(assetsProcess);
-    }
-
-    /**
-     * 修改资产流程
-     *
-     * @param assetsProcess 资产流程
-     * @return 结果
-     */
-    @Override
-    public int updateAssetsProcess(AssetsProcess assetsProcess)
-    {
-        assetsProcess.setUpdateTime(DateUtils.getNowDate());
-        return processMapper.updateAssetsProcess(assetsProcess);
-    }
-
-    /**
-     * 批量删除资产流程
-     *
-     * @param ids 需要删除的资产流程主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetsProcessByIds(Long[] ids)
-    {
-        return processMapper.deleteAssetsProcessByIds(ids);
-    }
-
-    /**
-     * 删除资产流程信息
-     *
-     * @param id 资产流程主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetsProcessById(Long id)
-    {
-        return processMapper.deleteAssetsProcessById(id);
-    }
-
-    @Override
-    public List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params) {
-
-        List<AssetsProcess> processList = processMapper.selectProcessWithCondition(processType, params);
-
-        List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
-                .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
+        List<AssetProcessVariable> varList = processVariableMapper
+                .selectProcessVariableWithCondition(processList.stream().map(AssetsProcess::getId).collect(Collectors.toList()));
 
         Map<String, List<AssetProcessVariable>> varMap = varList
                 .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
 
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (AssetsProcess process : processList) {
+            List<AssetProcessVariable> variableList = varMap.get(String.valueOf(process.getId()));
+            Map<String, Object> map = new HashMap<>();
+            for (AssetProcessVariable var : variableList) {
+                map.put(var.getFieldKey(), var.getFieldValue());
+            }
+            list.add(map);
+        }
+
+        // 关联表拼接
+        String relationTable = "";
+        for (AssetProcessField field : fieldList) {
+            if (StringUtils.isNotEmpty(field.getRelationTable())) {
+                relationTable = field.getRelationTable();
+                break;
+            }
+        }
+        if (StringUtils.isNotEmpty(relationTable)) {
+            if ("asset".equals(relationTable)) {
+                List<String> assetCodeList = varList.stream().filter(x -> "assetCode".equals(x.getFieldKey()))
+                        .map(AssetProcessVariable::getFieldValue).collect(Collectors.toList());
+                List<Asset> assetList = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeList));
+                Map<String, List<Asset>> assetMap = assetList.stream().collect(Collectors.groupingBy(Asset::getAssetCode));
+                for (Map<String, Object> map : list) {
+                    Asset asset = assetMap.get(map.get("assetCode")).get(0);
+                    map.putAll(BeanTool.objectToMap(asset));
+                }
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params) {
+        List<AssetsProcess> processList = processMapper.selectProcessWithCondition(null);
+        List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
+                .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
+        Map<String, List<AssetProcessVariable>> varMap = varList
+                .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
         for (AssetsProcess process : processList) {
             process.setVariableList(varMap.get(String.valueOf(process.getId())));
         }
-
         return processList;
     }
 

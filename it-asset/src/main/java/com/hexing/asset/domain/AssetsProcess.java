@@ -41,10 +41,10 @@ public class AssetsProcess {
     private String processType;
 
     /**
-     * 资产id
+     * 资产编号
      */
-    @Excel(name = "资产id")
-    private String assetId;
+    @Excel(name = "资产编号")
+    private String assetCode;
 
     /**
      * 流程状态

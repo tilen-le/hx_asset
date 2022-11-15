@@ -34,19 +34,22 @@ public class AssetProcessVariable {
      * 流程id
      */
     @Excel(name = "流程id")
-    private String processId;
+    private Long processId;
 
     /**
      * 字段id
      */
     @Excel(name = "字段id")
-    private String fieldId;
+    private Long fieldId;
 
     /**
-     * 字段标签
+     * 字段key
      */
     @TableField(exist = false)
     private String fieldKey;
+
+    @TableField(exist = false)
+    private String fieldLabel;
 
     /**
      * 字段值

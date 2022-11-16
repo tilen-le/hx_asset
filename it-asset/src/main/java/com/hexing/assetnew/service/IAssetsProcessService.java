@@ -35,6 +35,8 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
 
     void updateByProcessId(Object obj);
 
+    <T> T convertProcess(AssetsProcess process, T domain);
+
     /**
      * 盘点状态统计
      * @param taskCode 盘点任务编号

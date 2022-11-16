@@ -1,5 +1,6 @@
 package com.hexing.assetnew.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -7,6 +8,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
+import com.hexing.asset.zxy.PdProcessDomain;
 import com.hexing.assetnew.domain.AssetProcessCountingDomain;
 import com.hexing.assetnew.domain.AssetsProcess;
 import com.hexing.assetnew.service.IAssetsProcessService;
@@ -53,7 +55,14 @@ public class AssetProcessCountingController extends BaseController
     public TableDataInfo list(AssetProcessCountingDomain assetProcessCountingDomain)
     {
         List<AssetsProcess> list = processService.list(assetProcessCountingDomain);
-        return getDataTable(list);
+        List<AssetProcessCountingDomain> domains = new ArrayList<>();
+        for (AssetsProcess assetsProcess : list) {
+            AssetProcessCountingDomain domain = processService.convertProcess(assetsProcess, new AssetProcessCountingDomain());
+            domains.add(domain);
+        }
+        TableDataInfo dataTable = getDataTable(list);
+        dataTable.setRows(domains);
+        return dataTable;
     }
 
     /**

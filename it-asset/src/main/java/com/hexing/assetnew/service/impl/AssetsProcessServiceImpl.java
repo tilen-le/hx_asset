@@ -1,5 +1,6 @@
 package com.hexing.assetnew.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONObject;
@@ -210,6 +211,21 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     }
 
     /**
+     * process 转为 domain
+     * @param process
+     * @param domain
+     */
+    public <T> T convertProcess(AssetsProcess process, T domain) {
+        List<AssetProcessVariable> variableList = process.getVariableList();
+        for (AssetProcessVariable variable : variableList) {
+            BeanTool.setFieldValueThrowEx(domain, variable.getFieldKey(), variable.getFieldValue());
+        }
+        process.setVariableList(null);
+        BeanUtil.copyProperties(process, domain);
+        return domain;
+    }
+
+    /**
      * 盘点状态统计
      * @param taskCode 盘点任务编号
      * @return
@@ -238,19 +254,20 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
             for (String status : countStatusList) {
                 if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
-                    numDTO.setNotCounted(numDTO.getNotCounted()+1);
+                    numDTO.setNotCounted(numDTO.getNotCounted() + 1);
                 }
                 if (AssetCountingStatus.COUNTED.getStatus().equals(status)) {
-                    numDTO.setCounted(numDTO.getCounted()+1);
+                    numDTO.setCounted(numDTO.getCounted() + 1);
                 }
                 if (AssetCountingStatus.ABNORMAL.getStatus().equals(status)) {
-                    numDTO.setAbnormal(numDTO.getAbnormal()+1);
+                    numDTO.setAbnormal(numDTO.getAbnormal() + 1);
                 }
             }
         }
 
         return numDTO;
     }
+
 
 
 }

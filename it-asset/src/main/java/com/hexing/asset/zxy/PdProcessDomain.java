@@ -11,7 +11,6 @@ import java.io.Serializable;
  * @author 80010641
  */
 @Data
-@ToString(callSuper=false)
 public class PdProcessDomain extends AssetsProcess implements Serializable {
 
 

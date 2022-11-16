@@ -13,13 +13,10 @@ import com.hexing.asset.domain.dto.ReceiveProcessDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.*;
 import com.hexing.asset.service.*;
-import com.hexing.assetnew.domain.Asset;
-import com.hexing.assetnew.domain.AssetInventoryTask;
-import com.hexing.assetnew.domain.AssetsProcess;
+import com.hexing.assetnew.domain.*;
 import com.hexing.assetnew.enums.AssetProcessType;
-import com.hexing.assetnew.service.IAssetInventoryTaskService;
-import com.hexing.assetnew.service.IAssetService;
-import com.hexing.assetnew.service.IAssetsProcessService;
+import com.hexing.assetnew.service.*;
+import com.hexing.assetnew.service.impl.AssetInventoryTaskServiceImpl;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
@@ -30,6 +27,7 @@ import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.CommonUtils;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
@@ -79,7 +77,72 @@ public class DingTalkAssetController extends BaseController {
     private ISysUserService sysUserService;
     @Autowired
     private IAssetsProcessService processService;
+    @Autowired
+    private IAssetProcessFieldService assetProcessFieldService;
+    @Autowired
+    private IAssetProcessVariableService processVariableService;
 
+    //批量修改
+    @PostMapping(value = "/testUpdate")
+    public JSONObject testUpdate(@RequestBody List<ProcessParam> params) {
+        List<AssetProcessVariable> varList = new ArrayList<>();
+        List<AssetsProcess> processList = new ArrayList<>();
+        for (ProcessParam datum : params) {
+            if (StringUtils.isEmpty(datum.getProcessType())||StringUtils.isEmpty(datum.getAssetCode())){
+                continue;
+            }
+            List<AssetProcessField> processFieldList = assetProcessFieldService.list(new LambdaQueryWrapper<AssetProcessField>()
+                    .eq(AssetProcessField::getProcessType, datum.getProcessType()));
+            AssetsProcess process = processService.getOne(new LambdaQueryWrapper<AssetsProcess>().eq(AssetsProcess::getProcessType, datum.getProcessType())
+                    .eq(AssetsProcess::getAssetCode, datum.getAssetCode()));
+            processList.add(process.setStatus("1"));
+            processList.add(process.setUpdateTime(new Date()));
+            for (AssetProcessField field : processFieldList) {
+                AssetProcessVariable variable = processVariableService.getOne(new LambdaQueryWrapper<AssetProcessVariable>().eq(AssetProcessVariable::getProcessId, process.getId())
+                        .eq(AssetProcessVariable::getFieldId, field.getId()));
+                if (ObjectUtil.isNotEmpty(BeanTool.getFieldValue(datum, field.getFieldKey()))) {
+                    variable.setFieldValue(String.valueOf(BeanTool.getFieldValue(datum, field.getFieldKey())));
+                }
+                varList.add(variable);
+            }
+        }
+        processService.updateBatchById(processList);
+        processVariableService.updateBatchById(varList);
+        return null;
+    }
+
+    //单个修改
+    @PostMapping(value = "/testUpdateOne")
+    public JSONObject testUpdateOne(@RequestBody ProcessParam datum) {
+        if (StringUtils.isEmpty(datum.getProcessType())||StringUtils.isEmpty(datum.getAssetCode())){
+            return null;
+        }
+        List<AssetProcessVariable> varList = new ArrayList<>();
+        List<AssetProcessField> processFieldList = assetProcessFieldService.list(new LambdaQueryWrapper<AssetProcessField>()
+                .eq(AssetProcessField::getProcessType, datum.getProcessType()));
+        AssetsProcess process = processService.getOne(new LambdaQueryWrapper<AssetsProcess>().eq(AssetsProcess::getProcessType, datum.getProcessType())
+                .eq(AssetsProcess::getAssetCode, datum.getAssetCode()));
+        for (AssetProcessField field : processFieldList) {
+            AssetProcessVariable variable = processVariableService.getOne(new LambdaQueryWrapper<AssetProcessVariable>().eq(AssetProcessVariable::getProcessId, process.getId())
+                    .eq(AssetProcessVariable::getFieldId, field.getId()));
+            if (ObjectUtil.isNotEmpty(BeanTool.getFieldValue(datum, field.getFieldKey()))) {
+                variable.setFieldValue(String.valueOf(BeanTool.getFieldValue(datum, field.getFieldKey())));
+            }
+            varList.add(variable);
+        }
+        process.setStatus("1");
+        process.setUpdateTime(new Date());
+        processService.updateById(process);
+        processVariableService.updateBatchById(varList);
+        return null;
+    }
+
+    @PostMapping(value = "/insertAssetCountingTask")
+    public JSONObject insertAssetCountingTask(@RequestBody AssetInventoryTask assetInventoryTask){
+
+        assetInventoryTaskService.insertAssetCountingTask(assetInventoryTask);
+        return null;
+    }
     /**
      * 根据资产编号查询资产信息
      */

@@ -286,19 +286,12 @@ public class AssetProcessCountingServiceImpl extends ServiceImpl<AssetProcessCou
                 .eq(AssetProcessField::getProcessType, AssetProcessType.COUNTING_PROCESS.getCode()));
 
         for (AssetProcessCounting processCounting : processCountingList) {
-            // 创建资产流程
-            AssetsProcess process = new AssetsProcess();
-            process.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode())
-                    .setAssetCode(processCounting.getAssetCode())
-                    .setCreateBy(SecurityUtils.getUsername())
-                    .setCreateTime(DateUtils.getNowDate());
-            assetsProcessMapper.insert(process);
             // 字段值存入流程值表
             List<AssetProcessVariable> varList = new ArrayList<>();
             try {
                 for (AssetProcessField field : processFieldList) {
                     AssetProcessVariable var = new AssetProcessVariable();
-                    var.setProcessId(process.getId())
+                    var.setProcessId(processCounting.getProcessId())
                             .setFieldId(field.getId());
                     if (ObjectUtil.isNotEmpty(BeanTool.getFieldValue(processCounting, field.getFieldKey()))) {
                         var.setFieldValue(String.valueOf(BeanTool.getFieldValue(processCounting, field.getFieldKey())));

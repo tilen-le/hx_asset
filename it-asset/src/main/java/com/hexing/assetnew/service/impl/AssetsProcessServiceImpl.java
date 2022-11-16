@@ -275,6 +275,35 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         return numDTO;
     }
 
+    @Override
+    public void saveBatchProcess(List<? extends AssetsProcess> processList) {
 
+        List<AssetProcessField> fieldList = fieldService.list(new LambdaQueryWrapper<AssetProcessField>()
+                .eq(AssetProcessField::getProcessType, AssetProcessType.COUNTING_PROCESS.getCode()));
+
+        List<AssetProcessVariable> varList = new ArrayList<>();
+        for (AssetsProcess process : processList) {
+            // 字段值存入流程值表
+            for (AssetProcessField field : fieldList) {
+                AssetProcessVariable var = new AssetProcessVariable();
+                var.setProcessId(process.getId())
+                        .setFieldId(field.getId());
+                Object fieldValue = BeanTool.getFieldValue(process, field.getFieldKey());
+                if (ObjectUtil.isNotEmpty(fieldValue)) {
+                    var.setFieldValue(String.valueOf(fieldValue));
+                } else {
+                    var.setFieldValue(null);
+                }
+                varList.add(var);
+            }
+            if (varList.size() >= 1000) {
+                variableService.insertBatch(varList);
+                varList.clear();
+            }
+        }
+        if (varList.size() > 0) {
+            variableService.insertBatch(varList);
+        }
+    }
 
 }

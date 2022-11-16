@@ -48,4 +48,6 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
      * @return
      */
     CountingStatusNumDTO countingStatusCount(String taskCode);
+
+    void saveBatchProcess(List<? extends AssetsProcess> processList);
 }

@@ -7,6 +7,8 @@ import com.hexing.assetnew.service.IAssetProcessVariableService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * 流程值Service业务层处理
  *
@@ -17,6 +19,10 @@ import org.springframework.stereotype.Service;
 public class AssetProcessVariableServiceImpl extends ServiceImpl<AssetProcessVariableMapper, AssetProcessVariable> implements IAssetProcessVariableService {
 
     @Autowired
-    private AssetProcessVariableMapper assetProcessVariableMapper;
+    private AssetProcessVariableMapper variableMapper;
+
+    public Integer insertBatch(List<AssetProcessVariable> variableList) {
+        return variableMapper.insertBatch(variableList);
+    }
 
 }

@@ -243,6 +243,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
         AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
         entity.setTaskCode(taskCode);
+        entity.setProcessType("100"); // TODO 暂时写死
         List<AssetsProcess> processList = this.list(entity);
 
         CountingStatusNumDTO numDTO = new CountingStatusNumDTO();

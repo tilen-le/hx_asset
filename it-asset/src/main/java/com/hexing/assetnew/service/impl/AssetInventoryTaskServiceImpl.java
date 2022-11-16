@@ -42,6 +42,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.hexing.common.utils.PageUtil.startPage;
@@ -75,7 +77,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     private SysDeptServiceImpl sysDeptService;
     @Autowired
     private IAssetsProcessService assetsProcessService;
-
+    @Autowired
+    private AssetsProcessServiceImpl processService;
     /**
      * 查询盘点任务
      *
@@ -123,32 +126,33 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             wrapper.apply("(find_in_set( {0} , inventory_users ) or create_by = {0})", userName);
         }
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);
+
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        Map<String, String> userMaps = sysUsers.stream().collect(Collectors.toMap(SysUser::getUserName, SysUser::getNickName, (key1, key2) -> key2));
+        List<SysDept> sysDepts = sysDeptService.selectDeptList(new SysDept());
+        Map<Long, String> deptMaps = sysDepts.stream().collect(Collectors.toMap(SysDept::getDeptId, SysDept::getDeptName, (key1, key2) -> key2));
+
         for (AssetInventoryTask task : taskList) {
             CountingStatusNumDTO numDTO = assetsProcessService.countingStatusCount(task.getTaskCode());
             task.setAssetTotal(numDTO.getTotal());
             task.setAssetNotCounted(numDTO.getNotCounted());
             task.setAssetCounted(numDTO.getCounted());
             task.setAssetAbnormal(numDTO.getAbnormal());
-            SysUser sysUser = sysUserService.selectUserByUserName(task.getCreateBy());
-            task.setCreatorName(sysUser.getNickName());
+
+            task.setCreatorName(userMaps.get(task.getCreateBy()));
             String inventoryUsers = task.getInventoryUsers();
             if (inventoryUsers.contains(",")){
                 String[] split=inventoryUsers.split(",");
                 String inventoryUsersName ="";
                 for (int i = 0; i < split.length; i++) {
-                    SysUser sysUser1 = sysUserService.selectUserByUserName(split[i].trim());
-                    inventoryUsersName +=sysUser1.getNickName()+",";
+                    inventoryUsersName +=userMaps.get(split[i].trim())+",";
                 }
                 String substring = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
                 task.setInventoryUsersName(substring);
             }else {
-                SysUser sysUser1 = sysUserService.selectUserByUserName(inventoryUsers.trim());
-                task.setInventoryUsersName(sysUser1.getNickName());
+                task.setInventoryUsersName(userMaps.get(inventoryUsers));
             }
-
-            SysDept dept = sysDeptService.selectDeptById(Long.valueOf(task.getInventoryDept()));
-            task.setInventoryDeptName(dept.getDeptName());
-
+            task.setInventoryDeptName(deptMaps.get(Long.valueOf(task.getInventoryDept())));
         }
 
         return taskList;

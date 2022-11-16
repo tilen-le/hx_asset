@@ -2,6 +2,7 @@ package com.hexing.asset.zxy;
 
 import com.hexing.asset.domain.AssetsProcess;
 import lombok.Data;
+import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @author 80010641
  */
 @Data
+@ToString(callSuper=false)
 public class PdProcessDomain extends AssetsProcess implements Serializable {
 
 

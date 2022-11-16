@@ -1,7 +1,7 @@
 package com.hexing.asset.zxy;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.json.JSON;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -10,7 +10,7 @@ import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.AssetsProcess;
 import com.hexing.asset.mapper.AssetProcessFieldMapper;
 import com.hexing.asset.mapper.AssetsProcessMapper;
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.FieldAccessor_Long;
+import com.hexing.common.utils.bean.BeanTool;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,7 +35,7 @@ public class TestDemo {
     private AssetProcessFieldMapper assetProcessFieldMapper;
 
     @GetMapping(value = "/testSearch")
-    public List<AssetsProcess> testSearch(PdProcessDomain pdProcessDomain) {
+    public List<PdProcessDomain> testSearch(PdProcessDomain pdProcessDomain) {
         {
             //前置处理
         }
@@ -46,11 +46,26 @@ public class TestDemo {
 
         List<AssetProcessField> searchDomain = getSearchDomain(pdProcessDomain);
         List<AssetsProcess> assetsProcesses = searchAssetProcess(searchDomain, pdProcessDomain);
-        {
-            //后置处理
+        List<PdProcessDomain> domains = new ArrayList<>();
+        for (AssetsProcess assetsProcess : assetsProcesses) {
+            PdProcessDomain domain = convertProcess(assetsProcess, new PdProcessDomain());
+            domains.add(domain);
         }
+        return domains;
+    }
 
-        return assetsProcesses;
+    /**
+     * process 转为 domain
+     * @param assetsProcess
+     * @param domain
+     */
+    private <T> T convertProcess(AssetsProcess assetsProcess, T domain) {
+        List<AssetProcessVariable> variableList = assetsProcess.getVariableList();
+        for (AssetProcessVariable variable : variableList) {
+            BeanTool.setFieldValueThrowEx(domain, variable.getFieldKey(), variable.getFieldValue());
+        }
+        BeanUtil.copyProperties(assetsProcess, domain);
+        return domain;
     }
 
     /**

@@ -5,12 +5,12 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hexing.asset.domain.AssetProcessField;
-import com.hexing.asset.domain.AssetProcessVariable;
-import com.hexing.asset.domain.AssetsProcess;
-import com.hexing.asset.mapper.AssetProcessFieldMapper;
-import com.hexing.asset.mapper.AssetsProcessMapper;
 import com.hexing.common.utils.bean.BeanTool;
+import com.hexing.assetnew.domain.AssetProcessField;
+import com.hexing.assetnew.domain.AssetProcessVariable;
+import com.hexing.assetnew.domain.AssetsProcess;
+import com.hexing.assetnew.mapper.AssetProcessFieldMapper;
+import com.hexing.assetnew.mapper.AssetsProcessMapper;
 import io.swagger.annotations.Api;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -77,8 +77,10 @@ public class TestDemo {
         JSONObject obj = JSONUtil.parseObj(processDomain);
         Set<String> keySet = obj.keySet();
         LambdaQueryWrapper<AssetProcessField> fieldWrapper = new LambdaQueryWrapper<>();
-        fieldWrapper.eq(AssetProcessField::getProcessType, processDomain.getProcessType()).in(AssetProcessField::getFieldKey, keySet);
+        fieldWrapper.eq(AssetProcessField::getProcessType, processDomain.getProcessType())
+                .in(AssetProcessField::getFieldKey, keySet);
         List<AssetProcessField> assetProcessFields = assetProcessFieldMapper.selectList(fieldWrapper);
+
         Iterator<AssetProcessField> it = assetProcessFields.iterator();
         while (it.hasNext()) {
             AssetProcessField field = it.next();
@@ -89,6 +91,7 @@ public class TestDemo {
                 it.remove();
             }
         }
+
         return assetProcessFields;
     }
 

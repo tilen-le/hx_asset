@@ -1,6 +1,6 @@
 package com.hexing.asset.zxy;
 
-import com.hexing.asset.domain.AssetsProcess;
+import com.hexing.assetnew.domain.AssetsProcess;
 import lombok.Data;
 import lombok.ToString;
 

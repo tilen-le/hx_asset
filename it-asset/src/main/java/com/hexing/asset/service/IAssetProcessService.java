@@ -2,7 +2,7 @@ package com.hexing.asset.service;
 
 import java.util.List;
 
-import com.hexing.asset.domain.Asset;
+import com.hexing.assetnew.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.dto.StatisQueryParam;

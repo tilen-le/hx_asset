@@ -1,24 +1,22 @@
 package com.hexing.asset.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.Asset;
+import com.hexing.assetnew.domain.Asset;
 import com.hexing.asset.domain.dto.StatisQueryParam;
 import com.hexing.asset.domain.vo.AssetLifeCycleVO;
 import com.hexing.asset.enums.DingTalkAssetProcessType;
-import com.hexing.asset.service.IAssetService;
+import com.hexing.assetnew.service.IAssetService;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.hexing.asset.mapper.AssetProcessMapper;

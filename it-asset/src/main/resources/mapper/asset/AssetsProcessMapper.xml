@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hexing.asset.mapper.AssetsProcessMapper">
+<mapper namespace="com.hexing.assetnew.mapper.AssetsProcessMapper">
 
     <resultMap type="AssetsProcess" id="AssetsProcessResult">
         <result property="id"    column="id"    />
@@ -16,40 +16,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="remark"    column="remark"    />
     </resultMap>
 
-    <!--<resultMap id="ProcessResultMap" type="AssetsProcess">-->
-    <!--    <id column="id" property="id"/>-->
-    <!--    <result column="process_type" property="processType"/>-->
-    <!--    <result column="asset_id" property="assetId"/>-->
-    <!--    <result column="status" property="status"/>-->
-    <!--    <result column="create_by" property="createBy"/>-->
-    <!--    <result column="create_time" property="createTime"/>-->
-    <!--    <result column="update_by" property="updateBy"/>-->
-    <!--    <result column="update_time" property="updateTime"/>-->
-    <!--    <result column="remark" property="remark"/>-->
-    <!--    <collection property="variableList" ofType="AssetProcessVariable">-->
-    <!--        <id column="vid" property="id"/>-->
-    <!--        <result column="process_id" property="processId"/>-->
-    <!--        <result column="field_id" property="fieldId"/>-->
-    <!--        <result column="field_key" property="fieldKey"/>-->
-    <!--        <result column="field_value" property="fieldValue"/>-->
-    <!--    </collection>-->
-    <!--</resultMap>-->
-
-    <resultMap id="ProcessResultMap" type="AssetsProcess">
-        <id column="id" property="id"/>
-        <result column="process_type" property="processType"/>
-        <result column="asset_id" property="assetId"/>
-        <result column="status" property="status"/>
-        <result column="create_by" property="createBy"/>
-        <result column="create_time" property="createTime"/>
-        <result column="update_by" property="updateBy"/>
-        <result column="update_time" property="updateTime"/>
-        <result column="remark" property="remark"/>
-        <!--<collection property="variableList"-->
-        <!--            ofType="AssetProcessVariable"-->
-        <!--            select="com.hexing.asset.mapper.AssetProcessVariableMapper.selectProcessVariableWithCondition"-->
-        <!--            column="{processId = id, processType = process_type}"/>-->
-    </resultMap>
 
     <sql id="selectAssetsProcessVo">
         select id, process_type, asset_id, status, create_by, create_time, update_by, update_time, remark from assets_process
@@ -57,17 +23,27 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
 
     <select id="selectProcessWithCondition" resultMap="AssetsProcessResult">
-        SELECT p.*
-        FROM assets_process p
+        SELECT p.* FROM assets_process p
         WHERE p.process_type = #{processType}
-        <foreach collection="params" index="key" item="value">
-            AND EXISTS(SELECT 1 FROM asset_process_variable v
-                            LEFT JOIN asset_process_field f ON v.field_id = f.id
-                        WHERE v.process_id = p.id
-                            AND f.field_key = #{key}
-                            AND v.field_value = #{value}
-            )
-        </foreach>
+        <foreach collection="processCondition" index="key" item="value">
+          AND EXISTS (
+                SELECT 1 FROM asset_process_variable v
+                    LEFT JOIN asset_process_field f ON v.field_id = f.id
+                WHERE v.process_id = p.id
+                  AND f.field_key = #{key}
+                  AND v.field_value = #{value}
+          )
+       </foreach>
+        AND EXISTS (
+            SELECT 1 FROM asset_process_variable v
+            LEFT JOIN asset_process_field f ON v.field_id = f.id
+            LEFT JOIN ${relationTableName} t ON t.${relationTableForeignKey} = v.field_value
+            WHERE v.process_id = p.id
+            AND f.field_key = #{relationTableForeignKeyCamel}
+            <foreach collection="sqlConditionList" item="condition">
+                AND t.${condition}
+            </foreach>
+        )
     </select>
 
     <select id="selectVariableListByProcessId" resultType="AssetProcessVariable">
@@ -76,72 +52,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         left join asset_process_field t2 on t1.field_id = t2.id
         where t1.process_id = #{processId}
     </select>
-
-    <select id="selectAssetsProcessList" parameterType="AssetsProcess" resultMap="AssetsProcessResult">
-        <include refid="selectAssetsProcessVo"/>
-        <where>
-            <if test="processType != null  and processType != ''"> and process_type = #{processType}</if>
-            <if test="assetId != null "> and asset_id = #{assetId}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-        </where>
-    </select>
-
-    <select id="selectAssetsProcessById" parameterType="Long" resultMap="AssetsProcessResult">
-        <include refid="selectAssetsProcessVo"/>
-        where id = #{id}
-    </select>
-
-    <insert id="insertAssetsProcess" parameterType="AssetsProcess">
-        insert into assets_process
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="id != null">id,</if>
-            <if test="processType != null and processType != ''">process_type,</if>
-            <if test="assetId != null">asset_id,</if>
-            <if test="status != null">status,</if>
-            <if test="createBy != null">create_by,</if>
-            <if test="createTime != null">create_time,</if>
-            <if test="updateBy != null">update_by,</if>
-            <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="id != null">#{id},</if>
-            <if test="processType != null and processType != ''">#{processType},</if>
-            <if test="assetId != null">#{assetId},</if>
-            <if test="status != null">#{status},</if>
-            <if test="createBy != null">#{createBy},</if>
-            <if test="createTime != null">#{createTime},</if>
-            <if test="updateBy != null">#{updateBy},</if>
-            <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-         </trim>
-    </insert>
-
-    <update id="updateAssetsProcess" parameterType="AssetsProcess">
-        update assets_process
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="processType != null and processType != ''">process_type = #{processType},</if>
-            <if test="assetId != null">asset_id = #{assetId},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="createBy != null">create_by = #{createBy},</if>
-            <if test="createTime != null">create_time = #{createTime},</if>
-            <if test="updateBy != null">update_by = #{updateBy},</if>
-            <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-        </trim>
-        where id = #{id}
-    </update>
-
-    <delete id="deleteAssetsProcessById" parameterType="Long">
-        delete from assets_process where id = #{id}
-    </delete>
-
-    <delete id="deleteAssetsProcessByIds" parameterType="String">
-        delete from assets_process where id in
-        <foreach item="id" collection="array" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </delete>
 
     <select id="selectProcessWithDomain" resultMap="AssetsProcessResult">
         SELECT p.*
@@ -182,7 +92,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </select>
 
-    <select id="selectVarWithProcessIds" resultType="com.hexing.asset.domain.AssetProcessVariable">
+    <select id="selectVarWithProcessIds" resultType="com.hexing.assetnew.domain.AssetProcessVariable">
         SELECT v.id, v.process_id, v.field_id, v.field_value, f.field_key, f.field_label
         FROM asset_process_variable v
         LEFT JOIN asset_process_field f ON v.field_id=f.id

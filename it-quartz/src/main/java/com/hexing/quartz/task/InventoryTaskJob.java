@@ -1,6 +1,6 @@
 package com.hexing.quartz.task;
 
-import com.hexing.asset.service.IAssetInventoryTaskService;
+import com.hexing.assetnew.service.IAssetInventoryTaskService;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;

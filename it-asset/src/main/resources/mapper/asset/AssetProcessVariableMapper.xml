@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hexing.asset.mapper.AssetProcessVariableMapper">
+<mapper namespace="com.hexing.assetnew.mapper.AssetProcessVariableMapper">
     
     <resultMap type="AssetProcessVariable" id="AssetProcessVariableResult">
         <result property="id"    column="id"    />
@@ -34,52 +34,4 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-    <select id="selectAssetProcessVariableList" parameterType="AssetProcessVariable" resultMap="AssetProcessVariableResult">
-        <include refid="selectAssetProcessVariableVo"/>
-        <where>  
-            <if test="processId != null "> and process_id = #{processId}</if>
-            <if test="fieldId != null "> and field_id = #{fieldId}</if>
-            <if test="fieldValue != null  and fieldValue != ''"> and field_value = #{fieldValue}</if>
-        </where>
-    </select>
-    
-    <select id="selectAssetProcessVariableById" parameterType="Long" resultMap="AssetProcessVariableResult">
-        <include refid="selectAssetProcessVariableVo"/>
-        where id = #{id}
-    </select>
-        
-    <insert id="insertAssetProcessVariable" parameterType="AssetProcessVariable" useGeneratedKeys="true" keyProperty="id">
-        insert into asset_process_variable
-        <trim prefix="(" suffix=")" suffixOverrides=",">
-            <if test="processId != null">process_id,</if>
-            <if test="fieldId != null">field_id,</if>
-            <if test="fieldValue != null">field_value,</if>
-         </trim>
-        <trim prefix="values (" suffix=")" suffixOverrides=",">
-            <if test="processId != null">#{processId},</if>
-            <if test="fieldId != null">#{fieldId},</if>
-            <if test="fieldValue != null">#{fieldValue},</if>
-         </trim>
-    </insert>
-
-    <update id="updateAssetProcessVariable" parameterType="AssetProcessVariable">
-        update asset_process_variable
-        <trim prefix="SET" suffixOverrides=",">
-            <if test="processId != null">process_id = #{processId},</if>
-            <if test="fieldId != null">field_id = #{fieldId},</if>
-            <if test="fieldValue != null">field_value = #{fieldValue},</if>
-        </trim>
-        where id = #{id}
-    </update>
-
-    <delete id="deleteAssetProcessVariableById" parameterType="Long">
-        delete from asset_process_variable where id = #{id}
-    </delete>
-
-    <delete id="deleteAssetProcessVariableByIds" parameterType="String">
-        delete from asset_process_variable where id in 
-        <foreach item="id" collection="array" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-    </delete>
 </mapper>

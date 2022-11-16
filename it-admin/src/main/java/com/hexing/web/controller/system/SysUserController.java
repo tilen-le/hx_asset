@@ -15,6 +15,8 @@ import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.system.service.ISysPostService;
 import com.hexing.system.service.ISysRoleService;
 import com.hexing.system.service.ISysUserService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,6 +56,13 @@ public class SysUserController extends BaseController
         List<SysUser> list = userService.selectUserList(user);
         return getDataTable(list);
     }
+
+    @PreAuthorize("@ss.hasPermi('system:user:detail')")
+    @GetMapping("/detail/{userName}")
+    public AjaxResult detail(@PathVariable String userName) {
+        return AjaxResult.success(userService.selectUserByUserName(userName));
+    }
+
 
     @Log(title = "用户管理", businessType = BusinessType.EXPORT)
     @PreAuthorize("@ss.hasPermi('system:user:export')")

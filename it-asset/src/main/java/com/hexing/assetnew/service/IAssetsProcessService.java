@@ -27,6 +27,11 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
     List<AssetProcessVariable> selectVariableListByProcessId(String processId);
 
     /**
+     * 分页查询资产流程列表
+     */
+    List<AssetsProcess> listByPage(AssetsProcess process);
+
+    /**
      * 查询资产流程列表
      */
     List<AssetsProcess> list(AssetsProcess process);

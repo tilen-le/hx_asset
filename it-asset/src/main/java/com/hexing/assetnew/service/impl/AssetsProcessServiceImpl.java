@@ -148,11 +148,18 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
      * 查询资产流程列表
      */
     @Override
-    public List<AssetsProcess> list(AssetsProcess process) {
+    public List<AssetsProcess> listByPage(AssetsProcess process) {
         List<AssetProcessField> searchDomain = getSearchDomain(process);
         PageUtil.startPage();
         return searchAssetProcess(searchDomain, process);
     }
+
+    @Override
+    public List<AssetsProcess> list(AssetsProcess process) {
+        List<AssetProcessField> searchDomain = getSearchDomain(process);
+        return searchAssetProcess(searchDomain, process);
+    }
+
 
     @Override
     public List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params) {
@@ -236,8 +243,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
         AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
         entity.setTaskCode(taskCode);
-        List<AssetProcessField> searchDomain = getSearchDomain(entity);
-        List<AssetsProcess> processList = searchAssetProcess(searchDomain, entity);
+        List<AssetsProcess> processList = this.list(entity);
 
         CountingStatusNumDTO numDTO = new CountingStatusNumDTO();
 

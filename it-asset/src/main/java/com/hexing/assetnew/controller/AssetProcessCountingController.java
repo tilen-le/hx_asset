@@ -7,6 +7,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.hexing.asset.domain.vo.AssetProcessCountingVO;
 import com.hexing.asset.mapper.AssetProcessCountingMapper;
 import com.hexing.asset.zxy.PdProcessDomain;
 import com.hexing.assetnew.domain.AssetProcessCountingDomain;
@@ -15,6 +16,7 @@ import com.hexing.assetnew.service.IAssetsProcessService;
 import com.hexing.common.core.page.PageDomain;
 import com.hexing.common.core.page.TableSupport;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.poi.ExcelUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,7 +56,7 @@ public class AssetProcessCountingController extends BaseController
     @GetMapping("/list")
     public TableDataInfo list(AssetProcessCountingDomain assetProcessCountingDomain)
     {
-        List<AssetsProcess> list = processService.list(assetProcessCountingDomain);
+        List<AssetsProcess> list = processService.listByPage(assetProcessCountingDomain);
         List<AssetProcessCountingDomain> domains = new ArrayList<>();
         for (AssetsProcess assetsProcess : list) {
             AssetProcessCountingDomain domain = processService.convertProcess(assetsProcess, new AssetProcessCountingDomain());
@@ -109,13 +111,16 @@ public class AssetProcessCountingController extends BaseController
     @PreAuthorize("@ss.hasPermi('asset:counting:export')")
     @Log(title = "资产盘点流程", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(Map<String, Object> params)
+    public AjaxResult export(AssetProcessCountingDomain assetProcessCountingDomain)
     {
-//        List<AssetProcessCounting> list = assetProcessCountingService.selectAssetProcessCountingList(params);
-//        List<AssetProcessCountingVO> voList = assetProcessCountingService.toAssetProcessCountingVOList(list);
-//        ExcelUtil<AssetProcessCountingVO> util = new ExcelUtil<>(AssetProcessCountingVO.class);
-//        return util.exportExcel(voList, "资产盘点记录");
-        return null;
+        List<AssetsProcess> list = processService.list(assetProcessCountingDomain);
+        List<AssetProcessCountingDomain> domains = new ArrayList<>();
+        for (AssetsProcess assetsProcess : list) {
+            AssetProcessCountingDomain domain = processService.convertProcess(assetsProcess, new AssetProcessCountingDomain());
+            domains.add(domain);
+        }
+        ExcelUtil<AssetProcessCountingDomain> util = new ExcelUtil<>(AssetProcessCountingDomain.class);
+        return util.exportExcel(domains, "资产盘点记录");
     }
 
 }

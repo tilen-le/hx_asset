@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="80px">
       <el-form-item v-for="item, index in queryProperty" :key="item.fieldKey" :label="item.fieldLabel"
         :prop="'domains.' + index + '.value'">
         <template v-if="!item.timeFormat && !item.dictType">
@@ -24,7 +24,6 @@
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
-
     <div style="display:flex">
       <el-card :class="countingStatus === '' ? 'cardClickClass' : 'cardNoClickClass'" class="taskAmountCard"
         @click.native="statusSearch('')">
@@ -64,9 +63,9 @@
               <dict-tag :options="dict.type[item.dictType]" :value="scope.row[item.fieldKey]" />
             </template>
             <template v-if="item.fieldKey == 'assetCode'">
-              <el-popover trigger="hover">
-                <div style="width:calc(40vw)" v-loading="loadAsset">
-                  <el-descriptions title="资产详情" :column="2" border>
+              <el-popover trigger="hover" placement="top" popper-class="assetPopover">
+                <div style="width:calc(30vw)" v-loading="loadAsset">
+                  <el-descriptions title="资产详情" :column="2" size="mini" border>
                     <el-descriptions-item label="资产名称">{{ assetData.assetName }}</el-descriptions-item>
                     <el-descriptions-item label="公司名称">{{ assetData.companyName }}</el-descriptions-item>
                     <el-descriptions-item label="存放地点">{{ assetData.location }}</el-descriptions-item>
@@ -220,19 +219,35 @@ export default {
   }
 };
 </script>
+<style >
+.el-form-item__label {
+  white-space: nowrap;
+}
+
+.assetPopover .el-descriptions-item__label {
+  font-weight: bold !important;
+  white-space: nowrap;
+}
+</style>
 <style scoped>
+.el-form-item{
+  margin-bottom:0;
+}
 .taskAmountCard {
-  width: 180px;
-  height: 100px;
-  margin: 10px;
+  width: 170px;
+  height: 85px;
+  margin: 8px;
   text-align: center;
   cursor: pointer;
   font-weight: bold;
 }
+.taskAmountCard:first-child {
+  margin-left: 0;
+}
 
 .card_text {
   color: blue;
-  margin-top: 15px;
+  margin-top: 8px;
   font-size: 15pt;
 }
 

@@ -29,6 +29,7 @@ import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDictDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.lang.reflect.Field;
@@ -102,45 +103,57 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     }
 
     @Override
-    public void updateByProcessId(Object obj) {
+    @Transactional
+    public void updateByProcessId(AssetsProcess process) {
 
-        final String FIELD_PROCESS_ID = "processId";
+        List<AssetProcessVariable> varList = this.selectVariableListByProcessId(process.getId());
 
-        Field[] fields = obj.getClass().getDeclaredFields();
-        String processId = "";
-        try {
-            Field processIdField = obj.getClass().getDeclaredField(FIELD_PROCESS_ID);
-            processIdField.setAccessible(true);
-            processId = String.valueOf(processIdField.get(obj));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        List<AssetProcessVariable> varList = this.selectVariableListByProcessId(processId);
-
-        for (Field field : fields) {
-            field.setAccessible(true);
-            String fieldName = field.getName();
-            for (AssetProcessVariable var : varList) {
-                if (fieldName.equals(var.getFieldKey())) {
-                    try {
-                        if (ObjectUtil.isNotEmpty(field.get(obj))) {
-                            var.setFieldValue(String.valueOf(field.get(obj)));
-                        } else {
-                            var.setFieldValue(null);
-                        }
-                    } catch (IllegalAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
+        for (AssetProcessVariable var : varList) {
+            String fieldValue = (String) BeanTool.getFieldValue(process, var.getFieldKey());
+            if (StringUtils.isNotEmpty(fieldValue)) {
+                var.setFieldValue(fieldValue);
+            } else {
+                var.setFieldValue(null);
             }
         }
-
         variableService.updateBatchById(varList);
+
+        // 对于新添加的流程字段
+        Field[] fields = process.getClass().getDeclaredFields();
+        List<Field> newFieldList = Arrays.stream(fields).filter(new Predicate<Field>() {
+            @Override
+            public boolean test(Field field) {
+                return varList.stream().noneMatch(x -> x.getFieldKey().equals(field.getName()));
+            }
+        }).collect(Collectors.toList());
+
+        if (CollectionUtil.isNotEmpty(newFieldList)) {
+            List<AssetProcessField> processFieldList = fieldService.list(new LambdaQueryWrapper<AssetProcessField>()
+                    .eq(AssetProcessField::getProcessType, process.getProcessType())
+                    .in(AssetProcessField::getFieldKey, newFieldList.stream().map(Field::getName)));
+
+            Map<String, Long> fieldKeyIdMap = processFieldList
+                    .stream().collect(Collectors.toMap(AssetProcessField::getFieldKey, AssetProcessField::getId));
+
+            List<AssetProcessVariable> newVarList = new ArrayList<>();
+            for (Field field : newFieldList) {
+                AssetProcessVariable newVar = new AssetProcessVariable();
+                newVar.setProcessId(process.getId());
+                newVar.setFieldId(fieldKeyIdMap.get(field.getName()));
+                String fieldValue = (String) BeanTool.getFieldValue(process, field.getName());
+                if (StringUtils.isNotEmpty(fieldValue)) {
+                    newVar.setFieldValue(fieldValue);
+                } else {
+                    newVar.setFieldValue(null);
+                }
+            }
+            variableService.saveBatch(newVarList);
+        }
+
     }
 
     @Override
-    public List<AssetProcessVariable> selectVariableListByProcessId(String processId) {
+    public List<AssetProcessVariable> selectVariableListByProcessId(Long processId) {
         return processMapper.selectVariableListByProcessId(processId);
     }
 

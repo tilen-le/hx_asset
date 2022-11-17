@@ -1,4 +1,4 @@
-package com.hexing.assetnew.controller;
+package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.json.JSONUtil;
@@ -6,17 +6,19 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hexing.asset.domain.*;
+import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.dto.ExchangeProcessDTO;
 import com.hexing.asset.domain.dto.ProcessCommonDTO;
 import com.hexing.asset.domain.dto.ReceiveProcessDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
-import com.hexing.asset.enums.*;
+import com.hexing.asset.enums.AssetCountingStatus;
+import com.hexing.asset.enums.AssetStatus;
+import com.hexing.asset.enums.CountingTaskStatus;
+import com.hexing.asset.enums.DingTalkAssetProcessType;
 import com.hexing.asset.service.*;
 import com.hexing.assetnew.domain.*;
 import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.assetnew.service.*;
-import com.hexing.assetnew.service.impl.AssetInventoryTaskServiceImpl;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -47,9 +49,9 @@ import java.util.stream.Collectors;
 /**
  * 开放给钉钉端的rest接口
  */
-@Api(tags="钉钉接口")
-@RestController
-@RequestMapping("/api/dingtalk/asset")
+//@Api(tags="钉钉接口")
+//@RestController
+//@RequestMapping("/old/api/dingtalk/asset")
 public class DingTalkAssetController extends BaseController {
 
     @Autowired
@@ -144,7 +146,6 @@ public class DingTalkAssetController extends BaseController {
         assetInventoryTaskService.insertAssetCountingTask(assetInventoryTask);
         return null;
     }
-
     /**
      * 根据资产编号查询资产信息
      */
@@ -167,6 +168,121 @@ public class DingTalkAssetController extends BaseController {
         JSONObject r = new JSONObject();
         r.put("result", result);
         return r;
+    }
+
+    /**
+     * 资产领用
+     */
+    @ApiOperation("资产领用流程")
+    @PostMapping(value = "/assetReceive")
+    @Transactional
+    public Result assetReceive(@RequestBody ProcessCommonDTO<ReceiveProcessDTO> params) {
+
+        String processType = params.getData().getProcessType();
+        String userCode = params.getData().getUserCode();
+        String instanceId = params.getData().getInstanceId();
+        String assetCode = params.getData().getAssetCode();
+
+        int processId = assetProcessReceiveService
+                .saveProcess(instanceId, userCode, assetCode, processType);
+
+        Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>()
+                .eq(Asset::getAssetCode, assetCode));
+
+
+        entity.setAssetStatus(AssetStatus.USING.getStatus())
+                .setUsageScenario(params.getData().getUsageScenario())
+                .setLocation(params.getData().getLocation());
+
+        if (DingTalkAssetProcessType.PROCESS_RECEIVE.getCode().equals(processType)) {       /* 领用流程 */
+            entity.setResponsiblePersonCode(userCode);
+            SysUser user = sysUserService.getUserByUserName(userCode);
+            entity.setResponsiblePersonName(user.getNickName());
+        }
+        if (DingTalkAssetProcessType.PROCESS_RECEIVE_BY_ADMIN.getCode().equals(processType)) { /* 代领用流程 */
+            SysUser user = sysUserService.getUserByUserName(entity.getResponsiblePersonCode()); /* 代领用流程发起人工号 */
+            entity.setResponsiblePersonName(user.getNickName());
+        }
+
+        int update = assetService.updateAsset(entity, Integer.toString(processId));
+
+        if (update > 0) {
+            return Result.success("更新成功");
+        } else {
+            throw new ServiceException("更新失败");
+        }
+
+    }
+
+    /**
+     * 资产归还
+     */
+    @ApiOperation("资产归还流程")
+    @PostMapping(value = "/assetBack")
+    @Transactional
+    public Result assetBack(@RequestBody JSONObject params) {
+        params = params.getJSONObject("data");
+
+        String processType = params.getString("processType");                           /* 资产管理流程类型 */
+        String instanceId = params.getString("instanceId");
+        String userCode = params.getString("userCode");                                 /* 流程发起人工号 */
+        String responsiblePersonCode = params.getString("responsiblePersonCode");       /* 保管人工号（资产管理员工号） */
+        JSONArray assetList = params.getJSONArray("assets");
+
+        SysUser responsiblePerson = sysUserService.getUserByUserName(responsiblePersonCode);
+
+        for (Object o : assetList) {
+            String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
+            String location = JSONUtil.parseObj(o).getStr("location");
+
+            int processId = assetProcessBackService.saveProcess(instanceId, userCode, assetCode, processType);
+
+            Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetCode));
+            entity.setResponsiblePersonCode(responsiblePersonCode)
+                    .setResponsiblePersonName(responsiblePerson.getNickName())
+                    .setLocation(location);
+            int update = assetService.updateAsset(entity, Integer.toString(processId));
+
+            if (!(update > 0)) {
+                throw new ServiceException("归还失败");
+            }
+        }
+
+        return Result.success("归还成功");
+    }
+
+    /**
+     * 资产更换
+     */
+    @ApiOperation("资产更换流程")
+    @PostMapping(value = "/updateAssetExchange")
+    public Result updateAssetExchange(@RequestBody ProcessCommonDTO<ExchangeProcessDTO> params) {
+        return assetService.updateAssetExchange(params);
+    }
+
+    /**
+     * 资产转移
+     */
+    @ApiOperation("资产转移流程")
+    @PostMapping(value = "/updateAssetTransfer")
+    public Result updateAssetTransfer(@RequestBody JSONObject params) {
+        return assetService.updateAssetTransfer(params);
+    }
+
+    /**
+     * 查询所有存放地点
+     */
+    @ApiOperation("查询所有存放地点")
+    @PostMapping(value = "/queryAllAssetAddresses")
+    public JSONObject queryAllAssetAddresses() {
+        String dictType = "asset_location";
+        List<SysDictData> locationDictDataList = sysDictDataService.selectDictDataByType(dictType);
+        List<String> locationList = locationDictDataList.stream().map(SysDictData::getDictLabel).collect(Collectors.toList());
+        JSONObject addressList = new JSONObject();
+        addressList.put("addressList", locationList);
+        JSONObject result = new JSONObject();
+        result.put("result", addressList);
+        return result;
     }
 
     /**
@@ -316,6 +432,42 @@ public class DingTalkAssetController extends BaseController {
                     .set(AssetInventoryTask::getStatus, CountingTaskStatus.FINISHED.getStatus()));
         }
         return AjaxResult.success("盘点成功");
+    }
+
+    /**
+     * 员工处置资产流程
+     */
+    @ApiOperation("资产处置流程")
+    @Transactional
+    @PostMapping("/disposalAssets")
+    public AjaxResult disposalAssets(@RequestBody JSONObject params) {
+        System.out.println("params: " + params);
+        disposalService.disposalAssets(params);
+        return AjaxResult.success("处置成功");
+    }
+
+    /**
+     * 员工改造资产流程
+     */
+    @ApiOperation("资产改造流程")
+    @Transactional
+    @PostMapping("/transformAssets")
+    public AjaxResult transformAssets(@RequestBody JSONObject params) {
+        System.out.println("params: " + params);
+        transformService.transformAssets(params);
+        return AjaxResult.success("改造成功");
+    }
+
+    /**
+     * 员工维修资产流程
+     */
+    @ApiOperation("资产维修流程")
+    @Transactional
+    @PostMapping("/maintainAssets")
+    public AjaxResult maintainAssets(@RequestBody JSONObject params) {
+        System.out.println("params: " + params);
+        maintainService.maintainAssets(params);
+        return AjaxResult.success("维修成功");
     }
 
 }

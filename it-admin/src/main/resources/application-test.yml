@@ -7,7 +7,7 @@ spring:
             # 主库数据源
             master:
                 # 地址192.168.108.179
-                url: jdbc:mysql://192.168.108.176:3306/hx_asset?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+                url: jdbc:mysql://192.168.108.176:3306/hx_asset?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&rewriteBatchedStatements=true
                 username: root
                 password: HX.123456
             # 从库数据源

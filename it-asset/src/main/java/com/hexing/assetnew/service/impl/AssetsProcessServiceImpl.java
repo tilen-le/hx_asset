@@ -296,14 +296,8 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
                 }
                 varList.add(var);
             }
-            if (varList.size() >= 1000) {
-                variableService.insertBatch(varList);
-                varList.clear();
-            }
         }
-        if (varList.size() > 0) {
-            variableService.insertBatch(varList);
-        }
+        variableService.saveBatch(varList);
     }
 
 }

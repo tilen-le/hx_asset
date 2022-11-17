@@ -1,170 +1,190 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="资产编码" prop="assetCode">
-        <el-input
-          v-model="queryParams.assetCode"
-          placeholder="请输入资产编码"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="盘点人" prop="userName">
-        <el-input
-          v-model="queryParams.userName"
-          placeholder="请输入盘点人"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item v-for="item, index in queryProperty" :key="item.fieldKey" :label="item.fieldLabel"
+        :prop="'domains.' + index + '.value'">
+        <template v-if="!item.timeFormat && !item.dictType">
+          <el-input v-model="queryParams.domains[index].value" :placeholder="'请输入' + item.fieldLabel" clearable
+            size="small" @keyup.enter.native="handleQuery" />
+        </template>
+        <template v-if="item.dictType">
+          <el-select v-model="queryParams.domains[index].value" clearable>
+            <el-option v-for="dict in dict.type[item.dictType]" :key="dict.value" :label="dict.label"
+              :value="dict.value" />
+          </el-select>
+        </template>
+        <template v-if="item.timeFormat">
+          <el-date-picker clearable size="small" v-model="queryParams.domains[index].value" type="date"
+            :value-format="item.timeFormat">
+          </el-date-picker>
+        </template>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-        <el-button type="warning" plain icon="el-icon-download" size="mini" :loading="exportLoading" @click="handleExport" v-hasPermi="['asset:counting:export']">导出</el-button>
       </el-form-item>
     </el-form>
+
     <div style="display:flex">
-        <el-card :class="cardClick === ''?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('')">
-          固定资产总数
-          <div class="card_text">{{countResult.total}}</div>
-        </el-card>
-        <el-card :class="cardClick === '1'?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('1')">
-          已盘点资产总数
-          <div class="card_text">{{countResult.counted}}</div>
-        </el-card>
-        <el-card :class="cardClick === '0'?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('0')">
-          待盘点资产总数
-          <div class="card_text">{{countResult.notCounted}}</div>
-        </el-card>
-        <el-card :class="cardClick === '2'?'cardClickClass':'cardNoClickClass'" class="taskAmountCard" @click.native="statusSearch('2')">
-          盘点异常设备数目
-          <div class="card_text">{{countResult.abnormal}}</div>
-        </el-card>
+      <el-card :class="countingStatus === '' ? 'cardClickClass' : 'cardNoClickClass'" class="taskAmountCard"
+        @click.native="statusSearch('')">
+        固定资产总数
+        <div class="card_text">{{ countResult.total }}</div>
+      </el-card>
+      <el-card :class="countingStatus === '1' ? 'cardClickClass' : 'cardNoClickClass'" class="taskAmountCard"
+        @click.native="statusSearch('1')">
+        已盘点资产总数
+        <div class="card_text">{{ countResult.counted }}</div>
+      </el-card>
+      <el-card :class="countingStatus === '0' ? 'cardClickClass' : 'cardNoClickClass'" class="taskAmountCard"
+        @click.native="statusSearch('0')">
+        待盘点资产总数
+        <div class="card_text">{{ countResult.notCounted }}</div>
+      </el-card>
+      <el-card :class="countingStatus === '2' ? 'cardClickClass' : 'cardNoClickClass'" class="taskAmountCard"
+        @click.native="statusSearch('2')">
+        盘点异常设备数目
+        <div class="card_text">{{ countResult.abnormal }}</div>
+      </el-card>
     </div>
+
     <el-table v-loading="loading" :data="taskList" tooltip-effect="light">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="资产编码" align="center" prop="assetCode" width="150"/>
-      <el-table-column label="资产名称" align="center" prop="assetName" />
-      <el-table-column label="公司名称" align="center" prop="companyName" :show-overflow-tooltip="true" />
-      <el-table-column label="存放地点" align="center" prop="location" />
-      <el-table-column label="管理部门" align="center" prop="manageDept" />
-      <el-table-column label="保管人" align="center" prop="responsiblePersonName" />
-      <el-table-column label="保管部门" align="center" prop="responsiblePersonDept" />
-      <el-table-column label="使用场景" align="center" prop="usageScenario" />
-      <el-table-column label="规格型号" align="center" prop="standard" />
-      <el-table-column label="盘点人" align="center" prop="userName" />
-      <el-table-column label="盘点时间" align="center" prop="countingTime" width="150">
+      <el-table-column v-for="item in tableProperty" :key="item.fieldKey" :label="item.fieldLabel" :prop="item.fieldKey"
+        :width="item.width" :show-overflow-tooltip="true">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.countingTime) }}</span>
+          <!--<i class="el-icon-time"></i>-->
+          <slot :name="item.fieldKey" :data="scope.row[item.fieldKey]" :row="scope.row" :index="scope.$index">
+            <template v-if="!item.timeFormat && !item.dictType">
+              <span>{{ scope.row[item.fieldKey] }}</span>
+            </template>
+            <template v-if="item.timeFormat">
+              <span>{{ formatDate(scope.row[item.fieldKey], item.timeFormat) }}</span>
+            </template>
+            <template v-if="item.dictType">
+              <dict-tag :options="dict.type[item.dictType]" :value="scope.row[item.fieldKey]" />
+            </template>
+          </slot>
         </template>
       </el-table-column>
-      <el-table-column label="异常信息" align="center" prop="comment" :show-overflow-tooltip="true" />
-      <el-table-column label="盘点状态" align="center" prop="countingStatus" >
+      <el-table-column label="操作">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_counting_status" :value="scope.row.countingStatus"/>
+          <el-popover trigger="click">
+            <div style="width:calc(70vw)" v-loading="loadAsset">
+              <el-descriptions title="资产详情">
+                <el-descriptions-item label="资产名称">{{ assetData.assetName }}</el-descriptions-item>
+                <el-descriptions-item label="公司名称">{{ assetData.companyName }}</el-descriptions-item>
+                <el-descriptions-item label="存放地点">{{ assetData.location }}</el-descriptions-item>
+                <el-descriptions-item label="管理部门">{{ assetData.manageDept }}</el-descriptions-item>
+                <el-descriptions-item label="保管人">{{ assetData.responsiblePersonName }}</el-descriptions-item>
+                <el-descriptions-item label="保管部门">{{ assetData.responsiblePersonDept }}</el-descriptions-item>
+                <el-descriptions-item label="使用场景">{{ assetData.usageScenario }}</el-descriptions-item>
+                <el-descriptions-item label="规格型号">{{ assetData.standard }}</el-descriptions-item>
+              </el-descriptions>
+            </div>
+            <el-button slot="reference" size="mini" @click="getAsset(scope.row.assetCode)">资产详情</el-button>
+          </el-popover>
         </template>
       </el-table-column>
     </el-table>
 
-    <pagination v-show="total>0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
       @pagination="getList" />
 
   </div>
 </template>
 
 <script>
-
-  import {countRecord, listRecord, exportRecord } from "@/api/task/record";
-
-  export default {
+import { getAsset } from "@/api/asset/asset"
+import { countRecord, listRecord, exportRecord } from "@/api/task/record";
+import { listField } from "@/api/process/field";
+export default {
   name: "taskDetail",
-  dicts: ['asset_counting_status'],
+  dicts: [],
   data() {
     return {
+      property: [],
       // 遮罩层
       loading: true,
       // 导出遮罩层
       exportLoading: false,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
       // 显示搜索条件
       showSearch: true,
       // 总条数
       total: 0,
       // 盘点任务表格数据
       taskList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
       // 查询参数
       queryParams: {
+        domains: [],
         pageNum: 1,
         pageSize: 10,
-        taskCode: null,
-        assetCode: null,
-        userName: null,
-        countingStatus: null
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
       },
       countResult: {},
-      cardClick: null,
+      countingStatus: null,
+      // 资产详情
+      loadAsset: true,
+      assetData: {}
     };
   },
   created() {
+    listField({ processType: 100 }).then(response => {
+      this.property = response.rows.sort((a, b) => a.orderNum - b.orderNum)
+      let dictOptions = [];
+      response.rows.forEach(row => {
+        if (row.dictType)
+          dictOptions.push(row.dictType)
+        if (row.queryable == 1) {
+          this.queryParams.domains.push({
+            prop: row.fieldKey,
+            value: ""
+          })
+        }
+      })
+      this.dict.init(dictOptions)
+    });
     this.getList();
+  },
+  computed: {
+    queryProperty() {
+      return this.property.filter(item => item.queryable == 1)
+    },
+    tableProperty() {
+      return this.property.filter(item => item.visible == 1)
+    }
   },
   methods: {
     statusSearch(status) {
-      this.queryParams.countingStatus = status;
+      this.countingStatus = status;
       this.getList();
-      //颜色高亮
-      this.cardClick = status;
+    },
+    getQueryParams() {
+      var queryParams = {};
+      this.queryParams.domains.forEach(item => {
+        if (item.value != "") {
+          queryParams[item.prop] = item.value
+        }
+      })
+      queryParams.processType = 100
+      queryParams.pageNum = this.queryParams.pageNum
+      queryParams.pageSize = this.queryParams.pageSize
+      if (this.countingStatus)
+        queryParams.countingStatus = this.countingStatus
+      return queryParams;
     },
     /** 查询盘点任务列表 */
     getList() {
-      this.queryParams.taskCode = this.$route.params && this.$route.params.id
+      var queryParams = this.getQueryParams()
+      queryParams.taskCode = this.$route.params && this.$route.params.id
       this.loading = true;
-      listRecord(this.queryParams).then(response => {
+      listRecord(queryParams).then(response => {
         this.taskList = response.rows;
         this.total = response.total;
         this.loading = false;
       });
-      const taskCode = this.queryParams.taskCode
-      countRecord({taskCode: taskCode}).then(response => {
+      const taskCode = queryParams.taskCode
+      countRecord({ taskCode: taskCode }).then(response => {
         this.countResult = response.data;
       });
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        taskId: null,
-        taskCode: null,
-        userCode: null,
-        inventoryRange: null,
-        assetCounted: null,
-        assetNotCounted: null,
-        assetAbnormal: null,
-        startDate: null,
-        endDate: null,
-        status: "0"
-      };
-      this.resetForm("form");
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -174,14 +194,20 @@
     /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
-      this.queryParams.countingStatus = null;
-      this.cardClick = null;
+      this.countingStatus = null;
       this.handleQuery();
+    },
+    getAsset(assetCode) {
+      this.loadAsset = true;
+      getAsset(assetCode).then(response => {
+        this.assetData = response.data;
+        this.loadAsset = false;
+      })
     },
     /** 导出按钮操作 */
     handleExport() {
-      const queryParams = this.queryParams;
-      this.$modal.confirm("提示", "确认","取消", "是否确认导出所有符合条件数据项？").then(() => {
+      const queryParams = getQueryParams();
+      this.$modal.confirm("提示", "确认", "取消", "是否确认导出所有符合条件数据项？").then(() => {
         this.exportLoading = true;
         return exportRecord(queryParams);
       }).then(response => {
@@ -203,14 +229,17 @@
   cursor: pointer;
   font-weight: bold;
 }
+
 .card_text {
   color: blue;
   margin-top: 15px;
   font-size: 15pt;
 }
+
 .cardClickClass {
   background: #88eeff;
 }
+
 .cardNoClickClass {
   background-color: rgb(236, 245, 255);
 }

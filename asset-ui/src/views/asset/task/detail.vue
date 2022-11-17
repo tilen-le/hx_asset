@@ -47,7 +47,7 @@
       </el-card>
     </div>
 
-    <el-table v-loading="loading" :data="taskList" tooltip-effect="light">
+    <el-table v-loading="loading" :data="taskList" :height="tableHeight" tooltip-effect="light">
       <el-table-column v-for="item in tableProperty" :key="item.fieldKey" :label="item.fieldLabel" :prop="item.fieldKey"
         :width="item.width" :show-overflow-tooltip="true">
         <template slot-scope="scope">
@@ -112,6 +112,7 @@ export default {
       total: 0,
       // 盘点任务表格数据
       taskList: [],
+      tableHeight: 0,
       // 查询参数
       queryParams: {
         domains: [],
@@ -142,6 +143,15 @@ export default {
       this.dict.init(dictOptions)
     });
     this.getList();
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.tableHeight = document.body.offsetHeight - 330;
+    })
+    var _this = this
+    window.onresize = function () {
+      _this.tableHeight = document.body.offsetHeight - 330;
+    }
   },
   computed: {
     queryProperty() {
@@ -230,9 +240,10 @@ export default {
 }
 </style>
 <style scoped>
-.el-form-item{
-  margin-bottom:0;
+.el-form-item {
+  margin-bottom: 0;
 }
+
 .taskAmountCard {
   width: 170px;
   height: 85px;
@@ -241,6 +252,7 @@ export default {
   cursor: pointer;
   font-weight: bold;
 }
+
 .taskAmountCard:first-child {
   margin-left: 0;
 }

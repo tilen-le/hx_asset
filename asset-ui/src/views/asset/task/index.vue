@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="80px">
       <el-form-item label="任务名称" prop="taskName">
         <el-input
           v-model="queryParams.taskName"
@@ -87,7 +87,7 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="taskList" @selection-change="handleSelectionChange" tooltip-effect="light">
+    <el-table v-loading="loading" :data="taskList" :height="tableHeight" @selection-change="handleSelectionChange" tooltip-effect="light">
       <el-table-column type="selection" width="55" align="center" />
 <!--      <el-table-column label="任务编码" align="center" prop="taskCode" :show-overflow-tooltip="true">
         <template slot-scope="scope">
@@ -198,6 +198,7 @@ export default {
       total: 0,
       // 盘点任务表格数据
       taskList: [],
+      tableHeight: 0,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -243,6 +244,15 @@ export default {
   },
   created() {
     this.getList();
+  },
+  mounted(){
+    this.$nextTick(() => {
+      this.tableHeight = document.body.offsetHeight - 330;
+    })
+    var _this = this
+    window.onresize = function () {
+      _this.tableHeight = document.body.offsetHeight - 330;
+    }
   },
   methods: {
     /** 查询部门下拉树结构 */

@@ -13,6 +13,4 @@ import java.util.List;
  */
 public interface IAssetProcessVariableService extends IService<AssetProcessVariable> {
 
-    Integer insertBatch(List<AssetProcessVariable> variableList);
-
 }

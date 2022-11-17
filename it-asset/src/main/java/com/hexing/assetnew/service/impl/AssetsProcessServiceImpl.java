@@ -102,6 +102,9 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         return obj;
     }
 
+    /**
+     * 根据流程id更新值表
+     */
     @Override
     @Transactional
     public void updateByProcessId(AssetsProcess process) {

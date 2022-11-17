@@ -108,18 +108,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return asset;
     }
 
-
-    /**
-     * 查询资产表
-     *
-     * @param assetId 资产表主键
-     * @return 资产表
-     */
-    @Override
-    public Asset selectAssetByAssetId(String assetId) {
-        return assetMapper.selectById(assetId);
-    }
-
     /**
      * 根据资产编号查询资产信息
      */
@@ -378,19 +366,14 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     /**
-     * 删除资产表信息
+     * 批量删除资产
      *
-     * @param assetId 资产表主键
-     * @return 结果
+     * @param assetCodes 平台资产编号列表
+     * @return
      */
     @Override
-    public int deleteAssetByAssetId(Long assetId) {
-        return assetMapper.deleteAssetByAssetId(assetId);
-    }
-
-    @Override
     public int deleteAssetByAssetCodes(List<String> assetCodes) {
-        return assetMapper.delete(new QueryWrapper<Asset>().in("asset_code", assetCodes));
+        return assetMapper.delete(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodes));
     }
 
     /**

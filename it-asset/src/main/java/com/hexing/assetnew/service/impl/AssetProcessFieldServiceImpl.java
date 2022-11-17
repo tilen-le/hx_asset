@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * 【请填写功能名称】Service业务层处理
+ * 流程字段表Service业务层处理
  *
  * @author zxy
  * @date 2022-11-01
@@ -81,17 +81,6 @@ public class AssetProcessFieldServiceImpl extends ServiceImpl<AssetProcessFieldM
     @Override
     public int deleteAssetProcessFieldByIds(Long[] ids) {
         return assetProcessFieldMapper.deleteBatchIds(Arrays.asList(ids));
-    }
-
-    /**
-     * 删除【请填写功能名称】信息
-     *
-     * @param id 【请填写功能名称】主键
-     * @return 结果
-     */
-    @Override
-    public int deleteAssetProcessFieldById(Long id) {
-        return assetProcessFieldMapper.deleteAssetProcessFieldById(id);
     }
 
 }

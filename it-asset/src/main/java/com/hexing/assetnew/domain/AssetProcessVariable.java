@@ -3,13 +3,10 @@ package com.hexing.assetnew.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.apache.commons.lang3.builder.ToStringStyle;
 import com.hexing.common.annotation.Excel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-import com.hexing.common.core.domain.BaseEntity;
 
 /**
  * 流程值对象 asset_process_variable
@@ -48,6 +45,9 @@ public class AssetProcessVariable {
     @TableField(exist = false)
     private String fieldKey;
 
+    /**
+     * 字段Label
+     */
     @TableField(exist = false)
     private String fieldLabel;
 

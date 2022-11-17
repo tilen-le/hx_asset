@@ -56,16 +56,6 @@ public class AssetInventoryTaskController extends BaseController
     }
 
     /**
-     * 获取盘点任务详细信息
-     */
-    @PreAuthorize("@ss.hasPermi('asset:task:query')")
-    @GetMapping(value = "/{taskId}")
-    public AjaxResult getInfo(@PathVariable("taskId") String taskId)
-    {
-        return AjaxResult.success(assetProcessCountingTaskService.selectAssetCountingTaskByTaskId(taskId));
-    }
-
-    /**
      * 新增盘点任务
      */
     @PreAuthorize("@ss.hasPermi('asset:task:add')")

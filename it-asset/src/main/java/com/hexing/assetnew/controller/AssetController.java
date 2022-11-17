@@ -1,43 +1,25 @@
 package com.hexing.assetnew.controller;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.dto.StatisQueryParam;
-import com.hexing.asset.domain.vo.AssetLifeCycleVO;
-import com.hexing.asset.domain.vo.SimpleStatisticVO;
-import com.hexing.asset.enums.AssetStatisticType;
-import com.hexing.asset.enums.DingTalkAssetProcessType;
-import com.hexing.asset.service.IAssetProcessService;
-import com.hexing.common.core.domain.entity.SysDept;
-import com.hexing.common.core.domain.model.LoginUser;
-import com.hexing.common.utils.DateUtils;
-import com.hexing.common.utils.ServletUtils;
-import com.hexing.common.utils.StringUtils;
-import com.hexing.framework.web.service.TokenService;
-import com.hexing.system.service.ISysDeptService;
-import com.hexing.system.service.ISysUserService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import com.hexing.assetnew.domain.Asset;
+import com.hexing.assetnew.service.IAssetService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
-import com.hexing.common.enums.BusinessType;
-import com.hexing.assetnew.domain.Asset;
-import com.hexing.assetnew.service.IAssetService;
-import com.hexing.common.utils.poi.ExcelUtil;
+import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.core.page.TableDataInfo;
+import com.hexing.common.enums.BusinessType;
+import com.hexing.common.utils.ServletUtils;
+import com.hexing.common.utils.poi.ExcelUtil;
+import com.hexing.framework.web.service.TokenService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 /**
  * 资产表Controller
@@ -54,12 +36,6 @@ public class AssetController extends BaseController {
     private IAssetService assetService;
     @Autowired
     private TokenService tokenService;
-    @Autowired
-    private IAssetProcessService assetProcessService;
-    @Autowired
-    private ISysDeptService sysDeptService;
-    @Autowired
-    private ISysUserService sysUserService;
 
     /**
      * 查询资产列表
@@ -82,7 +58,6 @@ public class AssetController extends BaseController {
     @GetMapping("/export")
     public AjaxResult export(Asset asset) {
         List<Asset> list = assetService.selectAssetList(asset);
-//        List<Asset> list = assetService.list();
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }

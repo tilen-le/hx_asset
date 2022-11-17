@@ -7,7 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="AssetsProcess" id="AssetsProcessResult">
         <result property="id"    column="id"    />
         <result property="processType"    column="process_type"    />
-        <result property="assetId"    column="asset_id"    />
+        <result property="assetCode"    column="asset_code"    />
         <result property="status"    column="status"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
@@ -20,31 +20,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <sql id="selectAssetsProcessVo">
         select id, process_type, asset_id, status, create_by, create_time, update_by, update_time, remark from assets_process
     </sql>
-
-
-    <select id="selectProcessWithCondition" resultMap="AssetsProcessResult">
-        SELECT p.* FROM assets_process p
-        WHERE p.process_type = #{processType}
-        <foreach collection="processCondition" index="key" item="value">
-          AND EXISTS (
-                SELECT 1 FROM asset_process_variable v
-                    LEFT JOIN asset_process_field f ON v.field_id = f.id
-                WHERE v.process_id = p.id
-                  AND f.field_key = #{key}
-                  AND v.field_value = #{value}
-          )
-       </foreach>
-        AND EXISTS (
-            SELECT 1 FROM asset_process_variable v
-            LEFT JOIN asset_process_field f ON v.field_id = f.id
-            LEFT JOIN ${relationTableName} t ON t.${relationTableForeignKey} = v.field_value
-            WHERE v.process_id = p.id
-            AND f.field_key = #{relationTableForeignKeyCamel}
-            <foreach collection="sqlConditionList" item="condition">
-                AND t.${condition}
-            </foreach>
-        )
-    </select>
 
     <select id="selectVariableListByProcessId" resultType="AssetProcessVariable">
         select t1.*, t2.field_key

@@ -34,13 +34,4 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </where>
     </select>
 
-    <insert id="insertBatch" parameterType="java.util.List">
-        insert into asset_process_variable
-            (process_id, field_id, field_value)
-        values
-        <foreach collection="list" item="item" separator=",">
-            (#{item.processId},#{item.fieldId}, #{item.fieldValue})
-        </foreach>
-    </insert>
-    
 </mapper>

@@ -24,8 +24,8 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/asset/task")
-public class AssetInventoryTaskController extends BaseController
-{
+public class AssetInventoryTaskController extends BaseController {
+
     @Autowired
     private IAssetInventoryTaskService assetProcessCountingTaskService;
     @Autowired
@@ -36,8 +36,7 @@ public class AssetInventoryTaskController extends BaseController
      */
     @PreAuthorize("@ss.hasPermi('asset:task:list')")
     @GetMapping("/list")
-    public TableDataInfo list(AssetInventoryTask assetInventoryTask)
-    {
+    public TableDataInfo list(AssetInventoryTask assetInventoryTask) {
         List<AssetInventoryTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetInventoryTask);
         return getDataTable(list);
     }
@@ -48,21 +47,10 @@ public class AssetInventoryTaskController extends BaseController
     @PreAuthorize("@ss.hasPermi('asset:task:export')")
     @Log(title = "盘点任务", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(AssetInventoryTask assetInventoryTask)
-    {
+    public AjaxResult export(AssetInventoryTask assetInventoryTask) {
         List<AssetInventoryTask> list = assetProcessCountingTaskService.selectAssetCountingTaskList(assetInventoryTask);
         ExcelUtil<AssetInventoryTask> util = new ExcelUtil<AssetInventoryTask>(AssetInventoryTask.class);
         return util.exportExcel(list, "盘点任务数据");
-    }
-
-    /**
-     * 获取盘点任务详细信息
-     */
-    @PreAuthorize("@ss.hasPermi('asset:task:query')")
-    @GetMapping(value = "/{taskId}")
-    public AjaxResult getInfo(@PathVariable("taskId") String taskId)
-    {
-        return AjaxResult.success(assetProcessCountingTaskService.selectAssetCountingTaskByTaskId(taskId));
     }
 
     /**
@@ -87,7 +75,5 @@ public class AssetInventoryTaskController extends BaseController
     public AjaxResult remove(@PathVariable List<String> taskCodes) {
         return toAjax(assetInventoryTaskService.deleteAssetCountingTaskByTaskIds(taskCodes));
     }
-
-
 
 }

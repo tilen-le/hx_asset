@@ -24,6 +24,14 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
      */
     Object getOne(String processType, Map<String, Object> params);
 
+    /**
+     * 根据流程id更新值表
+     */
+    void updateByProcessId(AssetsProcess process);
+
+    /**
+     * 根据流程id查询值表列表
+     */
     List<AssetProcessVariable> selectVariableListByProcessId(Long processId);
 
     /**
@@ -37,8 +45,6 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
     List<AssetsProcess> list(AssetsProcess process);
 
     List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params);
-
-    void updateByProcessId(AssetsProcess process);
 
     <T> T convertProcess(AssetsProcess process, T domain);
 

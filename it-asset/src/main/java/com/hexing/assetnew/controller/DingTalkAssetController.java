@@ -6,31 +6,24 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hexing.asset.domain.*;
-import com.hexing.asset.domain.dto.ExchangeProcessDTO;
-import com.hexing.asset.domain.dto.ProcessCommonDTO;
-import com.hexing.asset.domain.dto.ReceiveProcessDTO;
+import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
-import com.hexing.asset.enums.*;
-import com.hexing.asset.service.*;
+import com.hexing.asset.enums.AssetCountingStatus;
+import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.assetnew.domain.*;
 import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.assetnew.service.*;
-import com.hexing.assetnew.service.impl.AssetInventoryTaskServiceImpl;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
-import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysUser;
-import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.CommonUtils;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.ISysDeptService;
-import com.hexing.system.service.ISysDictDataService;
 import com.hexing.system.service.ISysUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -42,7 +35,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 开放给钉钉端的rest接口
@@ -56,22 +48,6 @@ public class DingTalkAssetController extends BaseController {
     private IAssetService assetService;
     @Autowired
     private IAssetInventoryTaskService assetInventoryTaskService;
-    @Autowired
-    private IAssetProcessCountingService assetProcessCountingService;
-    @Autowired
-    private ISysDictDataService sysDictDataService;
-    @Autowired
-    private IAssetProcessBackService assetProcessBackService;
-    @Autowired
-    private IAssetProcessReceiveService assetProcessReceiveService;
-    @Autowired
-    private IAssetProcessDisposalService disposalService;
-    @Autowired
-    private IAssetProcessMaintainService maintainService;
-    @Autowired
-    private IAssetProcessTransformService transformService;
-    @Autowired
-    private IAssetProcessService assetProcessService;
     @Autowired
     private ISysDeptService sysDeptService;
     @Autowired

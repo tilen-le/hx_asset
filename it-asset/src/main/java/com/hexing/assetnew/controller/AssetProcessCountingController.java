@@ -1,34 +1,28 @@
 package com.hexing.assetnew.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSONObject;
-import com.github.pagehelper.Page;
-import com.github.pagehelper.PageHelper;
-import com.hexing.asset.domain.vo.AssetProcessCountingVO;
-import com.hexing.asset.mapper.AssetProcessCountingMapper;
-import com.hexing.asset.zxy.PdProcessDomain;
+import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.assetnew.domain.AssetProcessCountingDomain;
 import com.hexing.assetnew.domain.AssetsProcess;
 import com.hexing.assetnew.service.IAssetsProcessService;
-import com.hexing.common.core.page.PageDomain;
-import com.hexing.common.core.page.TableSupport;
+import com.hexing.common.annotation.Log;
+import com.hexing.common.core.controller.BaseController;
+import com.hexing.common.core.domain.AjaxResult;
+import com.hexing.common.core.page.TableDataInfo;
+import com.hexing.common.enums.BusinessType;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import com.hexing.common.annotation.Log;
-import com.hexing.common.core.controller.BaseController;
-import com.hexing.common.core.domain.AjaxResult;
-import com.hexing.common.enums.BusinessType;
-import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.service.IAssetProcessCountingService;
-import com.hexing.common.core.page.TableDataInfo;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -40,12 +34,10 @@ import com.hexing.common.core.page.TableDataInfo;
 @Api(tags = "资产盘点记录管理")
 @RestController
 @RequestMapping("/asset/counting")
-public class AssetProcessCountingController extends BaseController
-{
+public class AssetProcessCountingController extends BaseController {
+
     @Autowired
     private IAssetProcessCountingService assetProcessCountingService;
-    @Autowired
-    private AssetProcessCountingMapper assetProcessCountingMapper;
     @Autowired
     private IAssetsProcessService processService;
 
@@ -54,8 +46,7 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("获取盘点记录列表")
     @GetMapping("/list")
-    public TableDataInfo list(AssetProcessCountingDomain assetProcessCountingDomain)
-    {
+    public TableDataInfo list(AssetProcessCountingDomain assetProcessCountingDomain) {
         List<AssetsProcess> list = processService.listByPage(assetProcessCountingDomain);
         List<AssetProcessCountingDomain> domains = new ArrayList<>();
         for (AssetsProcess assetsProcess : list) {
@@ -72,8 +63,8 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("盘点统计")
     @GetMapping("/inventoryCount")
-    public AjaxResult inventoryCount(String type,String startDate, String endDate) {
-        if (StringUtils.isEmpty(startDate)||StringUtils.isEmpty(endDate)){
+    public AjaxResult inventoryCount(String type, String startDate, String endDate) {
+        if (StringUtils.isEmpty(startDate) || StringUtils.isEmpty(endDate)) {
             return AjaxResult.error("起止日期未设置");
         }
         JSONObject jsonObject = assetProcessCountingService.inventoryCount(type, startDate, endDate);
@@ -85,10 +76,9 @@ public class AssetProcessCountingController extends BaseController
      */
     @ApiOperation("盘点统计列表")
     @GetMapping("/inventoryCountList")
-    public TableDataInfo inventoryCountList(String startDate,String endDate)
-    {
+    public TableDataInfo inventoryCountList(String startDate, String endDate) {
         startPage();
-        if (StringUtils.isEmpty(startDate)||StringUtils.isEmpty(endDate)){
+        if (StringUtils.isEmpty(startDate) || StringUtils.isEmpty(endDate)) {
             return new TableDataInfo();
         }
         List<AssetProcessCounting> list = assetProcessCountingService.inventoryCountList(startDate, endDate);
@@ -111,8 +101,7 @@ public class AssetProcessCountingController extends BaseController
     @PreAuthorize("@ss.hasPermi('asset:counting:export')")
     @Log(title = "资产盘点流程", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(AssetProcessCountingDomain assetProcessCountingDomain)
-    {
+    public AjaxResult export(AssetProcessCountingDomain assetProcessCountingDomain) {
         List<AssetsProcess> list = processService.list(assetProcessCountingDomain);
         List<AssetProcessCountingDomain> domains = new ArrayList<>();
         for (AssetsProcess assetsProcess : list) {

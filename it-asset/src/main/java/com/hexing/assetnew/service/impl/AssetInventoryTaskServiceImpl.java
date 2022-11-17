@@ -2,25 +2,18 @@ package com.hexing.assetnew.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.assetnew.domain.Asset;
-import com.hexing.assetnew.domain.AssetInventoryTask;
-import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
+import com.hexing.assetnew.domain.Asset;
+import com.hexing.assetnew.domain.AssetInventoryTask;
 import com.hexing.assetnew.domain.AssetProcessCountingDomain;
 import com.hexing.assetnew.domain.AssetsProcess;
 import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
 import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.assetnew.mapper.AssetInventoryTaskMapper;
-import com.hexing.assetnew.mapper.AssetMapper;
-import com.hexing.asset.mapper.AssetProcessMapper;
 import com.hexing.assetnew.service.IAssetInventoryTaskService;
-import com.hexing.asset.service.IAssetProcessCountingService;
-import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.assetnew.service.IAssetService;
 import com.hexing.assetnew.service.IAssetsProcessService;
 import com.hexing.common.core.domain.entity.SysDept;
@@ -42,8 +35,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.hexing.common.utils.PageUtil.startPage;
@@ -56,50 +47,24 @@ import static com.hexing.common.utils.PageUtil.startPage;
  * @date 2022-09-13
  */
 @Service
-public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTaskMapper, AssetInventoryTask> implements IAssetInventoryTaskService
-{
+public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTaskMapper, AssetInventoryTask> implements IAssetInventoryTaskService {
 
     @Autowired
     private AssetInventoryTaskMapper assetInventoryTaskMapper;
     @Autowired
-    private AssetMapper assetMapper;
-    @Autowired
-    private AssetProcessMapper assetProcessMapper;
-    @Autowired
     private IAssetService assetService;
-    @Autowired
-    private IAssetProcessCountingService assetProcessCountingService;
-    @Autowired
-    private IAssetProcessService assetProcessService;
     @Autowired
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
     @Autowired
     private IAssetsProcessService assetsProcessService;
-    @Autowired
-    private AssetsProcessServiceImpl processService;
-    /**
-     * 查询盘点任务
-     *
-     * @param taskId 盘点任务主键
-     * @return 盘点任务
-     */
-    @Override
-    public AssetInventoryTask selectAssetCountingTaskByTaskId(String taskId)
-    {
-        return assetInventoryTaskMapper.selectAssetCountingTaskByTaskId(taskId);
-    }
 
     /**
      * 查询盘点任务列表
-     *
-     * @param assetInventoryTask 盘点任务
-     * @return 盘点任务
      */
     @Override
-    public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask)
-    {
+    public List<AssetInventoryTask> selectAssetCountingTaskList(AssetInventoryTask assetInventoryTask) {
         LambdaQueryWrapper<AssetInventoryTask> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(assetInventoryTask.getTaskName())) {
             wrapper.like(AssetInventoryTask::getTaskName, assetInventoryTask.getTaskName());
@@ -121,7 +86,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         }
         startPage();
         SysUser user = SecurityUtils.getLoginUser().getUser();
-        if(!user.isAdmin()){
+        if (!user.isAdmin()) {
             String userName = user.getUserName();
             wrapper.apply("(find_in_set( {0} , inventory_users ) or create_by = {0})", userName);
         }
@@ -139,17 +104,17 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             String userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(task.getCreateBy())).map(SysUser::getNickName).findFirst().orElse(null);
             task.setCreatorName(userName);
             String inventoryUsers = task.getInventoryUsers();
-            if (inventoryUsers.contains(",")){
-                String[] split=inventoryUsers.split(",");
-                String inventoryUsersName ="";
+            if (inventoryUsers.contains(",")) {
+                String[] split = inventoryUsers.split(",");
+                String inventoryUsersName = "";
                 for (int i = 0; i < split.length; i++) {
                     String trim = split[i].trim();
                     userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(trim)).map(SysUser::getNickName).findFirst().orElse(null);
-                    inventoryUsersName +=userName+",";
+                    inventoryUsersName += userName + ",";
                 }
                 String substring = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
                 task.setInventoryUsersName(substring);
-            }else {
+            } else {
                 userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(inventoryUsers)).map(SysUser::getNickName).findFirst().orElse(null);
                 task.setInventoryUsersName(userName);
             }
@@ -158,15 +123,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         }
 
         return taskList;
-    }
-
-    /**
-     * 生成盘点任务编码
-     */
-    private String generateTaskCode() {
-        String taskCode = DateUtils.dateTimeNow();
-        taskCode += RandomUtil.randomString(4);
-        return taskCode;
     }
 
     /**
@@ -256,11 +212,9 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
     /**
      * 批量删除盘点任务
-     * @return 结果
      */
     @Override
-    public int deleteAssetCountingTaskByTaskIds(List<String> taskCode)
-    {
+    public int deleteAssetCountingTaskByTaskIds(List<String> taskCode) {
         return assetInventoryTaskMapper.deleteBatchIds(taskCode);
     }
 
@@ -279,6 +233,16 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                 task.setStatus(CountingTaskStatus.FINISHED.getStatus());
             }
         }
+    }
+
+
+    /**
+     * 生成盘点任务编码
+     */
+    private String generateTaskCode() {
+        String taskCode = DateUtils.dateTimeNow();
+        taskCode += RandomUtil.randomString(4);
+        return taskCode;
     }
 
 }

@@ -182,10 +182,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <delete id="deleteAssetByAssetId" parameterType="Long">
-        delete from asset where asset_id = #{assetId}
-    </delete>
-
     <delete id="deleteAssetByAssetIds" parameterType="String">
         delete from asset where asset_id in 
         <foreach item="assetId" collection="array" open="(" separator="," close=")">

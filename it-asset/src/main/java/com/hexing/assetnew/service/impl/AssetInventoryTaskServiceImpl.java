@@ -128,9 +128,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         List<AssetInventoryTask> taskList = assetInventoryTaskMapper.selectList(wrapper);
 
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
-        Map<String, String> userMaps = sysUsers.stream().collect(Collectors.toMap(SysUser::getUserName, SysUser::getNickName, (key1, key2) -> key2));
         List<SysDept> sysDepts = sysDeptService.selectDeptList(new SysDept());
-        Map<Long, String> deptMaps = sysDepts.stream().collect(Collectors.toMap(SysDept::getDeptId, SysDept::getDeptName, (key1, key2) -> key2));
 
         for (AssetInventoryTask task : taskList) {
             CountingStatusNumDTO numDTO = assetsProcessService.countingStatusCount(task.getTaskCode());
@@ -138,21 +136,25 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             task.setAssetNotCounted(numDTO.getNotCounted());
             task.setAssetCounted(numDTO.getCounted());
             task.setAssetAbnormal(numDTO.getAbnormal());
-
-            task.setCreatorName(userMaps.get(task.getCreateBy()));
+            String userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(task.getCreateBy())).map(SysUser::getNickName).findFirst().orElse(null);
+            task.setCreatorName(userName);
             String inventoryUsers = task.getInventoryUsers();
             if (inventoryUsers.contains(",")){
                 String[] split=inventoryUsers.split(",");
                 String inventoryUsersName ="";
                 for (int i = 0; i < split.length; i++) {
-                    inventoryUsersName +=userMaps.get(split[i].trim())+",";
+                    String trim = split[i].trim();
+                    userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(trim)).map(SysUser::getNickName).findFirst().orElse(null);
+                    inventoryUsersName +=userName+",";
                 }
                 String substring = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
                 task.setInventoryUsersName(substring);
             }else {
-                task.setInventoryUsersName(userMaps.get(inventoryUsers));
+                userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(inventoryUsers)).map(SysUser::getNickName).findFirst().orElse(null);
+                task.setInventoryUsersName(userName);
             }
-            task.setInventoryDeptName(deptMaps.get(Long.valueOf(task.getInventoryDept())));
+            String deptName = sysDepts.stream().filter(sysDept -> sysDept.getDeptId().equals(Long.valueOf(task.getInventoryDept()))).map(SysDept::getDeptName).findFirst().orElse(null);
+            task.setInventoryDeptName(deptName);
         }
 
         return taskList;

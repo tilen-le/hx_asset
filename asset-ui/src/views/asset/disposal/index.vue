@@ -2,40 +2,21 @@
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
       <el-form-item label="实例ID" prop="instanceId">
-        <el-input
-          v-model="queryParams.instanceId"
-          placeholder="请输入实例ID"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.instanceId" placeholder="请输入实例ID" clearable size="small"
+          @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="发起人工号" prop="userCode">
-        <el-input
-          v-model="queryParams.userCode"
-          placeholder="请输入发起人工号"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.userCode" placeholder="请输入发起人工号" clearable size="small"
+          @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="平台资产编码" prop="assetCode">
-        <el-input
-          v-model="queryParams.assetCode"
-          placeholder="请输入平台资产编码"
-          clearable
-          size="small"
-          @keyup.enter.native="handleQuery"
-        />
+        <el-input v-model="queryParams.assetCode" placeholder="请输入平台资产编码" clearable size="small"
+          @keyup.enter.native="handleQuery" />
       </el-form-item>
       <el-form-item label="状态" prop="status">
         <el-select v-model="queryParams.status" placeholder="请选择状态" clearable size="small">
-          <el-option
-            v-for="dict in dict.type.asset_process_status"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+          <el-option v-for="dict in dict.type.asset_process_status" :key="dict.value" :label="dict.label"
+            :value="dict.value" />
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -78,20 +59,13 @@
         >删除</el-button>
       </el-col> -->
       <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          :loading="exportLoading"
-          @click="handleExport"
-          v-hasPermi="['asset:disposal:export']"
-        >导出</el-button>
+        <el-button type="warning" plain icon="el-icon-download" size="mini" :loading="exportLoading"
+          @click="handleExport" v-hasPermi="['asset:disposal:export']">导出</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="disposalList" @selection-change="handleSelectionChange">
+    <el-table v-loading="loading" :data="disposalList" :height="tableHeight" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="实例ID" align="center" prop="instanceId" />
       <el-table-column label="发起人工号" align="center" prop="userCode" />
@@ -104,13 +78,15 @@
       </el-table-column>
       <el-table-column label="附件1" align="center" prop="fileInfo">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfo)">查看
+          <el-button v-if="scope.row.fileInfo" size="mini" icon="el-icon-view"
+            @click="openDownload(scope.row.fileInfo)">查看
           </el-button>
         </template>
       </el-table-column>
       <el-table-column label="附件2" align="center" prop="fileInfoAdd">
         <template slot-scope="scope">
-          <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-view" @click="openDownload(scope.row.fileInfoAdd)">查看</el-button>
+          <el-button v-if="scope.row.fileInfoAdd" size="mini" icon="el-icon-view"
+            @click="openDownload(scope.row.fileInfoAdd)">查看</el-button>
         </template>
       </el-table-column>
       <!-- <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
@@ -133,13 +109,8 @@
       </el-table-column> -->
     </el-table>
 
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
+    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
+      @pagination="getList" />
 
     <!-- 添加或修改资产处置流程对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -165,7 +136,7 @@
 
     <el-dialog title="附件" :visible.sync="fileDialog" append-to-body>
       <el-row v-for="file in fileList" :key="file.url" style="margin-top:8px">
-        {{file.name}}<el-button size="mini" style="float:right" @click="download(file)">下载</el-button>
+        {{ file.name }}<el-button size="mini" style="float:right" @click="download(file)">下载</el-button>
       </el-row>
     </el-dialog>
   </div>
@@ -195,6 +166,7 @@ export default {
       total: 0,
       // 资产处置流程表格数据
       disposalList: [],
+      tableHeight: 0,
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -219,6 +191,15 @@ export default {
   },
   created() {
     this.getList();
+  },
+  mounted() {
+    this.$nextTick(() => {
+      this.tableHeight = document.body.offsetHeight - 310;
+    })
+    var _this = this
+    window.onresize = function () {
+      _this.tableHeight = document.body.offsetHeight - 310;
+    }
   },
   methods: {
     /** 查询资产处置流程列表 */
@@ -261,7 +242,7 @@ export default {
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
@@ -303,26 +284,26 @@ export default {
     /** 删除按钮操作 */
     handleDelete(row) {
       const ids = row.id || this.ids;
-      this.$modal.confirm("提示", "确认","取消",'是否确认删除资产处置流程编号为"' + ids + '"的数据项？').then(function() {
+      this.$modal.confirm("提示", "确认", "取消", '是否确认删除资产处置流程编号为"' + ids + '"的数据项？').then(function () {
         return delDisposal(ids);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+      }).catch(() => { });
     },
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.queryParams;
-      this.$modal.confirm("提示", "确认","取消",'是否确认导出所有资产处置流程数据项？').then(() => {
+      this.$modal.confirm("提示", "确认", "取消", '是否确认导出所有资产处置流程数据项？').then(() => {
         this.exportLoading = true;
         return exportDisposal(queryParams);
       }).then(response => {
         this.$download.name(response.msg);
         this.exportLoading = false;
-      }).catch(() => {});
+      }).catch(() => { });
     },
     /** 下载弹窗 */
-    openDownload(fileInfo){
+    openDownload(fileInfo) {
       this.fileList = JSON.parse(fileInfo)
       this.fileDialog = true;
     },

@@ -54,7 +54,7 @@
         <template slot-scope="scope">
           <!--<i class="el-icon-time"></i>-->
           <slot :name="item.fieldKey" :data="scope.row[item.fieldKey]" :row="scope.row" :index="scope.$index">
-            <template v-if="!item.timeFormat && !item.dictType">
+            <template v-if="!item.timeFormat && !item.dictType && item.fieldKey != 'assetCode'">
               <span>{{ scope.row[item.fieldKey] }}</span>
             </template>
             <template v-if="item.timeFormat">
@@ -63,26 +63,26 @@
             <template v-if="item.dictType">
               <dict-tag :options="dict.type[item.dictType]" :value="scope.row[item.fieldKey]" />
             </template>
+            <template v-if="item.fieldKey == 'assetCode'">
+              <el-popover trigger="hover">
+                <div style="width:calc(40vw)" v-loading="loadAsset">
+                  <el-descriptions title="资产详情" :column="2" border>
+                    <el-descriptions-item label="资产名称">{{ assetData.assetName }}</el-descriptions-item>
+                    <el-descriptions-item label="公司名称">{{ assetData.companyName }}</el-descriptions-item>
+                    <el-descriptions-item label="存放地点">{{ assetData.location }}</el-descriptions-item>
+                    <el-descriptions-item label="管理部门">{{ assetData.manageDept }}</el-descriptions-item>
+                    <el-descriptions-item label="保管人">{{ assetData.responsiblePersonName }}</el-descriptions-item>
+                    <el-descriptions-item label="保管部门">{{ assetData.responsiblePersonDept }}</el-descriptions-item>
+                    <el-descriptions-item label="使用场景">{{ assetData.usageScenario }}</el-descriptions-item>
+                    <el-descriptions-item label="规格型号">{{ assetData.standard }}</el-descriptions-item>
+                  </el-descriptions>
+                </div>
+                <span slot="reference" style="color:rgb(140,197,255)" @mouseover="getAsset(scope.row.assetCode)">
+                  {{ scope.row.assetCode }}
+                </span>
+              </el-popover>
+            </template>
           </slot>
-        </template>
-      </el-table-column>
-      <el-table-column label="操作">
-        <template slot-scope="scope">
-          <el-popover trigger="click">
-            <div style="width:calc(70vw)" v-loading="loadAsset">
-              <el-descriptions title="资产详情">
-                <el-descriptions-item label="资产名称">{{ assetData.assetName }}</el-descriptions-item>
-                <el-descriptions-item label="公司名称">{{ assetData.companyName }}</el-descriptions-item>
-                <el-descriptions-item label="存放地点">{{ assetData.location }}</el-descriptions-item>
-                <el-descriptions-item label="管理部门">{{ assetData.manageDept }}</el-descriptions-item>
-                <el-descriptions-item label="保管人">{{ assetData.responsiblePersonName }}</el-descriptions-item>
-                <el-descriptions-item label="保管部门">{{ assetData.responsiblePersonDept }}</el-descriptions-item>
-                <el-descriptions-item label="使用场景">{{ assetData.usageScenario }}</el-descriptions-item>
-                <el-descriptions-item label="规格型号">{{ assetData.standard }}</el-descriptions-item>
-              </el-descriptions>
-            </div>
-            <el-button slot="reference" size="mini" @click="getAsset(scope.row.assetCode)">资产详情</el-button>
-          </el-popover>
         </template>
       </el-table-column>
     </el-table>

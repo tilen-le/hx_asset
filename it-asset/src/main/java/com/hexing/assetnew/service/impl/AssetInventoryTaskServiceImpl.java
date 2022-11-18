@@ -194,7 +194,6 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             entity.setId(process.getId());
             entity.setTaskCode(task.getTaskCode());
             entity.setAssetCode(process.getAssetCode());
-            entity.setUserCode(task.getCreateBy());
             entity.setCreateTime(now);
             entity.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
             domainList.add(entity);

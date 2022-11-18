@@ -17,7 +17,7 @@ public class AssetProcessCountingDomain extends AssetsProcess implements Seriali
     /**
      * 流程类型编号
      */
-    private String processType = AssetProcessType.COUNTING_PROCESS.getCode();
+//    private String processType = AssetProcessType.COUNTING_PROCESS.getCode();
 
     /**
      * 实例ID

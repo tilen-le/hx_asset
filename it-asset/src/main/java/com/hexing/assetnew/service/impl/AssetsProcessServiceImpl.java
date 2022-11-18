@@ -69,9 +69,9 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         List<AssetProcessVariable> varList = this.selectVariableListByProcessId(process.getId());
 
         for (AssetProcessVariable var : varList) {
-            String fieldValue = (String) BeanTool.getFieldValue(process, var.getFieldKey());
-            if (StringUtils.isNotEmpty(fieldValue)) {
-                var.setFieldValue(fieldValue);
+            Object fieldValue = BeanTool.getFieldValue(process, var.getFieldKey());
+            if (ObjectUtil.isNotEmpty(fieldValue)) {
+                var.setFieldValue(String.valueOf(fieldValue));
             } else {
                 var.setFieldValue(null);
             }
@@ -100,9 +100,9 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
                 AssetProcessVariable newVar = new AssetProcessVariable();
                 newVar.setProcessId(process.getId());
                 newVar.setFieldId(fieldKeyIdMap.get(field.getName()));
-                String fieldValue = (String) BeanTool.getFieldValue(process, field.getName());
-                if (StringUtils.isNotEmpty(fieldValue)) {
-                    newVar.setFieldValue(fieldValue);
+                Object fieldValue = BeanTool.getFieldValue(process, field.getName());
+                if (ObjectUtil.isNotEmpty(fieldValue)) {
+                    newVar.setFieldValue(String.valueOf(fieldValue));
                 } else {
                     newVar.setFieldValue(null);
                 }

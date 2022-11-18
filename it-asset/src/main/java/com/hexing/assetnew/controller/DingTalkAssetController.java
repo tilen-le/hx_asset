@@ -4,13 +4,14 @@ import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hexing.asset.domain.dto.OldProcessCommonDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.assetnew.domain.*;
+import com.hexing.assetnew.domain.dto.ProcessCommonDTO;
 import com.hexing.assetnew.domain.dto.dingtalk.CountAssetDTO;
 import com.hexing.assetnew.domain.dto.dingtalk.CountAssetSimpleDTO;
+import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.assetnew.service.*;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.controller.BaseController;
@@ -33,7 +34,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * 开放给钉钉端的rest接口
@@ -226,7 +229,7 @@ public class DingTalkAssetController extends BaseController {
     @ApiOperation("资产盘点流程")
     @PostMapping("/counting/countAsset")
     @Transactional
-    public AjaxResult countAsset(@RequestBody OldProcessCommonDTO<CountAssetDTO> params) {
+    public AjaxResult countAsset(@RequestBody ProcessCommonDTO<CountAssetDTO> params) {
 
         CountAssetDTO data = params.getData();
 
@@ -279,6 +282,7 @@ public class DingTalkAssetController extends BaseController {
 
         // 盘点任务状态更新
         AssetProcessCountingDomain queryParam = new AssetProcessCountingDomain();
+        queryParam.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
         queryParam.setTaskCode(task.getTaskCode());
         queryParam.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
         List<AssetsProcess> notCounted = processService.list(queryParam);

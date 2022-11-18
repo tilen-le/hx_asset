@@ -19,7 +19,7 @@ public interface IAssetProcessFieldService extends IService<AssetProcessField> {
     AssetProcessField selectAssetProcessFieldById(Long id);
 
     /**
-     * 查询【请填写功能名称】列表
+     * 查询流程字段列表
      */
     List<AssetProcessField> selectAssetProcessFieldList(AssetProcessField assetProcessField);
 

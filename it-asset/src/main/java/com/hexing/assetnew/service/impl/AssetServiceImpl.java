@@ -15,11 +15,13 @@ import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
 import com.hexing.asset.enums.UIPcodeEnum;
+import com.hexing.assetnew.enums.SysDictTypeEnum;
 import com.hexing.assetnew.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetProcessExchangeService;
 import com.hexing.asset.service.IAssetProcessTransferService;
 import com.hexing.assetnew.service.IAssetService;
 import com.hexing.asset.service.IAssetUpdateLogService;
+import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysDictData;
@@ -54,14 +56,6 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements IAssetService {
-
-    // 数据字典类型值
-    private static final String ASSET_IMPORT_REQUIRED_FIELD = "asset_import_required_field";
-    private static final String COMPANY_LIST = "company_list";
-    private static final String MANAGE_DEPT = "manage_dept";
-    private static final String ASSET_CATEGORY = "asset_category";
-
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 
     private List<SysDictData> assetImportRequiredFieldDictDataList = null;
 
@@ -117,7 +111,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             LambdaUpdateWrapper<Asset> wrapper = new LambdaUpdateWrapper<>();
             String assetCode = asset.getAssetCode();
             if (StringUtils.isBlank(assetCode)) {
-                return new Result(500, "平台资产编号为空");
+                return new Result(HttpStatus.ERROR, "平台资产编号为空");
             }
             if (!assetCode.startsWith("[")) {
                 wrapper.eq(Asset::getAssetCode, assetCode);
@@ -157,11 +151,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             // 查询保管人信息
             SysUser user = sysUserService.selectUserByUserName(params.getUserCode());
             if (user == null) {
-                return new Result(500, "未查询到此保管人");
+                return new Result(HttpStatus.ERROR, "未查询到此保管人");
             }
             // 查询保管人所属部门
             if (user.getDeptId() == null) {
-                return new Result(500, "未查询到保管部门");
+                return new Result(HttpStatus.ERROR, "未查询到保管部门");
             }
             SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
 
@@ -178,7 +172,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             return Result.success(params);
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result(500, "出错");
+            return new Result(HttpStatus.ERROR, "出错");
         }
     }
 
@@ -243,7 +237,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             return Result.success("更换成功");
         } catch (Exception e) {
             e.printStackTrace();
-            return new Result(500, "出错");
+            return new Result(HttpStatus.ERROR, "出错");
         }
     }
 
@@ -263,11 +257,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 for (int i = 0; i < assets.size(); i++) {
                     JSONObject updateInfo = assets.getObject(i, JSONObject.class);
                     if (StringUtils.isNull(recipient)) {
-                        return new Result(500, "接收者工号不能为空");
+                        return new Result(HttpStatus.ERROR, "接收者工号不能为空");
                     }
                     SysUser recipientInfo = sysUserService.selectUserByUserName(recipient);
                     if (recipientInfo == null) {
-                        return new Result(500, "后台无该接收者信息");
+                        return new Result(HttpStatus.ERROR, "后台无该接收者信息");
                     }
                     int processId = assetProcessTransferService.saveProcess(instanceId, userCode, updateInfo.getString("assetCode"));
                     String location = updateInfo.getString("location");
@@ -287,7 +281,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             return Result.success("资产转移成功");
         } catch (Exception e) {
             log.error("", e);
-            return new Result(500, "出错");
+            return new Result(HttpStatus.ERROR, "出错");
         }
     }
 
@@ -483,7 +477,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      */
     private String checkRequiredFields(Asset asset) throws Exception {
         if (assetImportRequiredFieldDictDataList == null) {
-            assetImportRequiredFieldDictDataList = sysDictDataMapper.selectDictDataByType(ASSET_IMPORT_REQUIRED_FIELD);
+            assetImportRequiredFieldDictDataList = sysDictDataMapper.selectDictDataByType(SysDictTypeEnum.ASSET_IMPORT_REQUIRED_FIELD.getValue());
         }
         Class<Asset> clazz = Asset.class;
         for (SysDictData dictData : assetImportRequiredFieldDictDataList) {
@@ -501,11 +495,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         StringBuilder assetCode = new StringBuilder();
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
         DecimalFormat df = new DecimalFormat("0000");
 
-        List<SysDictData> companyListDictDataList = sysDictDataMapper.selectDictDataByType(COMPANY_LIST);
-        List<SysDictData> manageDeptDictDataList = sysDictDataMapper.selectDictDataByType(MANAGE_DEPT);
-        List<SysDictData> assetCategoryDictDataList = sysDictDataMapper.selectDictDataByType(ASSET_CATEGORY);
+        List<SysDictData> companyListDictDataList = sysDictDataMapper.selectDictDataByType(SysDictTypeEnum.COMPANY_LIST.getValue());
+        List<SysDictData> manageDeptDictDataList = sysDictDataMapper.selectDictDataByType(SysDictTypeEnum.MANAGE_DEPT.getValue());
+        List<SysDictData> assetCategoryDictDataList = sysDictDataMapper.selectDictDataByType(SysDictTypeEnum.ASSET_CATEGORY.getValue());
 
         String capitalizationDate = sdf.format(asset.getCapitalizationDate());
         String capitalizationDateCode = capitalizationDate.split("/")[0].substring(1);       /* 资本化日期对应编码 */

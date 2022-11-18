@@ -63,7 +63,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
      * 根据流程id更新值表
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateByProcessId(AssetsProcess process) {
 
         List<AssetProcessVariable> varList = this.selectVariableListByProcessId(process.getId());
@@ -181,6 +181,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
      * @param process
      * @param domain
      */
+    @Override
     public <T> T convertProcess(AssetsProcess process, T domain) {
         List<AssetProcessVariable> variableList = process.getVariableList();
         for (AssetProcessVariable variable : variableList) {

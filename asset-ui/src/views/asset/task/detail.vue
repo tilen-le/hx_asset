@@ -53,7 +53,8 @@
         <template slot-scope="scope">
           <!--<i class="el-icon-time"></i>-->
           <slot :name="item.fieldKey" :data="scope.row[item.fieldKey]" :row="scope.row" :index="scope.$index">
-            <template v-if="!item.timeFormat && !item.dictType && item.fieldKey != 'assetCode'">
+            <template
+              v-if="!item.timeFormat && !item.dictType && item.fieldKey != 'assetCode' && item.fieldKey != 'userCode'">
               <span>{{ scope.row[item.fieldKey] }}</span>
             </template>
             <template v-if="item.timeFormat">
@@ -81,6 +82,22 @@
                 </span>
               </el-popover>
             </template>
+            <template v-if="item.fieldKey == 'userCode'">
+              <el-popover trigger="hover" placement="top" popper-class="assetPopover">
+                <div style="width:calc(30vw)" v-loading="loadUser">
+                  <el-descriptions title="人员详情" :column="2" size="mini" border>
+                    <el-descriptions-item label="工号">{{ userData.userName }}</el-descriptions-item>
+                    <el-descriptions-item label="姓名">{{ userData.nickName }}</el-descriptions-item>
+                    <el-descriptions-item label="部门">{{ userData.dept?userData.dept.deptName:"" }}</el-descriptions-item>
+                    <el-descriptions-item label="电话">{{ userData.phonenumber }}</el-descriptions-item>
+                    <el-descriptions-item label="邮箱">{{ userData.email }}</el-descriptions-item>
+                  </el-descriptions>
+                </div>
+                <span slot="reference" style="color:rgb(140,197,255)" @mouseover="getUser(scope.row.userCode)">
+                  {{ scope.row.userCode }}
+                </span>
+              </el-popover>
+            </template>
           </slot>
         </template>
       </el-table-column>
@@ -94,6 +111,7 @@
 
 <script>
 import { getAsset } from "@/api/asset/asset"
+import { getUserDetail } from "@/api/system/user"
 import { countRecord, listRecord, exportRecord } from "@/api/task/record";
 import { listField } from "@/api/process/field";
 export default {
@@ -123,7 +141,10 @@ export default {
       countingStatus: null,
       // 资产详情
       loadAsset: true,
-      assetData: {}
+      assetData: {},
+      // 人员详情
+      loadUser: true,
+      userData: {},
     };
   },
   created() {
@@ -211,6 +232,13 @@ export default {
       getAsset(assetCode).then(response => {
         this.assetData = response.data;
         this.loadAsset = false;
+      })
+    },
+    getUser(userCode) {
+      this.loadUser = true;
+      getUserDetail(userCode).then(response => {
+        this.userData = response.data;
+        this.loadUser = false;
       })
     },
     /** 导出按钮操作 */

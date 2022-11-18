@@ -1,14 +1,12 @@
 package com.hexing.assetnew.service;
 
-import java.util.List;
-import java.util.Map;
-
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.assetnew.domain.AssetProcessVariable;
 import com.hexing.assetnew.domain.AssetsProcess;
-import com.hexing.asset.domain.Process;
 import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * 资产流程Service接口
@@ -16,8 +14,7 @@ import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
  * @author zxy
  * @date 2022-11-04
  */
-public interface IAssetsProcessService extends IService<AssetsProcess>
-{
+public interface IAssetsProcessService extends IService<AssetsProcess> {
 
     /**
      * 查询资产流程
@@ -50,6 +47,7 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
 
     /**
      * 盘点状态统计
+     *
      * @param taskCode 盘点任务编号
      * @return
      */

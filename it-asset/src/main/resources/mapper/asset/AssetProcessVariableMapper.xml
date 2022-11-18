@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.hexing.assetnew.mapper.AssetProcessVariableMapper">
-    
-    <resultMap type="AssetProcessVariable" id="AssetProcessVariableResult">
-        <result property="id"    column="id"    />
-        <result property="processId"    column="process_id"    />
-        <result property="fieldId"    column="field_id"    />
-        <result property="fieldValue"    column="field_value"    />
-    </resultMap>
 
     <sql id="selectAssetProcessVariableVo">
         select id, process_id, field_id, field_value from asset_process_variable
     </sql>
 
-    <select id="selectProcessVariableWithCondition" resultType="AssetProcessVariable">
+    <select id="selectProcessVariableWithCondition" resultType="com.hexing.assetnew.domain.AssetProcessVariable">
         select v.id, v.process_id, v.field_id, v.field_value, f.field_key
         from asset_process_variable v
         left join asset_process_field f on v.field_id=f.id

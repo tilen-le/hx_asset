@@ -23,12 +23,5 @@ public interface AssetProcessVariableMapper extends BaseMapper<AssetProcessVaria
      */
     List<AssetProcessVariable> selectProcessVariableWithCondition(List<Long> processIdList);
 
-    /**
-     * 批量插入
-     *
-     * @param variableList
-     * @return
-     */
-    Integer insertBatch(List<AssetProcessVariable> variableList);
 
 }

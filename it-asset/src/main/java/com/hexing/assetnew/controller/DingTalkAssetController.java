@@ -1,17 +1,16 @@
 package com.hexing.assetnew.controller;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONUtil;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
-import com.hexing.asset.domain.AssetProcessCounting;
+import com.hexing.asset.domain.dto.OldProcessCommonDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
 import com.hexing.assetnew.domain.*;
-import com.hexing.assetnew.enums.AssetProcessType;
+import com.hexing.assetnew.domain.dto.dingtalk.CountAssetDTO;
+import com.hexing.assetnew.domain.dto.dingtalk.CountAssetSimpleDTO;
 import com.hexing.assetnew.service.*;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.controller.BaseController;
@@ -72,8 +71,8 @@ public class DingTalkAssetController extends BaseController {
                     .eq(AssetProcessField::getProcessType, datum.getProcessType()));
             AssetsProcess process = processService.getOne(new LambdaQueryWrapper<AssetsProcess>().eq(AssetsProcess::getProcessType, datum.getProcessType())
                     .eq(AssetsProcess::getAssetCode, datum.getAssetCode()));
-            processList.add(process.setStatus("1"));
-            processList.add(process.setUpdateTime(new Date()));
+//            processList.add(process.setStatus("1"));
+//            processList.add(process.setUpdateTime(new Date()));
             for (AssetProcessField field : processFieldList) {
                 AssetProcessVariable variable = processVariableService.getOne(new LambdaQueryWrapper<AssetProcessVariable>().eq(AssetProcessVariable::getProcessId, process.getId())
                         .eq(AssetProcessVariable::getFieldId, field.getId()));
@@ -189,10 +188,11 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error( "该盘点任务名称对应的盘点任务不存在",asset);
         }
 
-        Map<String,Object> paramMap = new HashMap<>();
-        paramMap.put("taskCode", task.getTaskCode());
-        paramMap.put("assetCode", assetCode);
-        AssetProcessCounting entity = (AssetProcessCounting) processService.getOne(AssetProcessType.COUNTING_PROCESS.getCode(), paramMap);
+        AssetProcessCountingDomain queryParam = new AssetProcessCountingDomain();
+        queryParam.setTaskCode(task.getTaskCode());
+        queryParam.setAssetCode(assetCode);
+        AssetProcessCountingDomain entity = processService
+                .convertProcess(processService.getOne(queryParam), new AssetProcessCountingDomain());
 
         if (ObjectUtil.isNull(entity)) {
             Asset asset = CommonUtils.toNullStr(new Asset());
@@ -226,17 +226,17 @@ public class DingTalkAssetController extends BaseController {
     @ApiOperation("资产盘点流程")
     @PostMapping("/counting/countAsset")
     @Transactional
-    public AjaxResult countAsset(@RequestBody JSONObject params) {
+    public AjaxResult countAsset(@RequestBody OldProcessCommonDTO<CountAssetDTO> params) {
 
-        JSONObject data = params.getObject("data", JSONObject.class);
-        String taskName = data.getString("taskName");
+        CountAssetDTO data = params.getData();
 
         // 判断盘点任务名称是否为空
-        if (StringUtils.isEmpty(taskName)) {
+        if (StringUtils.isEmpty(data.getTaskName())) {
             return AjaxResult.error("盘点任务名称为空");
         }
+
         AssetInventoryTask task = assetInventoryTaskService
-                .getOne(new LambdaQueryWrapper<AssetInventoryTask>().eq(AssetInventoryTask::getTaskName, taskName));
+                .getOne(new LambdaQueryWrapper<AssetInventoryTask>().eq(AssetInventoryTask::getTaskName, data.getTaskName()));
         if (ObjectUtil.isNull(task)) {
             return AjaxResult.error(HttpStatus.ERROR, "该盘点任务名称对应的盘点任务不存在");
         }
@@ -246,19 +246,17 @@ public class DingTalkAssetController extends BaseController {
             return AjaxResult.error(HttpStatus.ERROR, "盘点任务已结束");
         }
 
-        String userCode = data.getString("userCode");
-        String instanceId = data.getString("instanceId");
-        JSONArray assetList = data.getJSONArray("assets");
+        List<CountAssetSimpleDTO> assetList = data.getAssets();
+        for (CountAssetSimpleDTO assetInfo : assetList) {
+            String assetCode = assetInfo.getAssetCode();
+            // 若备注不为空，则判为盘点异常
+            String comment = assetInfo.getComment();
 
-        for (Object o : assetList) {
-            String assetCode = JSONUtil.parseObj(o).getStr("assetCode");
-            // 若备注不为空，则为盘点异常
-            String comment = JSONUtil.parseObj(o).getStr("comment");
-
-            Map<String,Object> paramMap = new HashMap<>();
-            paramMap.put("taskCode", task.getTaskCode());
-            paramMap.put("assetCode", assetCode);
-            AssetProcessCounting entity = (AssetProcessCounting) processService.getOne(AssetProcessType.COUNTING_PROCESS.getCode(), paramMap);
+            AssetProcessCountingDomain queryParam = new AssetProcessCountingDomain();
+            queryParam.setTaskCode(task.getTaskCode());
+            queryParam.setAssetCode(assetCode);
+            AssetProcessCountingDomain entity = processService
+                    .convertProcess(processService.getOne(queryParam), new AssetProcessCountingDomain());
 
             // 若为异常数据，则跳过
             if (ObjectUtil.isNull(entity)) {
@@ -271,20 +269,20 @@ public class DingTalkAssetController extends BaseController {
                 } else {
                     entity.setCountingStatus(AssetCountingStatus.COUNTED.getStatus());
                 }
-                entity.setUserCode(userCode)
-                        .setInstanceId(instanceId)
-                        .setCountingTime(DateUtils.getNowDate())
-                        .setComment(comment);
-//                processService.updateByProcessId(entity);
+                entity.setUserCode(data.getUserCode());
+                entity.setInstanceId(data.getInstanceId());
+                entity.setCountingTime(DateUtils.getNowDate());
+                entity.setComment(comment);
+                processService.updateByProcessId(entity);
             }
         }
 
         // 盘点任务状态更新
+        AssetProcessCountingDomain queryParam = new AssetProcessCountingDomain();
+        queryParam.setTaskCode(task.getTaskCode());
+        queryParam.setCountingStatus(AssetCountingStatus.NOT_COUNTED.getStatus());
+        List<AssetsProcess> notCounted = processService.list(queryParam);
         // 若指定盘点任务下待盘记录数为0
-        Map<String, Object> paramMap = new HashMap<>();
-        paramMap.put("taskCode", task.getTaskCode());
-        paramMap.put("countingStatus", AssetCountingStatus.NOT_COUNTED.getStatus());
-        List<AssetsProcess> notCounted = processService.selectProcessWithCondition(AssetProcessType.COUNTING_PROCESS.getCode(), paramMap);
         if (notCounted.size() == 0) {
             // 更新盘点任务状态为已完成
             assetInventoryTaskService.update(new LambdaUpdateWrapper<AssetInventoryTask>()

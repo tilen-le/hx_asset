@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hexing.common.annotation.Excel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
 
 import java.util.Date;
 import java.util.List;
@@ -20,7 +19,6 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode
-@Accessors(chain = true)
 public class AssetsProcess {
 
     private static final long serialVersionUID = 1L;

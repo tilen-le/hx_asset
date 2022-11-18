@@ -18,11 +18,4 @@ import java.util.List;
 @Service
 public class AssetProcessVariableServiceImpl extends ServiceImpl<AssetProcessVariableMapper, AssetProcessVariable> implements IAssetProcessVariableService {
 
-    @Autowired
-    private AssetProcessVariableMapper variableMapper;
-
-    public Integer insertBatch(List<AssetProcessVariable> variableList) {
-        return variableMapper.insertBatch(variableList);
-    }
-
 }

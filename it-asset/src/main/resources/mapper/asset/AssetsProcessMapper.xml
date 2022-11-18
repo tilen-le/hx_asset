@@ -16,16 +16,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="remark"    column="remark"    />
     </resultMap>
 
-
-    <sql id="selectAssetsProcessVo">
-        select id, process_type, asset_id, status, create_by, create_time, update_by, update_time, remark from assets_process
-    </sql>
-
     <select id="selectVariableListByProcessId" resultType="AssetProcessVariable">
-        select t1.*, t2.field_key
-        from asset_process_variable t1
-        left join asset_process_field t2 on t1.field_id = t2.id
-        where t1.process_id = #{processId}
+        SELECT v.id, v.process_id, v.field_id, v.field_value, f.field_key, f.field_label
+        FROM asset_process_variable v
+        LEFT JOIN asset_process_field f ON v.field_id=f.id
+        where v.process_id = #{processId}
     </select>
 
     <select id="selectProcessWithDomain" resultMap="AssetsProcessResult">
@@ -67,7 +62,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </select>
 
-    <select id="selectVarWithProcessIds" resultType="com.hexing.assetnew.domain.AssetProcessVariable">
+    <select id="selectVarWithProcessIds" resultType="AssetProcessVariable">
         SELECT v.id, v.process_id, v.field_id, v.field_value, f.field_key, f.field_label
         FROM asset_process_variable v
         LEFT JOIN asset_process_field f ON v.field_id=f.id

@@ -15,20 +15,4 @@ import java.util.List;
 @Repository
 public interface AssetProcessVariableMapper extends BaseMapper<AssetProcessVariable> {
 
-    /**
-     * 查询流程值表列表
-     *
-     * @param processIdList
-     * @return
-     */
-    List<AssetProcessVariable> selectProcessVariableWithCondition(List<Long> processIdList);
-
-    /**
-     * 批量插入
-     *
-     * @param variableList
-     * @return
-     */
-    Integer insertBatch(List<AssetProcessVariable> variableList);
-
 }

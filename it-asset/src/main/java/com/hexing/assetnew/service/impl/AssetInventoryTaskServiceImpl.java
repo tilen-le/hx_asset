@@ -177,11 +177,11 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
         List<AssetsProcess> processList = new ArrayList<>();
         for (String assetCode : assetCodeList) {
             AssetsProcess assetsProcess = new AssetsProcess();
-            assetsProcess.setAssetCode(assetCode)
-                    .setCreateBy(userCode)
-                    .setProcessType(AssetProcessType.COUNTING_PROCESS.getCode())
-//                    .setStatus(CountingTaskStatus.COUNTING.getStatus())
-                    .setCreateTime(now);
+            assetsProcess.setAssetCode(assetCode);
+            assetsProcess.setCreateBy(userCode);
+            assetsProcess.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
+//                    assetsProcess.setStatus(CountingTaskStatus.COUNTING.getStatus());
+            assetsProcess.setCreateTime(now);
             processList.add(assetsProcess);
         }
 
@@ -231,6 +231,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
             LocalDateTime lastMomentOfDate = DateUtils.getLastMomentOfDate(task.getEndDate());
             if (LocalDateTime.now().isAfter(lastMomentOfDate)) {
                 task.setStatus(CountingTaskStatus.FINISHED.getStatus());
+                this.updateById(task);
             }
         }
     }

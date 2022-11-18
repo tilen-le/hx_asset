@@ -10,7 +10,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.assetnew.domain.Asset;
 import com.hexing.asset.domain.dto.ExchangeProcessDTO;
-import com.hexing.asset.domain.dto.ProcessCommonDTO;
+import com.hexing.asset.domain.dto.OldProcessCommonDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.SAPRespType;
@@ -178,7 +178,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
     @Override
     @Transactional
-    public Result updateAssetExchange(ProcessCommonDTO<ExchangeProcessDTO> params) {
+    public Result updateAssetExchange(OldProcessCommonDTO<ExchangeProcessDTO> params) {
         try {
             ExchangeProcessDTO data = params.getData();
 

@@ -22,12 +22,8 @@ public interface AssetsProcessMapper extends BaseMapper<AssetsProcess> {
 
     List<AssetProcessVariable> selectVariableListByProcessId(Long processId);
 
-    List<AssetsProcess> selectProcessWithCondition(@Param("processType") String processType, @Param("params") Map<String, Object> params);
-
     List<AssetsProcess> selectProcessWithDomain(@Param("process") AssetsProcess process, @Param("params") List<AssetProcessField> searchDomains);
 
     List<AssetProcessVariable> selectVarWithProcessIds(List<Long> processIds);
-
-    List<AssetsProcess> selectProcessWithCondition(MapperQueryParam param);
 
 }

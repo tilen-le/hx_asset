@@ -1,6 +1,7 @@
 package com.hexing.assetnew.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.common.annotation.Excel;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,6 +13,11 @@ import java.util.Date;
 @Data
 @ApiModel(description = "盘点记录DTO")
 public class AssetProcessCountingDomain extends AssetsProcess implements Serializable {
+
+    /**
+     * 流程类型编号
+     */
+    private String processType = AssetProcessType.COUNTING_PROCESS.getCode();
 
     /**
      * 实例ID

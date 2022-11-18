@@ -7,34 +7,27 @@ import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.AssetProcessCounting;
-import com.hexing.asset.domain.Process;
-import com.hexing.asset.domain.dto.MapperQueryParam;
 import com.hexing.asset.enums.AssetCountingStatus;
-import com.hexing.asset.zxy.PdProcessDomain;
-import com.hexing.assetnew.domain.*;
+import com.hexing.assetnew.domain.AssetProcessCountingDomain;
+import com.hexing.assetnew.domain.AssetProcessField;
+import com.hexing.assetnew.domain.AssetProcessVariable;
+import com.hexing.assetnew.domain.AssetsProcess;
 import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
 import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.assetnew.mapper.AssetProcessFieldMapper;
-import com.hexing.assetnew.mapper.AssetProcessVariableMapper;
 import com.hexing.assetnew.mapper.AssetsProcessMapper;
 import com.hexing.assetnew.service.IAssetProcessFieldService;
 import com.hexing.assetnew.service.IAssetProcessVariableService;
-import com.hexing.assetnew.service.IAssetService;
 import com.hexing.assetnew.service.IAssetsProcessService;
-import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.utils.PageUtil;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
-import com.hexing.system.service.ISysDictDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -45,8 +38,8 @@ import java.util.stream.Collectors;
  * @date 2022-11-04
  */
 @Service
-public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, AssetsProcess> implements IAssetsProcessService
-{
+public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, AssetsProcess> implements IAssetsProcessService {
+
     @Autowired
     private AssetsProcessMapper processMapper;
     @Autowired
@@ -54,52 +47,16 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     @Autowired
     private IAssetProcessFieldService fieldService;
     @Autowired
-    private ISysDictDataService sysDictDataService;
-    @Autowired
-    private AssetProcessVariableMapper processVariableMapper;
-    @Autowired
-    private IAssetService assetService;
-    @Autowired
     private AssetProcessFieldMapper assetProcessFieldMapper;
 
 
     /**
      * 查询资产流程
-     * @param processType 流程类型
-     * @param params 查询参数
-     * @return
      */
     @Override
-    public Object getOne(String processType, Map<String, Object> params) {
-        final String PROCESS_DICT_TYPE = "asset_process";
-        List<SysDictData> dictDataList = sysDictDataService.selectDictDataByType(PROCESS_DICT_TYPE);
-        String processClassName = dictDataList
-                .stream().filter(x->processType.equals(x.getDictValue())).map(SysDictData::getDictLabelEn).findFirst().orElse(null);
-        String fullClassName = "com.hexing.asset.domain." + processClassName;
-
-        Object obj = null;
-        try {
-            Class<?> clazz = Class.forName(fullClassName);
-            obj = clazz.newInstance();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        List<AssetsProcess> processList = this.selectProcessWithCondition(processType, params);
-        AssetsProcess process = processList.get(0);
-        for (AssetProcessVariable var : process.getVariableList()) {
-            BeanTool.setFieldValue(obj, var.getFieldKey(), var.getFieldValue());
-        }
-
-        try {
-            Field processIdField = obj.getClass().getDeclaredField("processId");
-            processIdField.setAccessible(true);
-            processIdField.set(obj, process.getId());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return obj;
+    public AssetsProcess getOne(AssetsProcess process) {
+        List<AssetsProcess> processList = this.list(process);
+        return processList.get(0);
     }
 
     /**
@@ -174,20 +131,6 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     public List<AssetsProcess> list(AssetsProcess process) {
         List<AssetProcessField> searchDomain = getSearchDomain(process);
         return searchAssetProcess(searchDomain, process);
-    }
-
-
-    @Override
-    public List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params) {
-        List<AssetsProcess> processList = processMapper.selectProcessWithCondition(null);
-        List<AssetProcessVariable> varList = processVariableMapper.selectProcessVariableWithCondition(processList
-                .stream().map(AssetsProcess::getId).collect(Collectors.toList()));
-        Map<Long, List<AssetProcessVariable>> varMap = varList
-                .stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
-        for (AssetsProcess process : processList) {
-            process.setVariableList(varMap.get(String.valueOf(process.getId())));
-        }
-        return processList;
     }
 
     /**

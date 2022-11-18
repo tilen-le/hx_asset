@@ -22,7 +22,7 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
     /**
      * 查询资产流程
      */
-    Object getOne(String processType, Map<String, Object> params);
+    AssetsProcess getOne(AssetsProcess process);
 
     /**
      * 根据流程id更新值表
@@ -43,8 +43,6 @@ public interface IAssetsProcessService extends IService<AssetsProcess>
      * 查询资产流程列表
      */
     List<AssetsProcess> list(AssetsProcess process);
-
-    List<AssetsProcess> selectProcessWithCondition(String processType, Map<String, Object> params);
 
     <T> T convertProcess(AssetsProcess process, T domain);
 

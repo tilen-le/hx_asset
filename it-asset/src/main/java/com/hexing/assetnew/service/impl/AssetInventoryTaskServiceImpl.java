@@ -129,7 +129,7 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
      * 新增盘点任务
      */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public boolean insertAssetCountingTask(AssetInventoryTask task) {
 
         Date now = DateUtils.getNowDate();

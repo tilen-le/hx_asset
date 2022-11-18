@@ -159,3 +159,11 @@ export function getUserListByRoleCodes(query) {
     params: query
   })
 }
+
+// 根据工号获取用户详情
+export function getUserDetail(userCode) {
+  return request({
+    url: `/system/user/detail/${userCode}`,
+    method: "get",
+  });
+}

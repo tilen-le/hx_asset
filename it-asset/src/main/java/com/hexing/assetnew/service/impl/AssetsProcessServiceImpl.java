@@ -56,7 +56,10 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     @Override
     public AssetsProcess getOne(AssetsProcess process) {
         List<AssetsProcess> processList = this.list(process);
-        return processList.get(0);
+        if (CollectionUtil.isNotEmpty(processList)){
+            return processList.get(0);
+        }
+        return new AssetsProcess();
     }
 
     /**
@@ -184,8 +187,10 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     @Override
     public <T> T convertProcess(AssetsProcess process, T domain) {
         List<AssetProcessVariable> variableList = process.getVariableList();
-        for (AssetProcessVariable variable : variableList) {
-            BeanTool.setFieldValueThrowEx(domain, variable.getFieldKey(), variable.getFieldValue());
+        if (CollectionUtil.isNotEmpty(variableList)){
+            for (AssetProcessVariable variable : variableList) {
+                BeanTool.setFieldValueThrowEx(domain, variable.getFieldKey(), variable.getFieldValue());
+            }
         }
         process.setVariableList(null);
         BeanUtil.copyProperties(process, domain);

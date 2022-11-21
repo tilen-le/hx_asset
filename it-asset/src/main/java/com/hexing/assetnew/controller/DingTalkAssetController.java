@@ -152,9 +152,9 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("查询盘点任务编码")
     @PostMapping("/selectCountingTaskCode")
-    public JSONObject selectCountingTaskCode(@RequestBody JSONObject params) {
+    public JSONObject selectCountingTaskCode(@RequestBody CountAssetDTO params) {
         JSONObject result = new JSONObject();
-        String userCode = params.getString("userCode");
+        String userCode = params.getUserCode();
         if (userCode.startsWith("S")){
             userCode = userCode.substring(1);
         }
@@ -166,9 +166,9 @@ public class DingTalkAssetController extends BaseController {
                 list.add(task.getTaskName());
             }
         }
-        JSONObject addressList = new JSONObject();
-        addressList.put("data", list);
-        result.put("result", addressList);;
+        JSONObject data = new JSONObject();
+        data.put("data", list);
+        result.put("result", data);
         return result;
     }
 
@@ -177,9 +177,9 @@ public class DingTalkAssetController extends BaseController {
      */
     @ApiOperation("扫码查询资产信息")
     @PostMapping("/counting/getAssetInfo")
-    public AjaxResult getAssetInfo(@RequestBody JSONObject params) {
-        String assetCode = params.getString("assetCode");
-        String taskName = params.getString("taskName");
+    public AjaxResult getAssetInfo(@RequestBody CountAssetDTO params) {
+        String assetCode = params.getAssetCode();
+        String taskName = params.getTaskName();
         if (StringUtils.isEmpty(taskName)) {
             Asset asset = CommonUtils.toNullStr(new Asset());
             return AjaxResult.error("盘点任务名称未选择",asset);
@@ -200,6 +200,11 @@ public class DingTalkAssetController extends BaseController {
         if (ObjectUtil.isNull(entity)) {
             Asset asset = CommonUtils.toNullStr(new Asset());
             return AjaxResult.error( "所盘点资产不在当前任务盘点范围内",asset);
+        }else {
+            if (StringUtils.isEmpty(entity.getAssetCode())){
+                Asset asset = CommonUtils.toNullStr(new Asset());
+                return AjaxResult.error( "所盘点资产不在当前任务盘点范围内",asset);
+            }
         }
         if (!AssetCountingStatus.NOT_COUNTED.getStatus().equals(entity.getCountingStatus())) {
             Asset asset = CommonUtils.toNullStr(new Asset());
@@ -243,7 +248,10 @@ public class DingTalkAssetController extends BaseController {
         if (ObjectUtil.isNull(task)) {
             return AjaxResult.error(HttpStatus.ERROR, "该盘点任务名称对应的盘点任务不存在");
         }
-
+       String userCode = data.getUserCode();
+        if (userCode.startsWith("S")){
+            userCode = userCode.substring(1);
+        }
         // 盘点任务是否结束
         if (CountingTaskStatus.FINISHED.getStatus().equals(task.getStatus())) {
             return AjaxResult.error(HttpStatus.ERROR, "盘点任务已结束");
@@ -272,7 +280,7 @@ public class DingTalkAssetController extends BaseController {
                 } else {
                     entity.setCountingStatus(AssetCountingStatus.COUNTED.getStatus());
                 }
-                entity.setUserCode(data.getUserCode());
+                entity.setUserCode(userCode);
                 entity.setInstanceId(data.getInstanceId());
                 entity.setCountingTime(DateUtils.getNowDate());
                 entity.setComment(comment);

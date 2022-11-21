@@ -13,6 +13,9 @@ public class CountAssetDTO {
     @ApiModelProperty(value = "资产管理员工号")
     private String taskName;
 
+    @ApiModelProperty(value = "资产编码")
+    private String assetCode;
+
     @ApiModelProperty(value = "发起人工号")
     private String userCode;
 

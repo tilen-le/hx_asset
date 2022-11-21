@@ -204,11 +204,11 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
      */
     @Override
     public CountingStatusNumDTO countingStatusCount(String taskCode) {
-        final String FIELD_COUNTING_STATUS = "countingStatus";
+        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessVariable::getFieldKey);
 
         AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
         entity.setTaskCode(taskCode);
-        entity.setProcessType("100"); // TODO 暂时写死
+        entity.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
         List<AssetsProcess> processList = this.list(entity);
 
         CountingStatusNumDTO numDTO = new CountingStatusNumDTO();
@@ -218,7 +218,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
             List<String> countStatusList = processList.stream()
                     .map(process -> process.getVariableList().stream()
-                            .filter(x -> FIELD_COUNTING_STATUS.equals(x.getFieldKey()))
+                            .filter(x -> countingStatusFieldName.equals(x.getFieldKey()))
                             .map(AssetProcessVariable::getFieldValue)
                             .findFirst()
                             .orElse(null))
@@ -267,7 +267,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
     @Override
     public CountingStatusNumDTO countingStatusCountNew(String taskCode,List<AssetProcessField> processFields) {
-        final String FIELD_COUNTING_STATUS = "countingStatus";
+        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessVariable::getFieldKey);
 
         AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
         entity.setTaskCode(taskCode);
@@ -282,7 +282,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
             List<String> countStatusList = processList.stream()
                     .map(process -> process.getVariableList().stream()
-                            .filter(x -> FIELD_COUNTING_STATUS.equals(x.getFieldKey()))
+                            .filter(x -> countingStatusFieldName.equals(x.getFieldKey()))
                             .map(AssetProcessVariable::getFieldValue)
                             .findFirst()
                             .orElse(null))

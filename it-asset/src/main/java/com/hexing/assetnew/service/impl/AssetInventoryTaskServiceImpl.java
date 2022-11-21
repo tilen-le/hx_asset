@@ -6,10 +6,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.enums.AssetCountingStatus;
 import com.hexing.asset.enums.CountingTaskStatus;
-import com.hexing.assetnew.domain.Asset;
-import com.hexing.assetnew.domain.AssetInventoryTask;
-import com.hexing.assetnew.domain.AssetProcessCountingDomain;
-import com.hexing.assetnew.domain.AssetsProcess;
+import com.hexing.assetnew.domain.*;
 import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
 import com.hexing.assetnew.enums.AssetProcessType;
 import com.hexing.assetnew.mapper.AssetInventoryTaskMapper;
@@ -94,9 +91,10 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         List<SysDept> sysDepts = sysDeptService.selectDeptList(new SysDept());
+        List<AssetProcessField> processFields = assetsProcessService.getProcessFields();
 
         for (AssetInventoryTask task : taskList) {
-            CountingStatusNumDTO numDTO = assetsProcessService.countingStatusCount(task.getTaskCode());
+            CountingStatusNumDTO numDTO = assetsProcessService.countingStatusCountNew(task.getTaskCode(),processFields);
             task.setAssetTotal(numDTO.getTotal());
             task.setAssetNotCounted(numDTO.getNotCounted());
             task.setAssetCounted(numDTO.getCounted());

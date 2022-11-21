@@ -260,4 +260,72 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         variableService.saveBatch(varList);
     }
 
+    @Override
+    public CountingStatusNumDTO countingStatusCountNew(String taskCode,List<AssetProcessField> processFields) {
+        final String FIELD_COUNTING_STATUS = "countingStatus";
+
+        AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
+        entity.setTaskCode(taskCode);
+        entity.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
+
+        List<AssetsProcess> processList = this.listProcessInfo(entity,processFields);
+
+        CountingStatusNumDTO numDTO = new CountingStatusNumDTO();
+
+        if (CollectionUtil.isNotEmpty(processList)) {
+            numDTO.setTotal(processList.size());
+
+            List<String> countStatusList = processList.stream()
+                    .map(process -> process.getVariableList().stream()
+                            .filter(x -> FIELD_COUNTING_STATUS.equals(x.getFieldKey()))
+                            .map(AssetProcessVariable::getFieldValue)
+                            .findFirst()
+                            .orElse(null))
+                    .collect(Collectors.toList());
+
+            for (String status : countStatusList) {
+                if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
+                    numDTO.setNotCounted(numDTO.getNotCounted() + 1);
+                }
+                if (AssetCountingStatus.COUNTED.getStatus().equals(status)) {
+                    numDTO.setCounted(numDTO.getCounted() + 1);
+                }
+                if (AssetCountingStatus.ABNORMAL.getStatus().equals(status)) {
+                    numDTO.setAbnormal(numDTO.getAbnormal() + 1);
+                }
+            }
+        }
+
+        return numDTO;
+    }
+
+    /**
+     * 获取属性字段
+     * @return
+     */
+    @Override
+    public List<AssetProcessField> getProcessFields() {
+        List<AssetProcessField> assetProcessFields = assetProcessFieldMapper.selectList(new LambdaQueryWrapper());
+        return assetProcessFields;
+    }
+
+    @Override
+    public List<AssetsProcess> listProcessInfo(AssetsProcess process, List<AssetProcessField> assetProcessFields) {
+        JSONObject obj = JSONUtil.parseObj(process);
+        Set<String> keySet = obj.keySet();
+        assetProcessFields = assetProcessFields.stream().filter(assetProcessField -> assetProcessField.getProcessType().equals(process.getProcessType()))
+                .filter(assetProcessField -> keySet.contains(assetProcessField.getFieldKey())).collect(Collectors.toList());
+        Iterator<AssetProcessField> it = assetProcessFields.iterator();
+        while (it.hasNext()) {
+            AssetProcessField field = it.next();
+            Object value = obj.get(field.getFieldKey());
+            if (Objects.nonNull(value)) {
+                field.setFieldValue(value);
+            } else {
+                it.remove();
+            }
+        }
+        List<AssetsProcess> assetsProcesses = searchAssetProcess(assetProcessFields, process);
+        return assetsProcesses;
+    }
 }

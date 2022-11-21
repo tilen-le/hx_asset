@@ -1,6 +1,7 @@
 package com.hexing.assetnew.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.assetnew.domain.AssetProcessField;
 import com.hexing.assetnew.domain.AssetProcessVariable;
 import com.hexing.assetnew.domain.AssetsProcess;
 import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
@@ -52,4 +53,19 @@ public interface IAssetsProcessService extends IService<AssetsProcess> {
     CountingStatusNumDTO countingStatusCount(String taskCode);
 
     void saveBatchProcess(List<? extends AssetsProcess> processList);
+
+    /**
+     *获取流程属性字段
+     */
+    List<AssetProcessField> getProcessFields();
+
+    /**
+     *获取流程详情列表
+     */
+    List<AssetsProcess> listProcessInfo(AssetsProcess process,List<AssetProcessField> assetProcessFields);
+
+    /**
+     *统计各盘点状态的数量
+     */
+    CountingStatusNumDTO countingStatusCountNew(String taskCode,List<AssetProcessField> processFields);
 }

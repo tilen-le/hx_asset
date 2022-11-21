@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.assetnew.domain.AssetInventoryTask;
+import com.hexing.assetnew.domain.AssetProcessField;
+import com.hexing.assetnew.domain.dto.CountingStatusNumDTO;
 
 /**
  * 盘点任务Service接口
@@ -31,4 +33,13 @@ public interface IAssetInventoryTaskService extends IService<AssetInventoryTask>
      * 更新盘点任务状态
      */
     void updateInventoryTaskStatus();
+
+    /**
+     * 盘点状态统计
+     *
+     * @param taskCode 盘点任务编号
+     * @return
+     */
+    CountingStatusNumDTO countingStatusCount(String taskCode, List<AssetProcessField> processFields);
+
 }

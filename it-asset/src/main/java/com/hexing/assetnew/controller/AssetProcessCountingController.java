@@ -4,8 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.hexing.asset.domain.AssetProcessCounting;
 import com.hexing.asset.service.IAssetProcessCountingService;
 import com.hexing.assetnew.domain.AssetProcessCountingDomain;
+import com.hexing.assetnew.domain.AssetProcessField;
 import com.hexing.assetnew.domain.AssetsProcess;
+import com.hexing.assetnew.service.IAssetInventoryTaskService;
 import com.hexing.assetnew.service.IAssetsProcessService;
+import com.hexing.assetnew.service.ICommonService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -40,7 +43,10 @@ public class AssetProcessCountingController extends BaseController {
     private IAssetProcessCountingService assetProcessCountingService;
     @Autowired
     private IAssetsProcessService processService;
-
+    @Autowired
+    private ICommonService commonService;
+    @Autowired
+    private IAssetInventoryTaskService inventoryTaskService;
     /**
      * 查询资产盘点流程列表
      */
@@ -92,7 +98,8 @@ public class AssetProcessCountingController extends BaseController {
     @ApiOperation("盘点状态统计")
     @GetMapping("/countingStatusCount")
     public AjaxResult countingStatusCount(String taskCode) {
-        return AjaxResult.success(processService.countingStatusCount(taskCode));
+        List<AssetProcessField> processFields = commonService.getProcessFields();
+        return AjaxResult.success(inventoryTaskService.countingStatusCount(taskCode,processFields));
     }
 
     /**

@@ -19,6 +19,7 @@ import com.hexing.assetnew.mapper.AssetsProcessMapper;
 import com.hexing.assetnew.service.IAssetProcessFieldService;
 import com.hexing.assetnew.service.IAssetProcessVariableService;
 import com.hexing.assetnew.service.IAssetsProcessService;
+import com.hexing.assetnew.service.ICommonService;
 import com.hexing.common.utils.PageUtil;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
@@ -41,14 +42,11 @@ import java.util.stream.Collectors;
 public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, AssetsProcess> implements IAssetsProcessService {
 
     @Autowired
-    private AssetsProcessMapper processMapper;
-    @Autowired
     private IAssetProcessVariableService variableService;
     @Autowired
     private IAssetProcessFieldService fieldService;
     @Autowired
-    private AssetProcessFieldMapper assetProcessFieldMapper;
-
+    private ICommonService commonService;
 
     /**
      * 查询资产流程
@@ -69,7 +67,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
     @Transactional(rollbackFor = Exception.class)
     public void updateByProcessId(AssetsProcess process) {
 
-        List<AssetProcessVariable> varList = this.selectVariableListByProcessId(process.getId());
+        List<AssetProcessVariable> varList = variableService.selectVariableListByProcessId(process.getId());
 
         for (AssetProcessVariable var : varList) {
             Object fieldValue = BeanTool.getFieldValue(process, var.getFieldKey());
@@ -115,69 +113,23 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
     }
 
-    @Override
-    public List<AssetProcessVariable> selectVariableListByProcessId(Long processId) {
-        return processMapper.selectVariableListByProcessId(processId);
-    }
-
     /**
      * 查询资产流程列表
      */
     @Override
     public List<AssetsProcess> listByPage(AssetsProcess process) {
-        List<AssetProcessField> searchDomain = getSearchDomain(process);
+        List<AssetProcessField> searchDomain = commonService.getSearchDomain(process);
         PageUtil.startPage();
-        return searchAssetProcess(searchDomain, process);
+        return commonService.searchAssetProcess(searchDomain, process);
     }
 
     @Override
     public List<AssetsProcess> list(AssetsProcess process) {
-        List<AssetProcessField> searchDomain = getSearchDomain(process);
-        return searchAssetProcess(searchDomain, process);
+        List<AssetProcessField> searchDomain = commonService.getSearchDomain(process);
+        return commonService.searchAssetProcess(searchDomain, process);
     }
 
-    /**
-     * 获取字段配置并过滤
-     * @param process
-     * @return
-     */
-    private List<AssetProcessField> getSearchDomain(AssetsProcess process) {
-        JSONObject obj = JSONUtil.parseObj(process);
-        Set<String> keySet = obj.keySet();
-        LambdaQueryWrapper<AssetProcessField> fieldWrapper = new LambdaQueryWrapper<>();
-        fieldWrapper.eq(AssetProcessField::getProcessType, process.getProcessType())
-                .in(AssetProcessField::getFieldKey, keySet);
-        List<AssetProcessField> assetProcessFields = assetProcessFieldMapper.selectList(fieldWrapper);
 
-        Iterator<AssetProcessField> it = assetProcessFields.iterator();
-        while (it.hasNext()) {
-            AssetProcessField field = it.next();
-            Object value = obj.get(field.getFieldKey());
-            if (Objects.nonNull(value)) {
-                field.setFieldValue(value);
-            } else {
-                it.remove();
-            }
-        }
-
-        return assetProcessFields;
-    }
-
-    /**
-     * 此方法只查数据库，不对结果进行二次封装
-     * @param searchDomains 查询条件集合
-     * @return
-     */
-    private List<AssetsProcess> searchAssetProcess(List<AssetProcessField> searchDomains, AssetsProcess process) {
-        List<AssetsProcess> assetsProcesses = processMapper.selectProcessWithDomain(process, searchDomains);
-        if (CollectionUtil.isNotEmpty(assetsProcesses)) {
-            List<Long> processIds = assetsProcesses.stream().map(AssetsProcess::getId).collect(Collectors.toList());
-            List<AssetProcessVariable> varList = processMapper.selectVarWithProcessIds(processIds);
-            Map<Long, List<AssetProcessVariable>> varMap = varList.stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
-            assetsProcesses.forEach(p -> p.setVariableList(varMap.getOrDefault(p.getId(), Collections.emptyList())));
-        }
-        return assetsProcesses;
-    }
 
     /**
      * process 转为 domain
@@ -197,54 +149,12 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         return domain;
     }
 
-    /**
-     * 盘点状态统计
-     * @param taskCode 盘点任务编号
-     * @return
-     */
-    @Override
-    public CountingStatusNumDTO countingStatusCount(String taskCode) {
-        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessCountingDomain::getCountingStatus);
-
-        AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
-        entity.setTaskCode(taskCode);
-        entity.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
-        List<AssetsProcess> processList = this.list(entity);
-
-        CountingStatusNumDTO numDTO = new CountingStatusNumDTO();
-
-        if (CollectionUtil.isNotEmpty(processList)) {
-            numDTO.setTotal(processList.size());
-
-            List<String> countStatusList = processList.stream()
-                    .map(process -> process.getVariableList().stream()
-                            .filter(x -> countingStatusFieldName.equals(x.getFieldKey()))
-                            .map(AssetProcessVariable::getFieldValue)
-                            .findFirst()
-                            .orElse(null))
-                    .collect(Collectors.toList());
-
-            for (String status : countStatusList) {
-                if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
-                    numDTO.setNotCounted(numDTO.getNotCounted() + 1);
-                }
-                if (AssetCountingStatus.COUNTED.getStatus().equals(status)) {
-                    numDTO.setCounted(numDTO.getCounted() + 1);
-                }
-                if (AssetCountingStatus.ABNORMAL.getStatus().equals(status)) {
-                    numDTO.setAbnormal(numDTO.getAbnormal() + 1);
-                }
-            }
-        }
-
-        return numDTO;
-    }
-
     @Override
     public void saveBatchProcess(List<? extends AssetsProcess> processList) {
-
-        List<AssetProcessField> fieldList = fieldService.list(new LambdaQueryWrapper<AssetProcessField>()
-                .eq(AssetProcessField::getProcessType, AssetProcessType.COUNTING_PROCESS.getCode()));
+        List<AssetProcessField> processFields = commonService.getProcessFields();
+        List<AssetProcessField> fieldList = processFields.stream().filter(assetProcessField ->
+                assetProcessField.getProcessType().equals(AssetProcessType.COUNTING_PROCESS.getCode()))
+                .collect(Collectors.toList());
 
         List<AssetProcessVariable> varList = new ArrayList<>();
         for (AssetsProcess process : processList) {
@@ -265,72 +175,4 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
         variableService.saveBatch(varList);
     }
 
-    @Override
-    public CountingStatusNumDTO countingStatusCountNew(String taskCode,List<AssetProcessField> processFields) {
-        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessCountingDomain::getCountingStatus);
-
-        AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
-        entity.setTaskCode(taskCode);
-        entity.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
-
-        List<AssetsProcess> processList = this.listProcessInfo(entity,processFields);
-
-        CountingStatusNumDTO numDTO = new CountingStatusNumDTO();
-
-        if (CollectionUtil.isNotEmpty(processList)) {
-            numDTO.setTotal(processList.size());
-
-            List<String> countStatusList = processList.stream()
-                    .map(process -> process.getVariableList().stream()
-                            .filter(x -> countingStatusFieldName.equals(x.getFieldKey()))
-                            .map(AssetProcessVariable::getFieldValue)
-                            .findFirst()
-                            .orElse(null))
-                    .collect(Collectors.toList());
-
-            for (String status : countStatusList) {
-                if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
-                    numDTO.setNotCounted(numDTO.getNotCounted() + 1);
-                }
-                if (AssetCountingStatus.COUNTED.getStatus().equals(status)) {
-                    numDTO.setCounted(numDTO.getCounted() + 1);
-                }
-                if (AssetCountingStatus.ABNORMAL.getStatus().equals(status)) {
-                    numDTO.setAbnormal(numDTO.getAbnormal() + 1);
-                }
-            }
-        }
-
-        return numDTO;
-    }
-
-    /**
-     * 获取属性字段
-     * @return
-     */
-    @Override
-    public List<AssetProcessField> getProcessFields() {
-        List<AssetProcessField> assetProcessFields = assetProcessFieldMapper.selectList(new LambdaQueryWrapper());
-        return assetProcessFields;
-    }
-
-    @Override
-    public List<AssetsProcess> listProcessInfo(AssetsProcess process, List<AssetProcessField> assetProcessFields) {
-        JSONObject obj = JSONUtil.parseObj(process);
-        Set<String> keySet = obj.keySet();
-        assetProcessFields = assetProcessFields.stream().filter(assetProcessField -> assetProcessField.getProcessType().equals(process.getProcessType()))
-                .filter(assetProcessField -> keySet.contains(assetProcessField.getFieldKey())).collect(Collectors.toList());
-        Iterator<AssetProcessField> it = assetProcessFields.iterator();
-        while (it.hasNext()) {
-            AssetProcessField field = it.next();
-            Object value = obj.get(field.getFieldKey());
-            if (Objects.nonNull(value)) {
-                field.setFieldValue(value);
-            } else {
-                it.remove();
-            }
-        }
-        List<AssetsProcess> assetsProcesses = searchAssetProcess(assetProcessFields, process);
-        return assetsProcesses;
-    }
 }

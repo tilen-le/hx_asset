@@ -15,4 +15,7 @@ import java.util.List;
 @Repository
 public interface AssetProcessVariableMapper extends BaseMapper<AssetProcessVariable> {
 
+    List<AssetProcessVariable> selectVariableListByProcessId(Long processId);
+
+    List<AssetProcessVariable> selectVarWithProcessIds(List<Long> processIds);
 }

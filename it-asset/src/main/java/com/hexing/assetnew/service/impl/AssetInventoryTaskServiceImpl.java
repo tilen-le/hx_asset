@@ -1,5 +1,6 @@
 package com.hexing.assetnew.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -13,12 +14,14 @@ import com.hexing.assetnew.mapper.AssetInventoryTaskMapper;
 import com.hexing.assetnew.service.IAssetInventoryTaskService;
 import com.hexing.assetnew.service.IAssetService;
 import com.hexing.assetnew.service.IAssetsProcessService;
+import com.hexing.assetnew.service.ICommonService;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.framework.manager.AsyncManager;
 import com.hexing.framework.manager.factory.AsyncFactory;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
@@ -56,6 +59,8 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
     private SysDeptServiceImpl sysDeptService;
     @Autowired
     private IAssetsProcessService assetsProcessService;
+    @Autowired
+    private ICommonService commonService;
 
     /**
      * 查询盘点任务列表
@@ -91,10 +96,10 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
 
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         List<SysDept> sysDepts = sysDeptService.selectDeptList(new SysDept());
-        List<AssetProcessField> processFields = assetsProcessService.getProcessFields();
+        List<AssetProcessField> processFields = commonService.getProcessFields();
 
         for (AssetInventoryTask task : taskList) {
-            CountingStatusNumDTO numDTO = assetsProcessService.countingStatusCountNew(task.getTaskCode(),processFields);
+            CountingStatusNumDTO numDTO = countingStatusCount(task.getTaskCode(),processFields);
             task.setAssetTotal(numDTO.getTotal());
             task.setAssetNotCounted(numDTO.getNotCounted());
             task.setAssetCounted(numDTO.getCounted());
@@ -231,6 +236,43 @@ public class AssetInventoryTaskServiceImpl extends ServiceImpl<AssetInventoryTas
                 this.updateById(task);
             }
         }
+    }
+    @Override
+    public CountingStatusNumDTO countingStatusCount(String taskCode, List<AssetProcessField> processFields) {
+        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessCountingDomain::getCountingStatus);
+
+        AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
+        entity.setTaskCode(taskCode);
+        entity.setProcessType(AssetProcessType.COUNTING_PROCESS.getCode());
+        List<AssetsProcess> processList = commonService.listProcessInfo(entity,processFields);
+
+        CountingStatusNumDTO numDTO = new CountingStatusNumDTO();
+
+        if (CollectionUtil.isNotEmpty(processList)) {
+            numDTO.setTotal(processList.size());
+
+            List<String> countStatusList = processList.stream()
+                    .map(process -> process.getVariableList().stream()
+                            .filter(x -> countingStatusFieldName.equals(x.getFieldKey()))
+                            .map(AssetProcessVariable::getFieldValue)
+                            .findFirst()
+                            .orElse(null))
+                    .collect(Collectors.toList());
+
+            for (String status : countStatusList) {
+                if (AssetCountingStatus.NOT_COUNTED.getStatus().equals(status)) {
+                    numDTO.setNotCounted(numDTO.getNotCounted() + 1);
+                }
+                if (AssetCountingStatus.COUNTED.getStatus().equals(status)) {
+                    numDTO.setCounted(numDTO.getCounted() + 1);
+                }
+                if (AssetCountingStatus.ABNORMAL.getStatus().equals(status)) {
+                    numDTO.setAbnormal(numDTO.getAbnormal() + 1);
+                }
+            }
+        }
+
+        return numDTO;
     }
 
 

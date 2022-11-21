@@ -20,10 +20,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface AssetsProcessMapper extends BaseMapper<AssetsProcess> {
 
-    List<AssetProcessVariable> selectVariableListByProcessId(Long processId);
-
     List<AssetsProcess> selectProcessWithDomain(@Param("process") AssetsProcess process, @Param("params") List<AssetProcessField> searchDomains);
-
-    List<AssetProcessVariable> selectVarWithProcessIds(List<Long> processIds);
 
 }

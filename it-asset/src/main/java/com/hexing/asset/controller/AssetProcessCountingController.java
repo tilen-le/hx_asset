@@ -97,7 +97,8 @@ public class AssetProcessCountingController extends BaseController
     @ApiOperation("盘点状态统计")
     @GetMapping("/countingStatusCount")
     public AjaxResult countingStatusCount(String taskCode) {
-        return AjaxResult.success(processService.countingStatusCount(taskCode));
+//        return AjaxResult.success(processService.countingStatusCount(taskCode));
+        return AjaxResult.success();
     }
 
     /**

@@ -5,6 +5,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.hexing.assetnew.mapper.AssetProcessVariableMapper;
 import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.assetnew.domain.AssetProcessField;
 import com.hexing.assetnew.domain.AssetProcessVariable;
@@ -33,6 +34,8 @@ public class TestDemo {
     private AssetsProcessMapper assetsProcessMapper;
     @Resource
     private AssetProcessFieldMapper assetProcessFieldMapper;
+    @Resource
+    private AssetProcessVariableMapper assetProcessVariableMapper;
 
     @GetMapping(value = "/testSearch")
     public List<PdProcessDomain> testSearch(PdProcessDomain pdProcessDomain) {
@@ -104,7 +107,7 @@ public class TestDemo {
         List<AssetsProcess> assetsProcesses = assetsProcessMapper.selectProcessWithDomain(process, searchDomains);
         if (CollectionUtil.isNotEmpty(assetsProcesses)) {
             List<Long> processIds = assetsProcesses.stream().map(AssetsProcess::getId).collect(Collectors.toList());
-            List<AssetProcessVariable> varList = assetsProcessMapper.selectVarWithProcessIds(processIds);
+            List<AssetProcessVariable> varList = assetProcessVariableMapper.selectVarWithProcessIds(processIds);
             Map<Long, List<AssetProcessVariable>> varMap = varList.stream().collect(Collectors.groupingBy(AssetProcessVariable::getProcessId));
             assetsProcesses.forEach(p -> p.setVariableList(varMap.getOrDefault(p.getId(), Collections.emptyList())));
         }

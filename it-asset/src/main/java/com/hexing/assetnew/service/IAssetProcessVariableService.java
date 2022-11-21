@@ -12,5 +12,12 @@ import java.util.List;
  * @date 2022-11-03
  */
 public interface IAssetProcessVariableService extends IService<AssetProcessVariable> {
-
+    /**
+     * 根据流程id查询值表列表
+     */
+    List<AssetProcessVariable> selectVariableListByProcessId(Long processId);
+    /**
+     * 根据流程id查询值表列表
+     */
+    List<AssetProcessVariable> selectVarWithProcessIds(List<Long> processIds);
 }

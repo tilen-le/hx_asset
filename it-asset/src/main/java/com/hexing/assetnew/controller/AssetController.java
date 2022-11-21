@@ -6,18 +6,14 @@ import com.hexing.assetnew.service.IAssetService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
-import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.core.page.TableDataInfo;
 import com.hexing.common.enums.BusinessType;
-import com.hexing.common.utils.ServletUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
-import com.hexing.framework.web.service.TokenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -34,8 +30,6 @@ public class AssetController extends BaseController {
 
     @Autowired
     private IAssetService assetService;
-    @Autowired
-    private TokenService tokenService;
 
     /**
      * 查询资产列表
@@ -109,33 +103,6 @@ public class AssetController extends BaseController {
     @DeleteMapping("/{assetCodes}")
     public AjaxResult remove(@PathVariable List<String> assetCodes) {
         return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
-    }
-
-    /**
-     * 资产信息导入
-     */
-    @ApiOperation("资产信息导入")
-    @PreAuthorize("@ss.hasPermi('asset:asset:import')")
-    @Log(title = "资产信息导入", businessType = BusinessType.IMPORT)
-    @PostMapping("/importData")
-    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception {
-        ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
-        List<Asset> assetList = util.importExcel(file.getInputStream());
-        LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
-        String operName = loginUser.getUsername();
-        String message = assetService.importAsset(assetList, updateSupport, operName);
-        return AjaxResult.success(message);
-    }
-
-    /**
-     * 资产导入模板下载
-     */
-    @ApiOperation("资产导入模板下载")
-    @PreAuthorize("@ss.hasPermi('asset:asset:template')")
-    @GetMapping("/importTemplate")
-    public AjaxResult importTemplate() {
-        ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
-        return util.importTemplateExcel("资产信息导入模板");
     }
 
 }

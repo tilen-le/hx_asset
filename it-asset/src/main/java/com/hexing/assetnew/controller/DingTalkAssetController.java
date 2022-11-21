@@ -136,18 +136,6 @@ public class DingTalkAssetController extends BaseController {
     }
 
     /**
-     * 根据工号,管理部门查询保管人信息及名下资产
-     */
-    @ApiOperation("根据工号,管理部门查询保管人信息及名下资产")
-    @PostMapping(value = "/queryPersonInfoAndAssetsByUserCode")
-    public JSONObject queryPersonInfoAndAssetsByUserCode(@RequestBody UserAssetInfoDTO params) {
-        Result result = assetService.queryPersonInfoAndAssetsByUserCode(params);
-        JSONObject r = new JSONObject();
-        r.put("result", result);
-        return r;
-    }
-
-    /**
      * 查询盘点任务编码
      */
     @ApiOperation("查询盘点任务编码")

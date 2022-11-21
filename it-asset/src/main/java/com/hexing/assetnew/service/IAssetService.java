@@ -1,14 +1,14 @@
 package com.hexing.assetnew.service;
 
-import java.util.List;
-
 import com.alibaba.fastjson.JSONObject;
-import com.hexing.assetnew.domain.Asset;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.dto.ExchangeProcessDTO;
-import com.hexing.asset.domain.dto.OldProcessCommonDTO;
 import com.hexing.asset.domain.dto.UserAssetInfoDTO;
+import com.hexing.assetnew.domain.Asset;
+import com.hexing.assetnew.domain.dto.ProcessCommonDTO;
 import com.hexing.common.core.domain.Result;
+
+import java.util.List;
 
 /**
  * 资产表Service接口
@@ -39,31 +39,6 @@ public interface IAssetService extends IService<Asset> {
     Result queryAssetCard(Asset asset);
 
     /**
-     * 根据工号查询保管人信息及其名下资产
-     *
-     * @param
-     * @return 人员资产查询
-     */
-    Result queryPersonInfoAndAssetsByUserCode(UserAssetInfoDTO params);
-
-    /**
-     * 资产变更
-     *
-     * @param params
-     * @return
-     */
-    Result updateAssetExchange(OldProcessCommonDTO<ExchangeProcessDTO> params);
-
-    /**
-     * 资产转移
-     *
-     * @param params
-     * @return
-     */
-    Result updateAssetTransfer(JSONObject params);
-
-
-    /**
      * 新增资产表
      *
      * @param asset 资产表
@@ -83,16 +58,6 @@ public interface IAssetService extends IService<Asset> {
      * 根据平台资产编号删除资产信息
      */
     int deleteAssetByAssetCodes(List<String> assetCodes);
-
-    /**
-     * 资产信息导入
-     *
-     * @param assetList       资产信息列表
-     * @param isUpdateSupport 是否存在则覆盖
-     * @param operName        操作人姓名
-     * @return
-     */
-    String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName);
 
     /**
      * 根据部门ID查询部门下所有员工保管的资产

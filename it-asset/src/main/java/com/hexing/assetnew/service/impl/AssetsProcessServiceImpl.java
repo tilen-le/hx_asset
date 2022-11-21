@@ -204,7 +204,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
      */
     @Override
     public CountingStatusNumDTO countingStatusCount(String taskCode) {
-        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessVariable::getFieldKey);
+        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessCountingDomain::getCountingStatus);
 
         AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
         entity.setTaskCode(taskCode);
@@ -267,7 +267,7 @@ public class AssetsProcessServiceImpl extends ServiceImpl<AssetsProcessMapper, A
 
     @Override
     public CountingStatusNumDTO countingStatusCountNew(String taskCode,List<AssetProcessField> processFields) {
-        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessVariable::getFieldKey);
+        final String countingStatusFieldName = BeanTool.convertToFieldName(AssetProcessCountingDomain::getCountingStatus);
 
         AssetProcessCountingDomain entity = new AssetProcessCountingDomain();
         entity.setTaskCode(taskCode);

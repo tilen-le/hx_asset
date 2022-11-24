@@ -20,18 +20,22 @@ public class AssetAcceptanceProcessController extends BaseController {
         return null;
     }
 
-    // TODO 接口：定时任务：试用到期发起验收申请
+    /**
+     * TODO 定时任务：试用到期发起验收申请
+     *
+     * @return
+     */
     public String notificationJob() {
         return null;
     }
 
     /**
      * TODO 验收成功的资产信息推送SAP
+     *
      * @param assetList 资产列表
      * @return SAP响应消息
      */
     public String syncAcceptedAssetInfoToSAP(List<Asset> assetList) {
-
         return null;
     }
 

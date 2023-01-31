@@ -11,6 +11,7 @@ import com.hexing.common.enums.BusinessType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class AssetManagementConfigController extends BaseController
      * 查询资产管理配置列表
      */
     @GetMapping("/list")
+    @PreAuthorize("@ss.hasPermi('manage:config:list')")
     @ApiOperation("查询资产管理配置列表")
     public TableDataInfo list(AssetManagementConfig assetManagementConfig)
     {
@@ -61,6 +63,7 @@ public class AssetManagementConfigController extends BaseController
      */
     @Log(title = "资产管理配置", businessType = BusinessType.INSERT)
     @PostMapping("/add")
+    @PreAuthorize("@ss.hasPermi('manage:config:add')")
     @ApiOperation("新增资产管理配置")
     public AjaxResult add(@RequestBody AssetManagementConfig assetManagementConfig)
     {
@@ -72,6 +75,7 @@ public class AssetManagementConfigController extends BaseController
      */
     @Log(title = "资产管理配置", businessType = BusinessType.UPDATE)
     @PutMapping("/edit")
+    @PreAuthorize("@ss.hasPermi('manage:config:edit')")
     @ApiOperation("修改资产管理配置")
     public AjaxResult edit(@RequestBody AssetManagementConfig assetManagementConfig)
     {
@@ -83,6 +87,7 @@ public class AssetManagementConfigController extends BaseController
      */
     @Log(title = "资产管理配置", businessType = BusinessType.DELETE)
 	@DeleteMapping("/{ids}")
+    @PreAuthorize("@ss.hasPermi('manage:config:remove')")
     @ApiOperation("删除资产管理配置")
     public AjaxResult remove(@PathVariable Long[] ids)
     {

@@ -41,19 +41,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     @Override
     public AssetManagementConfig selectAssetManagementConfigById(Long id)
     {
-        AssetManagementConfig managementConfig = assetManagementConfigMapper.selectById(id);
-        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
-        //资产管理员
-        String assetManager = managementConfig.getAssetManager();
-        managementConfig.setAssetManager(getUserNameByUserCode(sysUsers,assetManager));
-        //财务管理员
-        String financialManager = managementConfig.getFinancialManager();
-        managementConfig.setFinancialManager(getUserNameByUserCode(sysUsers,financialManager));
-        String createBy = managementConfig.getCreateBy();
-        managementConfig.setCreateBy(getUserNameByUserCode(sysUsers,createBy));
-        String updateBy = managementConfig.getUpdateBy();
-        managementConfig.setUpdateBy(getUserNameByUserCode(sysUsers,updateBy));
-        return managementConfig;
+        return assetManagementConfigMapper.selectById(id);
     }
 
     /**

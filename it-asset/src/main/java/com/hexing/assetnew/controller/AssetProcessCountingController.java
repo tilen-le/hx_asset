@@ -47,6 +47,7 @@ public class AssetProcessCountingController extends BaseController {
     private ICommonService commonService;
     @Autowired
     private IAssetInventoryTaskService inventoryTaskService;
+
     /**
      * 查询资产盘点流程列表
      */

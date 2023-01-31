@@ -29,7 +29,7 @@ public class AssetInventoryTaskController extends BaseController {
     @Autowired
     private IAssetInventoryTaskService assetProcessCountingTaskService;
     @Autowired
-    IAssetInventoryTaskService assetInventoryTaskService;
+    private IAssetInventoryTaskService assetInventoryTaskService;
 
     /**
      * 查询盘点任务列表

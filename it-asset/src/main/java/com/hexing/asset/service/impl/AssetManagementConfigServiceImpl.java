@@ -2,7 +2,6 @@ package com.hexing.asset.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.mapper.AssetManagementConfigMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
@@ -10,7 +9,6 @@ import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
-import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -126,35 +124,12 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     @Override
     public int updateAssetManagementConfig(AssetManagementConfig assetManagementConfig)
     {
-        AssetManagementConfig entity = assetManagementConfigMapper.selectOne(new LambdaQueryWrapper<AssetManagementConfig>().eq(AssetManagementConfig::getId, assetManagementConfig.getId()));
+        assetManagementConfig.setUpdateTime(DateUtils.getNowDate());
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+//        String userCode = "80015306";
+        assetManagementConfig.setUpdateBy(userCode);
 
-        if (ObjectUtils.isEmpty(entity)){
-            throw new ServiceException("该数据不能存在");
-        }
-        entity.setUpdateTime(DateUtils.getNowDate());
-//        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
-        String userCode = "80015306";
-        entity.setUpdateBy(userCode);
-
-        if (StringUtils.isNotBlank(assetManagementConfig.getAssetType())){
-            entity.setAssetType(assetManagementConfig.getAssetType());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getAssetCategory())){
-            entity.setAssetCategory(assetManagementConfig.getAssetCategory());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getCompany())){
-            entity.setCompany(assetManagementConfig.getCompany());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getLocation())){
-            entity.setLocation(assetManagementConfig.getLocation());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getAssetManager())){
-            entity.setAssetManager(assetManagementConfig.getAssetManager());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getFinancialManager())){
-            entity.setFinancialManager(assetManagementConfig.getFinancialManager());
-        }
-        return assetManagementConfigMapper.updateById(entity);
+        return assetManagementConfigMapper.updateById(assetManagementConfig);
     }
 
     /**

@@ -4,8 +4,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.hexing.asset.domain.AssetManagementConfig;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 /**
  * 资产管理配置Mapper接口
  *

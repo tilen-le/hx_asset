@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hexing.assetNew.mapper.AssetMapper">
+
+    <resultMap type="Asset" id="AssetResult">
+        <result property="assetId"    column="asset_id"    />
+        <result property="assetName"    column="asset_name"    />
+        <result property="assetCode"    column="asset_code"    />
+        <result property="financialAssetCode"    column="financial_asset_code"    />
+        <result property="responsiblePersonCode"    column="responsible_person_code"    />
+        <result property="category"    column="category"    />
+        <result property="assetStatus"    column="asset_status"    />
+        <result property="factoryNo"    column="factory_no"    />
+        <result property="standard"    column="standard"    />
+        <result property="measure"    column="measure"    />
+        <result property="buyer"    column="buyer"    />
+        <result property="buyDate"    column="buy_date"    />
+        <result property="netWorth"    column="net_worth"    />
+        <result property="totalValue"    column="total_value"    />
+        <result property="warranty"    column="warranty"    />
+        <result property="canUseMonths"    column="can_use_months"    />
+        <result property="canUseYears"    column="can_use_years"    />
+        <result property="capitalizationDate"    column="capitalization_date"    />
+        <result property="monetaryUnit"    column="monetary_unit"    />
+        <result property="companyCode"    column="company_code"    />
+        <result property="companyName"    column="company_name"    />
+        <result property="location"    column="location"    />
+        <result property="provider"    column="provider"    />
+        <result property="amount"    column="amount"    />
+        <result property="brand"    column="brand"    />
+        <result property="costCenter"    column="cost_center"    />
+        <result property="costCenterName"    column="cost_center_name"    />
+        <result property="manageDept"    column="manage_dept"    />
+        <result property="contractNo"    column="contract_no"    />
+        <result property="proposer"    column="proposer"    />
+        <result property="usageScenario"    column="usage_scenario"    />
+        <result property="comment"    column="comment"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectAssetVo">
+        select asset_id, asset_name, asset_code, financial_asset_code, responsible_person_code, category, asset_status, factory_no, standard, measure, buyer, buy_date, net_worth, total_value, warranty, can_use_months, can_use_years, capitalization_date, monetary_unit, company_code, company_name, location, provider, amount, brand, cost_center, cost_center_name, manage_dept, contract_no, proposer, usage_scenario, comment, create_by, inventory_status, create_time, update_by, update_time, remark from asset
+    </sql>
+
+    <select id="selectAssetList" parameterType="Asset" resultMap="AssetResult">
+        <include refid="selectAssetVo"/>
+        <where>
+            <if test="assetName != null  and assetName != ''"> and asset_name like concat('%', #{assetName}, '%')</if>
+            <if test="assetCode != null  and assetCode != ''"> and asset_code = #{assetCode}</if>
+            <if test="financialAssetCode != null  and financialAssetCode != ''"> and financial_asset_code = #{financialAssetCode}</if>
+            <if test="responsiblePersonCode != null  and responsiblePersonCode != ''"> and responsible_person_code = #{responsiblePersonCode}</if>
+            <if test="category != null  and category != ''"> and category = #{category}</if>
+            <if test="assetStatus != null  and assetStatus != ''"> and asset_status = #{assetStatus}</if>
+            <if test="factoryNo != null  and factoryNo != ''"> and factory_no = #{factoryNo}</if>
+            <if test="standard != null  and standard != ''"> and standard = #{standard}</if>
+            <if test="measure != null  and measure != ''"> and measure = #{measure}</if>
+            <if test="buyer != null  and buyer != ''"> and buyer = #{buyer}</if>
+            <if test="buyDate != null "> and buy_date = #{buyDate}</if>
+            <if test="netWorth != null "> and net_worth = #{netWorth}</if>
+            <if test="totalValue != null "> and total_value = #{totalValue}</if>
+            <if test="warranty != null "> and warranty = #{warranty}</if>
+            <if test="canUseMonths != null "> and can_use_months = #{canUseMonths}</if>
+            <if test="canUseYears != null "> and can_use_years = #{canUseYears}</if>
+            <if test="capitalizationDate != null "> and capitalization_date = #{capitalizationDate}</if>
+            <if test="monetaryUnit != null  and monetaryUnit != ''"> and monetary_unit = #{monetaryUnit}</if>
+            <if test="companyCode != null  and companyCode != ''"> and company_code = #{companyCode}</if>
+            <if test="companyName != null  and companyName != ''"> and company_name like concat('%', #{companyName}, '%')</if>
+            <if test="location != null  and location != ''"> and location = #{location}</if>
+            <if test="provider != null  and provider != ''"> and provider = #{provider}</if>
+            <if test="amount != null "> and amount = #{amount}</if>
+            <if test="brand != null  and brand != ''"> and brand = #{brand}</if>
+            <if test="costCenter != null  and costCenter != ''"> and cost_center = #{costCenter}</if>
+            <if test="costCenterName != null  and costCenterName != ''"> and cost_center_name like concat('%', #{costCenterName}, '%')</if>
+            <if test="manageDept != null  and manageDept != ''"> and manage_dept = #{manageDept}</if>
+            <if test="contractNo != null  and contractNo != ''"> and contract_no = #{contractNo}</if>
+            <if test="proposer != null  and proposer != ''"> and proposer = #{proposer}</if>
+            <if test="usageScenario != null  and usageScenario != ''"> and usage_scenario = #{usageScenario}</if>
+            <if test="comment != null  and comment != ''"> and comment = #{comment}</if>
+            <if test="inventoryStatus != null  and inventoryStatus != ''"> and inventory_status = #{inventoryStatus}</if>
+        </where>
+    </select>
+
+    <select id="selectAssetByAssetId" parameterType="Long" resultMap="AssetResult">
+        <include refid="selectAssetVo"/>
+        where asset_id = #{assetId}
+    </select>
+
+    <select id="selectAssetsByUserCodes"   resultType="String">
+        select asset_code from asset
+        where deleted = 0 and responsible_person_code in
+        <foreach collection="list" item="responsible_person_code" index="index" open="(" close=")" separator=",">
+            #{responsible_person_code}
+        </foreach>
+    </select>
+
+    <insert id="insertAsset" parameterType="Asset">
+        insert into asset
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="assetId != null">asset_id,</if>
+            <if test="assetName != null">asset_name,</if>
+            <if test="assetCode != null">asset_code,</if>
+            <if test="financialAssetCode != null">financial_asset_code,</if>
+            <if test="responsiblePersonCode != null">responsible_person_code,</if>
+            <if test="category != null">category,</if>
+            <if test="assetStatus != null">asset_status,</if>
+            <if test="factoryNo != null">factory_no,</if>
+            <if test="standard != null">standard,</if>
+            <if test="measure != null">measure,</if>
+            <if test="buyer != null">buyer,</if>
+            <if test="buyDate != null">buy_date,</if>
+            <if test="netWorth != null">net_worth,</if>
+            <if test="totalValue != null">total_value,</if>
+            <if test="warranty != null">warranty,</if>
+            <if test="canUseMonths != null">can_use_months,</if>
+            <if test="canUseYears != null">can_use_years,</if>
+            <if test="capitalizationDate != null">capitalization_date,</if>
+            <if test="monetaryUnit != null">monetary_unit,</if>
+            <if test="companyCode != null">company_code,</if>
+            <if test="companyName != null">company_name,</if>
+            <if test="location != null">location,</if>
+            <if test="provider != null">provider,</if>
+            <if test="amount != null">amount,</if>
+            <if test="brand != null">brand,</if>
+            <if test="costCenter != null">cost_center,</if>
+            <if test="costCenterName != null">cost_center_name,</if>
+            <if test="manageDept != null">manage_dept,</if>
+            <if test="contractNo != null">contract_no,</if>
+            <if test="proposer != null">proposer,</if>
+            <if test="usageScenario != null">usage_scenario,</if>
+            <if test="comment != null">comment,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="inventoryStatus != null">inventory_status,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="assetId != null">#{assetId},</if>
+            <if test="assetName != null">#{assetName},</if>
+            <if test="assetCode != null">#{assetCode},</if>
+            <if test="financialAssetCode != null">#{financialAssetCode},</if>
+            <if test="responsiblePersonCode != null">#{responsiblePersonCode},</if>
+            <if test="category != null">#{category},</if>
+            <if test="assetStatus != null">#{assetStatus},</if>
+            <if test="factoryNo != null">#{factoryNo},</if>
+            <if test="standard != null">#{standard},</if>
+            <if test="measure != null">#{measure},</if>
+            <if test="buyer != null">#{buyer},</if>
+            <if test="buyDate != null">#{buyDate},</if>
+            <if test="netWorth != null">#{netWorth},</if>
+            <if test="totalValue != null">#{totalValue},</if>
+            <if test="warranty != null">#{warranty},</if>
+            <if test="canUseMonths != null">#{canUseMonths},</if>
+            <if test="canUseYears != null">#{canUseYears},</if>
+            <if test="capitalizationDate != null">#{capitalizationDate},</if>
+            <if test="monetaryUnit != null">#{monetaryUnit},</if>
+            <if test="companyCode != null">#{companyCode},</if>
+            <if test="companyName != null">#{companyName},</if>
+            <if test="location != null">#{location},</if>
+            <if test="provider != null">#{provider},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="brand != null">#{brand},</if>
+            <if test="costCenter != null">#{costCenter},</if>
+            <if test="costCenterName != null">#{costCenterName},</if>
+            <if test="manageDept != null">#{manageDept},</if>
+            <if test="contractNo != null">#{contractNo},</if>
+            <if test="proposer != null">#{proposer},</if>
+            <if test="usageScenario != null">#{usageScenario},</if>
+            <if test="comment != null">#{comment},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="inventoryStatus != null">#{inventoryStatus},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+         </trim>
+    </insert>
+
+    <delete id="deleteAssetByAssetIds" parameterType="String">
+        delete from asset where asset_id in
+        <foreach item="assetId" collection="array" open="(" separator="," close=")">
+            #{assetId}
+        </foreach>
+    </delete>
+</mapper>

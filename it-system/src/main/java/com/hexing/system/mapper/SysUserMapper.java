@@ -129,6 +129,7 @@ public interface SysUserMapper
 
     List<SysUser> getUserListByRoleCodes(String[] roleCodes);
 
+    List<SysUser> getCommonUserList();
 
     List<SysUser> getUserListByIds(Long[] Ids);
 

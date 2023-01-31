@@ -3,18 +3,22 @@ package com.hexing.system.service.impl;
 import com.hexing.common.constant.UserConstants;
 import com.hexing.common.core.domain.entity.SysDictData;
 import com.hexing.common.core.domain.entity.SysDictType;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DictUtils;
 import com.hexing.common.utils.MessageUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.mapper.SysDictDataMapper;
 import com.hexing.system.mapper.SysDictTypeMapper;
+import com.hexing.system.mapper.SysUserMapper;
 import com.hexing.system.service.ISysDictTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -30,6 +34,9 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
 
     @Autowired
     private SysDictDataMapper dictDataMapper;
+
+    @Resource
+    private SysUserMapper userMapper;
 
     /**
      * 项目启动时，初始化字典到缓存
@@ -72,6 +79,19 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
     @Override
     public List<SysDictData> selectDictDataByType(String dictType)
     {
+        // 自定义的字典查询
+        if ("common_users".equals(dictType)) {
+            List<SysUser> userList = userMapper.getCommonUserList();
+            List<SysDictData> dictDatas = new ArrayList<>();
+            for (SysUser sysUser : userList) {
+                SysDictData sysDictData = new SysDictData();
+                sysDictData.setDictValue(sysUser.getUserName());
+                sysDictData.setDictLabel(sysUser.getNickName() + sysUser.getUserName());
+                sysDictData.setListClass("");
+                dictDatas.add(sysDictData);
+            }
+            return dictDatas;
+        }
         //判断国际化
 /*        String language = MessageUtils.getLanguage();
         Boolean en = (StringUtils.isBlank(language) || "en".equals(language)) ? Boolean.TRUE : Boolean.FALSE;*/

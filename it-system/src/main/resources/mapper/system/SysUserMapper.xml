@@ -271,6 +271,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 		SELECT * FROM sys_user
 	</select>
 
+	<select id="getCommonUserList" parameterType="String" resultMap="UserResult">
+		SELECT * FROM sys_user WHERE user_name != 'admin'
+	</select>
+
 	<update id="updateDel">
 		update sys_user set del_flag = #{del} where user_id = #{userId}
 	</update>

@@ -74,7 +74,7 @@ public class Asset {
     /**
      * 转固状态
      */
-    private Boolean isFixed;
+    private Boolean fixed;
 
     /**
      * 保管人工号（老工号）
@@ -102,21 +102,6 @@ public class Asset {
      * 所属公司
      */
     private String company;
-
-    /**
-     * 所属公司名称
-     */
-    private String companyName;
-
-    /**
-     * 资产管理员
-     */
-    private String assetManager;
-
-    /**
-     * 资产管理部门
-     */
-    private String assetManagementDept;
 
     /**
      * 成本中心

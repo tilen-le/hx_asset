@@ -30,6 +30,15 @@ public interface IAssetManagementConfigService extends IService<AssetManagementC
     public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfig assetManagementConfig);
 
     /**
+     * 资产、财务管理员资产数据权限查询接口
+     *
+     * @param user 资产管理配置
+     * @return 资产管理配置集合
+     */
+    public List<AssetManagementConfig> listManagementConfig(String user);
+
+
+    /**
      * 新增资产管理配置
      *
      * @param assetManagementConfig 资产管理配置

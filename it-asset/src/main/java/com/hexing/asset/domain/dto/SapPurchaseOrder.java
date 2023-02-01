@@ -63,7 +63,7 @@ public class SapPurchaseOrder {
     private String materialNumber;
 
     /**
-     * 物料文本 TXZ01
+     * 物料文本（资产名称） TXZ01
      */
     @JsonProperty("TXZ01")
     private String materialText;

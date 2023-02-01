@@ -93,4 +93,17 @@ public class AssetManagementConfigController extends BaseController
     {
         return toAjax(assetManagementConfigService.deleteAssetManagementConfigByIds(ids));
     }
+
+    /**
+     * 资产、财务管理员资产数据权限查询接口
+     */
+    @GetMapping("/listManagementConfig")
+    public TableDataInfo listManagementConfig(@RequestBody String user)
+    {
+        startPage();
+        List<AssetManagementConfig> list = assetManagementConfigService.listManagementConfig(user);
+
+        return getDataTable(list);
+    }
+
 }

@@ -3,8 +3,12 @@ package com.hexing.asset.controller;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
+import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.service.IAssetService;
+import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
@@ -43,9 +47,9 @@ public class AssetController extends BaseController {
     @ApiOperation("查询资产列表")
     @PreAuthorize("@ss.hasPermi('asset:collection:list')")
     @GetMapping("/list")
-    public TableDataInfo list(Asset asset) {
+    public TableDataInfo list(AssetQueryParam param) {
         startPage();
-        List<Asset> list = assetService.selectAssetList(asset);
+        List<Asset> list = assetService.selectAssetList(param);
         return getDataTable(list);
     }
 
@@ -103,7 +107,6 @@ public class AssetController extends BaseController {
      * SAP采购单同步接口
      */
     @ApiOperation("SAP采购单同步接口")
-//    @PreAuthorize("@ss.hasPermi('asset:asset:edit')")
     @PostMapping("/sapAdd")
     @Transactional
     public AjaxResult sapAdd(@RequestBody SapPurchaseOrder order) {
@@ -125,17 +128,25 @@ public class AssetController extends BaseController {
                 String assetCode = order.getMaterialNumber() + df.format(nextNum);
                 asset.setMaterialNum(order.getMaterialNumber())
                         .setSerialNum(nextNum)
-                        .setAssetName("TEST")
+                        .setAssetName(order.getMaterialText())
                         .setAssetCode(assetCode)
                         .setCompany(order.getCompanyCode())
-                        .setCompanyName(order.getCompanyCodeName())
                         .setPurchaseOrderNo(order.getPurchaseOrder())
                         .setProvider(order.getProvider())
                         .setProviderName(order.getProviderDescription())
                         .setOriginalValue(order.getPrice())
                         .setMonetaryUnit(order.getMoneyType())
+                        .setAssetStatus(AssetStatus.IN_STORE.getCode())
                         .setCreateBy("SAP")
                         .setCreateTime(new Date());
+
+                MaterialCategorySimpleDTO mcsDto = CodeUtil.parseMaterialNumber(order.getMaterialNumber());
+                if (ObjectUtil.isNotEmpty(mcsDto)) {
+                    asset.setAssetType(mcsDto.getAssetType())
+                            .setAssetCategory(mcsDto.getAssetCategory())
+                            .setAssetSubCategory(mcsDto.getAssetSubCategory());
+                }
+
                 assetList.add(asset);
 
                 nextNum++;

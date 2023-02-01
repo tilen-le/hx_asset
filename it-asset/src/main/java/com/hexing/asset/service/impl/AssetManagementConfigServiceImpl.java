@@ -2,6 +2,7 @@ package com.hexing.asset.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.mapper.AssetManagementConfigMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
@@ -9,11 +10,13 @@ import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
+import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,7 +56,26 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     @Override
     public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfig assetManagementConfig)
     {
-        List<AssetManagementConfig> assetManagementConfigs = assetManagementConfigMapper.selectList(new LambdaQueryWrapper());
+        LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(assetManagementConfig.getAssetType())) {
+            wrapper.eq(AssetManagementConfig::getAssetType, assetManagementConfig.getAssetType());
+        }
+        if (StringUtils.isNotBlank(assetManagementConfig.getAssetCategory())) {
+            wrapper.eq(AssetManagementConfig::getAssetCategory, assetManagementConfig.getAssetCategory());
+        }
+        if (StringUtils.isNotBlank(assetManagementConfig.getCompany())) {
+            wrapper.eq(AssetManagementConfig::getCompany, assetManagementConfig.getCompany());
+        }
+        if (StringUtils.isNotBlank(assetManagementConfig.getLocation())) {
+            wrapper.apply("(find_in_set( {0} , location ))", assetManagementConfig.getLocation());
+        }
+        if (StringUtils.isNotBlank(assetManagementConfig.getManageDept())) {
+            wrapper.eq(AssetManagementConfig::getManageDept, assetManagementConfig.getManageDept());
+        }
+
+        List<AssetManagementConfig> assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);
+
+
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         for (AssetManagementConfig managementConfig : assetManagementConfigs) {
             //资产管理员
@@ -81,6 +103,26 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
             userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(userCodes)).map(SysUser::getNickName).findFirst().orElse(null);
         }
         return userName;
+    }
+
+    /**
+     * 资产、财务管理员资产数据权限查询接口
+     *
+     * @param user 资产管理配置
+     * @return 资产管理配置
+     */
+    @Override
+    public List<AssetManagementConfig> listManagementConfig(String user)
+    {
+        LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
+        List<AssetManagementConfig> assetManagementConfigs =new ArrayList<>();
+
+        if (StringUtils.isNotBlank(user)) {
+            wrapper.apply("(find_in_set( {0} , asset_manager ))", user).or()
+                    .apply("(find_in_set( {0} , financial_manager ))", user);
+            assetManagementConfigs= assetManagementConfigMapper.selectList(wrapper);
+        }
+        return assetManagementConfigs;
     }
 
     /**

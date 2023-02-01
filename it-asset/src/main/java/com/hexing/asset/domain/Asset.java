@@ -74,7 +74,7 @@ public class Asset {
     /**
      * 转固状态
      */
-    private Boolean isFixed;
+    private Boolean fixed;
 
     /**
      * 保管人工号（老工号）

@@ -2,6 +2,7 @@ package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.common.core.domain.Result;
 
 import java.util.List;
@@ -28,6 +29,14 @@ public interface IAssetService extends IService<Asset> {
      * @return 资产表集合
      */
     List<Asset> selectAssetList(Asset asset);
+
+    /**
+     * 查询资产表列表
+     *
+     * @param param 资产信息查询参数
+     * @return
+     */
+    List<Asset> selectAssetList(AssetQueryParam param);
 
     /**
      * 根据资产编号查询资产信息

@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.IAssetUpdateLogService;
@@ -152,6 +153,70 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         return assetList;
     }
+
+    /**
+     * 查询资产表列表
+     *
+     * @param
+     * @return 资产表
+     */
+    @Override
+    public List<Asset> selectAssetList(AssetQueryParam param) {
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotEmpty(param.getAssetCode())) {
+            wrapper.like(Asset::getAssetCode, param.getAssetCode());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetType())) {
+            wrapper.eq(Asset::getAssetType, param.getAssetType());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetCategory())) {
+            wrapper.eq(Asset::getAssetCategory, param.getAssetCategory());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetSubCategory())) {
+            wrapper.eq(Asset::getAssetSubCategory, param.getAssetSubCategory());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetName())) {
+            wrapper.like(Asset::getAssetName, param.getAssetName());
+        }
+        if (CollectionUtil.isNotEmpty(param.getAssetStatus())) {
+            wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
+        }
+        if (StringUtils.isNotEmpty(param.getCurrentLocation())) {
+            wrapper.eq(Asset::getCurrentLocation, param.getCurrentLocation());
+        }
+        if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
+            wrapper.eq(Asset::getResponsiblePersonDept, param.getResponsiblePersonDept());
+        }
+        if (StringUtils.isNotEmpty(param.getCompany())) {
+            wrapper.eq(Asset::getCompany, param.getCompany());
+        }
+        if (ObjectUtil.isNotEmpty(param.getFixed())) {
+            wrapper.eq(Asset::getFixed, param.getFixed());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationDateStartDate())) {
+            wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationDateStartDate());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationDateEndDate())) {
+            wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationDateEndDate());
+        }
+
+        List<Asset> assetList = assetMapper.selectList(wrapper);
+        Map<String, SysUser> responsiblePersonMap = sysUserService
+                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+        Map<Long, SysDept> deptMap = sysDeptService
+                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
+
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            for (Asset a : assetList) {
+                SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
+                SysDept dept = deptMap.get(responsiblePerson.getDeptId());
+                a.setResponsiblePersonDept(dept.getDeptName());
+            }
+        }
+
+        return assetList;
+    }
+
 
     /**
      * 新增资产表

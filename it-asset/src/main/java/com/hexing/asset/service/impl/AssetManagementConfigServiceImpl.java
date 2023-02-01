@@ -16,6 +16,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -102,6 +103,26 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
             userName = sysUsers.stream().filter(sysUser -> sysUser.getUserName().equals(userCodes)).map(SysUser::getNickName).findFirst().orElse(null);
         }
         return userName;
+    }
+
+    /**
+     * 资产、财务管理员资产数据权限查询接口
+     *
+     * @param user 资产管理配置
+     * @return 资产管理配置
+     */
+    @Override
+    public List<AssetManagementConfig> listManagementConfig(String user)
+    {
+        LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
+        List<AssetManagementConfig> assetManagementConfigs =new ArrayList<>();
+
+        if (StringUtils.isNotBlank(user)) {
+            wrapper.apply("(find_in_set( {0} , asset_manager ))", user).or()
+                    .apply("(find_in_set( {0} , financial_manager ))", user);
+            assetManagementConfigs= assetManagementConfigMapper.selectList(wrapper);
+        }
+        return assetManagementConfigs;
     }
 
     /**

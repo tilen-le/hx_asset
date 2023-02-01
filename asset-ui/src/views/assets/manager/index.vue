@@ -21,8 +21,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="归属主体" prop="company">
-        <el-select v-model="queryParams.company" placeholder="请选择归属主体" clearable size="small">
+      <el-form-item label="所属公司" prop="company">
+        <el-select v-model="queryParams.company" placeholder="请选择所属公司" clearable size="small">
           <el-option
             v-for="dict in dict.type.asset_company"
             :key="dict.value"
@@ -98,7 +98,7 @@
           <dict-tag :options="dict.type.asset_category" :value="scope.row.assetCategory"/>
         </template>
       </el-table-column>
-      <el-table-column label="归属主体" align="center" prop="company">
+      <el-table-column label="所属公司" align="center" prop="company">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_company" :value="scope.row.company"/>
         </template>
@@ -161,8 +161,8 @@
             <el-option v-for="dict in dict.type.asset_category" :key="dict.value" :label="dict.label" :value="dict.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="归属主体" prop="company">
-          <el-select v-model="form.company" placeholder="请选择归属主体" clearable size="small" style="width: 80%">
+        <el-form-item label="所属公司" prop="company">
+          <el-select v-model="form.company" placeholder="请选择所属公司" clearable size="small" style="width: 80%">
             <el-option v-for="dict in dict.type.asset_company" :key="dict.value" :label="dict.label" :value="dict.value" />
           </el-select>
         </el-form-item>
@@ -261,7 +261,6 @@
   },
   created() {
     this.getList();
-    this.getAssetDept();
   },
   methods: {
     /** 查询成熟度流程列表 */
@@ -279,14 +278,6 @@
         getDicts("common_users").then(res => {
           this.common_users = res.data
         })
-      }
-    },
-    getAssetDept(){
-      const deptList = this.asset_dept;
-      if (deptList.length == 0) {
-        /*getDicts("common_users").then(res => {
-          this.asset_dept = res.data
-        })*/
       }
     },
     // 取消按钮
@@ -328,7 +319,6 @@
     handleAdd() {
       this.reset();
       this.getCommonUsers();
-      this.getAssetDept();
       this.open = true;
       this.title = "添加资产管理人员";
     },
@@ -336,7 +326,6 @@
     handleUpdate(row) {
       this.reset();
       this.getCommonUsers();
-      this.getAssetDept();
       getAssetManager(row.id).then(response => {
         this.form = response.data;
         this.form.location = this.form.location.split(',')

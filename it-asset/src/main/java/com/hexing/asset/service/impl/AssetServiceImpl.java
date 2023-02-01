@@ -181,9 +181,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (CollectionUtil.isNotEmpty(param.getAssetStatus())) {
             wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
         }
-        if (StringUtils.isNotEmpty(param.getCurrentLocation())) {
-            wrapper.eq(Asset::getCurrentLocation, param.getCurrentLocation());
-        }
         if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
             wrapper.eq(Asset::getResponsiblePersonDept, param.getResponsiblePersonDept());
         }
@@ -193,11 +190,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (ObjectUtil.isNotEmpty(param.getFixed())) {
             wrapper.eq(Asset::getFixed, param.getFixed());
         }
-        if (ObjectUtil.isNotEmpty(param.getCapitalizationDateStartDate())) {
-            wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationDateStartDate());
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationStartDate())) {
+            wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationStartDate());
         }
-        if (ObjectUtil.isNotEmpty(param.getCapitalizationDateEndDate())) {
-            wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationDateEndDate());
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationEndDate())) {
+            wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
         }
 
         List<Asset> assetList = assetMapper.selectList(wrapper);
@@ -206,13 +203,13 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         Map<Long, SysDept> deptMap = sysDeptService
                 .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
 
-        if (CollectionUtil.isNotEmpty(assetList)) {
-            for (Asset a : assetList) {
-                SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
-                SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-                a.setResponsiblePersonDept(dept.getDeptName());
-            }
-        }
+//        if (CollectionUtil.isNotEmpty(assetList)) {
+//            for (Asset a : assetList) {
+//                SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
+//                SysDept dept = deptMap.get(responsiblePerson.getDeptId());
+//                a.setResponsiblePersonDept(dept.getDeptName());
+//            }
+//        }
 
         return assetList;
     }

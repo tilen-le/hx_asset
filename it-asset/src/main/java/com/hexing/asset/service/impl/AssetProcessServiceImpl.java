@@ -60,7 +60,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetMapper, Asset> imp
         Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetId, asset.getAssetId()));
 
         // 资产操作【归还】后，资产状态变更为【在库】，清空字段【资产保管人】，【资产保管部门】，【成本中心】；
-        entity.setAssetStatus(AssetStatus.INSTORE.getCode());
+        entity.setAssetStatus(AssetStatus.IN_STORE.getCode());
         entity.setResponsiblePersonDept("");
         entity.setResponsiblePersonName("");
         entity.setResponsiblePersonDept("");
@@ -94,7 +94,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetMapper, Asset> imp
         * 固定资产-信息化设备除电脑外（Z030）
         * 2、【SAP卡片资产分类】【成本中心编码】为必填项，【责任成本中心编码】【归属项目】【制造商名称】【用途】为非必填项
         * */
-        entity.setAssetStatus(AssetStatus.INSTORE.getCode());
+        entity.setAssetStatus(AssetStatus.IN_STORE.getCode());
         entity.setResponsiblePersonDept("");
         entity.setResponsiblePersonName("");
         entity.setResponsiblePersonDept("");

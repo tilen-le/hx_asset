@@ -45,11 +45,6 @@ public class AssetQueryParam {
     @ApiModelProperty(value="资产状态")
     private List<String> assetStatus;
     /**
-     * 所在位置
-     */
-    @ApiModelProperty(value="所在位置")
-    private String currentLocation;
-    /**
      * 资产保管部门
      */
     @ApiModelProperty(value="资产保管部门")
@@ -69,11 +64,11 @@ public class AssetQueryParam {
      */
     @ApiModelProperty(value="资产化日期开始时间")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date capitalizationDateStartDate;
+    private Date capitalizationStartDate;
     /**
      * 资产化日期结束时间
      */
     @ApiModelProperty(value="资产化日期结束时间")
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date capitalizationDateEndDate;
+    private Date capitalizationEndDate;
 }

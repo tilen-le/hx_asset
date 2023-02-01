@@ -6,6 +6,7 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.annotation.Log;
@@ -130,12 +131,12 @@ public class AssetController extends BaseController {
                         .setAssetName(order.getMaterialText())
                         .setAssetCode(assetCode)
                         .setCompany(order.getCompanyCode())
-                        .setCompanyName(order.getCompanyCodeName())
                         .setPurchaseOrderNo(order.getPurchaseOrder())
                         .setProvider(order.getProvider())
                         .setProviderName(order.getProviderDescription())
                         .setOriginalValue(order.getPrice())
                         .setMonetaryUnit(order.getMoneyType())
+                        .setAssetStatus(AssetStatus.IN_STORE.getCode())
                         .setCreateBy("SAP")
                         .setCreateTime(new Date());
 

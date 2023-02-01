@@ -104,21 +104,6 @@ public class Asset {
     private String company;
 
     /**
-     * 所属公司名称
-     */
-    private String companyName;
-
-    /**
-     * 资产管理员
-     */
-    private String assetManager;
-
-    /**
-     * 资产管理部门
-     */
-    private String assetManagementDept;
-
-    /**
      * 成本中心
      */
     private String costCenter;

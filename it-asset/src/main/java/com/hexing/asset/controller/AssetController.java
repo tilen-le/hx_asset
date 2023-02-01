@@ -1,7 +1,9 @@
 package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.dto.SapPurchaseOrder;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
@@ -13,8 +15,12 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -70,16 +76,16 @@ public class AssetController extends BaseController {
         return AjaxResult.success(asset);
     }
 
-    /**
-     * 新增资产表
-     */
-    @ApiOperation("新增资产表")
-    @PreAuthorize("@ss.hasPermi('asset:asset:add')")
-    @Log(title = "新增资产表", businessType = BusinessType.INSERT)
-    @PostMapping
-    public AjaxResult add(@RequestBody Asset asset) {
-        return toAjax(assetService.insertAsset(asset));
-    }
+//    /**
+//     * 新增资产表
+//     */
+//    @ApiOperation("新增资产表")
+//    @PreAuthorize("@ss.hasPermi('asset:asset:add')")
+//    @Log(title = "新增资产表", businessType = BusinessType.INSERT)
+//    @PostMapping
+//    public AjaxResult add(@RequestBody Asset asset) {
+//        return toAjax(assetService.insertAsset(asset));
+//    }
 
     /**
      * 修改资产表
@@ -92,17 +98,66 @@ public class AssetController extends BaseController {
         return toAjax(assetService.updateAsset(asset, null));
     }
 
+
     /**
-     * 删除资产表
-     *
-     * @editor 80015306
+     * SAP采购单同步接口
      */
-    @ApiOperation("删除资产表")
-    @PreAuthorize("@ss.hasPermi('asset:asset:remove')")
-    @Log(title = "删除资产表", businessType = BusinessType.DELETE)
-    @DeleteMapping("/{assetCodes}")
-    public AjaxResult remove(@PathVariable List<String> assetCodes) {
-        return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
+    @ApiOperation("SAP采购单同步接口")
+//    @PreAuthorize("@ss.hasPermi('asset:asset:edit')")
+    @PostMapping("/sapAdd")
+    @Transactional
+    public AjaxResult sapAdd(@RequestBody SapPurchaseOrder order) {
+        logger.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
+        final String STR_FORMAT = "0000";
+        Integer numberOfArrival = order.getNumberOfArrival();
+        List<Asset> assetList = new ArrayList<>();
+        if (ObjectUtil.isNotNull(numberOfArrival)) {
+            LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
+                    .orderByDesc(Asset::getSerialNum)
+                    .last("LIMIT 1");
+            Asset theLastOne = assetService.getOne(wrapper);
+
+            int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
+            DecimalFormat df = new DecimalFormat(STR_FORMAT);
+            for (int i = 1; i <= numberOfArrival; i++) {
+                Asset asset = new Asset();
+                String assetCode = order.getMaterialNumber() + df.format(nextNum);
+                asset.setMaterialNum(order.getMaterialNumber())
+                        .setSerialNum(nextNum)
+                        .setAssetName("TEST")
+                        .setAssetCode(assetCode)
+                        .setCompany(order.getCompanyCode())
+                        .setCompanyName(order.getCompanyCodeName())
+                        .setPurchaseOrderNo(order.getPurchaseOrder())
+                        .setProvider(order.getProvider())
+                        .setProviderName(order.getProviderDescription())
+                        .setOriginalValue(order.getPrice())
+                        .setMonetaryUnit(order.getMoneyType())
+                        .setCreateBy("SAP")
+                        .setCreateTime(new Date());
+                assetList.add(asset);
+
+                nextNum++;
+            }
+            assetService.saveBatch(assetList);
+        }
+        logger.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + assetList.size() + " 个资产 ====");
+        return AjaxResult.success(order);
     }
+
+
+//    /**
+//     * 删除资产表
+//     *
+//     * @editor 80015306
+//     */
+//    @ApiOperation("删除资产表")
+//    @PreAuthorize("@ss.hasPermi('asset:asset:remove')")
+//    @Log(title = "删除资产表", businessType = BusinessType.DELETE)
+//    @DeleteMapping("/{assetCodes}")
+//    public AjaxResult remove(@PathVariable List<String> assetCodes) {
+//        return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
+//    }
 
 }

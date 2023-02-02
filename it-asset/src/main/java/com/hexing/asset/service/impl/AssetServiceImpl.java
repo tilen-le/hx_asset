@@ -7,8 +7,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.mapper.AssetMapper;
+import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.constant.HttpStatus;
@@ -16,6 +18,7 @@ import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
@@ -45,6 +48,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private SysDeptServiceImpl sysDeptService;
 //    @Autowired
     private IAssetUpdateLogService assetUpdateLogService;
+    @Autowired
+    private IAssetManagementConfigService assetManagementConfigService;
 
 
     @Value("${uip.uipTransfer}")
@@ -162,18 +167,41 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      */
     @Override
     public List<Asset> selectAssetList(AssetQueryParam param) {
+        List<Asset> assetList = new ArrayList<>();
+        String username = SecurityUtils.getUsername();
+        // 用户数据查看权限判断
+//        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
+//        if (CollectionUtil.isEmpty(managementConfigList)) {
+//            return assetList;
+//        }
+
+//        boolean isAssetManager = false;
+//        boolean isFinancialManager = false;
+//        for (AssetManagementConfig managementConfig : managementConfigList) {
+//            if (StringUtils.isNotEmpty(managementConfig.getAssetManager()) && managementConfig.getAssetManager().contains(username)) {
+//                isAssetManager = true;
+//            }
+//            if (StringUtils.isNotEmpty(managementConfig.getFinancialManager()) && managementConfig.getFinancialManager().contains(username)) {
+//                isFinancialManager = true;
+//            }
+//        }
+
+
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+//        if (isAssetManager) {
+//            wrapper.eq(Asset::get)
+//        }
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }
-        if (StringUtils.isNotEmpty(param.getAssetType())) {
-            wrapper.eq(Asset::getAssetType, param.getAssetType());
+        if (CollectionUtil.isNotEmpty(param.getAssetType())) {
+            wrapper.in(Asset::getAssetType, param.getAssetType());
         }
-        if (StringUtils.isNotEmpty(param.getAssetCategory())) {
-            wrapper.eq(Asset::getAssetCategory, param.getAssetCategory());
+        if (CollectionUtil.isNotEmpty(param.getAssetCategory())) {
+            wrapper.in(Asset::getAssetCategory, param.getAssetCategory());
         }
-        if (StringUtils.isNotEmpty(param.getAssetSubCategory())) {
-            wrapper.eq(Asset::getAssetSubCategory, param.getAssetSubCategory());
+        if (CollectionUtil.isNotEmpty(param.getAssetSubCategory())) {
+            wrapper.in(Asset::getAssetSubCategory, param.getAssetSubCategory());
         }
         if (StringUtils.isNotEmpty(param.getAssetName())) {
             wrapper.like(Asset::getAssetName, param.getAssetName());
@@ -197,7 +225,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
         }
 
-        List<Asset> assetList = assetMapper.selectList(wrapper);
+
+        assetList = assetMapper.selectList(wrapper);
         Map<String, SysUser> responsiblePersonMap = sysUserService
                 .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
         Map<Long, SysDept> deptMap = sysDeptService

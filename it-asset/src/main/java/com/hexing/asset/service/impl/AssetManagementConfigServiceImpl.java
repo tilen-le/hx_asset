@@ -26,8 +26,7 @@ import java.util.List;
  * @date 2023-01-30
  */
 @Service
-public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagementConfigMapper, AssetManagementConfig> implements IAssetManagementConfigService
-{
+public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagementConfigMapper, AssetManagementConfig> implements IAssetManagementConfigService {
     @Autowired
     private AssetManagementConfigMapper assetManagementConfigMapper;
     @Autowired
@@ -42,8 +41,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
      * @return 资产管理配置
      */
     @Override
-    public AssetManagementConfig selectAssetManagementConfigById(Long id)
-    {
+    public AssetManagementConfig selectAssetManagementConfigById(Long id) {
         return assetManagementConfigMapper.selectById(id);
     }
 
@@ -54,8 +52,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
      * @return 资产管理配置
      */
     @Override
-    public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfig assetManagementConfig)
-    {
+    public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfig assetManagementConfig) {
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(assetManagementConfig.getAssetType())) {
             wrapper.eq(AssetManagementConfig::getAssetType, assetManagementConfig.getAssetType());
@@ -80,15 +77,15 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         for (AssetManagementConfig managementConfig : assetManagementConfigs) {
             //资产管理员
             String assetManager = managementConfig.getAssetManager();
-            managementConfig.setAssetManager(getUserNameByUserCode(sysUsers,assetManager));
-            //财务管理员
+            managementConfig.setAssetManager(getUserNameByUserCode(sysUsers, assetManager));
+            //账务管理员
             String financialManager = managementConfig.getFinancialManager();
-            managementConfig.setFinancialManager(getUserNameByUserCode(sysUsers,financialManager));
+            managementConfig.setFinancialManager(getUserNameByUserCode(sysUsers, financialManager));
         }
         return assetManagementConfigs;
     }
 
-    private String getUserNameByUserCode(List<SysUser> sysUsers,String userCodes){
+    private String getUserNameByUserCode(List<SysUser> sysUsers, String userCodes) {
         String userName = "";
         if (userCodes.contains(",")) {
             String[] split = userCodes.split(",");
@@ -112,15 +109,14 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
      * @return 资产管理配置
      */
     @Override
-    public List<AssetManagementConfig> listManagementConfig(String user)
-    {
+    public List<AssetManagementConfig> listManagementConfig(String user) {
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
-        List<AssetManagementConfig> assetManagementConfigs =new ArrayList<>();
+        List<AssetManagementConfig> assetManagementConfigs = new ArrayList<>();
 
         if (StringUtils.isNotBlank(user)) {
             wrapper.apply("(find_in_set( {0} , asset_manager ))", user).or()
                     .apply("(find_in_set( {0} , financial_manager ))", user);
-            assetManagementConfigs= assetManagementConfigMapper.selectList(wrapper);
+            assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);
         }
         return assetManagementConfigs;
     }
@@ -132,8 +128,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
      * @return 结果
      */
     @Override
-    public int insertAssetManagementConfig(AssetManagementConfig assetManagementConfig)
-    {
+    public int insertAssetManagementConfig(AssetManagementConfig assetManagementConfig) {
         assetManagementConfig.setCreateTime(DateUtils.getNowDate());
         assetManagementConfig.setUpdateTime(DateUtils.getNowDate());
         //创建人工号
@@ -152,8 +147,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
      * @return 结果
      */
     @Override
-    public int updateAssetManagementConfig(AssetManagementConfig assetManagementConfig)
-    {
+    public int updateAssetManagementConfig(AssetManagementConfig assetManagementConfig) {
         assetManagementConfig.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
 //        String userCode = "80015306";
@@ -169,8 +163,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
      * @return 结果
      */
     @Override
-    public int deleteAssetManagementConfigByIds(Long[] ids)
-    {
+    public int deleteAssetManagementConfigByIds(Long[] ids) {
         return assetManagementConfigMapper.delete(new LambdaQueryWrapper<AssetManagementConfig>().in(AssetManagementConfig::getId, ids));
     }
 

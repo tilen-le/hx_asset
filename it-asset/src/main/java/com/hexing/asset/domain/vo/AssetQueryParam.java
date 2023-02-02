@@ -19,21 +19,20 @@ public class AssetQueryParam {
     @ApiModelProperty(value="资产编码")
     private String assetCode;
     /**
-     * 资产类型
-     */
-    @ApiModelProperty(value="资产类型")
-    private String assetType;
-    /**
-     * 资产分类
-     */
-    @ApiModelProperty(value="资产分类")
-    private String assetCategory;
-
-    /**
      * 资产大类
      */
     @ApiModelProperty(value="资产大类")
-    private String assetSubCategory;
+    private List<String> assetType;
+    /**
+     * 资产中类
+     */
+    @ApiModelProperty(value="资产中类")
+    private List<String> assetCategory;
+    /**
+     * 资产小类
+     */
+    @ApiModelProperty(value="资产小类")
+    private List<String> assetSubCategory;
     /**
      * 资产名称
      */

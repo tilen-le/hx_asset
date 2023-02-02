@@ -47,17 +47,17 @@ public class Asset {
     private String assetSapCode;
 
     /**
-     * 资产类型
+     * 资产大类
      */
     private String assetType;
 
     /**
-     * 资产分类
+     * 资产中类
      */
     private String assetCategory;
 
     /**
-     * 资产大类
+     * 资产小类
      */
     private String assetSubCategory;
 

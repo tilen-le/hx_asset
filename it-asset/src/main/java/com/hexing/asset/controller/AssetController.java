@@ -1,12 +1,15 @@
 package com.hexing.asset.controller;
 
+import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
+import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.enums.AssetStatus;
+import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.annotation.Log;
@@ -109,52 +112,59 @@ public class AssetController extends BaseController {
     @ApiOperation("SAP采购单同步接口")
     @PostMapping("/sapAdd")
     @Transactional
-    public AjaxResult sapAdd(@RequestBody SapPurchaseOrder order) {
-        logger.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
-        final String STR_FORMAT = "0000";
-        Integer numberOfArrival = order.getNumberOfArrival();
-        List<Asset> assetList = new ArrayList<>();
-        if (ObjectUtil.isNotNull(numberOfArrival)) {
-            LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
-                    .orderByDesc(Asset::getSerialNum)
-                    .last("LIMIT 1");
-            Asset theLastOne = assetService.getOne(wrapper);
-
-            int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
-            DecimalFormat df = new DecimalFormat(STR_FORMAT);
-            for (int i = 1; i <= numberOfArrival; i++) {
-                Asset asset = new Asset();
-                String assetCode = order.getMaterialNumber() + df.format(nextNum);
-                asset.setMaterialNum(order.getMaterialNumber())
-                        .setSerialNum(nextNum)
-                        .setAssetName(order.getMaterialText())
-                        .setAssetCode(assetCode)
-                        .setCompany(order.getCompanyCode())
-                        .setPurchaseOrderNo(order.getPurchaseOrder())
-                        .setProvider(order.getProvider())
-                        .setProviderName(order.getProviderDescription())
-                        .setOriginalValue(order.getPrice())
-                        .setMonetaryUnit(order.getMoneyType())
-                        .setAssetStatus(AssetStatus.IN_STORE.getCode())
-                        .setCreateBy("SAP")
-                        .setCreateTime(new Date());
-
-                MaterialCategorySimpleDTO mcsDto = CodeUtil.parseMaterialNumber(order.getMaterialNumber());
-                if (ObjectUtil.isNotEmpty(mcsDto)) {
-                    asset.setAssetType(mcsDto.getAssetType())
-                            .setAssetCategory(mcsDto.getAssetCategory())
-                            .setAssetSubCategory(mcsDto.getAssetSubCategory());
-                }
-
-                assetList.add(asset);
-
-                nextNum++;
-            }
-            assetService.saveBatch(assetList);
+    public AjaxResult sapAdd(@RequestBody SimpleOuterDTO<List<SapPurchaseOrder>> param) {
+        List<SapPurchaseOrder> orderList = param.getData();
+        if (CollectionUtil.isEmpty(orderList)) {
+            return AjaxResult.success();
         }
-        logger.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + assetList.size() + " 个资产 ====");
-        return AjaxResult.success(order);
+        int totalNum = 0;
+        logger.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
+        for (SapPurchaseOrder order : orderList) {
+            int numberOfArrival =  order.getNumberOfArrival().intValue();
+            List<Asset> assetList = new ArrayList<>();
+            if (ObjectUtil.isNotNull(numberOfArrival)) {
+                LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
+                        .orderByDesc(Asset::getSerialNum)
+                        .last("LIMIT 1");
+                Asset theLastOne = assetService.getOne(wrapper);
+
+                int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
+                DecimalFormat df = new DecimalFormat("0000");
+                for (int i = 1; i <= numberOfArrival; i++) {
+                    Asset asset = new Asset();
+                    String assetCode = order.getMaterialNumber() + df.format(nextNum);
+                    asset.setMaterialNum(order.getMaterialNumber())
+                            .setSerialNum(nextNum)
+                            .setAssetName(order.getMaterialText())
+                            .setAssetCode(assetCode)
+                            .setCompany(order.getCompanyCode())
+                            .setPurchaseOrderNo(order.getPurchaseOrder())
+                            .setProvider(order.getProvider())
+                            .setProviderName(order.getProviderDescription())
+                            .setOriginalValue(order.getPrice())
+                            .setMonetaryUnit(order.getMoneyType())
+                            .setAssetStatus(AssetStatus.IN_STORE.getCode())
+                            .setCreateBy("SAP")
+                            .setCreateTime(new Date());
+
+                    MaterialCategorySimpleDTO mcsDto = CodeUtil.parseMaterialNumber(order.getMaterialNumber());
+                    if (ObjectUtil.isNotEmpty(mcsDto)) {
+                        asset.setAssetType(mcsDto.getAssetType())
+                                .setAssetCategory(mcsDto.getAssetCategory())
+                                .setAssetSubCategory(mcsDto.getAssetSubCategory());
+                    }
+
+                    assetList.add(asset);
+
+                    nextNum++;
+                }
+                assetService.saveBatch(assetList);
+                totalNum += assetList.size();
+            }
+        }
+        logger.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + totalNum + " 个资产 ====");
+        return AjaxResult.success(orderList);
     }
 
 
@@ -170,5 +180,9 @@ public class AssetController extends BaseController {
 //    public AjaxResult remove(@PathVariable List<String> assetCodes) {
 //        return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
 //    }
+
+    public AjaxResult getAssetCategory() {
+        return null;
+    }
 
 }

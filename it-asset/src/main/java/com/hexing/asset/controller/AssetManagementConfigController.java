@@ -96,6 +96,8 @@ public class AssetManagementConfigController extends BaseController
 
     /**
      * 资产、财务管理员资产数据权限查询接口
+     * @param user 员工工号
+     * @return
      */
     @GetMapping("/listManagementConfig")
     public TableDataInfo listManagementConfig(@RequestBody String user)

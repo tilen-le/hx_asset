@@ -2,6 +2,7 @@ package com.hexing.asset.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
@@ -146,17 +147,11 @@ public class AssetController extends BaseController {
                             .setMonetaryUnit(order.getMoneyType())
                             .setAssetStatus(AssetStatus.IN_STORE.getCode())
                             .setCreateBy("SAP")
-                            .setCreateTime(new Date());
-
-                    MaterialCategorySimpleDTO mcsDto = CodeUtil.parseMaterialNumber(order.getMaterialNumber());
-                    if (ObjectUtil.isNotEmpty(mcsDto)) {
-                        asset.setAssetType(mcsDto.getAssetType())
-                                .setAssetCategory(mcsDto.getAssetCategory())
-                                .setAssetSubCategory(mcsDto.getAssetSubCategory());
-                    }
-
+                            .setCreateTime(new Date())
+                            .setAssetType(order.getMaterialNumber().substring(0, 1))
+                            .setAssetCategory(order.getMaterialNumber().substring(1, 3))
+                            .setAssetSubCategory(order.getMaterialNumber().substring(3, 5));
                     assetList.add(asset);
-
                     nextNum++;
                 }
                 assetService.saveBatch(assetList);
@@ -181,8 +176,13 @@ public class AssetController extends BaseController {
 //        return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
 //    }
 
-    public AjaxResult getAssetCategory() {
-        return null;
+    /**
+     * 获取物料号与资产关系对应关系
+     */
+    @ApiOperation("获取物料号与资产关系对应关系")
+    @PostMapping("/getAssetCategoryTree")
+    public JSONObject getAssetCategoryTree() {
+        return CodeUtil.getAssetCategoryTree();
     }
 
 }

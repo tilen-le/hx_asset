@@ -18,6 +18,10 @@ public class CodeUtil {
         categoryDict = JSONObject.parseObject(getJsonStr(materialCategoryJsonFilePath));
     }
 
+    public static JSONObject getAssetCategoryTree() {
+        return categoryDict;
+    }
+
     /**
      * 物料号解析
      * @param materialNumber 物料号
@@ -58,6 +62,8 @@ public class CodeUtil {
 
         return dto;
     }
+
+
 
     /**
      * 读取resource目录下的json文件，读取为json字符串

@@ -8,11 +8,13 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
+import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.IAssetUpdateLogService;
+import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
@@ -46,7 +48,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
-//    @Autowired
+    //    @Autowired
     private IAssetUpdateLogService assetUpdateLogService;
     @Autowired
     private IAssetManagementConfigService assetManagementConfigService;
@@ -69,12 +71,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (ObjectUtil.isEmpty(asset)) {
             return null;
         }
-        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
-        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
-
-        SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
-        asset.setResponsiblePersonName(user.getNickName());
-        asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+//        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
+//        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
+//
+//        SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
+//        asset.setResponsiblePersonName(user.getNickName());
+//        asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
 
         return asset;
     }
@@ -186,11 +188,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 //            }
 //        }
 
-
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-//        if (isAssetManager) {
-//            wrapper.eq(Asset::get)
-//        }
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }
@@ -225,12 +223,18 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
         }
 
-
         assetList = assetMapper.selectList(wrapper);
-        Map<String, SysUser> responsiblePersonMap = sysUserService
-                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
-        Map<Long, SysDept> deptMap = sysDeptService
-                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
+        for (Asset asset : assetList) {
+            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum());
+            asset.setAssetType(dto.getAssetType());
+            asset.setAssetCategory(dto.getAssetCategory());
+            asset.setAssetSubCategory(dto.getAssetSubCategory());
+        }
+
+//        Map<String, SysUser> responsiblePersonMap = sysUserService
+//                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+//        Map<Long, SysDept> deptMap = sysDeptService
+//                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
 
 //        if (CollectionUtil.isNotEmpty(assetList)) {
 //            for (Asset a : assetList) {
@@ -347,7 +351,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         return assetList;
     }
-
 
 
 }

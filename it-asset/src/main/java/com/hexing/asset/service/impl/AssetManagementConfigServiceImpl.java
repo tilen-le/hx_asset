@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
+import com.hexing.asset.domain.dto.AssetManagementConfigSearchDTO;
 import com.hexing.asset.mapper.AssetManagementConfigMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.common.core.domain.entity.SysUser;
@@ -48,25 +49,24 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     /**
      * 查询资产管理配置列表
      *
-     * @param assetManagementConfig 资产管理配置
+     * @param searchDTO 资产管理配置
      * @return 资产管理配置
      */
     @Override
-    public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfig assetManagementConfig) {
+    public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfigSearchDTO searchDTO) {
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(assetManagementConfig.getAssetType())) {
-            wrapper.eq(AssetManagementConfig::getAssetType, assetManagementConfig.getAssetType());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getAssetCategory())) {
-            wrapper.eq(AssetManagementConfig::getAssetCategory, assetManagementConfig.getAssetCategory());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getAssetSubCategory())) {
-            wrapper.eq(AssetManagementConfig::getAssetSubCategory, assetManagementConfig.getAssetSubCategory());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getCompany())) {
-            wrapper.eq(AssetManagementConfig::getCompany, assetManagementConfig.getCompany());
-        }
-
+//        if (StringUtils.isNotBlank(assetManagementConfig.getAssetType())) {
+//            wrapper.eq(AssetManagementConfig::getAssetType, assetManagementConfig.getAssetType());
+//        }
+//        if (StringUtils.isNotBlank(assetManagementConfig.getAssetCategory())) {
+//            wrapper.eq(AssetManagementConfig::getAssetCategory, assetManagementConfig.getAssetCategory());
+//        }
+//        if (StringUtils.isNotBlank(assetManagementConfig.getAssetSubCategory())) {
+//            wrapper.eq(AssetManagementConfig::getAssetSubCategory, assetManagementConfig.getAssetSubCategory());
+//        }
+//        if (StringUtils.isNotBlank(assetManagementConfig.getCompany())) {
+//            wrapper.eq(AssetManagementConfig::getCompany, assetManagementConfig.getCompany());
+//        }
         List<AssetManagementConfig> assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);
 
 

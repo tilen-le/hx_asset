@@ -2,6 +2,7 @@ package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.hexing.asset.domain.AssetManagementConfig;
+import com.hexing.asset.domain.dto.AssetManagementConfigSearchDTO;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
@@ -34,12 +35,12 @@ public class AssetManagementConfigController extends BaseController
      * 查询资产管理配置列表
      */
     @GetMapping("/list")
-    @PreAuthorize("@ss.hasPermi('manage:config:list')")
+//    @PreAuthorize("@ss.hasPermi('manage:config:list')")
     @ApiOperation("查询资产管理配置列表")
-    public TableDataInfo list(AssetManagementConfig assetManagementConfig)
+    public TableDataInfo list(@RequestBody AssetManagementConfigSearchDTO searchDTO)
     {
         startPage();
-        List<AssetManagementConfig> list = assetManagementConfigService.selectAssetManagementConfigList(assetManagementConfig);
+        List<AssetManagementConfig> list = assetManagementConfigService.selectAssetManagementConfigList(searchDTO);
 
         return getDataTable(list);
     }

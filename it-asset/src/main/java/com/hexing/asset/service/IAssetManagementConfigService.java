@@ -2,6 +2,7 @@ package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.AssetManagementConfig;
+import com.hexing.asset.domain.dto.AssetManagementConfigSearchDTO;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public interface IAssetManagementConfigService extends IService<AssetManagementC
      * @param assetManagementConfig 资产管理配置
      * @return 资产管理配置集合
      */
-    public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfig assetManagementConfig);
+    public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfigSearchDTO searchDTO);
 
     /**
      * 资产、财务管理员资产数据权限查询接口

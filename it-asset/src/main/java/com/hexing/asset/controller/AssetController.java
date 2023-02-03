@@ -181,8 +181,8 @@ public class AssetController extends BaseController {
      */
     @ApiOperation("获取物料号与资产关系对应关系")
     @GetMapping("/getAssetCategoryTree")
-    public JSONObject getAssetCategoryTree() {
-        return CodeUtil.getAssetCategoryTree();
+    public AjaxResult getAssetCategoryTree() {
+        return AjaxResult.success(CodeUtil.getAssetCategoryTree());
     }
 
 }

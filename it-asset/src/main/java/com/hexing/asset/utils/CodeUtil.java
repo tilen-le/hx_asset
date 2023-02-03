@@ -11,15 +11,10 @@ import java.io.*;
 
 public class CodeUtil {
 
-    private static final JSONObject categoryDict;
     private static final String materialCategoryJsonFilePath = "material_category.json";
 
-    static {
-        categoryDict = JSONObject.parseObject(getJsonStr(materialCategoryJsonFilePath));
-    }
-
     public static JSONObject getAssetCategoryTree() {
-        return categoryDict;
+        return JSONObject.parseObject(getJsonStr(materialCategoryJsonFilePath));
     }
 
     /**
@@ -31,6 +26,7 @@ public class CodeUtil {
         if (StringUtils.isEmpty(materialNumber)) {
             return null;
         }
+        JSONObject categoryDict = getAssetCategoryTree();
         MaterialCategorySimpleDTO dto = new MaterialCategorySimpleDTO();
 
         String assetTypeCode = materialNumber.substring(0, 1); // 没什么用，留着提供代码可读性

@@ -25,13 +25,13 @@ public class AssetManagementConfigSearchDTO
 {
     private static final long serialVersionUID = 1L;
     /** 所属公司 */
-    private List<String> companyList;
+    private List<String> company;
     /** 资产大类列表 */
-    private List<String> assetTypeList;
+    private List<String> assetType;
     /** 资产中类列表 */
-    private List<String> assetCategoryList;
+    private List<String> assetCategory;
     /** 资产小类列表 */
-    private List<String> assetSubCategoryList;
+    private List<String> assetSubCategory;
     /** 资产管理员列表 */
-    private List<String> assetManagerList;
+    private List<String> assetManager;
 }

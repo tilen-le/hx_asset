@@ -3,6 +3,7 @@ package com.hexing.asset.service.impl;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.support.spring.FastjsonSockJsMessageCodec;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -224,8 +225,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
 
         assetList = assetMapper.selectList(wrapper);
+
+        JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree();
         for (Asset asset : assetList) {
-            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum());
+            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
             asset.setAssetType(dto.getAssetType());
             asset.setAssetCategory(dto.getAssetCategory());
             asset.setAssetSubCategory(dto.getAssetSubCategory());

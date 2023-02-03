@@ -180,7 +180,7 @@ public class AssetController extends BaseController {
      * 获取物料号与资产关系对应关系
      */
     @ApiOperation("获取物料号与资产关系对应关系")
-    @PostMapping("/getAssetCategoryTree")
+    @GetMapping("/getAssetCategoryTree")
     public JSONObject getAssetCategoryTree() {
         return CodeUtil.getAssetCategoryTree();
     }

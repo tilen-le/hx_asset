@@ -1,5 +1,6 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -14,11 +15,14 @@ import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 资产管理配置Service业务层处理
@@ -55,33 +59,66 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     @Override
     public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfigSearchDTO searchDTO) {
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
-//        if (StringUtils.isNotBlank(assetManagementConfig.getAssetType())) {
-//            wrapper.eq(AssetManagementConfig::getAssetType, assetManagementConfig.getAssetType());
-//        }
-//        if (StringUtils.isNotBlank(assetManagementConfig.getAssetCategory())) {
-//            wrapper.eq(AssetManagementConfig::getAssetCategory, assetManagementConfig.getAssetCategory());
-//        }
-//        if (StringUtils.isNotBlank(assetManagementConfig.getAssetSubCategory())) {
-//            wrapper.eq(AssetManagementConfig::getAssetSubCategory, assetManagementConfig.getAssetSubCategory());
-//        }
-//        if (StringUtils.isNotBlank(assetManagementConfig.getCompany())) {
-//            wrapper.eq(AssetManagementConfig::getCompany, assetManagementConfig.getCompany());
-//        }
+        List resultList =new ArrayList();
+        List<String> assetSubCategory = searchDTO.getAssetSubCategory();
+        List<String> assetManager = searchDTO.getAssetManager();
+        List<String> company = searchDTO.getCompany();
+        if (StringUtils.isNotBlank(searchDTO.getAssetType())) {
+            wrapper.eq(AssetManagementConfig::getAssetType, searchDTO.getAssetType());
+        }
+        if (StringUtils.isNotBlank(searchDTO.getAssetCategory())) {
+            wrapper.eq(AssetManagementConfig::getAssetCategory, searchDTO.getAssetCategory());
+        }
         List<AssetManagementConfig> assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);
 
-
-        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
-        for (AssetManagementConfig managementConfig : assetManagementConfigs) {
-            //资产管理员
-            String assetManager = managementConfig.getAssetManager();
-            managementConfig.setAssetManager(getUserNameByUserCode(sysUsers, assetManager));
-            //账务管理员
-            String financialManager = managementConfig.getFinancialManager();
-            managementConfig.setFinancialManager(getUserNameByUserCode(sysUsers, financialManager));
+        if (CollectionUtil.isNotEmpty(assetSubCategory)){
+            assetManagementConfigs = getList(assetManagementConfigs, assetSubCategory,"assetSubCategory");
         }
+        if (CollectionUtil.isNotEmpty(assetManager)){
+            assetManagementConfigs = getList(assetManagementConfigs, assetManager,"assetManager");
+        }
+        if (CollectionUtil.isNotEmpty(company)){
+            assetManagementConfigs = getList(assetManagementConfigs, company,"");
+        }
+
+//        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());]
+//        for (AssetManagementConfig managementConfig : assetManagementConfigs) {
+//            //资产管理员
+//            assetManager = managementConfig.getAssetManager();
+//            managementConfig.setAssetManager(getUserNameByUserCode(sysUsers, assetManager));
+//            //账务管理员
+//            String financialManager = managementConfig.getFinancialManager();
+//            managementConfig.setFinancialManager(getUserNameByUserCode(sysUsers, financialManager));
+//        }
         return assetManagementConfigs;
     }
 
+    private List getList(List<AssetManagementConfig> assetManagementConfigs,List<String> searchParam,String whichSearch){
+        List<AssetManagementConfig> list = new ArrayList<>();
+        List<String> xlist =new ArrayList<>();
+        String param ="";
+        for (AssetManagementConfig x : assetManagementConfigs) {
+            param = x.getCompany();
+            if (whichSearch.equals("assetSubCategory")){
+                xlist= Arrays.asList(x.getAssetSubCategory().split(","));
+                param =x.getAssetSubCategory();
+            }else if(whichSearch.equals("assetManager")){
+                xlist= Arrays.asList(x.getAssetManager().split(","));
+                param = x.getAssetManager();
+            }
+            Boolean isTureWhich =false;
+            for (String s : searchParam) {
+                if (xlist.contains(s)){
+                    isTureWhich = Boolean.TRUE;
+                    continue;
+                }
+            }
+            if (searchParam.contains(param)||isTureWhich) {
+                list.add(x);
+            }
+        }
+        return list;
+    }
     private String getUserNameByUserCode(List<SysUser> sysUsers, String userCodes) {
         String userName = "";
         if (userCodes.contains(",")) {

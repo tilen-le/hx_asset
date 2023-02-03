@@ -27,9 +27,11 @@ public class AssetManagementConfigSearchDTO
     /** 所属公司 */
     private List<String> company;
     /** 资产大类列表 */
-    private List<String> assetType;
+//    private List<String> assetType;
+    private String assetType;
     /** 资产中类列表 */
-    private List<String> assetCategory;
+//    private List<String> assetCategory;
+    private String assetCategory;
     /** 资产小类列表 */
     private List<String> assetSubCategory;
     /** 资产管理员列表 */

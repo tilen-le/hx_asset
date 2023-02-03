@@ -226,13 +226,13 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         assetList = assetMapper.selectList(wrapper);
 
-        JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree();
-        for (Asset asset : assetList) {
-            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
-            asset.setAssetType(dto.getAssetType());
-            asset.setAssetCategory(dto.getAssetCategory());
-            asset.setAssetSubCategory(dto.getAssetSubCategory());
-        }
+//        JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree();
+//        for (Asset asset : assetList) {
+//            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+//            asset.setAssetType(dto.getAssetType());
+//            asset.setAssetCategory(dto.getAssetCategory());
+//            asset.setAssetSubCategory(dto.getAssetSubCategory());
+//        }
 
 //        Map<String, SysUser> responsiblePersonMap = sysUserService
 //                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));

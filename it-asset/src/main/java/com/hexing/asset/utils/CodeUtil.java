@@ -8,6 +8,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
 import java.io.*;
+import java.util.List;
 
 public class CodeUtil {
 
@@ -38,8 +39,8 @@ public class CodeUtil {
      * 获取物料号资产类别对应关系JSON对象
      * @return
      */
-    public static JSONObject getAssetCategoryTree() {
-        return JSONObject.parseObject(getJsonStr(materialCategoryJsonFilePath));
+    public static JSONArray getAssetCategoryTree() {
+        return JSONObject.parseArray(getJsonStr(materialCategoryJsonFilePath));
     }
 
 

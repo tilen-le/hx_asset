@@ -1,196 +1,196 @@
-{
-  "code": "7",
-  "description": "固定资产",
-  "child": [
-    {
-      "code": "01",
-      "description": "土地及房屋建筑",
-      "child": [
-        {
-          "code": "01",
-          "description": "土地"
-        },
-        {
-          "code": "02",
-          "description": "房屋建筑"
-        }
-      ]
-    },
-    {
-      "code": "02",
-      "description": "生产设备",
-      "child": [
-        {
-          "code": "01",
-          "description": "金加工设备"
-        },
-        {
-          "code": "02",
-          "description": "注塑设备"
-        },
-        {
-          "code": "03",
-          "description": "整形设备"
-        },
-        {
-          "code": "04",
-          "description": "焊接设备"
-        },
-        {
-          "code": "05",
-          "description": "SMT类设备"
-        },
-        {
-          "code": "06",
-          "description": "校验设备"
-        },
-        {
-          "code": "07",
-          "description": "装配设备"
-        },
-        {
-          "code": "08",
-          "description": "模具成品"
-        },
-        {
-          "code": "99",
-          "description": "其它类"
-        }
-      ]
-    },
-    {
-      "code": "03",
-      "description": "测试设备",
-      "child": [
-        {
-          "code": "01",
-          "description": "性能测试设备"
-        },
-        {
-          "code": "02",
-          "description": "功能测试设备"
-        },
-        {
-          "code": "03",
-          "description": "可靠性测试设备"
-        },
-        {
-          "code": "99",
-          "description": "其它类"
-        }
-      ]
-    },
-    {
-      "code": "04",
-      "description": "特种辅助设备",
-      "child": [
-        {
-          "code": "01",
-          "description": "空气动力设备"
-        },
-        {
-          "code": "02",
-          "description": "配电设备"
-        },
-        {
-          "code": "99",
-          "description": "其它类"
-        }
-      ]
-    },
-    {
-      "code": "05",
-      "description": "办公设备",
-      "child": [
-        {
-          "code": "01",
-          "description": "文件处理设备"
-        },
-        {
-          "code": "02",
-          "description": "办公器具"
-        },
-        {
-          "code": "03",
-          "description": "空调"
-        },
-        {
-          "code": "99",
-          "description": "其它类"
-        }
-      ]
-    },
-    {
-      "code": "06",
-      "description": "运输设备及周转器具",
-      "child": [
-        {
-          "code": "01",
-          "description": "货运设备"
-        },
-        {
-          "code": "02",
-          "description": "客运设备"
-        },
-        {
-          "code": "99",
-          "description": "周转器具"
-        }
-      ]
-    },
-    {
-      "code": "07",
-      "description": "信息化类设备",
-      "child": [
-        {
-          "code": "01",
-          "description": "服务器"
-        },
-        {
-          "code": "02",
-          "description": "台式电脑"
-        },
-        {
-          "code": "03",
-          "description": "笔记本电脑"
-        },
-        {
-          "code": "04",
-          "description": "工控机"
-        },
-        {
-          "code": "05",
-          "description": "网络设备"
-        },
-        {
-          "code": "06",
-          "description": "软件产品"
-        },
-        {
-          "code": "99",
-          "description": "其它类"
-        }
-      ]
-    },
-    {
-      "code": "08",
-      "description": "其他设备",
-      "child": [
-        {
-          "code": "01",
-          "description": "厨房设备"
-        },
-        {
-          "code": "02",
-          "description": "消防设备"
-        },
-        {
-          "code": "03",
-          "description": "低值易耗资产"
-        }
-      ]
-    }
-  ]
-}
-
-
+[
+  {
+    "code": "7",
+    "description": "固定资产",
+    "child": [
+      {
+        "code": "01",
+        "description": "土地及房屋建筑",
+        "child": [
+          {
+            "code": "01",
+            "description": "土地"
+          },
+          {
+            "code": "02",
+            "description": "房屋建筑"
+          }
+        ]
+      },
+      {
+        "code": "02",
+        "description": "生产设备",
+        "child": [
+          {
+            "code": "01",
+            "description": "金加工设备"
+          },
+          {
+            "code": "02",
+            "description": "注塑设备"
+          },
+          {
+            "code": "03",
+            "description": "整形设备"
+          },
+          {
+            "code": "04",
+            "description": "焊接设备"
+          },
+          {
+            "code": "05",
+            "description": "SMT类设备"
+          },
+          {
+            "code": "06",
+            "description": "校验设备"
+          },
+          {
+            "code": "07",
+            "description": "装配设备"
+          },
+          {
+            "code": "08",
+            "description": "模具成品"
+          },
+          {
+            "code": "99",
+            "description": "其它类"
+          }
+        ]
+      },
+      {
+        "code": "03",
+        "description": "测试设备",
+        "child": [
+          {
+            "code": "01",
+            "description": "性能测试设备"
+          },
+          {
+            "code": "02",
+            "description": "功能测试设备"
+          },
+          {
+            "code": "03",
+            "description": "可靠性测试设备"
+          },
+          {
+            "code": "99",
+            "description": "其它类"
+          }
+        ]
+      },
+      {
+        "code": "04",
+        "description": "特种辅助设备",
+        "child": [
+          {
+            "code": "01",
+            "description": "空气动力设备"
+          },
+          {
+            "code": "02",
+            "description": "配电设备"
+          },
+          {
+            "code": "99",
+            "description": "其它类"
+          }
+        ]
+      },
+      {
+        "code": "05",
+        "description": "办公设备",
+        "child": [
+          {
+            "code": "01",
+            "description": "文件处理设备"
+          },
+          {
+            "code": "02",
+            "description": "办公器具"
+          },
+          {
+            "code": "03",
+            "description": "空调"
+          },
+          {
+            "code": "99",
+            "description": "其它类"
+          }
+        ]
+      },
+      {
+        "code": "06",
+        "description": "运输设备及周转器具",
+        "child": [
+          {
+            "code": "01",
+            "description": "货运设备"
+          },
+          {
+            "code": "02",
+            "description": "客运设备"
+          },
+          {
+            "code": "99",
+            "description": "周转器具"
+          }
+        ]
+      },
+      {
+        "code": "07",
+        "description": "信息化类设备",
+        "child": [
+          {
+            "code": "01",
+            "description": "服务器"
+          },
+          {
+            "code": "02",
+            "description": "台式电脑"
+          },
+          {
+            "code": "03",
+            "description": "笔记本电脑"
+          },
+          {
+            "code": "04",
+            "description": "工控机"
+          },
+          {
+            "code": "05",
+            "description": "网络设备"
+          },
+          {
+            "code": "06",
+            "description": "软件产品"
+          },
+          {
+            "code": "99",
+            "description": "其它类"
+          }
+        ]
+      },
+      {
+        "code": "08",
+        "description": "其他设备",
+        "child": [
+          {
+            "code": "01",
+            "description": "厨房设备"
+          },
+          {
+            "code": "02",
+            "description": "消防设备"
+          },
+          {
+            "code": "03",
+            "description": "低值易耗资产"
+          }
+        ]
+      }
+    ]
+  }
+]

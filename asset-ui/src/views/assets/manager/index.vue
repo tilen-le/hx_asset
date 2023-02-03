@@ -1,20 +1,30 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="资产类型" prop="assetType">
-        <el-select v-model="queryParams.assetType" placeholder="请选择资产类型" clearable size="small">
+      <el-form-item label="资产大类" prop="assetType">
+        <el-select v-model="queryParams.assetType" placeholder="请选择资产大类" clearable size="small"  @change="typeChange">
           <el-option
-            v-for="dict in dict.type.asset_type"
+            v-for="dict in asset_types"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="资产分类" prop="assetCategory">
-        <el-select v-model="queryParams.assetCategory" placeholder="请选择资产分类" clearable size="small">
+      <el-form-item label="资产中类" prop="assetCategory">
+        <el-select v-model="queryParams.assetCategory" placeholder="请选择资产中类" clearable size="small" @change="categoryChange">
           <el-option
-            v-for="dict in dict.type.asset_category"
+            v-for="dict in asset_category_options"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="资产小类" prop="assetSubCategory">
+        <el-select v-model="queryParams.assetSubCategory" placeholder="请选择资产小类" clearable multiple size="small">
+          <el-option
+            v-for="dict in asset_sub_category_options"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -22,7 +32,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="所属公司" prop="company">
-        <el-select v-model="queryParams.company" placeholder="请选择所属公司" clearable size="small">
+        <el-select v-model="queryParams.company" placeholder="请选择所属公司" clearable multiple size="small">
           <el-option
             v-for="dict in dict.type.asset_company"
             :key="dict.value"
@@ -31,24 +41,9 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="地区" prop="location">
-        <el-select v-model="queryParams.location" placeholder="请选择地区" clearable size="small">
-          <el-option
-            v-for="dict in dict.type.asset_location"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="资产管理部门" prop="manageDept" label-width="100px">
-        <el-select v-model="queryParams.manageDept" placeholder="请选择资产管理部门" clearable size="small">
-          <el-option
-            v-for="dict in dict.type.asset_location"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
+      <el-form-item label="资产管理员" prop="assetManager">
+        <el-select popper-class="long_select" v-model="queryParams.assetManager" placeholder="请选择资产管理员" clearable multiple size="small">
+          <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel" :value="item.dictValue"/>
         </el-select>
       </el-form-item>
       <el-form-item>
@@ -85,27 +80,24 @@
     <el-table v-loading="loading" :data="managerList" @selection-change="handleSelectionChange" tooltip-effect="light">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="序号" type="index" align="center" />
-<!--
-      资产管理部门
-      -->
-      <el-table-column label="资产类型" align="center" prop="priority">
+      <el-table-column label="资产大类" align="center" prop="priority">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_type" :value="scope.row.assetType"/>
+          <dict-tag :options="asset_types" :value="scope.row.assetType"/>
         </template>
       </el-table-column>
-      <el-table-column label="资产分类" align="center" prop="assetCategory">
+      <el-table-column label="资产中类" align="center" prop="assetCategory">
         <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_category" :value="scope.row.assetCategory"/>
+          <dict-tag :options="asset_category" :value="scope.row.assetCategory"/>
+        </template>
+      </el-table-column>
+      <el-table-column label="资产小类" align="center" prop="assetSubCategory">
+        <template slot-scope="scope">
+          <dict-tag v-if="scope.row.assetSubCategory != null && scope.row.assetSubCategory != ''" :options="asset_sub_category" :value="scope.row.assetSubCategory.split(',')"/>
         </template>
       </el-table-column>
       <el-table-column label="所属公司" align="center" prop="company">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_company" :value="scope.row.company"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="地区" align="center" prop="location">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_location" :value="scope.row.location.split(',')"/>
         </template>
       </el-table-column>
       <el-table-column label="资产管理员" align="center" prop="assetManager" :show-overflow-tooltip="true" />
@@ -151,24 +143,24 @@
     <!-- 添加或修改对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body :close-on-click-modal="false">
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
-        <el-form-item label="资产类型" prop="assetType">
-          <el-select v-model="form.assetType" placeholder="请选择资产类型" clearable size="small" style="width: 80%">
-            <el-option v-for="dict in dict.type.asset_type" :key="dict.value" :label="dict.label" :value="dict.value" />
+        <el-form-item label="资产大类" prop="assetType">
+          <el-select v-model="form.assetType" placeholder="请选择资产大类" clearable size="small" style="width: 80%" @change="typeAddChange">
+            <el-option v-for="dict in asset_types" :key="dict.value" :label="dict.label" :value="dict.value" />
           </el-select>
         </el-form-item>
-        <el-form-item label="资产分类" prop="assetCategory">
-          <el-select v-model="form.assetCategory" placeholder="请选择资产分类" clearable size="small" style="width: 80%">
-            <el-option v-for="dict in dict.type.asset_category" :key="dict.value" :label="dict.label" :value="dict.value" />
+        <el-form-item label="资产中类" prop="assetCategory">
+          <el-select v-model="form.assetCategory" placeholder="请选择资产中类" clearable size="small" style="width: 80%" @change="categoryAddChange">
+            <el-option v-for="dict in asset_category_add_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资产小类" prop="assetSubCategory">
+          <el-select v-model="form.assetSubCategory" placeholder="请选择资产小类" clearable multiple size="small" style="width: 80%">
+            <el-option v-for="dict in asset_sub_category_add_options" :key="dict.value" :label="dict.label" :value="dict.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="所属公司" prop="company">
           <el-select v-model="form.company" placeholder="请选择所属公司" clearable size="small" style="width: 80%">
             <el-option v-for="dict in dict.type.asset_company" :key="dict.value" :label="dict.label" :value="dict.value" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="地区" prop="location">
-          <el-select v-model="form.location" placeholder="请选择地区" clearable multiple size="small" style="width: 80%">
-            <el-option v-for="dict in dict.type.asset_location" :key="dict.value" :label="dict.label" :value="dict.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="资产管理员" prop="assetManager">
@@ -193,11 +185,12 @@
 
 <script>
   import {deleteAssetManager, getAssetManager, listAssetManager, addAssetManger, editAssetManger} from "@/api/assets/manager";
+  import {getAssetTypeTree} from "@/api/assets/common";
   import {getDicts} from "@/api/system/dict/data";
 
   export default {
   name: "assets_manager",
-  dicts: ['asset_type', 'asset_category', 'asset_company', 'asset_location'],
+  dicts: ['asset_company'],
   data() {
     return {
       // 遮罩层
@@ -223,11 +216,11 @@
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        assetCategory: null,
         assetType: null,
+        assetCategory: null,
+        assetSubCategory: null,
         company: null,
-        location: null,
-        manageDept: null
+        assetManager: null
       },
       // 表单参数
       form: {},
@@ -242,12 +235,6 @@
         company: [
           { required: true, message: "该项必填", trigger: "blur" }
         ],
-        location: [
-          { required: true, message: "该项必填", trigger: "blur" }
-        ],
-        manageDept: [
-          { required: true, message: "该项必填", trigger: "blur" }
-        ],
         assetManager: [
           { required: true, message: "该项必填", trigger: "blur" }
         ],
@@ -255,12 +242,22 @@
           { required: true, message: "该项必填", trigger: "blur" }
         ]
       },
-      asset_dept: [],
-      common_users: []
+      common_users: [],
+      asset_type_tree: null,
+      asset_types: [],
+      asset_category_options: [],
+      asset_sub_category_options: [],
+      asset_category_add_options: [],
+      asset_sub_category_add_options: [],
+      asset_category: [],
+      asset_sub_category: [],
     };
   },
   created() {
+    this.getAssetTree();
+    this.getCommonUsers();
     this.getList();
+
   },
   methods: {
     /** 查询成熟度流程列表 */
@@ -271,8 +268,139 @@
         this.total = response.total;
         this.loading = false;
       });
+
     },
-    getCommonUsers(){
+    getAssetTree() {
+        getAssetTypeTree().then(response => {
+          const tree = response.data;
+          //三层
+          this.asset_type_tree = tree;
+          for (const item of tree) {
+            const it = {
+              "value": item.code,
+              "label": item.description,
+              "child": item.child,
+              "raw": {
+                "listClass": ""
+              }
+            }
+            this.asset_types.push(it);
+            if ('child' in item) {
+              for (const category of item.child) {
+                const cate = {
+                  "value": category.code,
+                  "label": category.description,
+                  "raw": {
+                    "listClass": ""
+                  }
+                }
+                this.asset_category.push(cate);
+                if ('child' in category) {
+                  for (const subCategory of category.child) {
+                    const sub = {
+                      "value": subCategory.code,
+                      "label": subCategory.description,
+                      "raw": {
+                        "listClass": ""
+                      }
+                    }
+                    this.asset_sub_category.push(sub);
+                  }
+                }
+              }
+            }
+          }
+        });
+    },
+    typeChange(value) {
+      this.queryParams.assetCategory = null;
+      this.queryParams.assetSubCategory = null;
+      this.asset_category_options = [];
+      this.asset_sub_category_options = [];
+      this.getAssetCategory(value)
+    },
+    categoryChange(value) {
+      this.queryParams.assetSubCategory = null;
+      this.asset_sub_category_options = [];
+      this.getAssetSubCategory(value)
+    },
+    getAssetCategory(code) {
+      const tree = this.asset_types;
+      for (const item of tree) {
+        if (code == item.value) {
+          for (const category of item.child) {
+            const it = {
+              "value": category.code,
+              "label": category.description,
+              "child": category.child,
+            }
+            this.asset_category_options.push(it);
+          }
+          break;
+        }
+      }
+    },
+    getAssetSubCategory(code) {
+      const tree = this.asset_category_options;
+      for (const item of tree) {
+        if (code == item.value) {
+          for (const subCategory of item.child) {
+            const it = {
+              "value": subCategory.code,
+              "label": subCategory.description,
+            }
+            this.asset_sub_category_options.push(it);
+          }
+          break;
+        }
+      }
+    },
+    typeAddChange(value) {
+      this.form.assetCategory = null;
+      this.form.assetSubCategory = null;
+      this.asset_category_add_options = [];
+      this.asset_sub_category_add_options = [];
+      this.getAssetAddCategory(value)
+    },
+    categoryAddChange(value) {
+      this.form.assetSubCategory = null;
+      this.asset_sub_category_add_options = [];
+      this.getAssetAddSubCategory(value)
+    },
+    getAssetAddCategory(code) {
+      debugger
+      const tree = this.asset_types;
+      for (const item of tree) {
+        if (code == item.value) {
+          for (const category of item.child) {
+            const it = {
+              "value": category.code,
+              "label": category.description,
+              "child": category.child,
+            }
+            this.asset_category_add_options.push(it);
+          }
+          break;
+        }
+      }
+    },
+    getAssetAddSubCategory(code) {
+      const tree = this.asset_category_add_options;
+      for (const item of tree) {
+        if (code == item.value) {
+          for (const subCategory of item.child) {
+            const it = {
+              "value": subCategory.code,
+              "label": subCategory.description,
+            }
+            this.asset_sub_category_add_options.push(it);
+          }
+          break;
+        }
+      }
+    },
+
+    getCommonUsers() {
       const userList = this.common_users
       if (userList.length == 0) {
         getDicts("common_users").then(res => {
@@ -289,11 +417,10 @@
     reset() {
       this.form = {
         id: null,
-        assetCategory: null,
         assetType: null,
+        assetCategory: null,
+        assetSubCategory: null,
         company: null,
-        location: null,
-        manageDept: null,
         assetManager: null,
         financialManager: null
       };
@@ -318,19 +445,21 @@
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.getCommonUsers();
       this.open = true;
       this.title = "添加资产管理人员";
+      this.asset_category_add_options = [];
+      this.asset_sub_category_add_options = [];
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      this.getCommonUsers();
       getAssetManager(row.id).then(response => {
         this.form = response.data;
-        this.form.location = this.form.location.split(',')
         this.form.assetManager = this.form.assetManager.split(',')
         this.form.financialManager = this.form.financialManager.split(',')
+        this.form.assetSubCategory = this.form.assetSubCategory.split(',')
+        this.getAssetAddCategory(this.form.assetType);
+        this.getAssetAddSubCategory(this.form.assetCategory);
         this.open = true;
         this.title = "修改资产管理人员";
       });
@@ -348,9 +477,9 @@
     submitForm(){
       this.$refs["form"].validate(valid => {
           if (valid) {
-            this.form.location = this.form.location.join()
             this.form.assetManager = this.form.assetManager.join()
             this.form.financialManager = this.form.financialManager.join()
+            this.form.assetSubCategory = this.form.assetSubCategory.join()
             if (this.form.id != undefined) {
               editAssetManger(this.form).then(response => {
                 this.$modal.msgSuccess("修改成功");

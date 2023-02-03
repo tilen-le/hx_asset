@@ -30,6 +30,9 @@ public class SysDept extends BaseEntity
     /** 部门名称 */
     private String deptName;
 
+    /** 部门全称 */
+    private String completeName;
+
     /** 显示顺序 */
     private String orderNum;
 
@@ -180,6 +183,14 @@ public class SysDept extends BaseEntity
         this.children = children;
     }
 
+    public String getCompleteName() {
+        return completeName;
+    }
+
+    public void setCompleteName(String completeName) {
+        this.completeName = completeName;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -187,6 +198,7 @@ public class SysDept extends BaseEntity
             .append("parentId", getParentId())
             .append("ancestors", getAncestors())
             .append("deptName", getDeptName())
+            .append("completeName", getCompleteName())
             .append("orderNum", getOrderNum())
             .append("leader", getLeader())
             .append("phone", getPhone())

@@ -121,6 +121,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="deptId != null and deptId != 0">dept_id,</if>
  			<if test="parentId != null and parentId != 0">parent_id,</if>
  			<if test="deptName != null and deptName != ''">dept_name,</if>
+			<if test="completeName != null and completeName != ''">complete_name,</if>
  			<if test="ancestors != null and ancestors != ''">ancestors,</if>
  			<if test="orderNum != null and orderNum != ''">order_num,</if>
  			<if test="leader != null and leader != ''">leader,</if>
@@ -133,6 +134,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  			<if test="deptId != null and deptId != 0">#{deptId},</if>
  			<if test="parentId != null and parentId != 0">#{parentId},</if>
  			<if test="deptName != null and deptName != ''">#{deptName},</if>
+			<if test="completeName != null and completeName != ''">#{completeName},,</if>
  			<if test="ancestors != null and ancestors != ''">#{ancestors},</if>
  			<if test="orderNum != null and orderNum != ''">#{orderNum},</if>
  			<if test="leader != null and leader != ''">#{leader},</if>
@@ -149,6 +151,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
  		<set>
  			<if test="parentId != null and parentId != 0">parent_id = #{parentId},</if>
  			<if test="deptName != null and deptName != ''">dept_name = #{deptName},</if>
+			<if test="completeName != null and completeName != ''">complete_name = #{completeName},</if>
  			<if test="ancestors != null and ancestors != ''">ancestors = #{ancestors},</if>
  			<if test="orderNum != null and orderNum != ''">order_num = #{orderNum},</if>
  			<if test="leader != null">leader = #{leader},</if>

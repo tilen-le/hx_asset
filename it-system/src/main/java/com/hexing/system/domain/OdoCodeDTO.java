@@ -11,7 +11,6 @@ import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**
- * 参数配置表 sys_config
  *
  * @author ruoyi
  */
@@ -25,6 +24,16 @@ public class OdoCodeDTO implements Serializable
     private String name;
 
     private String dept_code;
+
+    private String complete_name;
+
+    public String getComplete_name() {
+        return complete_name;
+    }
+
+    public void setComplete_name(String complete_name) {
+        this.complete_name = complete_name;
+    }
 
     private String parent_code;
 

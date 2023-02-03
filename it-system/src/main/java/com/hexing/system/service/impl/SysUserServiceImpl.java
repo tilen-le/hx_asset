@@ -623,7 +623,7 @@ public class SysUserServiceImpl implements ISysUserService
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void syncDepartmentUserList() {
         String delete = "2";
         String unDelete = "0";
@@ -646,6 +646,7 @@ public class SysUserServiceImpl implements ISysUserService
             if (Objects.nonNull(deptDO)) {
                 deptDO.setDelFlag(unDelete);
                 deptDO.setDeptName(odoCodeDTO.getName());
+                deptDO.setCompleteName(odoCodeDTO.getComplete_name());
                 if (StringUtils.isNotBlank(odoCodeDTO.getParent_code())) {
                     deptDO.setParentId(Long.parseLong(odoCodeDTO.getParent_code()));
                 }
@@ -656,6 +657,7 @@ public class SysUserServiceImpl implements ISysUserService
                     sysDept.setParentId(Long.parseLong(odoCodeDTO.getParent_code()));
                 }
                 sysDept.setDeptName(odoCodeDTO.getName());
+                sysDept.setCompleteName(odoCodeDTO.getComplete_name());
                 deptMapper.insertDept(sysDept);
             }
         }

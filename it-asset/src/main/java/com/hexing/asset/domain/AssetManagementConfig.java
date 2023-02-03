@@ -1,6 +1,7 @@
 package com.hexing.asset.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hexing.common.annotation.Excel;
@@ -27,25 +28,21 @@ public class AssetManagementConfig
     @TableId(type = IdType.AUTO)
     private Long id;
 
-    /** 资产类型 */
-    @Excel(name = "资产类型")
+    /** 资产大类 */
+    @Excel(name = "资产大类")
     private String assetType;
 
-    /** 资产分类 */
-    @Excel(name = "资产分类")
+    /** 资产中类 */
+    @Excel(name = "资产中类")
     private String assetCategory;
+
+    /** 资产小类 */
+    @Excel(name = "资产小类")
+    private String assetSubCategory;
 
     /** 归属主体 */
     @Excel(name = "归属主体")
     private String company;
-
-    /** 地区 */
-    @Excel(name = "地区")
-    private String location;
-
-    /** 资产管理部门 */
-    @Excel(name = "资产管理部门")
-    private String manageDept;
 
     /** 资产管理员 */
     @Excel(name = "资产管理员")
@@ -74,4 +71,9 @@ public class AssetManagementConfig
     /** 修改人 */
     @Excel(name = "修改人")
     private String updateBy;
+
+    /** 管理部门 */
+    @Excel(name = "管理部门")
+    @TableField(exist = false)
+    private String manageDept;
 }

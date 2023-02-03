@@ -60,14 +60,11 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         if (StringUtils.isNotBlank(assetManagementConfig.getAssetCategory())) {
             wrapper.eq(AssetManagementConfig::getAssetCategory, assetManagementConfig.getAssetCategory());
         }
+        if (StringUtils.isNotBlank(assetManagementConfig.getAssetSubCategory())) {
+            wrapper.eq(AssetManagementConfig::getAssetSubCategory, assetManagementConfig.getAssetSubCategory());
+        }
         if (StringUtils.isNotBlank(assetManagementConfig.getCompany())) {
             wrapper.eq(AssetManagementConfig::getCompany, assetManagementConfig.getCompany());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getLocation())) {
-            wrapper.apply("(find_in_set( {0} , location ))", assetManagementConfig.getLocation());
-        }
-        if (StringUtils.isNotBlank(assetManagementConfig.getManageDept())) {
-            wrapper.eq(AssetManagementConfig::getManageDept, assetManagementConfig.getManageDept());
         }
 
         List<AssetManagementConfig> assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);

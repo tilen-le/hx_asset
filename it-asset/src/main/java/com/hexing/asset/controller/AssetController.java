@@ -146,6 +146,7 @@ public class AssetController extends BaseController {
                             .setOriginalValue(order.getPrice())
                             .setMonetaryUnit(order.getMoneyType())
                             .setAssetStatus(AssetStatus.IN_STORE.getCode())
+                            .setProofOfMaterial(order.getProofOfMaterial())
                             .setCreateBy("SAP")
                             .setCreateTime(new Date())
                             .setAssetType(order.getMaterialNumber().substring(0, 1))
@@ -185,25 +186,35 @@ public class AssetController extends BaseController {
         return AjaxResult.success(CodeUtil.getAssetCategoryTree());
     }
 
-    @ApiOperation("价值传输接口")
+    /**
+     * SAP价值传输接口
+     */
+    @ApiOperation("SAP价值传输接口")
     @PostMapping("/sapSyncValue")
     public AjaxResult sapSyncValue(@RequestBody SimpleOuterDTO<List<SapValueDTO>> param) {
         List<SapValueDTO> sapValueList = param.getData();
-        List<String> assetCodeList = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toList());
-        List<Asset> assetList = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeList));
+        Set<String> assetCodeSet = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toSet());
+        List<Asset> assetList = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeSet));
         if (CollectionUtil.isNotEmpty(assetList)) {
             Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getAssetCode, o -> o));
             for (SapValueDTO sapValueDTO : sapValueList) {
                 Asset asset = assetMap.get(sapValueDTO.getAssetCode());
-                asset.setOriginalValue(sapValueDTO.getOriginalValue())
-                        .setNetValue(sapValueDTO.getNetValue())
-                        .setCanUseYears(sapValueDTO.getCanUseYears())
-                        .setCanUseMonths(sapValueDTO.getCanUseMonths());
-
+                if (ObjectUtil.isNotEmpty(asset)) {
+                    asset.setOriginalValue(sapValueDTO.getOriginalValue())
+                            .setNetValue(sapValueDTO.getNetValue())
+                            .setCanUseYears(sapValueDTO.getCanUseYears())
+                            .setCanUseMonths(sapValueDTO.getCanUseMonths());
+                }
+                try {
+                    assetService.updateById(asset);
+                    sapValueDTO.setSuccess(true);
+                } catch (Exception e) {
+                    sapValueDTO.setSuccess(false);
+                    sapValueDTO.setReason(e.getMessage());
+                }
             }
-            assetService.updateBatchById(assetList);
         }
-        return AjaxResult.success();
+        return AjaxResult.success(sapValueList);
     }
 
 }

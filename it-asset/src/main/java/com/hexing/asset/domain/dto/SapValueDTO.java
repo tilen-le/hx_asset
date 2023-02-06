@@ -72,4 +72,12 @@ public class SapValueDTO {
      */
     @JsonProperty("NDPER")
     private String canUseMonths;
+    /**
+     * 是否更新成功
+     */
+    private Boolean success;
+    /**
+     * 错误原因
+     */
+    private String reason;
 }

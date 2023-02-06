@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
+import com.hexing.asset.domain.dto.SapValueDTO;
 import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.enums.AssetStatus;
@@ -27,9 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * 资产表Controller
@@ -121,7 +121,7 @@ public class AssetController extends BaseController {
         int totalNum = 0;
         logger.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         for (SapPurchaseOrder order : orderList) {
-            int numberOfArrival =  order.getNumberOfArrival().intValue();
+            int numberOfArrival = order.getNumberOfArrival().intValue();
             List<Asset> assetList = new ArrayList<>();
             if (ObjectUtil.isNotNull(numberOfArrival)) {
                 LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
@@ -183,6 +183,27 @@ public class AssetController extends BaseController {
     @GetMapping("/getAssetCategoryTree")
     public AjaxResult getAssetCategoryTree() {
         return AjaxResult.success(CodeUtil.getAssetCategoryTree());
+    }
+
+    @ApiOperation("价值传输接口")
+    @PostMapping("/sapSyncValue")
+    public AjaxResult sapSyncValue(@RequestBody SimpleOuterDTO<List<SapValueDTO>> param) {
+        List<SapValueDTO> sapValueList = param.getData();
+        List<String> assetCodeList = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toList());
+        List<Asset> assetList = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeList));
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getAssetCode, o -> o));
+            for (SapValueDTO sapValueDTO : sapValueList) {
+                Asset asset = assetMap.get(sapValueDTO.getAssetCode());
+                asset.setOriginalValue(sapValueDTO.getOriginalValue())
+                        .setNetValue(sapValueDTO.getNetValue())
+                        .setCanUseYears(sapValueDTO.getCanUseYears())
+                        .setCanUseMonths(sapValueDTO.getCanUseMonths());
+
+            }
+            assetService.updateBatchById(assetList);
+        }
+        return AjaxResult.success();
     }
 
 }

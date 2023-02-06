@@ -87,3 +87,5 @@ ruoyi:
     profile: /data/it/file
 uip:
     uipTransfer: http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper
+conf:
+    assetCategoryConfFilePath: E:\company-codes\hx-asset\data\material_category.json

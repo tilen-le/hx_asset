@@ -99,10 +99,10 @@ public class SapPurchaseOrder {
     private String moneyType;
 
     /**
-     * 在建资产号 ANLN1
+     * 在建资产号（SAP资产编号） ANLN1
      */
     @JsonProperty("ANLN1")
-    private String assetNumUnderConstruction;
+    private String assetSapCode;
 
     /**
      * 到货日期 ZDHRQ

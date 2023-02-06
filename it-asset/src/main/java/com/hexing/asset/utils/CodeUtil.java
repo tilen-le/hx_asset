@@ -6,15 +6,25 @@ import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.common.utils.StringUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.io.*;
-import java.util.List;
 
+@Component
 public class CodeUtil {
 
-    private static final String materialCategoryJsonFilePath = "material_category.json";
+    private static String materialCategoryJsonFile;
+
+    @Value("${conf.assetCategoryConfFilePath}")
+    public void setMaterialCategoryJsonFile(String path){
+        CodeUtil.materialCategoryJsonFile = path;
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(getAssetCategoryTree());
+    }
 
     /**
      * 读取resource目录下的json文件，读取为json字符串
@@ -25,8 +35,8 @@ public class CodeUtil {
     public static String getJsonStr(String jsonFilePath) {
         StringBuilder sb = new StringBuilder();
         try {
-            Resource resource = new ClassPathResource(jsonFilePath);
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(resource.getFile())));
+            File jsonFile = new File(jsonFilePath);
+            final BufferedReader reader = new BufferedReader(new InputStreamReader(new FileInputStream(jsonFile)));
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
@@ -39,10 +49,11 @@ public class CodeUtil {
 
     /**
      * 获取物料号资产类别对应关系JSON对象
+     *
      * @return
      */
     public static JSONArray getAssetCategoryTree() {
-        return JSONObject.parseArray(getJsonStr(materialCategoryJsonFilePath));
+        return JSONObject.parseArray(getJsonStr(materialCategoryJsonFile));
     }
 
 
@@ -90,8 +101,8 @@ public class CodeUtil {
     }
 
     /**
-     * @param config 资产配置
-     * @param categoryDict   资产类别对应关系
+     * @param config       资产配置
+     * @param categoryDict 资产类别对应关系
      * @return 资产类型DTO
      */
     public static MaterialCategorySimpleDTO getAssetTypeName(AssetManagementConfig config, JSONObject categoryDict) {

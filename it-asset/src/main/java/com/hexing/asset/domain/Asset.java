@@ -116,7 +116,7 @@ public class Asset {
     /**
      * 资产净值
      */
-    private String netValue;
+    private Double netValue;
 
     /**
      * 资产原值币制
@@ -132,12 +132,12 @@ public class Asset {
     /**
      * 预计使用寿命（年）
      */
-    private Integer canUseYears;
+    private String canUseYears;
 
     /**
      * 预计使用寿命（月）
      */
-    private Integer canUseMonths;
+    private String canUseMonths;
 
     /**
      * 保修期

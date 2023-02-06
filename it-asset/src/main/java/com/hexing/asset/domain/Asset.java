@@ -44,137 +44,167 @@ public class Asset {
     /**
      * SAP固定资产编码
      */
+    @Excel(name = "SAP固定资产编码")
     private String assetSapCode;
 
     /**
      * 资产大类
      */
+    @Excel(name = "资产大类")
     private String assetType;
 
     /**
      * 资产中类
      */
+    @Excel(name = "资产中类")
     private String assetCategory;
 
     /**
      * 资产小类
      */
+    @Excel(name = "资产小类")
     private String assetSubCategory;
 
     /**
      * 规格型号
      */
+    @Excel(name = "规格型号")
     private String standard;
 
     /**
      * 资产状态
      */
+    @Excel(name = "资产状态")
     private String assetStatus;
 
     /**
      * 转固状态
      */
+    @Excel(name = "转固状态")
     private Boolean fixed;
 
     /**
-     * 保管人工号（老工号）
+     * 资产保管人工号（老工号）
      */
     @Excel(name = "资产保管人工号")
     private String responsiblePersonCode;
 
     /**
-     * 保管人姓名
+     * 资产保管人
      */
-    @Excel(name = "资产保管人", type = Excel.Type.EXPORT)
+    @Excel(name = "资产保管人")
     private String responsiblePersonName;
 
     /**
      * 资产保管部门
      */
+    @Excel(name = "资产保管部门")
     private String responsiblePersonDept;
 
     /**
      * 所在位置
      */
+    @Excel(name = "所在位置")
     private String currentLocation;
 
     /**
      * 所属公司
      */
+    @Excel(name = "所属公司")
     private String company;
 
     /**
      * 成本中心
      */
+    @Excel(name = "成本中心")
     private String costCenter;
 
     /**
      * 资产原值(含税)
      */
+    @Excel(name = "资产原值(含税)")
     private Double originalValue;
 
     /**
      * 资产净值
      */
+    @Excel(name = "资产净值")
     private Double netValue;
 
     /**
      * 资产原值币制
      */
+    @Excel(name = "资产原值币制")
     private String monetaryUnit;
 
     /**
      * 资产化日期（资本化日期/资产价值录入日期）
      */
+    @Excel(name = "资产化日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date capitalizationDate;
 
     /**
      * 预计使用寿命（年）
      */
+    @Excel(name = "预计使用寿命（年）")
     private String canUseYears;
 
     /**
      * 预计使用寿命（月）
      */
+    @Excel(name = "预计使用寿命（月）")
     private String canUseMonths;
 
     /**
      * 保修期
      */
+    @Excel(name = "保修期")
     private Integer warranty;
 
     /**
      * 供应商
      */
+    @Excel(name = "供应商")
     private String provider;
 
     /**
      * 供应商名称
      */
+    @Excel(name = "供应商名称")
     private String providerName;
 
     /**
      * 出厂编码
      */
+    @Excel(name = "出厂编码")
     private String factoryNo;
 
     /**
      * 采购单号
      */
+    @Excel(name = "采购单号")
     private String purchaseOrderNo;
 
     /**
      * 首次购置日期
      */
+    @Excel(name = "首次购置日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date buyDate;
 
     /**
      * 入库日期
      */
+    @Excel(name = "入库日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date storageDate;
+
+    /**
+     * 物料凭证
+     */
+    @Excel(name = "物料凭证")
+    private String proofOfMaterial;
 
     /**
      * 备注

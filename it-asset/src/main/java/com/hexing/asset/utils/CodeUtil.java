@@ -123,10 +123,29 @@ public class CodeUtil {
             if (assetCategoryCode.equals(jo.get("code"))) {
                 dto.setAssetCategory(jo.getString("description"));
                 JSONArray assetSubCategoryList = jo.getJSONArray("child");
+                String userName = "";
+                String inventoryUsersName = "";
                 for (int j = 0; j < assetSubCategoryList.size(); j++) {
                     JSONObject subJo = (JSONObject) assetSubCategoryList.get(j);
-                    if (assetSubCategoryCode.equals(subJo.get("code"))) {
-                        dto.setAssetSubCategory(subJo.getString("description"));
+                    if (StringUtils.isNotBlank(assetSubCategoryCode)){
+                        if (assetSubCategoryCode.contains(",")) {
+                            String[] split = assetSubCategoryCode.split(",");
+                            for (int k = 0; k < split.length; k++) {
+                                String trim = split[k].trim();
+                                if (trim.equals(subJo.get("code"))) {
+                                    userName=subJo.getString("description");
+                                    inventoryUsersName += userName + ",";
+                                }
+                            }
+                            if (StringUtils.isNotBlank(inventoryUsersName)){
+                                userName = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
+                            }
+                        } else {
+                            if (assetSubCategoryCode.equals(subJo.get("code"))) {
+                                userName=subJo.getString("description");
+                            }
+                        }
+                        dto.setAssetSubCategory(userName);
                     }
                 }
             }

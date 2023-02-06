@@ -11,11 +11,13 @@ import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.mapper.AssetManagementConfigMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.utils.CodeUtil;
+import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.poi.ss.formula.functions.T;
@@ -41,7 +43,8 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     private IAssetManagementConfigService assetManagementConfigService;
     @Autowired
     private SysUserServiceImpl sysUserService;
-
+    @Autowired
+    private SysDeptServiceImpl sysDeptService;
     /**
      * 查询资产管理配置
      *
@@ -62,7 +65,6 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     @Override
     public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfigSearchDTO searchDTO) {
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
-        List resultList =new ArrayList();
         List<String> assetSubCategory = searchDTO.getAssetSubCategory();
         List<String> assetManager = searchDTO.getAssetManager();
         List<String> company = searchDTO.getCompany();
@@ -84,22 +86,27 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
             assetManagementConfigs = getList(assetManagementConfigs, company,"");
         }
         JSONObject assetCategoryTree =CodeUtil.getAssetCategoryTree().getJSONObject(0);
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        List<SysDept> sysDept = sysDeptService.selectDeptList(new SysDept());
         for (AssetManagementConfig assetManagementConfig : assetManagementConfigs) {
             MaterialCategorySimpleDTO categorySimpleDTO= CodeUtil.getAssetTypeName(assetManagementConfig,assetCategoryTree);
             assetManagementConfig.setAssetType(categorySimpleDTO.getAssetType());
             assetManagementConfig.setAssetCategory(categorySimpleDTO.getAssetCategory());
             assetManagementConfig.setAssetSubCategory(categorySimpleDTO.getAssetSubCategory());
+            //获取部门id
+            SysUser assetManagerUser = getUserByUserCode(sysUsers, assetManagementConfig.getAssetManager());
+            SysUser financialManagerUser = getUserByUserCode(sysUsers, assetManagementConfig.getFinancialManager());
+            //获取部门名称
+            SysDept assetManagerDeptName = getDeptCompleteNameByDeptCode(sysDept, assetManagerUser.getDeptId());
+            SysDept financialManagerDeptName = getDeptCompleteNameByDeptCode(sysDept, financialManagerUser.getDeptId());
+            assetManagementConfig.setAssetManageDept(assetManagerDeptName.getCompleteName());
+            assetManagementConfig.setFinancialManageDept(financialManagerDeptName.getCompleteName());
+            //资产管理员
+            assetManagementConfig.setAssetManager(assetManagerUser.getNickName());
+            //账务管理员
+            assetManagementConfig.setFinancialManager(financialManagerUser.getNickName());
         }
 
-//        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());]
-//        for (AssetManagementConfig managementConfig : assetManagementConfigs) {
-//            //资产管理员
-//            assetManager = managementConfig.getAssetManager();
-//            managementConfig.setAssetManager(getUserNameByUserCode(sysUsers, assetManager));
-//            //账务管理员
-//            String financialManager = managementConfig.getFinancialManager();
-//            managementConfig.setFinancialManager(getUserNameByUserCode(sysUsers, financialManager));
-//        }
         return assetManagementConfigs;
     }
 
@@ -129,6 +136,17 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         }
         return list;
     }
+
+    private SysUser getUserByUserCode(List<SysUser> sysUsers, String userCode) {
+        SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(userCode)).findFirst().orElse(new SysUser());
+        return sysUser;
+    }
+
+    private SysDept getDeptCompleteNameByDeptCode(List<SysDept> sysDept, Long deptCode) {
+        SysDept dept = sysDept.stream().filter(x -> x.getDeptId().equals(deptCode)).findFirst().orElse(new SysDept());
+        return dept;
+    }
+
     private String getUserNameByUserCode(List<SysUser> sysUsers, String userCodes) {
         String userName = "";
         if (userCodes.contains(",")) {

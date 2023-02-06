@@ -73,8 +73,13 @@ public class AssetManagementConfig
     @Excel(name = "修改人")
     private String updateBy;
 
-    /** 管理部门 */
-    @Excel(name = "管理部门")
+    /** 资产管理部门 */
+    @Excel(name = "资产管理部门")
     @TableField(exist = false)
-    private String manageDept;
+    private String assetManageDept;
+
+    /** 财务管理部门 */
+    @Excel(name = "财务管理部门")
+    @TableField(exist = false)
+    private String financialManageDept;
 }

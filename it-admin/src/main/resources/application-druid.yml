@@ -87,3 +87,5 @@ ruoyi:
     profile: /profile
 uip:
     uipTransfer: http://192.168.3.158:8080/UIP/uip/uipManage/dataOper
+conf:
+    assetCategoryConfFilePath: E:\company-codes\hx-asset\data\material_category.json

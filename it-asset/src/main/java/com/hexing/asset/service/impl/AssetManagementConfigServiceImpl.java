@@ -1,13 +1,16 @@
 package com.hexing.asset.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.AssetManagementConfigSearchDTO;
+import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.mapper.AssetManagementConfigMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
+import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
@@ -79,6 +82,13 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         }
         if (CollectionUtil.isNotEmpty(company)){
             assetManagementConfigs = getList(assetManagementConfigs, company,"");
+        }
+        JSONObject assetCategoryTree =CodeUtil.getAssetCategoryTree().getJSONObject(0);
+        for (AssetManagementConfig assetManagementConfig : assetManagementConfigs) {
+            MaterialCategorySimpleDTO categorySimpleDTO= CodeUtil.getAssetTypeName(assetManagementConfig,assetCategoryTree);
+            assetManagementConfig.setAssetType(categorySimpleDTO.getAssetType());
+            assetManagementConfig.setAssetCategory(categorySimpleDTO.getAssetCategory());
+            assetManagementConfig.setAssetSubCategory(categorySimpleDTO.getAssetSubCategory());
         }
 
 //        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());]

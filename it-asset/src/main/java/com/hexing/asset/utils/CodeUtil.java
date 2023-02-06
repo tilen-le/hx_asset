@@ -2,8 +2,10 @@ package com.hexing.asset.utils;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.common.utils.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 
@@ -87,5 +89,44 @@ public class CodeUtil {
         return dto;
     }
 
+    /**
+     * @param config 资产配置
+     * @param categoryDict   资产类别对应关系
+     * @return 资产类型DTO
+     */
+    public static MaterialCategorySimpleDTO getAssetTypeName(AssetManagementConfig config, JSONObject categoryDict) {
+        if (ObjectUtils.isEmpty(config)) {
+            return null;
+        }
+        MaterialCategorySimpleDTO dto = new MaterialCategorySimpleDTO();
 
+        String assetTypeCode = config.getAssetType();
+        String assetCategoryCode = config.getAssetCategory();
+        String assetSubCategoryCode = config.getAssetSubCategory();
+
+        // 由于目前只有固定资产一种assetType，因此直接取json第一级的description字段值
+        dto.setAssetType(categoryDict.getString("description"));
+        JSONArray assetCategoryJOArray = categoryDict.getJSONArray("child");
+        for (int i = 0; i < assetCategoryJOArray.size(); i++) {
+            JSONObject jo = (JSONObject) assetCategoryJOArray.get(i);
+            if (assetCategoryCode.equals(jo.get("code"))) {
+                dto.setAssetCategory(jo.getString("description"));
+                JSONArray assetSubCategoryList = jo.getJSONArray("child");
+                for (int j = 0; j < assetSubCategoryList.size(); j++) {
+                    JSONObject subJo = (JSONObject) assetSubCategoryList.get(j);
+                    if (assetSubCategoryCode.equals(subJo.get("code"))) {
+                        dto.setAssetSubCategory(subJo.getString("description"));
+                    }
+                }
+            }
+        }
+
+        if (StringUtils.isEmpty(dto.getAssetType())
+                && StringUtils.isEmpty(dto.getAssetCategory())
+                && StringUtils.isEmpty(dto.getAssetSubCategory())) {
+            return null;
+        }
+
+        return dto;
+    }
 }

@@ -10,6 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CodeUtil {
@@ -97,10 +99,10 @@ public class CodeUtil {
 
     /**
      * @param config       资产配置
-     * @param categoryDict 资产类别对应关系
+     * @param  config
      * @return 资产类型DTO
      */
-    public static MaterialCategorySimpleDTO getAssetTypeName(AssetManagementConfig config, JSONObject categoryDict) {
+    public static MaterialCategorySimpleDTO getAssetTypeName(AssetManagementConfig config) {
         if (ObjectUtils.isEmpty(config)) {
             return null;
         }
@@ -109,43 +111,42 @@ public class CodeUtil {
         String assetTypeCode = config.getAssetType();
         String assetCategoryCode = config.getAssetCategory();
         String assetSubCategoryCode = config.getAssetSubCategory();
+        JSONArray assetCategoryTree = CodeUtil.getAssetCategoryTree();
+        Object assetTypeObj = assetCategoryTree.stream().filter(x -> JSONObject.parseObject(x.toString()).getString("code").equals(assetTypeCode)).findFirst().orElse(null);
+        Object assetCategoryObj =null;
+        if(ObjectUtils.isNotEmpty(assetTypeObj)){
+            String description = JSONObject.parseObject(assetTypeObj.toString()).getString("description");
+            dto.setAssetType(description);
+            JSONArray child = JSONObject.parseObject(assetTypeObj.toString()).getJSONArray("child");
+            assetCategoryObj = child.stream().filter(x -> JSONObject.parseObject(x.toString()).getString("code").equals(assetCategoryCode)).findFirst().orElse(null);
+        }
+        if (ObjectUtils.isNotEmpty(assetCategoryObj)){
+            String description = JSONObject.parseObject(assetCategoryObj.toString()).getString("description");
+            dto.setAssetCategory(description);
+            JSONArray child = JSONObject.parseObject(assetCategoryObj.toString()).getJSONArray("child");
 
-        // 由于目前只有固定资产一种assetType，因此直接取json第一级的description字段值
-        dto.setAssetType(categoryDict.getString("description"));
-        JSONArray assetCategoryJOArray = categoryDict.getJSONArray("child");
-        for (int i = 0; i < assetCategoryJOArray.size(); i++) {
-            JSONObject jo = (JSONObject) assetCategoryJOArray.get(i);
-            if (assetCategoryCode.equals(jo.get("code"))) {
-                dto.setAssetCategory(jo.getString("description"));
-                JSONArray assetSubCategoryList = jo.getJSONArray("child");
-                String userName = "";
-                String inventoryUsersName = "";
-                for (int j = 0; j < assetSubCategoryList.size(); j++) {
-                    JSONObject subJo = (JSONObject) assetSubCategoryList.get(j);
-                    if (StringUtils.isNotBlank(assetSubCategoryCode)) {
-                        if (assetSubCategoryCode.contains(",")) {
-                            String[] split = assetSubCategoryCode.split(",");
-                            for (int k = 0; k < split.length; k++) {
-                                String trim = split[k].trim();
-                                if (trim.equals(subJo.get("code"))) {
-                                    userName = subJo.getString("description");
-                                    inventoryUsersName += userName + ",";
-                                }
-                            }
-                            if (StringUtils.isNotBlank(inventoryUsersName)) {
-                                userName = inventoryUsersName.substring(0, inventoryUsersName.lastIndexOf(","));
-                            }
-                        } else {
-                            if (assetSubCategoryCode.equals(subJo.get("code"))) {
-                                userName = subJo.getString("description");
-                            }
-                        }
-                        dto.setAssetSubCategory(userName);
+            String subName="";
+            String tempName="";
+            if (assetSubCategoryCode.contains(",")){
+                String[] split = assetSubCategoryCode.split(",");
+                for (String s : split) {
+                    Object assetSubCategoryObj = child.stream().filter(x -> JSONObject.parseObject(x.toString()).getString("code").equals(s)).findFirst().orElse(null);
+                    if (ObjectUtils.isNotEmpty(assetSubCategoryObj)){
+                        subName = JSONObject.parseObject(assetSubCategoryObj.toString()).getString("description");
+                        tempName += subName + ",";
+                    }
+                    if (StringUtils.isNotBlank(tempName)){
+                        subName =tempName.substring(0, tempName.lastIndexOf(","));
                     }
                 }
+            }else {
+                Object assetSubCategoryObj = child.stream().filter(x -> JSONObject.parseObject(x.toString()).getString("code").equals(assetSubCategoryCode)).findFirst().orElse(null);
+                if (ObjectUtils.isNotEmpty(assetSubCategoryObj)){
+                    subName = JSONObject.parseObject(assetSubCategoryObj.toString()).getString("description");
+                }
             }
+            dto.setAssetSubCategory(subName);
         }
-
         if (StringUtils.isEmpty(dto.getAssetType())
                 && StringUtils.isEmpty(dto.getAssetCategory())
                 && StringUtils.isEmpty(dto.getAssetSubCategory())) {

@@ -85,11 +85,10 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         if (CollectionUtil.isNotEmpty(company)){
             assetManagementConfigs = getList(assetManagementConfigs, company,"");
         }
-        JSONObject assetCategoryTree =CodeUtil.getAssetCategoryTree().getJSONObject(0);
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         List<SysDept> sysDept = sysDeptService.selectDeptList(new SysDept());
         for (AssetManagementConfig assetManagementConfig : assetManagementConfigs) {
-            MaterialCategorySimpleDTO categorySimpleDTO= CodeUtil.getAssetTypeName(assetManagementConfig,assetCategoryTree);
+            MaterialCategorySimpleDTO categorySimpleDTO= CodeUtil.getAssetTypeName(assetManagementConfig);
             assetManagementConfig.setAssetType(categorySimpleDTO.getAssetType());
             assetManagementConfig.setAssetCategory(categorySimpleDTO.getAssetCategory());
             assetManagementConfig.setAssetSubCategory(categorySimpleDTO.getAssetSubCategory());

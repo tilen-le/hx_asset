@@ -120,6 +120,12 @@ public class Asset {
     private String costCenter;
 
     /**
+     * 成本中心描述
+     */
+    @Excel(name = "成本中心描述")
+    private String costCenterName;
+
+    /**
      * 资产原值(含税)
      */
     @Excel(name = "资产原值(含税)")

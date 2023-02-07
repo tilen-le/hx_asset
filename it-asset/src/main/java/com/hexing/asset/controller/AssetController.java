@@ -17,15 +17,19 @@ import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
+import com.hexing.common.core.domain.model.LoginUser;
 import com.hexing.common.core.page.TableDataInfo;
 import com.hexing.common.enums.BusinessType;
+import com.hexing.common.utils.ServletUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
+import com.hexing.framework.web.service.TokenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -44,6 +48,8 @@ public class AssetController extends BaseController {
 
     @Autowired
     private IAssetService assetService;
+    @Autowired
+    private TokenService tokenService;
 
     /**
      * 查询资产列表
@@ -71,6 +77,22 @@ public class AssetController extends BaseController {
     }
 
     /**
+     * SAP初始资产信息导入
+     */
+    @ApiOperation("SAP初始资产信息导入")
+//    @PreAuthorize("@ss.hasPermi('asset:asset:import')")
+    @PostMapping("/importData")
+    public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception {
+        ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
+        List<Asset> assetList = util.importExcel(file.getInputStream());
+        LoginUser loginUser = tokenService.getLoginUser(ServletUtils.getRequest());
+        String operName = loginUser.getUsername();
+        String message = assetService.importAsset(assetList, updateSupport, operName);
+        return AjaxResult.success(message);
+    }
+
+
+    /**
      * 获取资产详细信息
      */
     @ApiOperation("获取资产详细信息")
@@ -83,17 +105,6 @@ public class AssetController extends BaseController {
         }
         return AjaxResult.success(asset);
     }
-
-//    /**
-//     * 新增资产表
-//     */
-//    @ApiOperation("新增资产表")
-//    @PreAuthorize("@ss.hasPermi('asset:asset:add')")
-//    @Log(title = "新增资产表", businessType = BusinessType.INSERT)
-//    @PostMapping
-//    public AjaxResult add(@RequestBody Asset asset) {
-//        return toAjax(assetService.insertAsset(asset));
-//    }
 
     /**
      * 修改资产表
@@ -162,20 +173,6 @@ public class AssetController extends BaseController {
         logger.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + totalNum + " 个资产 ====");
         return AjaxResult.success(orderList);
     }
-
-
-//    /**
-//     * 删除资产表
-//     *
-//     * @editor 80015306
-//     */
-//    @ApiOperation("删除资产表")
-//    @PreAuthorize("@ss.hasPermi('asset:asset:remove')")
-//    @Log(title = "删除资产表", businessType = BusinessType.DELETE)
-//    @DeleteMapping("/{assetCodes}")
-//    public AjaxResult remove(@PathVariable List<String> assetCodes) {
-//        return toAjax(assetService.deleteAssetByAssetCodes(assetCodes));
-//    }
 
     /**
      * 获取物料号与资产关系对应关系

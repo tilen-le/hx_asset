@@ -20,6 +20,7 @@ import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -81,6 +83,47 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         return asset;
     }
+
+    /**
+     * 资产信息导入
+     *
+     * @param assetList       资产信息列表
+     * @param isUpdateSupport 是否存在则覆盖
+     * @param operName        操作人姓名
+     * @return
+     */
+    @Override
+    @Transactional
+    public String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName) {
+        if (CollectionUtil.isEmpty(assetList)) {
+            throw new ServiceException("导入资产数据不能为空！");
+        }
+        int successNum = 0;         /* 导入成功条数 */
+        int failureNum = 0;         /* 导入失败条数 */
+        StringBuilder message = new StringBuilder();
+        for (int i = 0; i < assetList.size(); i++) {
+            try {
+                JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
+                for (Asset asset : assetList) {
+                    MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                    asset.setAssetType(dto.getAssetType());
+                    asset.setAssetCategory(dto.getAssetCategory());
+                    asset.setAssetSubCategory(dto.getAssetSubCategory());
+                    save(asset);
+                    successNum++;
+                }
+            } catch (Exception e) {
+                failureNum++;
+                String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";
+                message.append(msg + e.getMessage());
+                log.error(msg, e);
+                throw new ServiceException("导入出错");
+            }
+        }
+        message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");
+        return message.toString();
+    }
+
 
     /**
      * 根据资产编号查询资产信息
@@ -161,6 +204,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         return assetList;
     }
+
 
     /**
      * 查询资产表列表

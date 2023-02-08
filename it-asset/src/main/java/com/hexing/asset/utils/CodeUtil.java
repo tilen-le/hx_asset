@@ -127,7 +127,7 @@ public class CodeUtil {
 
             String subName="";
             String tempName="";
-            if (assetSubCategoryCode.contains(",")){
+            if (StringUtils.isNotBlank(assetSubCategoryCode)&&assetSubCategoryCode.contains(",")){
                 String[] split = assetSubCategoryCode.split(",");
                 for (String s : split) {
                     Object assetSubCategoryObj = child.stream().filter(x -> JSONObject.parseObject(x.toString()).getString("code").equals(s)).findFirst().orElse(null);

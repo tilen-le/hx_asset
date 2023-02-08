@@ -82,16 +82,16 @@
       <el-table-column label="序号" type="index" align="center" />
       <el-table-column label="资产大类" align="center" prop="assetType" />
       <el-table-column label="资产中类" align="center" prop="assetCategory" />
-      <el-table-column label="资产小类" align="center" prop="assetSubCategory" />
+      <el-table-column label="资产小类" align="center" prop="assetSubCategory" :show-overflow-tooltip="true"/>
       <el-table-column label="所属公司" align="center" prop="company">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_company" :value="scope.row.company"/>
         </template>
       </el-table-column>
       <el-table-column label="资产管理员" align="center" prop="assetManager" :show-overflow-tooltip="true" />
-      <el-table-column label="资产管理员部门" align="center" prop="assetManageDept" :show-overflow-tooltip="true" />
+      <el-table-column label="资产管理部门" align="center" prop="assetManageDept" :show-overflow-tooltip="true" />
       <el-table-column label="账务管理员" align="center" prop="financialManager" :show-overflow-tooltip="true" />
-      <el-table-column label="资产管理员部门" align="center" prop="financialManageDept" :show-overflow-tooltip="true" />
+      <el-table-column label="财务管理部门" align="center" prop="financialManageDept" :show-overflow-tooltip="true" />
       <el-table-column label="创建日期" align="center" prop="createTime">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -174,7 +174,13 @@
 </template>
 
 <script>
-  import {deleteAssetManager, getAssetManager, listAssetManager, addAssetManger, editAssetManger} from "@/api/assets/manager";
+  import {
+    addAssetManger,
+    deleteAssetManager,
+    editAssetManger,
+    getAssetManager,
+    listAssetManager
+  } from "@/api/assets/manager";
   import {getAssetTypeTree} from "@/api/assets/common";
   import {getDicts} from "@/api/system/dict/data";
 
@@ -444,7 +450,12 @@
           if (valid) {
             // this.form.assetManager = this.form.assetManager.join()
             // this.form.financialManager = this.form.financialManager.join()
-            this.form.assetSubCategory = this.form.assetSubCategory.join()
+            const assetSubCategory = this.form.assetSubCategory
+            if (assetSubCategory != null && assetSubCategory.length > 0) {
+              this.form.assetSubCategory = this.form.assetSubCategory.join()
+            } else {
+              this.form.assetSubCategory = null;
+            }
             if (this.form.id != undefined) {
               editAssetManger(this.form).then(response => {
                 this.$modal.msgSuccess("修改成功");

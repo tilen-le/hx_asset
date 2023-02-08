@@ -41,8 +41,8 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="资产管理员" prop="assetManager">
-        <el-select popper-class="long_select" v-model="queryParams.assetManager" placeholder="请选择资产管理员" clearable multiple size="small">
+      <el-form-item label="资产管理员" prop="assetManager" label-width="82px">
+        <el-select popper-class="long_select" v-model="queryParams.assetManager" placeholder="请选择资产管理员"  filterable clearable multiple size="small">
           <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel" :value="item.dictValue"/>
         </el-select>
       </el-form-item>
@@ -80,28 +80,18 @@
     <el-table v-loading="loading" :data="managerList" @selection-change="handleSelectionChange" tooltip-effect="light">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="序号" type="index" align="center" />
-      <el-table-column label="资产大类" align="center" prop="priority">
-        <template slot-scope="scope">
-          <dict-tag :options="asset_types" :value="scope.row.assetType"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="资产中类" align="center" prop="assetCategory">
-        <template slot-scope="scope">
-          <dict-tag :options="asset_category" :value="scope.row.assetCategory"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="资产小类" align="center" prop="assetSubCategory">
-        <template slot-scope="scope">
-          <dict-tag v-if="scope.row.assetSubCategory != null && scope.row.assetSubCategory != ''" :options="asset_sub_category" :value="scope.row.assetSubCategory.split(',')"/>
-        </template>
-      </el-table-column>
+      <el-table-column label="资产大类" align="center" prop="assetType" />
+      <el-table-column label="资产中类" align="center" prop="assetCategory" />
+      <el-table-column label="资产小类" align="center" prop="assetSubCategory" />
       <el-table-column label="所属公司" align="center" prop="company">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_company" :value="scope.row.company"/>
         </template>
       </el-table-column>
       <el-table-column label="资产管理员" align="center" prop="assetManager" :show-overflow-tooltip="true" />
+      <el-table-column label="资产管理员部门" align="center" prop="assetManageDept" :show-overflow-tooltip="true" />
       <el-table-column label="账务管理员" align="center" prop="financialManager" :show-overflow-tooltip="true" />
+      <el-table-column label="资产管理员部门" align="center" prop="financialManageDept" :show-overflow-tooltip="true" />
       <el-table-column label="创建日期" align="center" prop="createTime">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime, '{y}-{m}-{d}') }}</span>
@@ -164,12 +154,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="资产管理员" prop="assetManager">
-          <el-select popper-class="long_select" v-model="form.assetManager" placeholder="请选择资产管理员" multiple filterable style="width: 80%;" :multiple-limit="10">
+          <el-select popper-class="long_select" v-model="form.assetManager" placeholder="请选择资产管理员" filterable style="width: 80%;">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel" :value="item.dictValue"/>
           </el-select>
         </el-form-item>
         <el-form-item label="财务管理员" prop="financialManager">
-          <el-select popper-class="long_select" v-model="form.financialManager" placeholder="请选择财务管理员" multiple filterable style="width: 80%;" :multiple-limit="10" >
+          <el-select popper-class="long_select" v-model="form.financialManager" placeholder="请选择财务管理员" filterable style="width: 80%;" >
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel" :value="item.dictValue"/>
           </el-select>
         </el-form-item>
@@ -248,9 +238,7 @@
       asset_category_options: [],
       asset_sub_category_options: [],
       asset_category_add_options: [],
-      asset_sub_category_add_options: [],
-      asset_category: [],
-      asset_sub_category: [],
+      asset_sub_category_add_options: []
     };
   },
   created() {
@@ -285,30 +273,6 @@
               }
             }
             this.asset_types.push(it);
-            if ('child' in item) {
-              for (const category of item.child) {
-                const cate = {
-                  "value": category.code,
-                  "label": category.description,
-                  "raw": {
-                    "listClass": ""
-                  }
-                }
-                this.asset_category.push(cate);
-                if ('child' in category) {
-                  for (const subCategory of category.child) {
-                    const sub = {
-                      "value": subCategory.code,
-                      "label": subCategory.description,
-                      "raw": {
-                        "listClass": ""
-                      }
-                    }
-                    this.asset_sub_category.push(sub);
-                  }
-                }
-              }
-            }
           }
         });
     },
@@ -368,7 +332,6 @@
       this.getAssetAddSubCategory(value)
     },
     getAssetAddCategory(code) {
-      debugger
       const tree = this.asset_types;
       for (const item of tree) {
         if (code == item.value) {
@@ -453,10 +416,12 @@
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
+      this.asset_category_add_options = [];
+      this.asset_sub_category_add_options = [];
       getAssetManager(row.id).then(response => {
         this.form = response.data;
-        this.form.assetManager = this.form.assetManager.split(',')
-        this.form.financialManager = this.form.financialManager.split(',')
+        // this.form.assetManager = this.form.assetManager.split(',')
+        // this.form.financialManager = this.form.financialManager.split(',')
         this.form.assetSubCategory = this.form.assetSubCategory.split(',')
         this.getAssetAddCategory(this.form.assetType);
         this.getAssetAddSubCategory(this.form.assetCategory);
@@ -477,8 +442,8 @@
     submitForm(){
       this.$refs["form"].validate(valid => {
           if (valid) {
-            this.form.assetManager = this.form.assetManager.join()
-            this.form.financialManager = this.form.financialManager.join()
+            // this.form.assetManager = this.form.assetManager.join()
+            // this.form.financialManager = this.form.financialManager.join()
             this.form.assetSubCategory = this.form.assetSubCategory.join()
             if (this.form.id != undefined) {
               editAssetManger(this.form).then(response => {

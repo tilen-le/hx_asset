@@ -35,7 +35,7 @@ public class AssetManagementConfigController extends BaseController
      * 查询资产管理配置列表
      */
     @GetMapping("/list")
-//    @PreAuthorize("@ss.hasPermi('manage:config:list')")
+    @PreAuthorize("@ss.hasPermi('manage:config:list')")
     @ApiOperation("查询资产管理配置列表")
     public TableDataInfo list(AssetManagementConfigSearchDTO searchDTO)
     {

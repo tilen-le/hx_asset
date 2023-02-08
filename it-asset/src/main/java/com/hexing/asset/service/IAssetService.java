@@ -23,6 +23,17 @@ public interface IAssetService extends IService<Asset> {
     Asset selectAssetByAssetCode(String assetCode);
 
     /**
+     * 资产信息导入
+     *
+     * @param assetList 资产信息列表
+     * @param isUpdateSupport 是否存在则覆盖
+     * @param operName 操作人姓名
+     * @return
+     */
+    String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName);
+
+
+    /**
      * 查询资产表列表
      *
      * @param

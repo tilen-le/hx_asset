@@ -244,10 +244,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }
-        if (CollectionUtil.isNotEmpty(param.getAssetType())) {
+        if (StringUtils.isNotEmpty(param.getAssetType())) {
             wrapper.in(Asset::getAssetType, param.getAssetType());
         }
-        if (CollectionUtil.isNotEmpty(param.getAssetCategory())) {
+        if (StringUtils.isNotEmpty(param.getAssetCategory())) {
             wrapper.in(Asset::getAssetCategory, param.getAssetCategory());
         }
         if (CollectionUtil.isNotEmpty(param.getAssetSubCategory())) {
@@ -444,7 +444,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                             .setCreateTime(new Date())
                             .setAssetType(order.getMaterialNumber().substring(0, 1))
                             .setAssetCategory(order.getMaterialNumber().substring(1, 3))
-                            .setAssetSubCategory(order.getMaterialNumber().substring(3, 5));
+                            .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
+                            .setFixed("0");
                     assetList.add(asset);
                     nextNum++;
                 }

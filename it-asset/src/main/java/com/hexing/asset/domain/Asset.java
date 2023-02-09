@@ -94,7 +94,7 @@ public class Asset {
      */
     @ApiModelProperty(value = "转固状态")
     @Excel(name = "转固状态")
-    private Integer fixed;
+    private String fixed;
 
     /**
      * 资产保管人工号（老工号）

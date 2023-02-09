@@ -10,3 +10,10 @@ export function listAssets(query) {
 }
 
 
+export function exportData(query) {
+  return request({
+    url: '/asset/export',
+    method: 'get',
+    params: query
+  })
+}

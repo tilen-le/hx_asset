@@ -52,7 +52,7 @@ export function resetForm(refName) {
 }
 
 // 添加日期范围
-export function addDateRange(params, dateRange, propName) {
+export function addDateRange(params, dateRange, propName,p1, p2) {
 	let search = params;
 	search.params = typeof (search.params) === 'object' && search.params !== null && !Array.isArray(search.params) ? search.params : {};
 	dateRange = Array.isArray(dateRange) ? dateRange : [];
@@ -62,6 +62,9 @@ export function addDateRange(params, dateRange, propName) {
   } else if (propName == "start_end") {
     search.startDate = dateRange[0];
     search.endDate = dateRange[1];
+  } else if (propName == "customize") {
+    search[p1] = dateRange[0];
+    search[p2]= dateRange[1];
   } else {
     search.params["begin" + propName] = dateRange[0];
     search.params["end" + propName] = dateRange[1];

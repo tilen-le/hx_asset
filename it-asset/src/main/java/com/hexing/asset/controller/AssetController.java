@@ -70,8 +70,8 @@ public class AssetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('asset:asset:export')")
     @Log(title = "导出资产表列表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(Asset asset) {
-        List<Asset> list = assetService.selectAssetList(asset);
+    public AjaxResult export(AssetQueryParam param) {
+        List<Asset> list = assetService.selectAssetList(param);
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }

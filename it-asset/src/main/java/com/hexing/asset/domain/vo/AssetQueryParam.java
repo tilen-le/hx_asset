@@ -22,12 +22,12 @@ public class AssetQueryParam {
      * 资产大类
      */
     @ApiModelProperty(value="资产大类")
-    private List<String> assetType;
+    private String assetType;
     /**
      * 资产中类
      */
     @ApiModelProperty(value="资产中类")
-    private List<String> assetCategory;
+    private String assetCategory;
     /**
      * 资产小类
      */

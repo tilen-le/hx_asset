@@ -10,13 +10,18 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
+import com.hexing.asset.domain.dto.SapPurchaseOrder;
+import com.hexing.asset.domain.dto.SapValueDTO;
+import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.constant.HttpStatus;
+import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
@@ -31,7 +36,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestBody;
 
+import java.text.DecimalFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -399,5 +406,81 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         return assetList;
     }
 
+    /**
+     * SAP采购单同步接口
+     */
+    @Override
+    public void sapAdd(List<SapPurchaseOrder> orderList) {
+        log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
+        int totalNum = 0;
+        for (SapPurchaseOrder order : orderList) {
+            int numberOfArrival = order.getNumberOfArrival().intValue();
+            List<Asset> assetList = new ArrayList<>();
+            if (ObjectUtil.isNotNull(numberOfArrival)) {
+                LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
+                        .orderByDesc(Asset::getSerialNum)
+                        .last("LIMIT 1");
+                Asset theLastOne = this.getOne(wrapper);
 
+                int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
+                DecimalFormat df = new DecimalFormat("0000");
+                for (int i = 1; i <= numberOfArrival; i++) {
+                    Asset asset = new Asset();
+                    String assetCode = order.getMaterialNumber() + df.format(nextNum);
+                    asset.setMaterialNum(order.getMaterialNumber())
+                            .setSerialNum(nextNum)
+                            .setAssetName(order.getMaterialText())
+                            .setAssetCode(assetCode)
+                            .setCompany(order.getCompanyCode())
+                            .setPurchaseOrderNo(order.getPurchaseOrder())
+                            .setProvider(order.getProvider())
+                            .setProviderName(order.getProviderDescription())
+                            .setOriginalValue(order.getPrice())
+                            .setMonetaryUnit(order.getMoneyType())
+                            .setAssetStatus(AssetStatus.IN_STORE.getCode())
+                            .setProofOfMaterial(order.getProofOfMaterial())
+                            .setCreateBy("SAP")
+                            .setCreateTime(new Date())
+                            .setAssetType(order.getMaterialNumber().substring(0, 1))
+                            .setAssetCategory(order.getMaterialNumber().substring(1, 3))
+                            .setAssetSubCategory(order.getMaterialNumber().substring(3, 5));
+                    assetList.add(asset);
+                    nextNum++;
+                }
+                this.saveBatch(assetList);
+                totalNum += assetList.size();
+            }
+        }
+        log.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + totalNum + " 个资产 ====");
+    }
+
+    /**
+     * SAP价值传输接口
+     */
+    @Override
+    public List<SapValueDTO> sapSyncValue(List<SapValueDTO> sapValueList) {
+        Set<String> assetCodeSet = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toSet());
+        List<Asset> assetList = this.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeSet));
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getAssetCode, o -> o));
+            for (SapValueDTO sapValueDTO : sapValueList) {
+                Asset asset = assetMap.get(sapValueDTO.getAssetCode());
+                if (ObjectUtil.isNotEmpty(asset)) {
+                    asset.setOriginalValue(sapValueDTO.getOriginalValue())
+                            .setNetValue(sapValueDTO.getNetValue())
+                            .setCanUseYears(sapValueDTO.getCanUseYears())
+                            .setCanUseMonths(sapValueDTO.getCanUseMonths());
+                }
+                try {
+                    this.updateById(asset);
+                    sapValueDTO.setSuccess(true);
+                } catch (Exception e) {
+                    sapValueDTO.setSuccess(false);
+                    sapValueDTO.setReason(e.getMessage());
+                }
+            }
+        }
+        return sapValueList;
+    }
 }

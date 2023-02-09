@@ -126,52 +126,10 @@ public class AssetController extends BaseController {
     @Transactional
     public AjaxResult sapAdd(@RequestBody SimpleOuterDTO<List<SapPurchaseOrder>> param) {
         List<SapPurchaseOrder> orderList = param.getData();
-        if (CollectionUtil.isEmpty(orderList)) {
-            return AjaxResult.success();
+        if (CollectionUtil.isNotEmpty(orderList)) {
+            assetService.sapAdd(orderList);
         }
-        int totalNum = 0;
-        logger.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
-        for (SapPurchaseOrder order : orderList) {
-            int numberOfArrival = order.getNumberOfArrival().intValue();
-            List<Asset> assetList = new ArrayList<>();
-            if (ObjectUtil.isNotNull(numberOfArrival)) {
-                LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
-                        .orderByDesc(Asset::getSerialNum)
-                        .last("LIMIT 1");
-                Asset theLastOne = assetService.getOne(wrapper);
-
-                int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
-                DecimalFormat df = new DecimalFormat("0000");
-                for (int i = 1; i <= numberOfArrival; i++) {
-                    Asset asset = new Asset();
-                    String assetCode = order.getMaterialNumber() + df.format(nextNum);
-                    asset.setMaterialNum(order.getMaterialNumber())
-                            .setSerialNum(nextNum)
-                            .setAssetName(order.getMaterialText())
-                            .setAssetCode(assetCode)
-                            .setCompany(order.getCompanyCode())
-                            .setPurchaseOrderNo(order.getPurchaseOrder())
-                            .setProvider(order.getProvider())
-                            .setProviderName(order.getProviderDescription())
-                            .setOriginalValue(order.getPrice())
-                            .setMonetaryUnit(order.getMoneyType())
-                            .setAssetStatus(AssetStatus.IN_STORE.getCode())
-                            .setProofOfMaterial(order.getProofOfMaterial())
-                            .setCreateBy("SAP")
-                            .setCreateTime(new Date())
-                            .setAssetType(order.getMaterialNumber().substring(0, 1))
-                            .setAssetCategory(order.getMaterialNumber().substring(1, 3))
-                            .setAssetSubCategory(order.getMaterialNumber().substring(3, 5));
-                    assetList.add(asset);
-                    nextNum++;
-                }
-                assetService.saveBatch(assetList);
-                totalNum += assetList.size();
-            }
-        }
-        logger.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + totalNum + " 个资产 ====");
-        return AjaxResult.success(orderList);
+        return AjaxResult.success();
     }
 
     /**
@@ -190,28 +148,7 @@ public class AssetController extends BaseController {
     @PostMapping("/sapSyncValue")
     public AjaxResult sapSyncValue(@RequestBody SimpleOuterDTO<List<SapValueDTO>> param) {
         List<SapValueDTO> sapValueList = param.getData();
-        Set<String> assetCodeSet = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toSet());
-        List<Asset> assetList = assetService.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeSet));
-        if (CollectionUtil.isNotEmpty(assetList)) {
-            Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getAssetCode, o -> o));
-            for (SapValueDTO sapValueDTO : sapValueList) {
-                Asset asset = assetMap.get(sapValueDTO.getAssetCode());
-                if (ObjectUtil.isNotEmpty(asset)) {
-                    asset.setOriginalValue(sapValueDTO.getOriginalValue())
-                            .setNetValue(sapValueDTO.getNetValue())
-                            .setCanUseYears(sapValueDTO.getCanUseYears())
-                            .setCanUseMonths(sapValueDTO.getCanUseMonths());
-                }
-                try {
-                    assetService.updateById(asset);
-                    sapValueDTO.setSuccess(true);
-                } catch (Exception e) {
-                    sapValueDTO.setSuccess(false);
-                    sapValueDTO.setReason(e.getMessage());
-                }
-            }
-        }
-        return AjaxResult.success(sapValueList);
+        return AjaxResult.success(assetService.sapSyncValue(sapValueList));
     }
 
 }

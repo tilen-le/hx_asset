@@ -68,7 +68,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetMapper, Asset> imp
         entity.setCostCenter(assetProcess.getCostCenter());
         entity.setAssetCategory(assetProcess.getAssetCategory());
         entity.setAssetStatus(AssetStatus.USING.getCode());
-        entity.setFixed(Boolean.TRUE);
+        entity.setFixed("1");
         entity.setUpdateTime(DateUtils.getNowDate());
 //        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
         String userCode = "80010712";
@@ -174,7 +174,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetMapper, Asset> imp
         if (StringUtils.isBlank(assetProcess.getCurrentLocation())){
             throw new ServiceException("请输入所在位置");
         }
-        if (entity.getFixed()){
+        if (StringUtils.isNotBlank(entity.getFixed())&&"1".equals(entity.getFixed())){
             entity.setAssetStatus(AssetStatus.USING.getCode());
         }else {
             entity.setAssetStatus(AssetStatus.TRIAL.getCode());

@@ -2,8 +2,12 @@ package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.dto.SapPurchaseOrder;
+import com.hexing.asset.domain.dto.SapValueDTO;
+import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.common.core.domain.Result;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
@@ -92,4 +96,14 @@ public interface IAssetService extends IService<Asset> {
      * 查询部门下所有员工名下的资产
      */
     List<Asset> selectAssetByDeptId(Long deptId);
+
+    /**
+     * SAP采购单同步接口
+     */
+    void sapAdd(List<SapPurchaseOrder> orderList);
+
+    /**
+     * SAP价值传输接口
+     */
+    List<SapValueDTO>  sapSyncValue(List<SapValueDTO> sapValueList);
 }

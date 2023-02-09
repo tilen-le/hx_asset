@@ -2,7 +2,7 @@ package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
-import com.hexing.common.core.domain.Result;
+import com.hexing.asset.domain.AssetProcess;
 
 import java.util.List;
 
@@ -17,85 +17,85 @@ public interface IAssetProcessService extends IService<Asset> {
     /**
      * 资产归还
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int backAsset(Asset asset);
+    int backAsset(AssetProcess assetProcess);
     /**
      * 资产转固
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int fixationAsset(Asset asset);
+    int fixationAsset(AssetProcess assetProcess);
     /**
      * 资产转移
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int transferAsset(Asset asset,String recipient);
+    int transferAsset(AssetProcess assetProcess);
     /**
      * 资产待外卖
      *
-     * @param asset 资产表
+     *
      * @return 结果
      */
-    int waiteTakeOutAsset(Asset asset);
+    int waiteTakeOutAsset(AssetProcess assetProcess);
     /**
      * 资产已外卖
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int takeOutAsset(Asset asset);
+    int takeOutAsset(AssetProcess assetProcess);
     /**
      * 资产返修
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int repairAsset(Asset asset);
+    int repairAsset(AssetProcess assetProcess);
     /**
-     * 资产操作-领用
+     * 资产操作-派发
      *
-     * @param asset 资产表
+     * @param assetProcess 资产表
      * @return 结果
      */
-    int receiveAsset(Asset asset);
+    int receiveAsset(AssetProcess assetProcess);
     /**
      * 资产操作-退货
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int returnAsset(Asset asset);
+    int returnAsset(AssetProcess assetProcess);
     /**
      * 资产操作-维修
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int maintainAsset(Asset asset);
+    int maintainAsset(AssetProcess assetProcess);
     /**
      * 资产操作-已维修
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int maintainedAsset(Asset asset);
+    int maintainedAsset(AssetProcess assetProcess);
     /**
      * 资产操作-报废
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int scrapAsset(Asset asset);
+    int scrapAsset(AssetProcess assetProcess);
     /**
      * 资产操作-已报废
      *
-     * @param asset 资产表
+     * 
      * @return 结果
      */
-    int scrapedAsset(Asset asset);
+    int scrapedAsset(AssetProcess assetProcess);
 }

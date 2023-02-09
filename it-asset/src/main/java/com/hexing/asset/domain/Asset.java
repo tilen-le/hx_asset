@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hexing.common.annotation.Excel;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -19,6 +21,7 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
+@ApiModel(description = "资产表对象")
 public class Asset {
 
     private static final long serialVersionUID = 1L;
@@ -26,126 +29,147 @@ public class Asset {
     /**
      * 资产id
      */
+    @ApiModelProperty(value = "资产id")
     @TableId(type = IdType.AUTO)
     private String assetId;
 
     /**
      * 资产名称
      */
+    @ApiModelProperty(value = "资产名称")
     @Excel(name = "资产名称")
     private String assetName;
 
     /**
      * 资产编码
      */
+    @ApiModelProperty(value = "资产编码")
     @Excel(name = "资产编码", type = Excel.Type.EXPORT)
     private String assetCode;
 
     /**
      * SAP固定资产编码
      */
+    @ApiModelProperty(value = "SAP固定资产编码")
     @Excel(name = "SAP固定资产编码")
     private String assetSapCode;
 
     /**
      * 资产大类
      */
+    @ApiModelProperty(value = "资产大类")
     @Excel(name = "资产大类")
     private String assetType;
 
     /**
      * 资产中类
      */
+    @ApiModelProperty(value = "资产中类")
     @Excel(name = "资产中类")
     private String assetCategory;
 
     /**
      * 资产小类
      */
+    @ApiModelProperty(value = "资产小类")
     @Excel(name = "资产小类")
     private String assetSubCategory;
 
     /**
      * 规格型号
      */
+    @ApiModelProperty(value = "规格型号")
     @Excel(name = "规格型号")
     private String standard;
 
     /**
      * 资产状态
      */
+    @ApiModelProperty(value = "资产状态")
     @Excel(name = "资产状态")
     private String assetStatus;
 
     /**
      * 转固状态
      */
+    @ApiModelProperty(value = "转固状态")
     @Excel(name = "转固状态")
     private Boolean fixed;
 
     /**
      * 资产保管人工号（老工号）
      */
+    @ApiModelProperty(value = "资产保管人工号（老工号）")
     @Excel(name = "资产保管人工号")
     private String responsiblePersonCode;
 
     /**
      * 资产保管人
      */
+    @ApiModelProperty(value = "资产保管人")
     @Excel(name = "资产保管人")
     private String responsiblePersonName;
 
     /**
      * 资产保管部门
      */
+    @ApiModelProperty(value = "资产保管部门")
     @Excel(name = "资产保管部门")
     private String responsiblePersonDept;
 
     /**
      * 所在位置
      */
+    @ApiModelProperty(value = "所在位置")
     @Excel(name = "所在位置")
     private String currentLocation;
 
     /**
      * 所属公司
      */
+    @ApiModelProperty(value = "所属公司")
     @Excel(name = "所属公司")
     private String company;
 
     /**
      * 成本中心
      */
+    @ApiModelProperty(value = "成本中心")
     @Excel(name = "成本中心")
     private String costCenter;
 
     /**
      * 成本中心描述
      */
+    @ApiModelProperty(value = "成本中心描述")
     @Excel(name = "成本中心描述")
     private String costCenterName;
 
     /**
      * 资产原值(含税)
      */
+    @ApiModelProperty(value = "资产原值(含税)")
     @Excel(name = "资产原值(含税)")
     private Double originalValue;
 
     /**
      * 资产净值
      */
+    @ApiModelProperty(value = "资产净值")
     @Excel(name = "资产净值")
     private Double netValue;
 
     /**
      * 资产原值币制
      */
+    @ApiModelProperty(value = "资产原值币制")
     @Excel(name = "资产原值币制")
     private String monetaryUnit;
 
     /**
      * 资产化日期（资本化日期/资产价值录入日期）
      */
+    @ApiModelProperty(value = "资产化日期（资本化日期/资产价值录入日期）")
     @Excel(name = "资产化日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date capitalizationDate;
@@ -153,48 +177,56 @@ public class Asset {
     /**
      * 预计使用寿命（年）
      */
+    @ApiModelProperty(value = "预计使用寿命（年）")
     @Excel(name = "预计使用寿命（年）")
     private String canUseYears;
 
     /**
      * 预计使用寿命（月）
      */
+    @ApiModelProperty(value = "预计使用寿命（月）")
     @Excel(name = "预计使用寿命（月）")
     private String canUseMonths;
 
     /**
      * 保修期
      */
+    @ApiModelProperty(value = "保修期")
     @Excel(name = "保修期")
     private Integer warranty;
 
     /**
      * 供应商
      */
+    @ApiModelProperty(value = "供应商")
     @Excel(name = "供应商")
     private String provider;
 
     /**
      * 供应商名称
      */
+    @ApiModelProperty(value = "供应商名称")
     @Excel(name = "供应商名称")
     private String providerName;
 
     /**
      * 出厂编码
      */
+    @ApiModelProperty(value = "出厂编码")
     @Excel(name = "出厂编码")
     private String factoryNo;
 
     /**
      * 采购单号
      */
+    @ApiModelProperty(value = "采购单号")
     @Excel(name = "采购单号")
     private String purchaseOrderNo;
 
     /**
      * 首次购置日期
      */
+    @ApiModelProperty(value = "首次购置日期")
     @Excel(name = "首次购置日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date buyDate;
@@ -202,6 +234,7 @@ public class Asset {
     /**
      * 入库日期
      */
+    @ApiModelProperty(value = "入库日期")
     @Excel(name = "入库日期")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date storageDate;
@@ -209,44 +242,52 @@ public class Asset {
     /**
      * 物料凭证
      */
+    @ApiModelProperty(value = "物料凭证")
     @Excel(name = "物料凭证")
     private String proofOfMaterial;
 
     /**
      * 备注
      */
+    @ApiModelProperty(value = "备注")
     private String comment;
 
     /**
      * 创建者
      */
+    @ApiModelProperty(value = "创建者")
     private String createBy;
 
     /**
      * 创建时间
      */
+    @ApiModelProperty(value = "创建时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
 
     /**
      * 更新者
      */
+    @ApiModelProperty(value = "更新者")
     private String updateBy;
 
     /**
      * 更新时间
      */
+    @ApiModelProperty(value = "更新时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date updateTime;
 
     /**
      * 物料号
      */
+    @ApiModelProperty(value = "物料号")
     private String materialNum;
 
     /**
      * 流水号
      */
+    @ApiModelProperty(value = "流水号")
     private Integer serialNum;
 
 }

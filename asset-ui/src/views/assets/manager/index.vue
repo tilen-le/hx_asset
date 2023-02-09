@@ -267,7 +267,6 @@
     getAssetTree() {
         getAssetTypeTree().then(response => {
           const tree = response.data;
-          //三层
           this.asset_type_tree = tree;
           for (const item of tree) {
             const it = {

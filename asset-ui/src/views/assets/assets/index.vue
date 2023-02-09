@@ -1,24 +1,34 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="资产编码" prop="assetName">
-        <el-input v-model="queryParams.assetName" placeholder="请输入资产编码" clearable size="small"
+      <el-form-item label="资产编码" prop="assetCode">
+        <el-input v-model="queryParams.assetCode" placeholder="请输入资产编码" clearable size="small"
                   @keyup.enter.native="handleQuery"/>
       </el-form-item>
-      <el-form-item label="资产类型" prop="assetType">
-        <el-select v-model="queryParams.assetType" placeholder="请选择资产类型"  clearable multiple size="small">
+      <el-form-item label="资产大类" prop="assetType">
+        <el-select v-model="queryParams.assetType" placeholder="请选择资产大类" clearable size="small"  @change="typeChange">
           <el-option
-            v-for="dict in dict.type.asset_type"
+            v-for="dict in asset_types"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="资产分类" prop="assetCategory">
-        <el-select v-model="queryParams.assetCategory" placeholder="请选择资产分类" clearable multiple size="small">
+      <el-form-item label="资产中类" prop="assetCategory">
+        <el-select v-model="queryParams.assetCategory" placeholder="请选择资产中类" clearable size="small" @change="categoryChange">
           <el-option
-            v-for="dict in dict.type.asset_category"
+            v-for="dict in asset_category_options"
+            :key="dict.value"
+            :label="dict.label"
+            :value="dict.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="资产小类" prop="assetSubCategory">
+        <el-select v-model="queryParams.assetSubCategory" placeholder="请选择资产小类" clearable multiple size="small">
+          <el-option
+            v-for="dict in asset_sub_category_options"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -26,23 +36,13 @@
         </el-select>
       </el-form-item>
       <el-form-item label="资产名称" prop="assetName">
-        <el-input v-model="queryParams.assetName" placeholder="请输入资产名称" clearable multiple size="small"
+        <el-input v-model="queryParams.assetName" placeholder="请输入资产名称" clearable size="small"
                   @keyup.enter.native="handleQuery"/>
       </el-form-item>
       <el-form-item label="资产状态" prop="assetStatus">
         <el-select v-model="queryParams.assetStatus" placeholder="请选择资产状态" clearable multiple size="small">
           <el-option
             v-for="dict in dict.type.asset_status"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="保管部门" prop="responsiblePersonDept">
-        <el-select v-model="queryParams.responsiblePersonDept" placeholder="请选择保管部门" clearable multiple size="small">
-          <el-option
-            v-for="dict in dict.type.common_dept"
             :key="dict.value"
             :label="dict.label"
             :value="dict.value"
@@ -69,9 +69,13 @@
           />
         </el-select>
       </el-form-item>
-      <el-form-item label="资产化日期">
+      <el-form-item label="资产保管部门" prop="responsiblePersonDept" label-width="102px">
+        <treeselect style="width:215px;" v-model="queryParams.responsiblePersonDept" :options="deptOptions" :normalizer="normalizer"
+                    :show-count="true" placeholder="请选择资产保管部门"/>
+      </el-form-item>
+      <el-form-item label="资产化日期" prop="capitalizationDateRange" label-width="82px">
         <div class="block">
-          <el-date-picker size="small" v-model="capitalizationDateRange"
+          <el-date-picker size="small" v-model="queryParams.capitalizationDateRange"
                           start-placeholder="开始日期"
                           end-placeholder="结束日期"
                           type="daterange" value-format="yyyy-MM-dd" range-separator="-">
@@ -87,7 +91,7 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button type="warning" plain icon="el-icon-download" size="mini" :loading="exportLoading"
-                   @click="handleExport" v-hasPermi="['asset:asset:export']">导出</el-button>
+                           @click="handleExport" v-hasPermi="['asset:asset:export']">导出</el-button>
       </el-col>
     </el-row>
 
@@ -104,25 +108,14 @@
           <el-link :underline="false" type="primary" @click="getDetail(scope.row)">{{ scope.row.assetCode }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="资产类型" align="center" prop="priority">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_type" :value="scope.row.assetType"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="资产分类" align="center" prop="assetCategory">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_category" :value="scope.row.assetCategory"/>
-        </template>
-      </el-table-column>
-      <el-table-column label="资产大类" align="center" prop="assetCategory">
-        <template slot-scope="scope">
-          <dict-tag :options="dict.type.asset_category" :value="scope.row.assetCategory"/>
-        </template>
-      </el-table-column>
+      <el-table-column label="资产大类" align="center" prop="assetType" />
+      <el-table-column label="资产中类" align="center" prop="assetCategory" />
+      <el-table-column label="资产小类" align="center" prop="assetSubCategory" />
       <el-table-column label="资产名称" align="center" prop="assetName" />
       <el-table-column label="规格型号" align="center" prop="standard" />
-      <el-table-column label="保管部门" align="center" prop="responsiblePersonDept" />
-      <el-table-column label="保管人姓名" align="center" prop="responsiblePersonName" />
+      <el-table-column label="资产保管人" align="center" prop="responsiblePersonName" />
+<!--      responsiblePersonName-->
+<!--      responsible_person_dept-->
       <el-table-column label="所在位置" align="center" prop="currentLocation" />
       <el-table-column label="转固状态" align="center" prop="fixed">
         <template slot-scope="scope">
@@ -140,7 +133,6 @@
           <el-button
             size="mini"
             type="text"
-            icon="el-icon-search"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['assets:manager:edit']"
           >查看</el-button>
@@ -161,13 +153,16 @@
 
 <script>
 
-  import {listAssets} from "@/api/assets/assets";
-  import {getDicts} from "@/api/system/dict/data";
+  import {exportData, listAssets} from "@/api/assets/assets";
+  import {getAssetTypeTree} from "@/api/assets/common";
+  import { childTree } from '@/api/system/dept'
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
   export default {
   name: "assets",
-  dicts: ['asset_type', 'asset_category', 'asset_company', 'asset_location'
-          , 'asset_fixed', 'asset_status'],
+  dicts: ['asset_company', 'asset_fixed', 'asset_status'],
+  components: { Treeselect },
   data() {
     return {
       // 遮罩层
@@ -189,19 +184,18 @@
       title: "",
       // 是否显示弹出层
       open: false,
-      capitalizationDateRange: [],
+      deptOptions: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        assetCategory: null,
         assetCode: null,
         assetName: null,
-        assetStatus: null,
-        assetSubCategory: null,
         assetType: null,
-        capitalizationStartDate: null,
-        capitalizationEndDate: null,
+        assetCategory: null,
+        assetSubCategory: null,
+        assetStatus: null,
+        capitalizationDateRange: [],
         company: null,
         fixed: null,
         responsiblePersonDept: null
@@ -210,20 +204,27 @@
       form: {},
       // 表单校验
       rules: {
-      }
+      },
+      asset_type_tree: null,
+      asset_types: [],
+      asset_category_options: [],
+      asset_sub_category_options: [],
     };
   },
   created() {
     this.getList();
+    this.getAssetTree();
+    this.getChildDeptTree();
   },
   methods: {
     /** 查询成熟度流程列表 */
     getList() {
       this.loading = true;
-      listAssets(this.queryParams).then(response => {
-        this.assetList = response.rows;
-        this.total = response.total;
-        this.loading = false;
+      listAssets(this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange,"customize","capitalizationStartDate","capitalizationEndDate"))
+        .then(response => {
+          this.assetList = response.rows;
+          this.total = response.total;
+          this.loading = false;
       });
     },
     /** 搜索按钮操作 */
@@ -235,7 +236,93 @@
     resetQuery() {
       this.resetForm("queryForm");
       this.handleQuery();
-    }
+    },
+    getAssetTree() {
+      getAssetTypeTree().then(response => {
+        const tree = response.data;
+        this.asset_type_tree = tree;
+        for (const item of tree) {
+          const it = {
+            "value": item.code,
+            "label": item.description,
+            "child": item.child,
+            "raw": {
+              "listClass": ""
+            }
+          }
+          this.asset_types.push(it);
+        }
+      });
+    },
+    typeChange(value) {
+      this.queryParams.assetCategory = null;
+      this.queryParams.assetSubCategory = null;
+      this.asset_category_options = [];
+      this.asset_sub_category_options = [];
+      this.getAssetCategory(value)
+    },
+    categoryChange(value) {
+      this.queryParams.assetSubCategory = null;
+      this.asset_sub_category_options = [];
+      this.getAssetSubCategory(value)
+    },
+    getAssetCategory(code) {
+      const tree = this.asset_types;
+      for (const item of tree) {
+        if (code == item.value) {
+          for (const category of item.child) {
+            const it = {
+              "value": category.code,
+              "label": category.description,
+              "child": category.child,
+            }
+            this.asset_category_options.push(it);
+          }
+          break;
+        }
+      }
+    },
+    getAssetSubCategory(code) {
+      const tree = this.asset_category_options;
+      for (const item of tree) {
+        if (code == item.value) {
+          for (const subCategory of item.child) {
+            const it = {
+              "value": subCategory.code,
+              "label": subCategory.description,
+            }
+            this.asset_sub_category_options.push(it);
+          }
+          break;
+        }
+      }
+    },
+    /** 导出按钮操作 */
+    handleExport() {
+      const queryParams = this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange,"customize","capitalizationStartDate","capitalizationEndDate");
+      this.$modal.confirm("提出", "确定", "取消", "是否确认导出所有符合条件数据项?").then(() => {
+        this.exportLoading = true;
+        return exportData(queryParams);
+      }).then(response => {
+        this.$download.name(response.msg);
+        this.exportLoading = false;
+      }).catch(() => {});
+    },
+    normalizer(node) {
+      if (node.children && !node.children.length) {
+        delete node.children
+      }
+      return {
+        id: node.id,
+        label: node.label,
+        children: node.children
+      }
+    },
+    getChildDeptTree() {
+      childTree().then(response => {
+        this.deptOptions = response.data
+      })
+    },
   }
 };
 </script>

@@ -116,7 +116,6 @@ public class Asset {
      */
     @ApiModelProperty(value = "资产保管部门")
     @Excel(name = "资产保管部门")
-    @TableField(exist = false)
     private String responsiblePersonDept;
 
     /**

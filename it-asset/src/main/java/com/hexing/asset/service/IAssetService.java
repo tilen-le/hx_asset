@@ -36,15 +36,6 @@ public interface IAssetService extends IService<Asset> {
      */
     String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName);
 
-
-    /**
-     * 查询资产表列表
-     *
-     * @param
-     * @return 资产表集合
-     */
-    List<Asset> selectAssetList(Asset asset);
-
     /**
      * 查询资产表列表
      *

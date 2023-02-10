@@ -1,6 +1,7 @@
 package com.hexing.asset.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hexing.common.annotation.Excel;
@@ -109,6 +110,14 @@ public class Asset {
     @ApiModelProperty(value = "资产保管人")
     @Excel(name = "资产保管人")
     private String responsiblePersonName;
+
+    /**
+     * 资产保管部门
+     */
+    @ApiModelProperty(value = "资产保管部门")
+    @Excel(name = "资产保管部门")
+    @TableField(exist = false)
+    private String responsiblePersonDept;
 
     /**
      * 所在位置

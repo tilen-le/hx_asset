@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.spring.FastjsonSockJsMessageCodec;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
@@ -27,6 +28,7 @@ import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.PageUtil;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
@@ -183,43 +185,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 资产表
      */
     @Override
-    public List<Asset> selectAssetList(Asset asset) {
-        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-        if (StringUtils.isNotBlank(asset.getAssetName())) {
-            wrapper.like(Asset::getAssetName, asset.getAssetName());
-        }
-        if (StringUtils.isNotBlank(asset.getAssetCode())) {
-            wrapper.like(Asset::getAssetCode, asset.getAssetCode());
-        }
-        if (StringUtils.isNotBlank(asset.getResponsiblePersonName())) {
-            wrapper.eq(Asset::getResponsiblePersonName, asset.getResponsiblePersonName());
-        }
-
-        List<Asset> assetList = assetMapper.selectList(wrapper);
-
-        Map<String, SysUser> responsiblePersonMap = sysUserService
-                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
-        Map<Long, SysDept> deptMap = sysDeptService
-                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
-
-        if (CollectionUtil.isNotEmpty(assetList)) {
-            for (Asset a : assetList) {
-                SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
-                SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-                a.setResponsiblePersonDept(dept.getDeptName());
-            }
-        }
-        return assetList;
-    }
-
-
-    /**
-     * 查询资产表列表
-     *
-     * @param
-     * @return 资产表
-     */
-    @Override
     public List<Asset> selectAssetList(AssetQueryParam param) {
         List<Asset> assetList = new ArrayList<>();
         String username = SecurityUtils.getUsername();
@@ -245,10 +210,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }
         if (StringUtils.isNotEmpty(param.getAssetType())) {
-            wrapper.in(Asset::getAssetType, param.getAssetType());
+            wrapper.eq(Asset::getAssetType, param.getAssetType());
         }
         if (StringUtils.isNotEmpty(param.getAssetCategory())) {
-            wrapper.in(Asset::getAssetCategory, param.getAssetCategory());
+            wrapper.eq(Asset::getAssetCategory, param.getAssetCategory());
         }
         if (CollectionUtil.isNotEmpty(param.getAssetSubCategory())) {
             wrapper.in(Asset::getAssetSubCategory, param.getAssetSubCategory());
@@ -258,9 +223,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         if (CollectionUtil.isNotEmpty(param.getAssetStatus())) {
             wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
-        }
-        if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
-            wrapper.eq(Asset::getResponsiblePersonDept, param.getResponsiblePersonDept());
         }
         if (StringUtils.isNotEmpty(param.getCompany())) {
             wrapper.eq(Asset::getCompany, param.getCompany());
@@ -274,29 +236,40 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (ObjectUtil.isNotEmpty(param.getCapitalizationEndDate())) {
             wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
         }
-
-        assetList = assetMapper.selectList(wrapper);
-
-        JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
-        for (Asset asset : assetList) {
-            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
-            asset.setAssetType(dto.getAssetType());
-            asset.setAssetCategory(dto.getAssetCategory());
-            asset.setAssetSubCategory(dto.getAssetSubCategory());
+        if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
+            // 查询指定部门下所有部门的id
+            List<String> childDeptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(param.getResponsiblePersonDept()));
+            childDeptIdList.add(param.getResponsiblePersonDept());
+            // 查询这些部门下所有人的工号
+            List<String> usernameList = sysUserService.selectUserByDeptId(childDeptIdList);
+            wrapper.in(Asset::getResponsiblePersonCode, usernameList);
         }
 
-//        Map<String, SysUser> responsiblePersonMap = sysUserService
-//                .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
-//        Map<Long, SysDept> deptMap = sysDeptService
-//                .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
+        PageUtil.startPage();
+        assetList = assetMapper.selectList(wrapper);
 
-//        if (CollectionUtil.isNotEmpty(assetList)) {
-//            for (Asset a : assetList) {
-//                SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
-//                SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-//                a.setResponsiblePersonDept(dept.getDeptName());
-//            }
-//        }
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            // 解析物料号返回资产大中小类
+            JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
+            for (Asset asset : assetList) {
+                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                asset.setAssetType(dto.getAssetType());
+                asset.setAssetCategory(dto.getAssetCategory());
+                asset.setAssetSubCategory(dto.getAssetSubCategory());
+            }
+
+            Map<String, SysUser> responsiblePersonMap = sysUserService
+                    .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+            Map<Long, SysDept> deptMap = sysDeptService
+                    .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
+            for (Asset a : assetList) {
+                if (StringUtils.isNotEmpty(a.getResponsiblePersonCode())) {
+                    SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
+                    SysDept dept = deptMap.get(responsiblePerson.getDeptId());
+                    a.setResponsiblePersonDept(dept.getDeptName());
+                }
+            }
+        }
 
         return assetList;
     }

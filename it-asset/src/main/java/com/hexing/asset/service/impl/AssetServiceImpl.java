@@ -87,12 +87,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             asset.setAssetType(dto.getAssetType());
             asset.setAssetCategory(dto.getAssetCategory());
             asset.setAssetSubCategory(dto.getAssetSubCategory());
-            // 保管人和保管部门
-            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
-                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
-                asset.setResponsiblePersonDept(dept.getDeptName());
-            }
+//             保管人和保管部门
+//            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
+//                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+//                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+//                asset.setResponsiblePersonDept(dept.getDeptName());
+//            }
 
         }
         return asset;
@@ -269,17 +269,17 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 asset.setAssetSubCategory(dto.getAssetSubCategory());
             }
 
-            Map<String, SysUser> responsiblePersonMap = sysUserService
-                    .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
-            Map<Long, SysDept> deptMap = sysDeptService
-                    .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
-            for (Asset a : assetList) {
-                if (StringUtils.isNotEmpty(a.getResponsiblePersonCode())) {
-                    SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
-                    SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-                    a.setResponsiblePersonDept(dept.getDeptName());
-                }
-            }
+//            Map<String, SysUser> responsiblePersonMap = sysUserService
+//                    .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
+//            Map<Long, SysDept> deptMap = sysDeptService
+//                    .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
+//            for (Asset a : assetList) {
+//                if (StringUtils.isNotEmpty(a.getResponsiblePersonCode())) {
+//                    SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
+//                    SysDept dept = deptMap.get(responsiblePerson.getDeptId());
+//                    a.setResponsiblePersonDept(dept.getDeptName());
+//                }
+//            }
         }
 
         return assetList;

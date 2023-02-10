@@ -17,9 +17,6 @@ public enum AssetProcessType {
      * 资产转移
      */
     PROCESS_TRANSFORM("201", "资产转移"),
-
-    PROCESS_BACK("801", "资产归还"),
-
     /**
      * 退货
      */

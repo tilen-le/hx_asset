@@ -241,6 +241,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (ObjectUtil.isNotEmpty(param.getCapitalizationEndDate())) {
             wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
         }
+        if (ObjectUtil.isNotEmpty(param.getCreateTimeBegin())) {
+            wrapper.ge(Asset::getCreateTime, param.getCreateTimeBegin());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCreateTimeEnd())) {
+            wrapper.le(Asset::getCreateTime, param.getCreateTimeEnd());
+        }
         if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
             // 查询指定部门下所有部门的id
             List<String> childDeptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(param.getResponsiblePersonDept()));

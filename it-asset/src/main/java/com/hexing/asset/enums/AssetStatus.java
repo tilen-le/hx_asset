@@ -17,8 +17,8 @@ public enum AssetStatus {
     MAINTAIN("8", "维修"),
     WAITING_SCRAP("9", "待报废"),
     TOKE_OUT("10", "已外卖"),
-    SCRAPED("11", "已报废")
-    ;
+    SCRAPED("11", "已报废"),
+    INVENTORY_LOSE("12", "盘亏");
 
     private final String code;
     private final String name;

@@ -19,6 +19,7 @@ import java.util.List;
 public class AssetProcessVariableServiceImpl extends ServiceImpl<AssetProcessVariableMapper, AssetProcessVariable> implements IAssetProcessVariableService {
     @Autowired
     private AssetProcessVariableMapper assetProcessVariableMapper;
+
     @Override
     public List<AssetProcessVariable> selectVariableListByProcessId(Long processId) {
         return assetProcessVariableMapper.selectVariableListByProcessId(processId);

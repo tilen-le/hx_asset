@@ -55,14 +55,17 @@ public enum AssetProcessType {
      */
     SCRAPED("702", "已报废"),
     /**
+     * 盘亏
+     */
+    PROCESS_INVENTORY_LOSE("801", "盘亏"),
+    /**
      * 闲置
      */
     PROCESS_UNUSED("901", "闲置"),
     /**
      * 资产盘点流程
      */
-    COUNTING_PROCESS("100","资产盘点流程")
-    ;
+    COUNTING_PROCESS("100", "资产盘点流程");
 
 
     private final String code;

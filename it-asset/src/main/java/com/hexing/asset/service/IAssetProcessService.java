@@ -21,9 +21,9 @@ public interface IAssetProcessService extends IService<AssetProcess> {
      * @return 结果
      */
     int receiveAsset(AssetProcessParam assetProcess);
+
     /**
      * 资产转移
-     *
      *
      * @return 结果
      */
@@ -32,13 +32,12 @@ public interface IAssetProcessService extends IService<AssetProcess> {
     /**
      * 资产操作-已退货
      *
-     *
      * @return 结果
      */
     int returnAsset(AssetProcessParam assetProcess);
+
     /**
      * 资产转固
-     *
      *
      * @return 结果
      */
@@ -47,64 +46,74 @@ public interface IAssetProcessService extends IService<AssetProcess> {
     /**
      * 资产操作-维修
      *
-     *
      * @return 结果
      */
     int maintainAsset(AssetProcessParam assetProcess);
 
     /**
-     * 资产归还
+     * 资产操作-闲置
      *
-     * 
      * @return 结果
      */
-    int backAsset(AssetProcessParam assetProcess);
+    int unusedAsset(AssetProcessParam assetProcess);
 
+    /**
+     * 资产操作-报废
+     *
+     * @return 结果
+     */
+    int scrapAsset(AssetProcessParam assetProcess);
 
     /**
      * 资产待外卖
      *
-     *
      * @return 结果
      */
     int waiteTakeOutAsset(AssetProcessParam assetProcess);
+
     /**
-     * 资产已外卖
+     * 资产操作-盘亏
      *
-     * 
      * @return 结果
      */
-    int takeOutAsset(AssetProcessParam assetProcess);
-    /**
-     * 资产返修
-     *
-     * 
-     * @return 结果
-     */
-    int repairAsset(AssetProcessParam assetProcess);
+    int inventoryLossAsset(AssetProcessParam assetProcess);
 
     /**
      * 资产操作-已维修
      *
-     * 
      * @return 结果
      */
     int maintainedAsset(AssetProcessParam assetProcess);
+
     /**
-     * 资产操作-报废
+     * 资产已外卖
      *
-     * 
      * @return 结果
      */
-    int scrapAsset(AssetProcessParam assetProcess);
+    int takeOutAsset(AssetProcessParam assetProcess);
+
     /**
      * 资产操作-已报废
      *
-     * 
      * @return 结果
      */
     int scrapedAsset(AssetProcessParam assetProcess);
-    int unusedAsset(AssetProcessParam assetProcess);
+
+
+    /**
+     * 资产归还
+     *
+     * @return 结果
+     */
+    int backAsset(AssetProcessParam assetProcess);
+
+    /**
+     * 资产返修
+     *
+     * @return 结果
+     */
+    int repairAsset(AssetProcessParam assetProcess);
+
 
     /**
      * 查询资产流程
@@ -130,5 +139,5 @@ public interface IAssetProcessService extends IService<AssetProcess> {
 
     void saveBatchProcess(List<? extends AssetProcess> processList);
 
-    void saveProcess(AssetProcessParam processParam,String type);
+    void saveProcess(AssetProcessParam processParam, String type);
 }

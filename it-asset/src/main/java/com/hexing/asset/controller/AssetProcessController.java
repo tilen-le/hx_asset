@@ -27,33 +27,8 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/receiveAsset")
 //    @PreAuthorize("@ss.hasPermi('asset:process:receiveAsset')")
     @ApiOperation("资产派发")
-    public AjaxResult receiveAsset(@RequestBody AssetProcessParam assetProcess)
-    {
+    public AjaxResult receiveAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.receiveAsset(assetProcess));
-    }
-
-    /**
-     * 归还资产
-     */
-    @Log(title = "归还资产", businessType = BusinessType.UPDATE)
-    @PutMapping("/backAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:backAsset')")
-    @ApiOperation("归还资产")
-    public AjaxResult backAsset(@RequestBody AssetProcessParam assetProcess)
-    {
-        return toAjax(processService.backAsset(assetProcess));
-    }
-
-    /**
-     * 转固资产
-     */
-    @Log(title = "转固资产", businessType = BusinessType.UPDATE)
-    @PutMapping("/fixationAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
-    @ApiOperation("转固资产")
-    public AjaxResult fixationAsset(@RequestBody AssetProcessParam assetProcess)
-    {
-        return toAjax(processService.fixationAsset(assetProcess));
     }
 
     /**
@@ -63,45 +38,8 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/transferAsset")
 //    @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
     @ApiOperation("转固资产")
-    public AjaxResult transferAsset(@RequestBody AssetProcessParam assetProcess)
-    {
+    public AjaxResult transferAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.transferAsset(assetProcess));
-    }
-
-    /**
-     * 资产待外卖
-     */
-    @Log(title = "资产待外卖", businessType = BusinessType.UPDATE)
-    @PutMapping("/waiteTakeOutAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:waiteTakeOutAsset')")
-    @ApiOperation("资产待外卖")
-    public AjaxResult waiteTakeOutAsset(@RequestBody AssetProcessParam assetProcess)
-    {
-        return toAjax(processService.waiteTakeOutAsset(assetProcess));
-    }
-
-    /**
-     * 外卖资产
-     */
-    @Log(title = "外卖资产", businessType = BusinessType.UPDATE)
-    @PutMapping("/takeOutAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:takeOutAsset')")
-    @ApiOperation("外卖资产")
-    public AjaxResult takeOutAsset(@RequestBody AssetProcessParam assetProcess)
-    {
-        return toAjax(processService.takeOutAsset(assetProcess));
-    }
-
-    /**
-     * 外卖资产
-     */
-    @Log(title = "资产返修", businessType = BusinessType.UPDATE)
-    @PutMapping("/repairAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:repairAsset')")
-    @ApiOperation("资产返修")
-    public AjaxResult repairAsset(@RequestBody AssetProcessParam assetProcess)
-    {
-        return toAjax(processService.repairAsset(assetProcess));
     }
 
     /**
@@ -111,9 +49,19 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/returnAsset")
 //    @PreAuthorize("@ss.hasPermi('asset:process:returnAsset')")
     @ApiOperation("资产退货")
-    public AjaxResult returnAsset(@RequestBody AssetProcessParam assetProcess)
-    {
+    public AjaxResult returnAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.returnAsset(assetProcess));
+    }
+
+    /**
+     * 转固资产
+     */
+    @Log(title = "转固资产", businessType = BusinessType.UPDATE)
+    @PutMapping("/fixationAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
+    @ApiOperation("转固资产")
+    public AjaxResult fixationAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.fixationAsset(assetProcess));
     }
 
     /**
@@ -123,21 +71,19 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/maintainAsset")
 //    @PreAuthorize("@ss.hasPermi('asset:process:maintainAsset')")
     @ApiOperation("资产维修")
-    public AjaxResult maintainAsset(@RequestBody AssetProcessParam assetProcess)
-    {
+    public AjaxResult maintainAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.maintainAsset(assetProcess));
     }
 
     /**
-     * 资产已维修
+     * 资产闲置
      */
-    @Log(title = "资产已维修", businessType = BusinessType.UPDATE)
-    @PutMapping("/maintainedAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:maintainedAsset')")
-    @ApiOperation("资产已维修")
-    public AjaxResult maintainedAsset(@RequestBody AssetProcessParam assetProcess)
-    {
-        return toAjax(processService.maintainedAsset(assetProcess));
+    @Log(title = "资产闲置", businessType = BusinessType.UPDATE)
+    @PutMapping("/unusedAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:unusedAsset')")
+    @ApiOperation("资产闲置")
+    public AjaxResult unusedAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.unusedAsset(assetProcess));
     }
 
     /**
@@ -147,9 +93,52 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/scrapAsset")
 //    @PreAuthorize("@ss.hasPermi('asset:process:scrapAsset')")
     @ApiOperation("资产报废")
-    public AjaxResult scrapAsset(@RequestBody AssetProcessParam assetProcess)
-    {
+    public AjaxResult scrapAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.scrapAsset(assetProcess));
+    }
+
+    /**
+     * 资产待外卖
+     */
+    @Log(title = "资产待外卖", businessType = BusinessType.UPDATE)
+    @PutMapping("/waiteTakeOutAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:waiteTakeOutAsset')")
+    @ApiOperation("资产待外卖")
+    public AjaxResult waiteTakeOutAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.waiteTakeOutAsset(assetProcess));
+    }
+
+    /**
+     * 资产盘亏
+     */
+    @Log(title = "资产盘亏", businessType = BusinessType.UPDATE)
+    @PutMapping("/inventoryLossAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:inventoryLossAsset')")
+    @ApiOperation("资产盘亏")
+    public AjaxResult inventoryLossAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.inventoryLossAsset(assetProcess));
+    }
+
+    /**
+     * 资产已维修
+     */
+    @Log(title = "资产已维修", businessType = BusinessType.UPDATE)
+    @PutMapping("/maintainedAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:maintainedAsset')")
+    @ApiOperation("资产已维修")
+    public AjaxResult maintainedAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.maintainedAsset(assetProcess));
+    }
+
+    /**
+     * 已外卖资产
+     */
+    @Log(title = "已外卖资产", businessType = BusinessType.UPDATE)
+    @PutMapping("/takeOutAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:takeOutAsset')")
+    @ApiOperation("已外卖资产")
+    public AjaxResult takeOutAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.takeOutAsset(assetProcess));
     }
 
     /**
@@ -164,14 +153,26 @@ public class AssetProcessController extends BaseController {
     }
 
     /**
-     * 资产闲置
+     * 资产返修
      */
-    @Log(title = "资产闲置", businessType = BusinessType.UPDATE)
-    @PutMapping("/unusedAsset")
-//    @PreAuthorize("@ss.hasPermi('asset:process:unusedAsset')")
-    @ApiOperation("资产闲置")
-    public AjaxResult unusedAsset(@RequestBody AssetProcessParam assetProcess) {
-        return toAjax(processService.unusedAsset(assetProcess));
+    @Log(title = "资产返修", businessType = BusinessType.UPDATE)
+    @PutMapping("/repairAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:repairAsset')")
+    @ApiOperation("资产返修")
+    public AjaxResult repairAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.repairAsset(assetProcess));
     }
+
+    /**
+     * 归还资产
+     */
+    @Log(title = "归还资产", businessType = BusinessType.UPDATE)
+    @PutMapping("/backAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:backAsset')")
+    @ApiOperation("归还资产")
+    public AjaxResult backAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.backAsset(assetProcess));
+    }
+
 
 }

@@ -25,7 +25,6 @@ public interface IAssetManagementConfigService extends IService<AssetManagementC
     /**
      * 查询资产管理配置列表
      *
-     * @param assetManagementConfig 资产管理配置
      * @return 资产管理配置集合
      */
     public List<AssetManagementConfig> selectAssetManagementConfigList(AssetManagementConfigSearchDTO searchDTO);

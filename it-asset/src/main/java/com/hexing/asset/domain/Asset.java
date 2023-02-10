@@ -248,7 +248,7 @@ public class Asset {
     /**
      * 创建者
      */
-    @ApiModelProperty(value = "创建者")
+    @ApiModelProperty(value = "创建人")
     private String createBy;
 
     /**

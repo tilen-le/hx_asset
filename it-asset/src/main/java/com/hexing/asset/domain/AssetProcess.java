@@ -1,104 +1,83 @@
 package com.hexing.asset.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import io.swagger.annotations.ApiModelProperty;
+import com.hexing.common.annotation.Excel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.experimental.Accessors;
 
 import java.util.Date;
+import java.util.List;
 
+/**
+ * 资产流程对象 asset_process
+ *
+ * @author zxy
+ * @date 2022-11-04
+ */
 @Data
 @EqualsAndHashCode
-@Accessors(chain = true)
 public class AssetProcess {
+
     private static final long serialVersionUID = 1L;
 
     /**
-     * 资产id
+     * 主键
      */
-    @ApiModelProperty(value = "资产id")
-    private String assetId;
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
     /**
-     * 资产编码
+     * 流程类型编号
      */
-    @ApiModelProperty(value = "资产编码")
+    @Excel(name = "流程类型编号")
+    private String processType;
+
+    /**
+     * 资产编号
+     */
+    @Excel(name = "资产编号")
     private String assetCode;
+
     /**
-     * 资产名称
+     * 流程状态
      */
-    @ApiModelProperty(value = "资产名称")
-    private String assetName;
+    @Excel(name = "流程状态")
+    private String status;
+
     /**
-     * 规格型号
+     * 创建者
      */
-    @ApiModelProperty(value = "规格型号")
-    private String standard;
+    private String createBy;
+
     /**
-     * 领用人工号
+     * 创建时间
      */
-    @ApiModelProperty(value = "保管人工号")
-    private String responsiblePersonCode;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
+
     /**
-     * 领用人名称
+     * 更新者
      */
-    @ApiModelProperty(value = "保管人名称")
-    private String responsiblePersonName;
+    private String updateBy;
+
     /**
-     * 领用人保管部门
+     * 更新时间
      */
-    @ApiModelProperty(value = "保管部门")
-    private String responsiblePersonDept;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date updateTime;
+
     /**
-     * 领用人岗位
+     * 备注
      */
-    @ApiModelProperty(value = "保管人岗位")
-    private String responsiblePersonJob;
+    private String remark;
+
     /**
-     * 存放地点
+     * 字段值列表
      */
-    @ApiModelProperty(value = "存放地点")
-    private String currentLocation;
-    /**
-     * 出厂编码
-     */
-    @ApiModelProperty(value = "出厂编码")
-    private String factoryNo;
-    /**
-     * 资产分类
-     */
-    @ApiModelProperty(value = "资产分类")
-    private String assetCategory;
-    /**
-     * 成本中心
-     */
-    @ApiModelProperty(value = "成本中心")
-    private String costCenter;
-    /**
-     * 所属公司
-     */
-    @ApiModelProperty(value = "所属公司")
-    private String company;
-    /**
-     * 资产状态
-     */
-    @ApiModelProperty(value = "资产状态")
-    private String assetStatus;
-    /**
-     * 是否转固
-     */
-    @ApiModelProperty(value = "是否转固")
-    private Boolean fixed;
-    /**
-     * 采购单号
-     */
-    @ApiModelProperty(value = "采购单号")
-    private String purchaseOrderNo;
-    /**
-     * 转固验收日期
-     */
-    @ApiModelProperty(value = "转固验收日期")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date fixedAcceptanceDate;
+    @TableField(exist = false)
+    private List<AssetProcessVariable> variableList;
 
 }

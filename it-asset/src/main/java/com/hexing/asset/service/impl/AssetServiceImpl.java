@@ -206,7 +206,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             for (Asset a : assetList) {
                 SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
                 SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-                a.setResponsiblePersonDept(dept.getDeptName());
             }
         }
         return assetList;
@@ -258,9 +257,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         if (CollectionUtil.isNotEmpty(param.getAssetStatus())) {
             wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
-        }
-        if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
-            wrapper.eq(Asset::getResponsiblePersonDept, param.getResponsiblePersonDept());
         }
         if (StringUtils.isNotEmpty(param.getCompany())) {
             wrapper.eq(Asset::getCompany, param.getCompany());

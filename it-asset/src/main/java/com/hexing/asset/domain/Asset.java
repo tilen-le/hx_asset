@@ -111,13 +111,6 @@ public class Asset {
     private String responsiblePersonName;
 
     /**
-     * 资产保管部门
-     */
-    @ApiModelProperty(value = "资产保管部门")
-    @Excel(name = "资产保管部门")
-    private String responsiblePersonDept;
-
-    /**
      * 所在位置
      */
     @ApiModelProperty(value = "所在位置")

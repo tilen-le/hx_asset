@@ -22,12 +22,12 @@ public class AssetQueryParam {
      * 资产大类
      */
     @ApiModelProperty(value="资产大类")
-    private List<String> assetType;
+    private String assetType;
     /**
      * 资产中类
      */
     @ApiModelProperty(value="资产中类")
-    private List<String> assetCategory;
+    private String assetCategory;
     /**
      * 资产小类
      */
@@ -70,4 +70,17 @@ public class AssetQueryParam {
     @ApiModelProperty(value="资产化日期结束时间")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date capitalizationEndDate;
+    /**
+     * 创建时间开始
+     */
+    @ApiModelProperty(value="创建时间开始")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTimeBegin;
+    /**
+     * 创建时间结束
+     */
+    @ApiModelProperty(value="创建时间结束")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTimeEnd;
+
 }

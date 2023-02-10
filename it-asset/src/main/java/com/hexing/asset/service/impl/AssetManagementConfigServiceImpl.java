@@ -45,6 +45,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
+
     /**
      * 查询资产管理配置
      *
@@ -54,6 +55,28 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     @Override
     public AssetManagementConfig selectAssetManagementConfigById(Long id) {
         return assetManagementConfigMapper.selectById(id);
+    }
+
+    /**
+     * 根据资产类型查询资产配置信息
+     *
+     * @param asset 资产对象
+     * @return
+     */
+    @Override
+    public Asset selectAssetManagementConfigByCategoryInfo(Asset asset) {
+        LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetManagementConfig::getAssetType, asset.getAssetType())
+                .eq(AssetManagementConfig::getAssetCategory, asset.getAssetCategory())
+                .apply("(find_in_set( {0} , asset_sub_category ))", asset.getAssetSubCategory());
+        List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigMapper.selectList(wrapper);
+        if (CollectionUtil.isNotEmpty(assetManagementConfigList)) {
+            AssetManagementConfig config = assetManagementConfigList.get(0);
+            SysUser user = sysUserService.getUserByUserName(config.getAssetManager());
+            SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+            asset.setAssetManager(user.getNickName()).setAssetManagementDept(dept.getDeptName());
+        }
+        return asset;
     }
 
     /**
@@ -76,19 +99,19 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         }
         List<AssetManagementConfig> assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);
 
-        if (CollectionUtil.isNotEmpty(assetSubCategory)){
-            assetManagementConfigs = getList(assetManagementConfigs, assetSubCategory,"assetSubCategory");
+        if (CollectionUtil.isNotEmpty(assetSubCategory)) {
+            assetManagementConfigs = getList(assetManagementConfigs, assetSubCategory, "assetSubCategory");
         }
-        if (CollectionUtil.isNotEmpty(assetManager)){
-            assetManagementConfigs = getList(assetManagementConfigs, assetManager,"assetManager");
+        if (CollectionUtil.isNotEmpty(assetManager)) {
+            assetManagementConfigs = getList(assetManagementConfigs, assetManager, "assetManager");
         }
-        if (CollectionUtil.isNotEmpty(company)){
-            assetManagementConfigs = getList(assetManagementConfigs, company,"");
+        if (CollectionUtil.isNotEmpty(company)) {
+            assetManagementConfigs = getList(assetManagementConfigs, company, "");
         }
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         List<SysDept> sysDept = sysDeptService.selectDeptList(new SysDept());
         for (AssetManagementConfig assetManagementConfig : assetManagementConfigs) {
-            MaterialCategorySimpleDTO categorySimpleDTO= CodeUtil.getAssetTypeName(assetManagementConfig);
+            MaterialCategorySimpleDTO categorySimpleDTO = CodeUtil.getAssetTypeName(assetManagementConfig);
             assetManagementConfig.setAssetType(categorySimpleDTO.getAssetType());
             assetManagementConfig.setAssetCategory(categorySimpleDTO.getAssetCategory());
             assetManagementConfig.setAssetSubCategory(categorySimpleDTO.getAssetSubCategory());
@@ -109,27 +132,27 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         return assetManagementConfigs;
     }
 
-    private List getList(List<AssetManagementConfig> assetManagementConfigs,List<String> searchParam,String whichSearch){
+    private List getList(List<AssetManagementConfig> assetManagementConfigs, List<String> searchParam, String whichSearch) {
         List<AssetManagementConfig> list = new ArrayList<>();
-        List<String> xlist =new ArrayList<>();
-        String param ="";
+        List<String> xlist = new ArrayList<>();
+        String param = "";
         for (AssetManagementConfig x : assetManagementConfigs) {
             param = x.getCompany();
-            if (whichSearch.equals("assetSubCategory")){
-                xlist= Arrays.asList(x.getAssetSubCategory().split(","));
-                param =x.getAssetSubCategory();
-            }else if(whichSearch.equals("assetManager")){
-                xlist= Arrays.asList(x.getAssetManager().split(","));
+            if (whichSearch.equals("assetSubCategory")) {
+                xlist = Arrays.asList(x.getAssetSubCategory().split(","));
+                param = x.getAssetSubCategory();
+            } else if (whichSearch.equals("assetManager")) {
+                xlist = Arrays.asList(x.getAssetManager().split(","));
                 param = x.getAssetManager();
             }
-            Boolean isTureWhich =false;
+            Boolean isTureWhich = false;
             for (String s : searchParam) {
-                if (xlist.contains(s)){
+                if (xlist.contains(s)) {
                     isTureWhich = Boolean.TRUE;
                     continue;
                 }
             }
-            if (searchParam.contains(param)||isTureWhich) {
+            if (searchParam.contains(param) || isTureWhich) {
                 list.add(x);
             }
         }

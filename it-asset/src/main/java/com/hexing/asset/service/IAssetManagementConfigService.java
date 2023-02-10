@@ -1,6 +1,7 @@
 package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.AssetManagementConfigSearchDTO;
 
@@ -21,6 +22,14 @@ public interface IAssetManagementConfigService extends IService<AssetManagementC
      * @return 资产管理配置
      */
     public AssetManagementConfig selectAssetManagementConfigById(Long id);
+
+    /**
+     * 根据资产类型查询资产配置信息
+     *
+     * @param asset 资产对象
+     * @return
+     */
+    Asset selectAssetManagementConfigByCategoryInfo(Asset asset);
 
     /**
      * 查询资产管理配置列表

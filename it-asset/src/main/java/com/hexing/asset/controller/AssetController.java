@@ -58,7 +58,6 @@ public class AssetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('asset:asset:list')")
     @GetMapping("/list")
     public TableDataInfo list(AssetQueryParam param) {
-        startPage();
         List<Asset> list = assetService.selectAssetList(param);
         return getDataTable(list);
     }
@@ -70,8 +69,8 @@ public class AssetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('asset:asset:export')")
     @Log(title = "导出资产表列表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
-    public AjaxResult export(Asset asset) {
-        List<Asset> list = assetService.selectAssetList(asset);
+    public AjaxResult export(AssetQueryParam param) {
+        List<Asset> list = assetService.selectAssetList(param);
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }
@@ -90,7 +89,6 @@ public class AssetController extends BaseController {
         String message = assetService.importAsset(assetList, updateSupport, operName);
         return AjaxResult.success(message);
     }
-
 
     /**
      * 获取资产详细信息
@@ -116,7 +114,6 @@ public class AssetController extends BaseController {
     public AjaxResult edit(@RequestBody Asset asset) {
         return toAjax(assetService.updateAsset(asset, null));
     }
-
 
     /**
      * SAP采购单同步接口

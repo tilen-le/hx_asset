@@ -154,6 +154,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 
         return assetMapper.updateById(entity);
     }
+
     //资产操作-已退货
     @Override
     public int returnAsset(AssetProcessParam assetProcess) {
@@ -199,6 +200,53 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         return assetMapper.updateById(entity);
     }
 
+    //维修
+    @Override
+    public int maintainAsset(AssetProcessParam assetProcess) {
+        Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        /*
+   资产操作【维修】后，弹框确认后，资产状态变更为【维修】；
+         * */
+        entity.setAssetStatus(AssetStatus.MAINTAIN.getCode());
+        entity.setUpdateTime(DateUtils.getNowDate());
+//        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userCode = "80010712";
+        entity.setUpdateBy(userCode);
+
+        createLog(entity,assetProcess,AssetProcessType.PROCESS_MAINTAIN.getCode());
+
+        return assetMapper.updateById(entity);
+    }
+    //闲置
+    @Override
+    public int unusedAsset(AssetProcessParam assetProcess) {
+        Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        /*
+   资产操作【闲置】后
+     a.弹框提示“是否清空资产保管人和保管部门？”
+         是：资产状态变更为【闲置】，清空字段【资产保管人】，【资产保管部门】，【成本中心】；
+         否：资产状态变更为【闲置】
+         * */
+        entity.setAssetStatus(AssetStatus.MAINTAIN.getCode());
+        entity.setUpdateTime(DateUtils.getNowDate());
+//        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userCode = "80010712";
+        entity.setUpdateBy(userCode);
+        if (assetProcess.getIsClear()){
+            assetProcess.setResponsiblePersonCode("");
+            assetProcess.setResponsiblePersonName("");
+            assetProcess.setResponsiblePersonDept("");
+            assetProcess.setCostCenter("");
+        }else {
+            assetProcess.setResponsiblePersonCode(entity.getResponsiblePersonCode());
+            assetProcess.setResponsiblePersonName(entity.getResponsiblePersonName());
+            assetProcess.setResponsiblePersonDept(entity.getResponsiblePersonDept());
+            assetProcess.setCostCenter(entity.getCostCenter());
+        }
+        createLog(entity,assetProcess,AssetProcessType.PROCESS_UNUSED.getCode());
+
+        return assetMapper.updateById(entity);
+    }
     @Override
     public int backAsset(AssetProcessParam assetProcess) {
         Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
@@ -267,22 +315,6 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         return assetMapper.updateById(entity);
     }
 
-    @Override
-    public int maintainAsset(AssetProcessParam assetProcess) {
-        Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        /*
-   资产操作【维修】后，弹框确认后，资产状态变更为【维修】；
-         * */
-        entity.setAssetStatus(AssetStatus.MAINTAIN.getCode());
-        entity.setUpdateTime(DateUtils.getNowDate());
-//        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
-        String userCode = "80010712";
-        entity.setUpdateBy(userCode);
-
-        createLog(entity,assetProcess,"维修");
-
-        return assetMapper.updateById(entity);
-    }
 
     @Override
     public int maintainedAsset(AssetProcessParam assetProcess) {

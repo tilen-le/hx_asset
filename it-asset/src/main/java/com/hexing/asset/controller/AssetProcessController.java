@@ -162,4 +162,16 @@ public class AssetProcessController extends BaseController {
     public AjaxResult scrapedAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.scrapedAsset(assetProcess));
     }
+
+    /**
+     * 资产闲置
+     */
+    @Log(title = "资产闲置", businessType = BusinessType.UPDATE)
+    @PutMapping("/unusedAsset")
+//    @PreAuthorize("@ss.hasPermi('asset:process:unusedAsset')")
+    @ApiOperation("资产闲置")
+    public AjaxResult unusedAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.unusedAsset(assetProcess));
+    }
+
 }

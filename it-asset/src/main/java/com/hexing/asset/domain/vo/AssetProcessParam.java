@@ -142,4 +142,9 @@ public class AssetProcessParam {
     @ApiModelProperty(value = "供应商名称")
     private String supplierName;
 
+    //闲置 是否清空资产保管人和保管部门，成本中心
+    @ApiModelProperty(value = "是否清空")
+    private Boolean isClear;
+
+
 }

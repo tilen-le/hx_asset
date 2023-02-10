@@ -43,6 +43,15 @@ public interface IAssetProcessService extends IService<AssetProcess> {
      * @return 结果
      */
     int fixationAsset(AssetProcessParam assetProcess);
+
+    /**
+     * 资产操作-维修
+     *
+     *
+     * @return 结果
+     */
+    int maintainAsset(AssetProcessParam assetProcess);
+
     /**
      * 资产归还
      *
@@ -75,13 +84,6 @@ public interface IAssetProcessService extends IService<AssetProcess> {
     int repairAsset(AssetProcessParam assetProcess);
 
     /**
-     * 资产操作-维修
-     *
-     * 
-     * @return 结果
-     */
-    int maintainAsset(AssetProcessParam assetProcess);
-    /**
      * 资产操作-已维修
      *
      * 
@@ -102,6 +104,7 @@ public interface IAssetProcessService extends IService<AssetProcess> {
      * @return 结果
      */
     int scrapedAsset(AssetProcessParam assetProcess);
+    int unusedAsset(AssetProcessParam assetProcess);
 
     /**
      * 查询资产流程

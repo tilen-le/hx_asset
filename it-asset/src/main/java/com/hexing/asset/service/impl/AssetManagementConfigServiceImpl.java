@@ -58,6 +58,28 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
     }
 
     /**
+     * 根据资产类型查询资产配置信息
+     *
+     * @param asset 资产对象
+     * @return
+     */
+    @Override
+    public Asset selectAssetManagementConfigByCategoryInfo(Asset asset) {
+        LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetManagementConfig::getAssetType, asset.getAssetType())
+                .eq(AssetManagementConfig::getAssetCategory, asset.getAssetCategory())
+                .apply("(find_in_set( {0} , asset_sub_category ))", asset.getAssetSubCategory());
+        List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigMapper.selectList(wrapper);
+        if (CollectionUtil.isNotEmpty(assetManagementConfigList)) {
+            AssetManagementConfig config = assetManagementConfigList.get(0);
+            SysUser user = sysUserService.getUserByUserName(config.getAssetManager());
+            SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+            asset.setAssetManager(user.getNickName()).setAssetManagementDept(dept.getDeptName());
+        }
+        return asset;
+    }
+
+    /**
      * 查询资产管理配置列表
      *
      * @param searchDTO 资产管理配置

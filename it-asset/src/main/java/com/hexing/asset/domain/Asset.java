@@ -292,4 +292,19 @@ public class Asset {
     @ApiModelProperty(value = "流水号")
     private Integer serialNum;
 
+    /**
+     * 资产管理员
+     */
+    @ApiModelProperty(value = "资产管理员")
+    @TableField(exist = false)
+    private String assetManager;
+
+    /**
+     * 资产管理部门
+     */
+    @ApiModelProperty(value = "资产管理部门")
+    @TableField(exist = false)
+    private String assetManagementDept;
+
+
 }

@@ -10,10 +10,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
-import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
-import com.hexing.asset.domain.dto.SapPurchaseOrder;
-import com.hexing.asset.domain.dto.SapValueDTO;
-import com.hexing.asset.domain.dto.SimpleOuterDTO;
+import com.hexing.asset.domain.dto.*;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.mapper.AssetMapper;
@@ -34,6 +31,7 @@ import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.aspectj.weaver.ast.Var;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -80,16 +78,23 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Asset::getAssetCode, assetCode);
         Asset asset = assetMapper.selectOne(wrapper);
-        if (ObjectUtil.isEmpty(asset)) {
-            return null;
-        }
-//        Map<String, SysUser> usernameNicknameMap = sysUserService.getUsernameUserObjMap();
-//        Map<String, String> deptIdDeptNameMap = sysDeptService.getDeptIdDeptNameMap();
-//
-//        SysUser user = usernameNicknameMap.get(asset.getResponsiblePersonCode());
-//        asset.setResponsiblePersonName(user.getNickName());
-//        asset.setResponsiblePersonDept(deptIdDeptNameMap.get(user.getDeptId().toString()));
+        if (ObjectUtil.isNotEmpty(asset)) {
+            // 资产管理员
+            asset = assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);
+            // 解析物料号返回资产大中小类
+            JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
+            MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+            asset.setAssetType(dto.getAssetType());
+            asset.setAssetCategory(dto.getAssetCategory());
+            asset.setAssetSubCategory(dto.getAssetSubCategory());
+            // 保管人和保管部门
+            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
+                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+                asset.setResponsiblePersonDept(dept.getDeptName());
+            }
 
+        }
         return asset;
     }
 

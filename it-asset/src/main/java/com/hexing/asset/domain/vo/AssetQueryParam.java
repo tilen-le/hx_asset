@@ -70,4 +70,17 @@ public class AssetQueryParam {
     @ApiModelProperty(value="资产化日期结束时间")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date capitalizationEndDate;
+    /**
+     * 创建时间开始
+     */
+    @ApiModelProperty(value="创建时间开始")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTimeBegin;
+    /**
+     * 创建时间结束
+     */
+    @ApiModelProperty(value="创建时间结束")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTimeEnd;
+
 }

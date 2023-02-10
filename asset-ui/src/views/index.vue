@@ -1,5 +1,5 @@
 <template>
-  <div class="app-container ">
+  <div class="app-container">
     <div>{{ $t('homepage.content') }}</div>
   </div>
 </template>

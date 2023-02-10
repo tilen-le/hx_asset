@@ -17,3 +17,10 @@ export function exportData(query) {
     params: query
   })
 }
+
+export function getInfo(assetCode) {
+  return request({
+    url: '/asset/getInfo/' + assetCode,
+    method: 'get'
+  })
+}

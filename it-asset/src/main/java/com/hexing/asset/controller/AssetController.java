@@ -5,10 +5,8 @@ import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
-import com.hexing.asset.domain.dto.SapPurchaseOrder;
-import com.hexing.asset.domain.dto.SapValueDTO;
-import com.hexing.asset.domain.dto.SimpleOuterDTO;
+import com.hexing.asset.domain.dto.*;
+import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.service.IAssetManagementConfigService;
@@ -55,10 +53,9 @@ public class AssetController extends BaseController {
      * 查询资产列表
      */
     @ApiOperation("查询资产列表")
-    @PreAuthorize("@ss.hasPermi('asset:collection:list')")
+    @PreAuthorize("@ss.hasPermi('asset:asset:list')")
     @GetMapping("/list")
     public TableDataInfo list(AssetQueryParam param) {
-        startPage();
         List<Asset> list = assetService.selectAssetList(param);
         return getDataTable(list);
     }
@@ -91,7 +88,6 @@ public class AssetController extends BaseController {
         return AjaxResult.success(message);
     }
 
-
     /**
      * 获取资产详细信息
      */
@@ -116,7 +112,6 @@ public class AssetController extends BaseController {
     public AjaxResult edit(@RequestBody Asset asset) {
         return toAjax(assetService.updateAsset(asset, null));
     }
-
 
     /**
      * SAP采购单同步接口
@@ -149,6 +144,36 @@ public class AssetController extends BaseController {
     public AjaxResult sapSyncValue(@RequestBody SimpleOuterDTO<List<SapValueDTO>> param) {
         List<SapValueDTO> sapValueList = param.getData();
         return AjaxResult.success(assetService.sapSyncValue(sapValueList));
+    }
+
+    /**
+     * 资产转固
+     */
+    @ApiOperation("资产转固")
+    @PreAuthorize("@ss.hasPermi('asset:asset:fixAsset')")
+    @Log(title = "资产转固", businessType = BusinessType.OTHER)
+    @PostMapping("/fixAsset")
+    public AjaxResult fixAsset(AssetFixVO assetFixVO) {
+        SapAssetFixDTO sapAssetFixDTO = new SapAssetFixDTO();
+        Asset asset = assetService.selectAssetByAssetCode(assetFixVO.getAssetCode());
+        if (ObjectUtil.isNotEmpty(asset)) {
+            // 推送sap
+            sapAssetFixDTO.setBUKRS(asset.getCompany())
+                    .setANLKL(assetFixVO.getCategory())
+                    .setTXT50(asset.getAssetName())
+                    .setTXA50(asset.getStandard())
+                    .setANLHTXT(assetFixVO.getBelong())
+                    .setSERNR(asset.getMaterialNum())
+                    .setINVNR(asset.getAssetCode())
+                    .setMENGE(1.0)
+                    .setMEINS("")
+                    .setINVZU(asset.getCurrentLocation());
+
+            // 更新资产的SAP资产编码字段
+
+        }
+
+        return AjaxResult.success("资产转固成功");
     }
 
 }

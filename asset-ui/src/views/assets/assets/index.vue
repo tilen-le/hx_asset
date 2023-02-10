@@ -95,7 +95,7 @@
       </el-col>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" @selection-change="handleSelectionChange" tooltip-effect="light">
+    <el-table v-loading="loading" :data="assetList" tooltip-effect="light">
     <!--  <el-table-column type="selection" width="55" align="center" />-->
       <el-table-column label="序号" type="index" align="center" />
       <el-table-column label="资产状态" align="center" prop="assetStatus">
@@ -105,7 +105,7 @@
       </el-table-column>
       <el-table-column label="资产编码" align="center" prop="assetCode">
         <template slot-scope="scope">
-          <el-link :underline="false" type="primary" @click="getDetail(scope.row)">{{ scope.row.assetCode }}</el-link>
+          <el-link :underline="false" type="primary" @click="goDetail(scope.row)">{{ scope.row.assetCode }}</el-link>
         </template>
       </el-table-column>
       <el-table-column label="资产大类" align="center" prop="assetType" />
@@ -114,8 +114,7 @@
       <el-table-column label="资产名称" align="center" prop="assetName" />
       <el-table-column label="规格型号" align="center" prop="standard" />
       <el-table-column label="资产保管人" align="center" prop="responsiblePersonName" />
-<!--      responsiblePersonName-->
-<!--      responsible_person_dept-->
+      <el-table-column label="资产保管部门" align="center" prop="responsiblePersonDept" />
       <el-table-column label="所在位置" align="center" prop="currentLocation" />
       <el-table-column label="转固状态" align="center" prop="fixed">
         <template slot-scope="scope">
@@ -133,8 +132,8 @@
           <el-button
             size="mini"
             type="text"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['assets:manager:edit']"
+            @click="goDetail(scope.row)"
+            v-hasPermi="['asset:asset:export']"
           >查看</el-button>
         </template>
       </el-table-column>
@@ -322,6 +321,9 @@
       childTree().then(response => {
         this.deptOptions = response.data
       })
+    },
+    goDetail(row) {
+      this.$router.push('/asset/assetInfo/' + row.assetCode)
     },
   }
 };

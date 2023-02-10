@@ -249,6 +249,13 @@ public class Asset {
     private String proofOfMaterial;
 
     /**
+     * 单位
+     */
+    @ApiModelProperty(value = "单位")
+    @Excel(name = "单位")
+    private String unit;
+
+    /**
      * 备注
      */
     @ApiModelProperty(value = "备注")

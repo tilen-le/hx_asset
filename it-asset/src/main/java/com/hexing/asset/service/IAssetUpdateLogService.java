@@ -2,6 +2,7 @@ package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 
 /**
@@ -16,8 +17,8 @@ public interface IAssetUpdateLogService extends IService<AssetUpdateLog>
      * 创建资产信息更新日志
      *
      * @param asset
-     * @param processId
+     * @param process
      * @return
      */
-    boolean saveLog(Asset asset, String processId);
+    int saveLog(Asset asset, AssetProcess process);
 }

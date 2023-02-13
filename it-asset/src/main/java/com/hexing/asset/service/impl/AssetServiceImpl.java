@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
+import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.dto.*;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
@@ -63,7 +64,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private SysUserServiceImpl sysUserService;
     @Autowired
     private SysDeptServiceImpl sysDeptService;
-    //    @Autowired
+    @Autowired
     private IAssetUpdateLogService assetUpdateLogService;
     @Autowired
     private IAssetManagementConfigService assetManagementConfigService;
@@ -311,11 +312,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 结果
      */
     @Override
-    public int updateAsset(Asset asset, String processId) {
+    public int updateAsset(Asset asset, AssetProcess process) {
         // 资产更新日志记录
-        Asset entity = assetMapper.selectOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetId, asset.getAssetId()));
-        assetUpdateLogService.saveLog(entity, processId);
-
+        assetUpdateLogService.saveLog(asset, process);
         // 更新资产信息
         asset.setUpdateTime(DateUtils.getNowDate());
         int changed = assetMapper.updateById(asset);

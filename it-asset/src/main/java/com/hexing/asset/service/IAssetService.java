@@ -2,6 +2,7 @@ package com.hexing.asset.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
 import com.hexing.asset.domain.dto.SapValueDTO;
 import com.hexing.asset.domain.dto.SimpleOuterDTO;
@@ -65,7 +66,7 @@ public interface IAssetService extends IService<Asset> {
      * @param asset 资产表
      * @return 结果
      */
-    int updateAsset(Asset asset, String processId);
+    int updateAsset(Asset asset, AssetProcess process);
 
     /**
      * 根据平台资产编号删除资产信息

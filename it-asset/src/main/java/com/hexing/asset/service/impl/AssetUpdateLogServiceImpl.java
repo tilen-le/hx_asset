@@ -2,10 +2,12 @@ package com.hexing.asset.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.utils.DateUtils;
+import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,24 +29,26 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
      * 创建资产信息更新日志
      *
      * @param asset 资产旧信息
-     * @param processId 主流程id
+     * @param process 主流程
      * @return
      */
     @Override
-    public boolean saveLog(Asset asset, String processId) {
+    public int saveLog(Asset asset, AssetProcess process) {
         AssetUpdateLog log = new AssetUpdateLog();
         BeanUtils.copyProperties(asset, log);
-
-        if (StringUtils.isNotBlank(processId)) {
-            log.setProcessId(processId);
-        } else {
-            // 若processId为空，则说明是在网站上修改了资产信息
-//            log.setUpdateBy(SecurityUtils.getUsername());
-            log.setUpdateBy("test");
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userName = SecurityUtils.getLoginUser().getUser().getNickName();
+//        String userCode = "80010712";
+//        String userName = "PFC";
+        if (StringUtils.isNotBlank(process.getId().toString())) {
+            log.setProcessId(process.getId().toString());
+            log.setProcessType(process.getProcessType());
         }
 
-        log.setUpdateTime(DateUtils.getNowDate());
-        return this.save(log);
+        log.setCreateBy(userCode);
+        log.setCreateTime(DateUtils.getNowDate());
+
+        return  assetUpdateLogMapper.insert(log);
     }
 
 }

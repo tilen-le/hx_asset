@@ -167,7 +167,7 @@ public class AssetController extends BaseController {
             assetService.fixAsset(vo);
         } catch (Exception e) {
             e.printStackTrace();
-            return AjaxResult.error("资产转固失败，请联系管理员排查原因");
+            return AjaxResult.error("资产转固失败，请联系管理员排查原因\n错误信息：" + e.getMessage());
         }
         return AjaxResult.success("资产转固成功");
     }
@@ -184,7 +184,7 @@ public class AssetController extends BaseController {
             assetService.transferAsset(vo);
         } catch (Exception e) {
             e.printStackTrace();
-            return AjaxResult.error("资产转移失败，请联系管理员排查原因");
+            return AjaxResult.error("资产转移失败，请联系管理员排查原因\n错误信息：" + e.getMessage());
         }
         return AjaxResult.success("资产转移失败");
     }

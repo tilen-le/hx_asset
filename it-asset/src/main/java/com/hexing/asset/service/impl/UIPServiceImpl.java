@@ -2,6 +2,7 @@ package com.hexing.asset.service.impl;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.hexing.asset.domain.dto.SapResp;
 import com.hexing.asset.enums.UIPCodeEnum;
 import com.hexing.asset.service.IUIPService;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
 
 @Service
 @Slf4j

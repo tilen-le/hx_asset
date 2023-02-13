@@ -137,6 +137,8 @@ public interface IAssetProcessService extends IService<AssetProcess> {
 
     <T> T convertProcess(AssetProcess process, T domain);
 
+    void saveOne(AssetProcess process);
+
     void saveBatchProcess(List<? extends AssetProcess> processList);
 
     void saveProcess(AssetProcessParam processParam, String type);

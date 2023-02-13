@@ -12,17 +12,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.dto.*;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
 import com.hexing.asset.domain.vo.AssetTransferVO;
+import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.UIPCodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
-import com.hexing.asset.service.IAssetManagementConfigService;
-import com.hexing.asset.service.IAssetService;
-import com.hexing.asset.service.IAssetUpdateLogService;
-import com.hexing.asset.service.IUIPService;
+import com.hexing.asset.service.*;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.domain.AjaxResult;
@@ -68,6 +67,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private IAssetUpdateLogService assetUpdateLogService;
     @Autowired
     private IAssetManagementConfigService assetManagementConfigService;
+    @Autowired
+    private IAssetProcessService assetProcessService;
     @Autowired
     private IUIPService uipService;
 
@@ -434,7 +435,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                             .setAssetType(order.getMaterialNumber().substring(0, 1))
                             .setAssetCategory(order.getMaterialNumber().substring(1, 3))
                             .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
-                            .setFixed("0");
+                            .setFixed("0")
+                            .setUnit(order.getUnit());
                     assetList.add(asset);
                     nextNum++;
                 }
@@ -506,9 +508,19 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             JSONArray data = new JSONArray();
             data.add(sapAssetFixDTO);
             String responseBody = uipService.sendToSAP(data, UIPCodeEnum.FIX_ASSET_INTERFACE.getCode(), "资产转固");
-            JSONObject responseBodyJSON = JSONObject.parseObject(responseBody);
-            System.out.println(responseBodyJSON);
-            // 更新资产的SAP资产编码字段
+
+            JSONObject responseBodyJO = JSONObject.parseObject(responseBody);
+            String sapResponseCode = responseBodyJO.getString("CODE");
+            if ("E".equals(sapResponseCode)) {
+                throw new Exception("SAP报错：" + responseBodyJO);
+            } else if ("S".equals(sapResponseCode)) {
+                // 更新资产的SAP资产编码字段
+                JSONObject dataJO = responseBodyJO.getJSONObject("DATA");
+                String sapAssetCode = dataJO.getString("ANLN1");
+                asset.setAssetSapCode(sapAssetCode);
+                this.updateById(asset);
+            }
+
         }
     }
 
@@ -516,11 +528,37 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * 资产转移
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void transferAsset(AssetTransferVO vo) throws Exception {
+        Asset asset = this.selectAssetByAssetCode(vo.getAssetCode());
+        if (ObjectUtil.isEmpty(asset)) {
+            throw new Exception("无该资产信息");
+        }
         // 推送SAP
 
-        // 流程日志记录
+        // 创建转移流程记录
+        AssetTransferProcessDTO process = new AssetTransferProcessDTO();
+        process.setProcessType(AssetProcessType.PROCESS_TRANSFORM.getCode());
+        process.setAssetCode(vo.getAssetCode());
+        process.setCreateBy(SecurityUtils.getLoginUser().getUser().getUserName());
+        process.setCreateTime(DateUtils.getNowDate());
+        process.setRemark(asset.getCompany() + "转移资产到" + vo.getReceiveCompany());
+        process.setSapAssetCode(asset.getAssetSapCode());
 
+        process.setOldCompany(asset.getCompany());
+        process.setOldEmployee(asset.getResponsiblePersonCode());
+        process.setOldCostCenter(asset.getCostCenter());
+        process.setOldEmployeePosition(""); // ?
+        process.setOldLocation(asset.getCurrentLocation());
+
+        process.setNewCompany(vo.getReceiveCompany());
+        process.setNewEmployee(vo.getReceiveEmployee());
+        process.setNewCostCenter(vo.getCostCenter());
+        process.setNewEmployeePosition(vo.getReceiverPosition());
+        process.setNewLocation(vo.getNewLocation()); // ?
+
+        //TODO set variables
+        assetProcessService.saveOne(process);
     }
 
 }

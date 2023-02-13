@@ -1,6 +1,7 @@
 package com.hexing.asset.service;
 
 import com.alibaba.fastjson.JSONArray;
+import com.hexing.asset.domain.dto.SapResp;
 
 public interface IUIPService {
 

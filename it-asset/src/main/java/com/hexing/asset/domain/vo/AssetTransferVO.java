@@ -18,6 +18,11 @@ import lombok.experimental.Accessors;
 @ApiModel(description = "资产转移VO")
 public class AssetTransferVO {
     /**
+     * 资产编码
+     */
+    @ApiModelProperty(value = "资产编码")
+    private String assetCode;
+    /**
      * 接收公司
      */
     @ApiModelProperty(value = "接收公司")
@@ -45,6 +50,6 @@ public class AssetTransferVO {
     /**
      * 所在位置
      */
-    @ApiModelProperty(value = "所在位置")
-    private String currentLocation;
+    @ApiModelProperty(value = "所在位置（新位置）")
+    private String newLocation;
 }

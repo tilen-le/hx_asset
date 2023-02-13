@@ -70,7 +70,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         //流程子表
         processService.saveProcess(processParam, type);
 
-       return assetService.updateAsset(entity,process);
+        return assetService.updateAsset(entity, process);
     }
 
     //资产操作-派发
@@ -497,6 +497,32 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         process.setVariableList(null);
         BeanUtil.copyProperties(process, domain);
         return domain;
+    }
+
+    @Override
+    public void saveOne(AssetProcess process) {
+        List<AssetProcessField> processFields = commonService.getProcessFields();
+        if (StringUtils.isEmpty(process.getProcessType())) {
+            return;
+        }
+        List<AssetProcessField> fieldList = processFields.stream()
+                .filter(assetProcessField -> assetProcessField.getProcessType().equals(process.getProcessType()))
+                .collect(Collectors.toList());
+
+        List<AssetProcessVariable> varList = new ArrayList<>();
+        for (AssetProcessField field : fieldList) {
+            AssetProcessVariable var = new AssetProcessVariable();
+            var.setProcessId(process.getId())
+                    .setFieldId(field.getId());
+            Object fieldValue = BeanTool.getFieldValue(process, field.getFieldKey());
+            if (ObjectUtil.isNotEmpty(fieldValue)) {
+                var.setFieldValue(String.valueOf(fieldValue));
+            } else {
+                var.setFieldValue(null);
+            }
+            varList.add(var);
+        }
+        variableService.saveBatch(varList);
     }
 
     @Override

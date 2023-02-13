@@ -6,6 +6,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.*;
+import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetProcessParam;
 import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
@@ -70,8 +71,24 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         String wokeCode = processParam.getWokeCode();
         //流程子表
         processService.saveProcess(processParam, type);
-
-        return assetService.updateAsset(entity, process);
+        int i = assetService.updateAsset(entity, process);
+        if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())){
+            AssetFixVO vo =new AssetFixVO();
+            vo.setAssetCode(entity.getAssetCode());
+            vo.setCategory(processParam.getAssetType());
+            vo.setCostCenterCode(processParam.getCostCenter());
+            vo.setExpirationDate(processParam.getMaturityTime());
+            vo.setResponsibilityCostCenterCode(processParam.getDutyCostCenter());
+            vo.setBelong(processParam.getProject());
+            vo.setProvider(processParam.getSupplierName());
+            vo.setUsage(processParam.getComment());
+            try{
+                assetService.fixAsset(vo);
+            }catch (Exception e){
+                throw new ServiceException("推送sap异常");
+            }
+        }
+        return i;
     }
 
     //资产操作-派发
@@ -160,6 +177,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 
     //资产操作-已退货
     @Override
+    @Transactional
     public int returnAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*

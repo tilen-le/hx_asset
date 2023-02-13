@@ -5,7 +5,9 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
 import com.hexing.asset.domain.dto.SapValueDTO;
 import com.hexing.asset.domain.dto.SimpleOuterDTO;
+import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.domain.vo.AssetTransferVO;
 import com.hexing.common.core.domain.Result;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -97,4 +99,14 @@ public interface IAssetService extends IService<Asset> {
      * SAP价值传输接口
      */
     List<SapValueDTO>  sapSyncValue(List<SapValueDTO> sapValueList);
+
+    /**
+     * 资产转固
+     */
+    void fixAsset(AssetFixVO vo) throws Exception;
+
+    /**
+     * 资产转移
+     */
+    void  transferAsset(AssetTransferVO vo) throws Exception;
 }

@@ -11,8 +11,10 @@ import com.hexing.asset.domain.dto.SapValueDTO;
 import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.domain.vo.AssetTransferVO;
 import com.hexing.asset.enums.UIPCodeEnum;
 import com.hexing.asset.service.IAssetService;
+import com.hexing.asset.service.IUIPService;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
@@ -23,6 +25,7 @@ import com.hexing.common.enums.BusinessType;
 import com.hexing.common.utils.ServletUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.framework.web.service.TokenService;
+import com.taobao.api.internal.util.json.ExceptionErrorListener;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,13 +52,11 @@ import java.util.List;
 @RequestMapping("/asset")
 public class AssetController extends BaseController {
 
-    @Value("${uip.uipTransfer}")
-    private String uipTransfer;
-
     @Autowired
     private IAssetService assetService;
     @Autowired
     private TokenService tokenService;
+
 
     /**
      * 查询资产列表
@@ -161,53 +162,32 @@ public class AssetController extends BaseController {
     @PreAuthorize("@ss.hasPermi('asset:asset:fixAsset')")
     @Log(title = "资产转固", businessType = BusinessType.OTHER)
     @PostMapping("/fixAsset")
-    public AjaxResult fixAsset(AssetFixVO assetFixVO) {
-        SapAssetFixDTO sapAssetFixDTO = new SapAssetFixDTO();
-        Asset asset = assetService.selectAssetByAssetCode(assetFixVO.getAssetCode());
-        if (ObjectUtil.isNotEmpty(asset)) {
-            // 推送sap
-            sapAssetFixDTO.setBUKRS(asset.getCompany())
-                    .setANLKL(assetFixVO.getCategory())
-                    .setTXT50(asset.getAssetName())
-                    .setTXA50(asset.getStandard())
-                    .setANLHTXT(assetFixVO.getBelong())
-                    .setSERNR(asset.getMaterialNum())
-                    .setINVNR(asset.getAssetCode())
-                    .setMENGE(1.0)
-                    .setMEINS(asset.getUnit())
-                    .setINVZU(asset.getCurrentLocation())
-                    .setZYONGTU(assetFixVO.getUsage())
-                    .setZZANLU003("")
-                    .setZZANLU004(asset.getResponsiblePersonCode())
-                    .setKOSTL(assetFixVO.getCostCenterCode())
-                    .setKOSTLV(assetFixVO.getResponsibilityCostCenterCode())
-                    .setRAUMN(asset.getResponsiblePersonName())
-                    .setLIFNR(asset.getProvider())
-                    .setNAME1(asset.getProviderName())
-                    .setNAME2(assetFixVO.getProvider());
-
-
-            JSONArray data = new JSONArray();
-            data.add(sapAssetFixDTO);
-            MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-            params.add("INBOUND", data);
-            params.add("interfaceCode", UIPCodeEnum.FIX_ASSET_INTERFACE.getCode());
-            logger.info("====资产转固，推送SAP：" + params);
-
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
-
-            String body = responseEntity.getBody();
-            JSONObject responseBody = JSONObject.parseObject(body);
-            logger.info("====资产转固，SAP响应：" + responseBody);
-
-            // 更新资产的SAP资产编码字段
-
+    public AjaxResult fixAsset(AssetFixVO vo) {
+        try {
+            assetService.fixAsset(vo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error("资产转固失败，请联系管理员排查原因");
         }
-
         return AjaxResult.success("资产转固成功");
     }
 
+    /**
+     * 资产转移
+     */
+    @ApiOperation("资产转移")
+    @PreAuthorize("@ss.hasPermi('asset:asset:transferAsset')")
+    @Log(title = "资产转移", businessType = BusinessType.OTHER)
+    @PostMapping("/transferAsset")
+    public AjaxResult transferAsset(AssetTransferVO vo) {
+        try {
+            assetService.transferAsset(vo);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return AjaxResult.error("资产转移失败，请联系管理员排查原因");
+        }
+        return AjaxResult.success("资产转移失败");
+    }
 
 
 }

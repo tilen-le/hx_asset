@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum UIPCodeEnum {
 
-    FIX_ASSET_INTERFACE("","资产转固"),
+    FIX_ASSET_INTERFACE("ZFMFICOZC006","资产平台转固信息同步SAP"),
     ;
 
     private final String code;

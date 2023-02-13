@@ -2,6 +2,7 @@ package com.hexing.asset.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.spring.FastjsonSockJsMessageCodec;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -11,12 +12,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.*;
+import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.domain.vo.AssetTransferVO;
 import com.hexing.asset.enums.AssetStatus;
+import com.hexing.asset.enums.UIPCodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.service.IAssetUpdateLogService;
+import com.hexing.asset.service.IUIPService;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.domain.AjaxResult;
@@ -62,7 +67,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private IAssetUpdateLogService assetUpdateLogService;
     @Autowired
     private IAssetManagementConfigService assetManagementConfigService;
-
+    @Autowired
+    private IUIPService uipService;
 
     @Value("${uip.uipTransfer}")
     private String uipTransfer;
@@ -468,4 +474,54 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
         return sapValueList;
     }
+
+    /**
+     * 资产转固
+     */
+    @Override
+    public void fixAsset(AssetFixVO vo) throws Exception {
+        SapAssetFixDTO sapAssetFixDTO = new SapAssetFixDTO();
+        Asset asset = this.selectAssetByAssetCode(vo.getAssetCode());
+        if (ObjectUtil.isNotEmpty(asset)) {
+            // 推送SAP
+            sapAssetFixDTO.setBUKRS(asset.getCompany())
+                    .setANLKL(vo.getCategory())
+                    .setTXT50(asset.getAssetName())
+                    .setTXA50(asset.getStandard())
+                    .setANLHTXT(vo.getBelong())
+                    .setSERNR(asset.getMaterialNum())
+                    .setINVNR(asset.getAssetCode())
+                    .setMENGE(1.0)
+                    .setMEINS(asset.getUnit())
+                    .setINVZU(asset.getCurrentLocation())
+                    .setZYONGTU(vo.getUsage())
+                    .setZZANLU003("")
+                    .setZZANLU004(asset.getResponsiblePersonCode())
+                    .setKOSTL(vo.getCostCenterCode())
+                    .setKOSTLV(vo.getResponsibilityCostCenterCode())
+                    .setRAUMN(asset.getResponsiblePersonName())
+                    .setLIFNR(asset.getProvider())
+                    .setNAME1(asset.getProviderName())
+                    .setNAME2(vo.getProvider());
+
+            JSONArray data = new JSONArray();
+            data.add(sapAssetFixDTO);
+            String responseBody = uipService.sendToSAP(data, UIPCodeEnum.FIX_ASSET_INTERFACE.getCode(), "资产转固");
+            JSONObject responseBodyJSON = JSONObject.parseObject(responseBody);
+            System.out.println(responseBodyJSON);
+            // 更新资产的SAP资产编码字段
+        }
+    }
+
+    /**
+     * 资产转移
+     */
+    @Override
+    public void transferAsset(AssetTransferVO vo) throws Exception {
+        // 推送SAP
+
+        // 流程日志记录
+
+    }
+
 }

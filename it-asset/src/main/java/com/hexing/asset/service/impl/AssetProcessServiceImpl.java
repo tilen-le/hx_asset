@@ -233,6 +233,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             assetProcess.setResponsiblePersonName("");
             assetProcess.setResponsiblePersonDept("");
             assetProcess.setCostCenter("");
+            entity.setResponsiblePersonCode("");
+            entity.setResponsiblePersonName("");
+            entity.setResponsiblePersonDept("");
+            entity.setCostCenter("");
         } else {
             assetProcess.setResponsiblePersonCode(entity.getResponsiblePersonCode());
             assetProcess.setResponsiblePersonName(entity.getResponsiblePersonName());
@@ -304,13 +308,13 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 页面样式参考图1-4；
          * */
         if (assetProcess.getAssetStatus().equals(AssetStatus.USING.getCode())) {
-            if (!assetProcess.getFixed()) {
+            if ("0".equals(entity.getFixed())) {
                 throw new ServiceException("该资产未转固");
             }
             entity.setAssetStatus(AssetStatus.USING.getCode());
         }
         if (assetProcess.getAssetStatus().equals(AssetStatus.TRIAL.getCode())) {
-            if (assetProcess.getFixed()) {
+            if ("1".equals(entity.getFixed())) {
                 throw new ServiceException("该资产已转固");
             }
             entity.setAssetStatus(AssetStatus.TRIAL.getCode());

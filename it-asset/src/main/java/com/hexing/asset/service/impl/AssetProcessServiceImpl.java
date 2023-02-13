@@ -16,6 +16,7 @@ import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.PageUtil;
+import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.bean.BeanTool;
 import com.hexing.system.service.impl.SysUserServiceImpl;
@@ -522,8 +523,8 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
     @Override
     public void saveBatchProcess(List<? extends AssetProcess> processList) {
         List<AssetProcessField> processFields = commonService.getProcessFields();
-        List<AssetProcessField> fieldList = processFields.stream().filter(assetProcessField ->
-                assetProcessField.getProcessType().equals(AssetProcessType.COUNTING_PROCESS.getCode()))
+        List<AssetProcessField> fieldList = processFields.stream()
+                .filter(assetProcessField -> assetProcessField.getProcessType().equals(AssetProcessType.COUNTING_PROCESS.getCode()))
                 .collect(Collectors.toList());
 
         List<AssetProcessVariable> varList = new ArrayList<>();
@@ -547,15 +548,15 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 
     @Override
     public void saveProcess(AssetProcessParam process, String type) {
-        //        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
-//        String userName = SecurityUtils.getLoginUser().getUser().getNickName();
-        String userCode = "80010712";
-        String userName = "PFC";
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userName = SecurityUtils.getLoginUser().getUser().getNickName();
+//        String userCode = "80010712";
+//        String userName = "PFC";
         process.setCreateTime(DateUtils.getNowDate());
         process.setCreateBy(userCode);
         List<AssetProcessField> processFields = commonService.getProcessFields();
-        List<AssetProcessField> fieldList = processFields.stream().filter(assetProcessField ->
-                assetProcessField.getProcessType().equals(type))
+        List<AssetProcessField> fieldList = processFields.stream()
+                .filter(assetProcessField -> assetProcessField.getProcessType().equals(type))
                 .collect(Collectors.toList());
 
         List<AssetProcessVariable> varList = new ArrayList<>();

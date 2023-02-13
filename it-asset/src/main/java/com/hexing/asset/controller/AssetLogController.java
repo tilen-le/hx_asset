@@ -1,8 +1,13 @@
 package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
-import com.hexing.asset.domain.AssetCustodyLog;
-import com.hexing.asset.service.IAssetCustodyLogService;
+import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
+import com.hexing.asset.domain.AssetManagementConfig;
+import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.domain.AssetUpdateLog;
+import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.service.IAssetProcessService;
+import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.page.TableDataInfo;
@@ -26,62 +31,63 @@ import java.util.List;
 public class AssetLogController extends BaseController
 {
     @Autowired
-    private IAssetCustodyLogService custodyLogService;
+    private IAssetUpdateLogService updateLogService;
+
 
     /**
-     * 资产保管记录列表
+     * 查询保管记录
      */
     @GetMapping("/custodyLogList")
-    @PreAuthorize("@ss.hasPermi('manage:config:custodyLogList')")
-    @ApiOperation("资产保管记录列表")
-    public TableDataInfo custodyLogList(AssetCustodyLog searchDTO)
+    @PreAuthorize("@ss.hasPermi('asset:log:custodyLogList')")
+    @ApiOperation("查询保管记录")
+    @ApiOperationSupport(order = 14)
+    public TableDataInfo custodyLogList(AssetProcessParam assetProcess)
     {
         startPage();
-        List<AssetCustodyLog> list = custodyLogService.selectAssetCustodyLogList(searchDTO);
-
+        List<AssetUpdateLog> list = updateLogService.custodyLogList(assetProcess);
         return getDataTable(list);
     }
 
     /**
-     * 资产保管记录详情
+     * 查询工单记录
      */
-    @GetMapping(value = "/{id}")
-    @ApiOperation("资产保管记录详情")
-    public AjaxResult getInfo(@PathVariable("id") Long id)
+    @GetMapping("/workLogList")
+    @PreAuthorize("@ss.hasPermi('asset:log:workLogList')")
+    @ApiOperation("查询工单记录")
+    @ApiOperationSupport(order = 14)
+    public TableDataInfo workLogList(AssetProcessParam assetProcess)
     {
-        AssetCustodyLog custodyLog = custodyLogService.selectAssetCustodyLogById(id);
-        if (ObjectUtil.isEmpty(custodyLog)) {
-            return AjaxResult.error("资产保管记录不存在");
-        }
-        return AjaxResult.success(custodyLog);
+        startPage();
+        List<AssetProcess> list = updateLogService.workLogList(assetProcess);
+        return getDataTable(list);
     }
 
-//    /**
-//     * 资产工单记录列表
-//     */
-//    @GetMapping("/workLogList")
-//    @PreAuthorize("@ss.hasPermi('manage:config:custodyLogList')")
-//    @ApiOperation("资产工单记录列表")
-//    public TableDataInfo workLogList(AssetWorkLog searchDTO)
-//    {
-//        startPage();
-//        List<AssetWorkLog> list = workLogService.selectAssetWorkLogList(searchDTO);
-//
-//        return getDataTable(list);
-//    }
-//
-//    /**
-//     * 资产操作记录列表
-//     */
-//    @GetMapping("/operationLogList")
-//    @PreAuthorize("@ss.hasPermi('manage:config:operationLogList')")
-//    @ApiOperation("资产操作记录列表")
-//    public TableDataInfo operationLogList(AssetOperationLog searchDTO)
-//    {
-//        startPage();
-//        List<AssetOperationLog> list = operationLogService.selectAssetOperationLogList(searchDTO);
-//
-//        return getDataTable(list);
-//    }
+    /**
+     * 查询操作记录
+     */
+    @GetMapping("/operationLogList")
+    @PreAuthorize("@ss.hasPermi('asset:log:custodyLogList')")
+    @ApiOperation("查询操作记录")
+    @ApiOperationSupport(order = 14)
+    public TableDataInfo operationLogList(AssetProcessParam assetProcess)
+    {
+        startPage();
+        List<AssetUpdateLog> list = updateLogService.operationLogList(assetProcess);
+        return getDataTable(list);
+    }
+
+    /**
+     * 获取资产操作记录详细信息
+     */
+    @GetMapping(value = "/{id}")
+    @ApiOperation("获取资产操作记录详细信息")
+    public AjaxResult getInfo(@PathVariable("id") Long id)
+    {
+        AssetUpdateLog updateLog = updateLogService.getOperationLogById(id);
+        if (ObjectUtil.isEmpty(updateLog)) {
+            return AjaxResult.error("该资产操作记录不存在");
+        }
+        return AjaxResult.success(updateLog);
+    }
 
 }

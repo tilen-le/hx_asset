@@ -37,11 +37,6 @@ public class AssetProcessParam {
     @ApiModelProperty(value = "资产名称")
     private String assetName;
     /**
-     * 规格型号
-     */
-    @ApiModelProperty(value = "规格型号")
-    private String standard;
-    /**
      * 领用人工号
      */
     @ApiModelProperty(value = "保管人工号")
@@ -66,12 +61,6 @@ public class AssetProcessParam {
      */
     @ApiModelProperty(value = "存放地点")
     private String currentLocation;
-    /**
-     * 出厂编码
-     */
-    @ApiModelProperty(value = "出厂编码")
-    private String factoryNo;
-
     /**
      * 成本中心
      */
@@ -98,12 +87,6 @@ public class AssetProcessParam {
     @ApiModelProperty(value = "采购单号")
     private String purchaseOrderNo;
     /**
-     * 转固验收日期
-     */
-    @ApiModelProperty(value = "转固验收日期")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date fixedAcceptanceDate;
-    /**
      * 工单号
      */
     @ApiModelProperty(value = "工单号")
@@ -112,16 +95,33 @@ public class AssetProcessParam {
     //转固（用途） 派发（领用说明）
     @ApiModelProperty(value = "转固（用途）;派发（领用说明）")
     private String comment;
-
+    /**
+     * 创建人
+     */
+    @ApiModelProperty(value = "创建人")
     private String createBy;
-
-
     /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date createTime;
     //资产派发字段 领用人 领用部门 领用人岗位  所在位置 资产名称 规格型号 资产出厂编号 转固验收日期 领用说明
+    /**
+     * 转固验收日期
+     */
+    @ApiModelProperty(value = "转固验收日期")
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date fixedAcceptanceDate;
+    /**
+     * 出厂编码
+     */
+    @ApiModelProperty(value = "出厂编码")
+    private String factoryNo;
+    /**
+     * 规格型号
+     */
+    @ApiModelProperty(value = "规格型号")
+    private String standard;
 
     //转移字段 接收公司 接收人 接收人部门 接收人岗位 成本中心 所在位置
 

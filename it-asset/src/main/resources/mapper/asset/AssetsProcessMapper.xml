@@ -2,9 +2,9 @@
 <!DOCTYPE mapper
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hexing.assetNew.mapper.AssetsProcessMapper">
+<mapper namespace="com.hexing.asset.mapper.AssetProcessMapper">
 
-    <resultMap type="com.hexing.assetNew.domain.AssetsProcess" id="AssetsProcessResult">
+    <resultMap type="com.hexing.asset.domain.AssetProcess" id="AssetsProcessResult">
         <result property="id" column="id"/>
         <result property="processType" column="process_type"/>
         <result property="assetCode" column="asset_code"/>

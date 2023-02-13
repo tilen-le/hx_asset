@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.hexing.assetNew.mapper.AssetProcessVariableMapper">
+<mapper namespace="com.hexing.asset.mapper.AssetProcessVariableMapper">
     <select id="selectVariableListByProcessId" resultType="AssetProcessVariable">
         SELECT v.id, v.process_id, v.field_id, v.field_value, f.field_key, f.field_label
         FROM asset_process_variable v

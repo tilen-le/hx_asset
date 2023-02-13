@@ -52,13 +52,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Autowired
     private ICommonService commonService;
 
-    private int updateAsset(Asset entity, AssetProcessParam processParam, String type) {
+    private int updateAssetAndCreateLog(Asset entity, AssetProcessParam processParam, String type) {
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
         String userName = SecurityUtils.getLoginUser().getUser().getNickName();
 //        String userCode = "80010712";
 //        String userName = "PFC";
         Date nowDate = DateUtils.getNowDate();
-        //操作日志
         //总流程
         AssetProcess process = new AssetProcess();
         process.setProcessType(type);
@@ -67,6 +66,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         process.setCreateTime(nowDate);
         processService.save(process);
         processParam.setId(process.getId());
+        //工单号
+        String wokeCode = processParam.getWokeCode();
         //流程子表
         processService.saveProcess(processParam, type);
 
@@ -118,11 +119,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_RECEIVE.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_RECEIVE.getCode());
     }
 
     //资产操作-转移
     @Override
+    @Transactional
     public int transferAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         if (StringUtils.isBlank(assetProcess.getCompany())) {
@@ -153,7 +155,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_TRANSFORM.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_TRANSFORM.getCode());
     }
 
     //资产操作-已退货
@@ -169,11 +171,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.RETURN.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.RETURNED.getCode());
     }
 
     //转固
     @Override
+    @Transactional
     public int fixationAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         if (StringUtils.isBlank(assetProcess.getAssetType())) {
@@ -194,11 +197,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_FIXED.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_FIXED.getCode());
     }
 
     //维修
     @Override
+    @Transactional
     public int maintainAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -210,11 +214,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_MAINTAIN.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_MAINTAIN.getCode());
     }
 
     //闲置
     @Override
+    @Transactional
     public int unusedAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -233,6 +238,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             assetProcess.setResponsiblePersonName("");
             assetProcess.setResponsiblePersonDept("");
             assetProcess.setCostCenter("");
+            entity.setResponsiblePersonCode("");
+            entity.setResponsiblePersonName("");
+            entity.setResponsiblePersonDept("");
+            entity.setCostCenter("");
         } else {
             assetProcess.setResponsiblePersonCode(entity.getResponsiblePersonCode());
             assetProcess.setResponsiblePersonName(entity.getResponsiblePersonName());
@@ -240,11 +249,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             assetProcess.setCostCenter(entity.getCostCenter());
         }
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_UNUSED.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_UNUSED.getCode());
     }
 
     //报废
     @Override
+    @Transactional
     public int scrapAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -256,11 +266,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.SCRAP.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.SCRAP.getCode());
     }
 
     //外卖
     @Override
+    @Transactional
     public int waiteTakeOutAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -272,11 +283,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.WAITING_TAKE_OUT.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.WAITING_TAKE_OUT.getCode());
     }
 
     //盘亏
     @Override
+    @Transactional
     public int inventoryLossAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -288,11 +300,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_INVENTORY_LOSE.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_INVENTORY_LOSE.getCode());
     }
 
     //已维修
     @Override
+    @Transactional
     public int maintainedAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -304,13 +317,13 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 页面样式参考图1-4；
          * */
         if (assetProcess.getAssetStatus().equals(AssetStatus.USING.getCode())) {
-            if (!assetProcess.getFixed()) {
+            if ("0".equals(entity.getFixed())) {
                 throw new ServiceException("该资产未转固");
             }
             entity.setAssetStatus(AssetStatus.USING.getCode());
         }
         if (assetProcess.getAssetStatus().equals(AssetStatus.TRIAL.getCode())) {
-            if (assetProcess.getFixed()) {
+            if ("1".equals(entity.getFixed())) {
                 throw new ServiceException("该资产已转固");
             }
             entity.setAssetStatus(AssetStatus.TRIAL.getCode());
@@ -331,11 +344,12 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         assetProcess.setCostCenter(entity.getCostCenter());
         assetProcess.setAssetStatus(entity.getAssetStatus());
 
-        return updateAsset(entity, assetProcess, AssetProcessType.PROCESS_MAINTAINED.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_MAINTAINED.getCode());
     }
 
     //已外卖
     @Override
+    @Transactional
     public int takeOutAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -347,11 +361,12 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.TOKE_OUT.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.TOKE_OUT.getCode());
     }
 
     //已报废
     @Override
+    @Transactional
     public int scrapedAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -363,10 +378,11 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, AssetProcessType.SCRAPED.getCode());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.SCRAPED.getCode());
     }
 
     @Override
+    @Transactional
     public int backAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
 
@@ -379,11 +395,12 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, "");
+        return updateAssetAndCreateLog(entity, assetProcess, "");
     }
 
 
     @Override
+    @Transactional
     public int repairAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
         /*
@@ -395,7 +412,7 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
 
-        return updateAsset(entity, assetProcess, "");
+        return updateAssetAndCreateLog(entity, assetProcess, "");
     }
 
 

@@ -2,14 +2,16 @@ package com.hexing.asset.controller;
 
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.dto.*;
+import com.hexing.asset.domain.dto.SapAssetFixDTO;
+import com.hexing.asset.domain.dto.SapPurchaseOrder;
+import com.hexing.asset.domain.dto.SapValueDTO;
+import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
-import com.hexing.asset.enums.AssetStatus;
-import com.hexing.asset.service.IAssetManagementConfigService;
+import com.hexing.asset.enums.UIPCodeEnum;
 import com.hexing.asset.service.IAssetService;
 import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.annotation.Log;
@@ -24,14 +26,17 @@ import com.hexing.framework.web.service.TokenService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.text.DecimalFormat;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
 /**
  * 资产表Controller
@@ -43,6 +48,9 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/asset")
 public class AssetController extends BaseController {
+
+    @Value("${uip.uipTransfer}")
+    private String uipTransfer;
 
     @Autowired
     private IAssetService assetService;
@@ -166,8 +174,32 @@ public class AssetController extends BaseController {
                     .setSERNR(asset.getMaterialNum())
                     .setINVNR(asset.getAssetCode())
                     .setMENGE(1.0)
-                    .setMEINS("")
-                    .setINVZU(asset.getCurrentLocation());
+                    .setMEINS(asset.getUnit())
+                    .setINVZU(asset.getCurrentLocation())
+                    .setZYONGTU(assetFixVO.getUsage())
+                    .setZZANLU003("")
+                    .setZZANLU004(asset.getResponsiblePersonCode())
+                    .setKOSTL(assetFixVO.getCostCenterCode())
+                    .setKOSTLV(assetFixVO.getResponsibilityCostCenterCode())
+                    .setRAUMN(asset.getResponsiblePersonName())
+                    .setLIFNR(asset.getProvider())
+                    .setNAME1(asset.getProviderName())
+                    .setNAME2(assetFixVO.getProvider());
+
+
+            JSONArray data = new JSONArray();
+            data.add(sapAssetFixDTO);
+            MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
+            params.add("INBOUND", data);
+            params.add("interfaceCode", UIPCodeEnum.FIX_ASSET_INTERFACE.getCode());
+            logger.info("====资产转固，推送SAP：" + params);
+
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> responseEntity = restTemplate.postForEntity(uipTransfer, params, String.class);
+
+            String body = responseEntity.getBody();
+            JSONObject responseBody = JSONObject.parseObject(body);
+            logger.info("====资产转固，SAP响应：" + responseBody);
 
             // 更新资产的SAP资产编码字段
 
@@ -175,5 +207,7 @@ public class AssetController extends BaseController {
 
         return AjaxResult.success("资产转固成功");
     }
+
+
 
 }

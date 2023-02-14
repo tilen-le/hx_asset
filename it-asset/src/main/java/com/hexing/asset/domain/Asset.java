@@ -49,11 +49,18 @@ public class Asset {
     private String assetCode;
 
     /**
+     * SAP资产编号
+     */
+    @ApiModelProperty(value = "SAP资产编号")
+    @Excel(name = "SAP资产编号")
+    private String sapCode;
+
+    /**
      * SAP固定资产编码
      */
     @ApiModelProperty(value = "SAP固定资产编码")
     @Excel(name = "SAP固定资产编码")
-    private String assetSapCode;
+    private String sapAssetCode;
 
     /**
      * 资产大类

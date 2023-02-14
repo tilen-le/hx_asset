@@ -516,8 +516,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             } else if ("S".equals(sapResponseCode)) {
                 // 更新资产的SAP资产编码字段
                 JSONObject dataJO = responseBodyJO.getJSONObject("DATA");
-                String sapAssetCode = dataJO.getString("ANLN1");
-                asset.setAssetSapCode(sapAssetCode);
+                String sapCode = dataJO.getString("ANLN1");
+                asset.setSapCode(sapCode);
                 this.updateById(asset);
             }
 
@@ -535,6 +535,19 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             throw new Exception("无该资产信息");
         }
         // 推送SAP
+        SapAssetTransferDTO dto = new SapAssetTransferDTO();
+        dto.setBUKRS(vo.getReceiveCompany())
+                .setRname(vo.getReceiveEmployee())
+                .setPost(vo.getReceiverPosition())
+                .setKOSTL(vo.getCostCenter())
+                .setStage(vo.getNewLocation())
+                .setAnln1(asset.getSapCode());
+
+        JSONArray data = new JSONArray();
+        data.add(dto);
+        String responseBody = uipService.sendToSAP(data, null, "资产转移");
+
+
 
         // 创建转移流程记录
         AssetTransferProcessDTO process = new AssetTransferProcessDTO();
@@ -543,7 +556,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         process.setCreateBy(SecurityUtils.getLoginUser().getUser().getUserName());
         process.setCreateTime(DateUtils.getNowDate());
         process.setRemark(asset.getCompany() + "转移资产到" + vo.getReceiveCompany());
-        process.setSapAssetCode(asset.getAssetSapCode());
+        process.setSapAssetCode(asset.getSapCode());
 
         process.setOldCompany(asset.getCompany());
         process.setOldEmployee(asset.getResponsiblePersonCode());
@@ -555,7 +568,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         process.setNewEmployee(vo.getReceiveEmployee());
         process.setNewCostCenter(vo.getCostCenter());
         process.setNewEmployeePosition(vo.getReceiverPosition());
-        process.setNewLocation(vo.getNewLocation()); // ?
+        process.setNewLocation(vo.getNewLocation());
 
         //TODO set variables
         assetProcessService.saveOne(process);

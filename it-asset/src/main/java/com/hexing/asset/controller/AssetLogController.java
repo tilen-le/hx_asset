@@ -66,7 +66,7 @@ public class AssetLogController extends BaseController
      * 查询操作记录
      */
     @GetMapping("/operationLogList")
-    @PreAuthorize("@ss.hasPermi('asset:log:custodyLogList')")
+    @PreAuthorize("@ss.hasPermi('asset:log:operationLogList')")
     @ApiOperation("查询操作记录")
     @ApiOperationSupport(order = 14)
     public TableDataInfo operationLogList(AssetProcessParam assetProcess)

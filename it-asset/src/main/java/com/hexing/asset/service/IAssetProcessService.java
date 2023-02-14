@@ -99,22 +99,6 @@ public interface IAssetProcessService extends IService<AssetProcess> {
      */
     int scrapedAsset(AssetProcessParam assetProcess);
 
-
-    /**
-     * 资产归还
-     *
-     * @return 结果
-     */
-    int backAsset(AssetProcessParam assetProcess);
-
-    /**
-     * 资产返修
-     *
-     * @return 结果
-     */
-    int repairAsset(AssetProcessParam assetProcess);
-
-
     /**
      * 查询资产流程
      */

@@ -77,7 +77,7 @@ public class AssetController extends BaseController {
     @Log(title = "导出资产表列表", businessType = BusinessType.EXPORT)
     @GetMapping("/export")
     public AjaxResult export(AssetQueryParam param) {
-        List<Asset> list = assetService.selectAssetList(param);
+        List<Asset> list = assetService.selectAllAsset(param);
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
         return util.exportExcel(list, "固定资产数据");
     }
@@ -127,7 +127,6 @@ public class AssetController extends BaseController {
      */
     @ApiOperation("SAP采购单同步接口")
     @PostMapping("/sapAdd")
-    @Transactional
     public AjaxResult sapAdd(@RequestBody SimpleOuterDTO<List<SapPurchaseOrder>> param) {
         List<SapPurchaseOrder> orderList = param.getData();
         if (CollectionUtil.isNotEmpty(orderList)) {

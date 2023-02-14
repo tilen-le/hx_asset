@@ -199,7 +199,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      */
     @Override
     public List<Asset> selectAssetList(AssetQueryParam param) {
-        List<Asset> assetList = new ArrayList<>();
+        List<Asset> assetList;
         String username = SecurityUtils.getUsername();
         // 用户数据查看权限判断
 //        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
@@ -238,10 +238,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
         }
         if (StringUtils.isNotEmpty(param.getCompany())) {
-            wrapper.eq(Asset::getCompany, param.getCompany());
+            wrapper.in(Asset::getCompany, param.getCompany());
         }
         if (ObjectUtil.isNotEmpty(param.getFixed())) {
-            wrapper.eq(Asset::getFixed, param.getFixed());
+            wrapper.in(Asset::getFixed, param.getFixed());
         }
         if (ObjectUtil.isNotEmpty(param.getCapitalizationStartDate())) {
             wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationStartDate());
@@ -288,6 +288,77 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 //                    a.setResponsiblePersonDept(dept.getDeptName());
 //                }
 //            }
+        }
+
+        return assetList;
+    }
+
+    /**
+     * 查询资产表列表
+     *
+     * @param
+     * @return 资产表
+     */
+    @Override
+    public List<Asset> selectAllAsset(AssetQueryParam param) {
+        List<Asset> assetList;
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotEmpty(param.getAssetCode())) {
+            wrapper.like(Asset::getAssetCode, param.getAssetCode());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetType())) {
+            wrapper.eq(Asset::getAssetType, param.getAssetType());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetCategory())) {
+            wrapper.eq(Asset::getAssetCategory, param.getAssetCategory());
+        }
+        if (CollectionUtil.isNotEmpty(param.getAssetSubCategory())) {
+            wrapper.in(Asset::getAssetSubCategory, param.getAssetSubCategory());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetName())) {
+            wrapper.like(Asset::getAssetName, param.getAssetName());
+        }
+        if (CollectionUtil.isNotEmpty(param.getAssetStatus())) {
+            wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
+        }
+        if (StringUtils.isNotEmpty(param.getCompany())) {
+            wrapper.in(Asset::getCompany, param.getCompany());
+        }
+        if (ObjectUtil.isNotEmpty(param.getFixed())) {
+            wrapper.in(Asset::getFixed, param.getFixed());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationStartDate())) {
+            wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationStartDate());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationEndDate())) {
+            wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCreateTimeBegin())) {
+            wrapper.ge(Asset::getCreateTime, param.getCreateTimeBegin());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCreateTimeEnd())) {
+            wrapper.le(Asset::getCreateTime, param.getCreateTimeEnd());
+        }
+        if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
+            // 查询指定部门下所有部门的id
+            List<String> childDeptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(param.getResponsiblePersonDept()));
+            childDeptIdList.add(param.getResponsiblePersonDept());
+            // 查询这些部门下所有人的工号
+            List<String> usernameList = sysUserService.selectUserByDeptId(childDeptIdList);
+            wrapper.in(Asset::getResponsiblePersonCode, usernameList);
+        }
+
+        assetList = assetMapper.selectList(wrapper);
+
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            // 解析物料号返回资产大中小类
+            JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
+            for (Asset asset : assetList) {
+                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                asset.setAssetType(dto.getAssetType());
+                asset.setAssetCategory(dto.getAssetCategory());
+                asset.setAssetSubCategory(dto.getAssetSubCategory());
+            }
         }
 
         return assetList;
@@ -400,52 +471,69 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * SAP采购单同步接口
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void sapAdd(List<SapPurchaseOrder> orderList) {
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
         for (SapPurchaseOrder order : orderList) {
             int numberOfArrival = order.getNumberOfArrival().intValue();
             List<Asset> assetList = new ArrayList<>();
-            if (ObjectUtil.isNotNull(numberOfArrival)) {
-                LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-                wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
-                        .orderByDesc(Asset::getSerialNum)
-                        .last("LIMIT 1");
-                Asset theLastOne = this.getOne(wrapper);
+            LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Asset::getMaterialNum, order.getMaterialNumber())
+                    .orderByDesc(Asset::getSerialNum)
+                    .last("LIMIT 1");
+            Asset theLastOne = this.getOne(wrapper);
 
-                int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
-                DecimalFormat df = new DecimalFormat("0000");
-                for (int i = 1; i <= numberOfArrival; i++) {
-                    Asset asset = new Asset();
-                    String assetCode = order.getMaterialNumber() + df.format(nextNum);
-                    asset.setMaterialNum(order.getMaterialNumber())
-                            .setSerialNum(nextNum)
-                            .setAssetName(order.getMaterialText())
-                            .setAssetCode(assetCode)
-                            .setCompany(order.getCompanyCode())
-                            .setPurchaseOrderNo(order.getPurchaseOrder())
-                            .setProvider(order.getProvider())
-                            .setProviderName(order.getProviderDescription())
-                            .setOriginalValue(order.getPrice())
-                            .setMonetaryUnit(order.getMoneyType())
-                            .setAssetStatus(AssetStatus.IN_STORE.getCode())
-                            .setProofOfMaterial(order.getProofOfMaterial())
-                            .setCreateBy("SAP")
-                            .setCreateTime(new Date())
-                            .setAssetType(order.getMaterialNumber().substring(0, 1))
-                            .setAssetCategory(order.getMaterialNumber().substring(1, 3))
-                            .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
-                            .setFixed("0")
-                            .setUnit(order.getUnit());
-                    assetList.add(asset);
-                    nextNum++;
-                }
-                this.saveBatch(assetList);
-                totalNum += assetList.size();
+            int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
+            DecimalFormat df = new DecimalFormat("0000");
+            for (int i = 1; i <= numberOfArrival; i++) {
+                Asset asset = new Asset();
+                String assetCode = order.getMaterialNumber() + df.format(nextNum);
+                asset.setMaterialNum(order.getMaterialNumber())
+                        .setSerialNum(nextNum)
+                        .setAssetName(order.getMaterialText())
+                        .setAssetCode(assetCode)
+                        .setSapAssetCode(assetCode)
+                        .setCompany(order.getCompanyCode())
+                        .setPurchaseOrderNo(order.getPurchaseOrder())
+                        .setProvider(order.getProvider())
+                        .setProviderName(order.getProviderDescription())
+                        .setOriginalValue(order.getOriginalValue())
+                        .setMonetaryUnit(order.getMoneyType())
+                        .setAssetStatus(AssetStatus.IN_STORE.getCode())
+                        .setProofOfMaterial(order.getProofOfMaterial())
+                        .setCreateBy("SAP")
+                        .setCreateTime(new Date())
+                        .setAssetType(order.getMaterialNumber().substring(0, 1))
+                        .setAssetCategory(order.getMaterialNumber().substring(1, 3))
+                        .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
+                        .setFixed("0")
+                        .setUnit(order.getUnit());
+                assetList.add(asset);
+                nextNum++;
             }
+            this.saveBatch(assetList);
+            totalNum += assetList.size();
         }
         log.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + totalNum + " 个资产 ====");
     }
+
+    /**
+     * SAP资产转移数据更新
+     */
+//    @Override
+    public void sapAssetTransferUpdate(String sapCode) {
+        Asset asset = this.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getSapCode, sapCode));
+
+        AssetProcess param = new AssetProcess();
+        param.setProcessType(AssetProcessType.PROCESS_TRANSFORM.getCode());
+
+        AssetProcess process = assetProcessService.getOne(param);
+
+
+        return;
+    }
+
 
     /**
      * SAP价值传输接口
@@ -547,7 +635,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         data.add(dto);
         String responseBody = uipService.sendToSAP(data, null, "资产转移");
 
-
+        // 资产状态改为在用
+        this.updateById(asset.setAssetStatus(AssetStatus.USING.getCode()));
 
         // 创建转移流程记录
         AssetTransferProcessDTO process = new AssetTransferProcessDTO();

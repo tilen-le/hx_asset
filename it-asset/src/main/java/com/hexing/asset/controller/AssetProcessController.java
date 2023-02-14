@@ -1,16 +1,11 @@
 package com.hexing.asset.controller;
 
-import cn.hutool.core.util.ObjectUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import com.hexing.asset.domain.AssetManagementConfig;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
-import com.hexing.common.core.page.TableDataInfo;
 import com.hexing.common.enums.BusinessType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @Api(tags = "资产流程管理")
 @RestController
@@ -170,30 +164,6 @@ public class AssetProcessController extends BaseController {
     @ApiOperationSupport(order = 12)
     public AjaxResult scrapedAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.scrapedAsset(assetProcess));
-    }
-
-    /**
-     * 资产返修
-     */
-    @Log(title = "资产返修", businessType = BusinessType.UPDATE)
-    @PutMapping("/repairAsset")
-    @PreAuthorize("@ss.hasPermi('asset:process:repairAsset')")
-    @ApiOperation("资产返修")
-    @ApiOperationSupport(order = 13)
-    public AjaxResult repairAsset(@RequestBody AssetProcessParam assetProcess) {
-        return toAjax(processService.repairAsset(assetProcess));
-    }
-
-    /**
-     * 归还资产
-     */
-    @Log(title = "归还资产", businessType = BusinessType.UPDATE)
-    @PutMapping("/backAsset")
-    @PreAuthorize("@ss.hasPermi('asset:process:backAsset')")
-    @ApiOperation("归还资产")
-    @ApiOperationSupport(order = 14)
-    public AjaxResult backAsset(@RequestBody AssetProcessParam assetProcess) {
-        return toAjax(processService.backAsset(assetProcess));
     }
 
 

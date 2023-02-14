@@ -94,14 +94,14 @@ public class Asset {
      * 资产状态
      */
     @ApiModelProperty(value = "资产状态")
-    @Excel(name = "资产状态")
+    @Excel(name = "资产状态", dictType = "asset_status")
     private String assetStatus;
 
     /**
      * 转固状态
      */
     @ApiModelProperty(value = "转固状态")
-    @Excel(name = "转固状态")
+    @Excel(name = "转固状态", dictType = "asset_fixed")
     private String fixed;
 
     /**
@@ -136,7 +136,7 @@ public class Asset {
      * 所属公司
      */
     @ApiModelProperty(value = "所属公司")
-    @Excel(name = "所属公司")
+    @Excel(name = "所属公司", dictType = "asset_company")
     private String company;
 
     /**
@@ -178,7 +178,7 @@ public class Asset {
      * 资产化日期（资本化日期/资产价值录入日期）
      */
     @ApiModelProperty(value = "资产化日期（资本化日期/资产价值录入日期）")
-    @Excel(name = "资产化日期")
+    @Excel(name = "资产化日期", dateFormat = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date capitalizationDate;
 
@@ -235,7 +235,7 @@ public class Asset {
      * 首次购置日期
      */
     @ApiModelProperty(value = "首次购置日期")
-    @Excel(name = "首次购置日期")
+    @Excel(name = "首次购置日期", dateFormat = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date buyDate;
 
@@ -243,7 +243,7 @@ public class Asset {
      * 入库日期
      */
     @ApiModelProperty(value = "入库日期")
-    @Excel(name = "入库日期")
+    @Excel(name = "入库日期", dateFormat = "yyyy-MM-dd")
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date storageDate;
 

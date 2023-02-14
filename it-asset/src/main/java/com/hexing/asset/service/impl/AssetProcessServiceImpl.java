@@ -85,7 +85,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try{
                 assetService.fixAsset(vo);
             }catch (Exception e){
-                throw new ServiceException("推送sap异常");
+                throw new ServiceException("资产转固推送sap异常");
             }
         }
         return i;
@@ -96,6 +96,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int receiveAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        if (!entity.getAssetStatus().equals(AssetStatus.IN_STORE.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())){
+            throw new ServiceException("非在库和闲置资产无权操作");
+        }
         String responsiblePersonCode = assetProcess.getResponsiblePersonCode();
         if (StringUtils.isBlank(responsiblePersonCode)) {
             throw new ServiceException("请选择领用人");
@@ -115,7 +119,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         entity.setResponsiblePersonName(sysUser.getNickName());
         entity.setResponsiblePersonName(sysUser.getNickName());
         entity.setCurrentLocation(assetProcess.getCurrentLocation());
-        if (StringUtils.isNotBlank(entity.getFixed()) && "1".equals(entity.getFixed())) {
+        if (StringUtils.isNotBlank(entity.getFixed()) && AssetStatus.FIXED.getCode().equals(entity.getFixed())) {
             entity.setAssetStatus(AssetStatus.USING.getCode());
         } else {
             entity.setAssetStatus(AssetStatus.TRIAL.getCode());
@@ -144,6 +148,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int transferAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        if (!entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())){
+            throw new ServiceException("非闲置资产无权操作");
+        }
         if (StringUtils.isBlank(assetProcess.getCompany())) {
             throw new ServiceException("请选择接收公司");
         }
@@ -183,6 +190,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
  资产操作【退货】后，弹框确认是否退货，确认后【资产状态】变更为“已退货”页面样式参考图1-3
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.MAINTAIN.getCode())
+        ){
+            throw new ServiceException("非维修资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.RETURNED.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -197,6 +208,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int fixationAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        if (!entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())){
+            throw new ServiceException("非试用资产无权操作");
+        }
         if (StringUtils.isBlank(assetProcess.getAssetType())) {
             throw new ServiceException("请选择资产类型");
         }
@@ -209,7 +223,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         entity.setCostCenter(assetProcess.getCostCenter());
         entity.setAssetCategory(assetProcess.getAssetType());
         entity.setAssetStatus(AssetStatus.USING.getCode());
-        entity.setFixed("1");
+        entity.setFixed(AssetStatus.FIXED.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
 //        String userCode = "80010712";
@@ -226,6 +240,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
    资产操作【维修】后，弹框确认后，资产状态变更为【维修】；
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+            throw new ServiceException("非试用和在用资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.MAINTAIN.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -246,6 +264,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
          是：资产状态变更为【闲置】，清空字段【资产保管人】，【资产保管部门】，【成本中心】；
          否：资产状态变更为【闲置】
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+            throw new ServiceException("非在用资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.UNUSED.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -278,6 +299,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
    资产操作【报废】后，弹框确认后，资产状态变更为【待报废】页面样式参考图1-3
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+            throw new ServiceException("非在用资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.WAITING_SCRAP.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -295,6 +319,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
  资产操作【外卖】后，弹框确认是否外卖，确认后，资产状态变更为【待外卖】页面样式参考图1-3
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+            throw new ServiceException("非在用资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.WAITING_TAKE_OUT.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -309,9 +336,15 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int inventoryLossAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        /*
- 资产操作【外卖】后，弹框确认是否外卖，确认后，资产状态变更为【待外卖】页面样式参考图1-3
-         * */
+        if (!entity.getAssetStatus().equals(AssetStatus.IN_STORE.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.USING.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.WAITING_TAKE_OUT.getCode())&&
+                !entity.getAssetStatus().equals(AssetStatus.WAITING_SCRAP.getCode())
+        ){
+            throw new ServiceException("非在库、试用、在用、闲置、待外卖、待报废资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.INVENTORY_LOSE.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -334,14 +367,17 @@ b."试用"，，资产状态变更为【试用】。 表示未转固的资产已
 c."在库"，清空该条资产“资产保管人，资产保管部门，成本中心”，资产状态变更为【在库】。表示资产已经维修完成且资产保管人不再使用该资产；
 页面样式参考图1-4；
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.MAINTAIN.getCode())){
+            throw new ServiceException("非维修资产无权操作");
+        }
         if (assetProcess.getAssetStatus().equals(AssetStatus.USING.getCode())) {
-            if ("0".equals(entity.getFixed())) {
+            if (AssetStatus.UNFIXED.getCode().equals(entity.getFixed())) {
                 throw new ServiceException("该资产未转固");
             }
             entity.setAssetStatus(AssetStatus.USING.getCode());
         }
         if (assetProcess.getAssetStatus().equals(AssetStatus.TRIAL.getCode())) {
-            if ("1".equals(entity.getFixed())) {
+            if (AssetStatus.FIXED.getCode().equals(entity.getFixed())) {
                 throw new ServiceException("该资产已转固");
             }
             entity.setAssetStatus(AssetStatus.TRIAL.getCode());
@@ -373,6 +409,9 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         /*
  资产操作【已外卖】后，弹框确认是否已外卖，确认后，资产状态变更为【已外卖】页面样式参考图1-5
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.WAITING_TAKE_OUT.getCode())){
+            throw new ServiceException("非待外卖资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.TOKE_OUT.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -390,6 +429,9 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         /*
  资产操作【已报废】后，弹框确认是否已报废，确认后，资产状态变更为【已报废】页面样式参考图1-5
          * */
+        if (!entity.getAssetStatus().equals(AssetStatus.WAITING_SCRAP.getCode())){
+            throw new ServiceException("非待报废资产无权操作");
+        }
         entity.setAssetStatus(AssetStatus.SCRAPED.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
@@ -398,41 +440,6 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
 
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.SCRAPED.getCode());
     }
-
-    @Override
-    @Transactional
-    public int backAsset(AssetProcessParam assetProcess) {
-        Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-
-        // 资产操作【归还】后，资产状态变更为【在库】，清空字段【资产保管人】，【资产保管部门】，【成本中心】；
-        entity.setAssetStatus(AssetStatus.IN_STORE.getCode());
-        entity.setResponsiblePersonName("");
-        entity.setCostCenter("");
-        entity.setUpdateTime(DateUtils.getNowDate());
-        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
-//        String userCode = "80010712";
-        entity.setUpdateBy(userCode);
-
-        return updateAssetAndCreateLog(entity, assetProcess, "");
-    }
-
-
-    @Override
-    @Transactional
-    public int repairAsset(AssetProcessParam assetProcess) {
-        Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        /*
-  资产操作【返修】后，弹框确认是否返修，确认后【资产状态】变更为”返修“页面样式参考图1-3
-         * */
-        entity.setAssetStatus(AssetStatus.REPAIR.getCode());
-        entity.setUpdateTime(DateUtils.getNowDate());
-        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
-//        String userCode = "80010712";
-        entity.setUpdateBy(userCode);
-
-        return updateAssetAndCreateLog(entity, assetProcess, "");
-    }
-
 
     /**
      * 查询资产流程

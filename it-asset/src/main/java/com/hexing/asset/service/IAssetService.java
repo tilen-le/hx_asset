@@ -47,6 +47,8 @@ public interface IAssetService extends IService<Asset> {
      */
     List<Asset> selectAssetList(AssetQueryParam param);
 
+    List<Asset> selectAllAsset(AssetQueryParam param);
+
     /**
      * 根据资产编号查询资产信息
      */

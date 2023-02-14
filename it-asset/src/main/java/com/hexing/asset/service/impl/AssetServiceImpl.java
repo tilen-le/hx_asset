@@ -199,7 +199,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      */
     @Override
     public List<Asset> selectAssetList(AssetQueryParam param) {
-        List<Asset> assetList = new ArrayList<>();
+        List<Asset> assetList;
         String username = SecurityUtils.getUsername();
         // 用户数据查看权限判断
 //        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
@@ -238,10 +238,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
         }
         if (StringUtils.isNotEmpty(param.getCompany())) {
-            wrapper.eq(Asset::getCompany, param.getCompany());
+            wrapper.in(Asset::getCompany, param.getCompany());
         }
         if (ObjectUtil.isNotEmpty(param.getFixed())) {
-            wrapper.eq(Asset::getFixed, param.getFixed());
+            wrapper.in(Asset::getFixed, param.getFixed());
         }
         if (ObjectUtil.isNotEmpty(param.getCapitalizationStartDate())) {
             wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationStartDate());
@@ -288,6 +288,77 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 //                    a.setResponsiblePersonDept(dept.getDeptName());
 //                }
 //            }
+        }
+
+        return assetList;
+    }
+
+    /**
+     * 查询资产表列表
+     *
+     * @param
+     * @return 资产表
+     */
+    @Override
+    public List<Asset> selectAllAsset(AssetQueryParam param) {
+        List<Asset> assetList;
+        LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotEmpty(param.getAssetCode())) {
+            wrapper.like(Asset::getAssetCode, param.getAssetCode());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetType())) {
+            wrapper.eq(Asset::getAssetType, param.getAssetType());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetCategory())) {
+            wrapper.eq(Asset::getAssetCategory, param.getAssetCategory());
+        }
+        if (CollectionUtil.isNotEmpty(param.getAssetSubCategory())) {
+            wrapper.in(Asset::getAssetSubCategory, param.getAssetSubCategory());
+        }
+        if (StringUtils.isNotEmpty(param.getAssetName())) {
+            wrapper.like(Asset::getAssetName, param.getAssetName());
+        }
+        if (CollectionUtil.isNotEmpty(param.getAssetStatus())) {
+            wrapper.in(Asset::getAssetStatus, param.getAssetStatus());
+        }
+        if (StringUtils.isNotEmpty(param.getCompany())) {
+            wrapper.in(Asset::getCompany, param.getCompany());
+        }
+        if (ObjectUtil.isNotEmpty(param.getFixed())) {
+            wrapper.in(Asset::getFixed, param.getFixed());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationStartDate())) {
+            wrapper.ge(Asset::getCapitalizationDate, param.getCapitalizationStartDate());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCapitalizationEndDate())) {
+            wrapper.le(Asset::getCapitalizationDate, param.getCapitalizationEndDate());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCreateTimeBegin())) {
+            wrapper.ge(Asset::getCreateTime, param.getCreateTimeBegin());
+        }
+        if (ObjectUtil.isNotEmpty(param.getCreateTimeEnd())) {
+            wrapper.le(Asset::getCreateTime, param.getCreateTimeEnd());
+        }
+        if (StringUtils.isNotEmpty(param.getResponsiblePersonDept())) {
+            // 查询指定部门下所有部门的id
+            List<String> childDeptIdList = sysDeptService.selectDeptByParentId(Long.valueOf(param.getResponsiblePersonDept()));
+            childDeptIdList.add(param.getResponsiblePersonDept());
+            // 查询这些部门下所有人的工号
+            List<String> usernameList = sysUserService.selectUserByDeptId(childDeptIdList);
+            wrapper.in(Asset::getResponsiblePersonCode, usernameList);
+        }
+
+        assetList = assetMapper.selectList(wrapper);
+
+        if (CollectionUtil.isNotEmpty(assetList)) {
+            // 解析物料号返回资产大中小类
+            JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
+            for (Asset asset : assetList) {
+                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                asset.setAssetType(dto.getAssetType());
+                asset.setAssetCategory(dto.getAssetCategory());
+                asset.setAssetSubCategory(dto.getAssetSubCategory());
+            }
         }
 
         return assetList;

@@ -5,6 +5,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.apache.coyote.http11.filters.IdentityInputFilter;
 
 import java.util.Date;
 import java.util.List;
@@ -52,12 +53,12 @@ public class AssetQueryParam {
      * 所属公司
      */
     @ApiModelProperty(value="所属公司")
-    private String company;
+    private List<String> company;
     /**
      * 转固状态
      */
     @ApiModelProperty(value="转固状态")
-    private Boolean fixed;
+    private List<String> fixed;
     /**
      * 资产化日期开始时间
      */

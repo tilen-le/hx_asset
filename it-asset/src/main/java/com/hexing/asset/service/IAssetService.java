@@ -8,6 +8,7 @@ import com.hexing.asset.domain.dto.SapValueDTO;
 import com.hexing.asset.domain.dto.SimpleOuterDTO;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.domain.vo.AssetReceiveVO;
 import com.hexing.asset.domain.vo.AssetTransferVO;
 import com.hexing.common.core.domain.Result;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -32,9 +33,9 @@ public interface IAssetService extends IService<Asset> {
     /**
      * 资产信息导入
      *
-     * @param assetList 资产信息列表
+     * @param assetList       资产信息列表
      * @param isUpdateSupport 是否存在则覆盖
-     * @param operName 操作人姓名
+     * @param operName        操作人姓名
      * @return
      */
     String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName);
@@ -101,7 +102,7 @@ public interface IAssetService extends IService<Asset> {
     /**
      * SAP价值传输接口
      */
-    List<SapValueDTO>  sapSyncValue(List<SapValueDTO> sapValueList);
+    List<SapValueDTO> sapSyncValue(List<SapValueDTO> sapValueList);
 
     /**
      * 资产转固
@@ -111,5 +112,10 @@ public interface IAssetService extends IService<Asset> {
     /**
      * 资产转移
      */
-    void  transferAsset(AssetTransferVO vo) throws Exception;
+    void transferAsset(AssetTransferVO vo) throws Exception;
+
+    /**
+     * 资产派发
+     */
+    void receiveAsset(AssetReceiveVO vo) throws Exception;
 }

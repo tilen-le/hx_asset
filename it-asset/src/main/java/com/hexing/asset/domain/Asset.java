@@ -73,14 +73,14 @@ public class Asset {
      * 资产中类
      */
     @ApiModelProperty(value = "资产中类")
-    @Excel(name = "资产中类")
+    @Excel(name = "资产中类", isExport = true)
     private String assetCategory;
 
     /**
      * 资产小类
      */
     @ApiModelProperty(value = "资产小类")
-    @Excel(name = "资产小类")
+    @Excel(name = "资产小类", isExport = true)
     private String assetSubCategory;
 
     /**
@@ -297,6 +297,7 @@ public class Asset {
      * 物料号
      */
     @ApiModelProperty(value = "物料号")
+    @Excel(name = "物料号")
     private String materialNum;
 
     /**

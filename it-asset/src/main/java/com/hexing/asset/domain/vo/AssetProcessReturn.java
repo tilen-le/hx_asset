@@ -54,6 +54,11 @@ public class AssetProcessReturn {
     @ApiModelProperty(value = "保管部门")
     private String responsiblePersonDept;
     /**
+     * 领用人保管部门名称
+     */
+    @ApiModelProperty(value = "保管部门名称")
+    private String responsiblePersonDeptName;
+    /**
      * 领用人岗位
      */
     @ApiModelProperty(value = "保管人岗位")

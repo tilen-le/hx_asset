@@ -1,7 +1,5 @@
 package com.hexing.asset.service.impl;
 
-import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -12,14 +10,20 @@ import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
+import com.hexing.common.core.domain.entity.SysDept;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.system.service.ISysDeptService;
+import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static com.hexing.common.utils.PageUtil.startPage;
 
 /**
  * 资产信息更新日志Service业务层处理
@@ -36,6 +40,10 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     private IAssetUpdateLogService logService;
     @Autowired
     private IAssetProcessService processService;
+    @Autowired
+    private ISysDeptService sysDeptService;
+    @Autowired
+    private SysUserServiceImpl sysUserService;
 
     /**
      * 创建资产信息更新日志
@@ -69,10 +77,19 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         List<AssetUpdateLog> list = logService.list(wrapper);
+        startPage();
         List<AssetUpdateLog> paramsData = new ArrayList<>();
         String personCode = "";
         String deptCode = "";
+        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         for (AssetUpdateLog log : list) {
+            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(log.getCreateBy())).findFirst().orElse(new SysUser());
+            log.setCreateBy(sysUser.getNickName());
+            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())){
+                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(log.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+                log.setResponsiblePersonDeptName(dept.getDeptName());
+            }
             String responsiblePersonCode = log.getResponsiblePersonCode();
             String responsiblePersonDept = log.getResponsiblePersonDept();
             if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
@@ -92,16 +109,13 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
 
     //工单记录
     @Override
-    public List<AssetProcessReturn> workLogList(AssetProcessParam assetProcess) {
+    public List<AssetProcess> workLogList(AssetProcessParam assetProcess) {
         List<AssetProcessReturn> domains = new ArrayList<>();
         AssetProcess process=new AssetProcess();
         process.setAssetCode(assetProcess.getAssetCode());
-        List<AssetProcess> list = processService.list(process);
-        for (AssetProcess ap : list) {
-            AssetProcessReturn domain = processService.convertProcess(ap, new AssetProcessReturn());
-            domains.add(domain);
-        }
-        return domains;
+        List<AssetProcess> list = processService.listByPage(process);
+
+        return list;
     }
 
     //操作记录
@@ -110,7 +124,20 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
-        return logService.list(wrapper);
+        startPage();
+        List<AssetUpdateLog> list = logService.list(wrapper);
+        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        for (AssetUpdateLog updateLog : list) {
+            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(updateLog.getCreateBy())).findFirst().orElse(new SysUser());
+           if (StringUtils.isNotBlank(updateLog.getResponsiblePersonDept())){
+               SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(updateLog.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+               updateLog.setResponsiblePersonDeptName(dept.getDeptName());
+           }
+            updateLog.setCreateBy(sysUser.getNickName());
+        }
+
+        return list;
     }
 
     //操作记录详情

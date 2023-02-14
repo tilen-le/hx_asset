@@ -40,6 +40,11 @@ public class AssetUpdateLog extends Asset
     @ApiModelProperty(value = "资产id")
     private String processId;
 
+    /** 保管部门名称 */
+    @ApiModelProperty(value = "保管部门名称")
+    @TableField(exist = false)
+    private String responsiblePersonDeptName;
+
 
     /** 主流程id */
     @ApiModelProperty(value = "结束时间")

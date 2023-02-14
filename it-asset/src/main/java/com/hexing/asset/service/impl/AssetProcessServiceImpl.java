@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.*;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetReceiveVO;
 import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.mapper.AssetProcessMapper;
@@ -86,6 +87,18 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 assetService.fixAsset(vo);
             }catch (Exception e){
                 throw new ServiceException("资产转固推送sap异常");
+            }
+        }else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())){
+            AssetReceiveVO vo =new AssetReceiveVO();
+            vo.setRname(processParam.getResponsiblePersonCode());
+            vo.setPost(processParam.getResponsiblePersonDept());
+            vo.setStage(processParam.getCurrentLocation());
+            vo.setAnln1(entity.getSapAssetCode());
+            vo.setZnum(processParam.getAssetType());
+            try{
+                assetService.receiveAsset(vo);
+            }catch (Exception e){
+                throw new ServiceException("资产派发推送sap异常");
             }
         }
         return i;

@@ -11,13 +11,19 @@ import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
+import com.hexing.common.core.domain.entity.SysDept;
+import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.core.page.TableDataInfo;
+import com.hexing.common.utils.StringUtils;
+import com.hexing.system.service.ISysDeptService;
+import com.hexing.system.service.impl.SysUserServiceImpl;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -33,6 +39,12 @@ public class AssetLogController extends BaseController
 {
     @Autowired
     private IAssetUpdateLogService updateLogService;
+    @Autowired
+    private ISysDeptService sysDeptService;
+    @Autowired
+    private SysUserServiceImpl sysUserService;
+    @Autowired
+    private IAssetProcessService processService;
 
     /**
      * 查询保管记录
@@ -43,7 +55,6 @@ public class AssetLogController extends BaseController
     @ApiOperationSupport(order = 14)
     public TableDataInfo custodyLogList(AssetProcessParam assetProcess)
     {
-        startPage();
         List<AssetUpdateLog> list = updateLogService.custodyLogList(assetProcess);
         return getDataTable(list);
     }
@@ -57,9 +68,24 @@ public class AssetLogController extends BaseController
     @ApiOperationSupport(order = 14)
     public TableDataInfo workLogList(AssetProcessParam assetProcess)
     {
-        startPage();
-        List<AssetProcessReturn> list = updateLogService.workLogList(assetProcess);
-        return getDataTable(list);
+        List<AssetProcess> list = updateLogService.workLogList(assetProcess);
+        List<AssetProcessReturn> domains = new ArrayList<>();
+        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        for (AssetProcess ap : list) {
+            AssetProcessReturn domain = processService.convertProcess(ap, new AssetProcessReturn());
+            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(domain.getCreateBy())).findFirst().orElse(new SysUser());
+            if (StringUtils.isNotBlank(domain.getResponsiblePersonDept())){
+                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(domain.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+                domain.setResponsiblePersonDeptName(dept.getDeptName());
+            }
+            domain.setCreateBy(sysUser.getNickName());
+            domains.add(domain);
+        }
+
+        TableDataInfo dataTable = getDataTable(list);
+        dataTable.setRows(domains);
+        return dataTable;
     }
 
     /**
@@ -71,7 +97,6 @@ public class AssetLogController extends BaseController
     @ApiOperationSupport(order = 14)
     public TableDataInfo operationLogList(AssetProcessParam assetProcess)
     {
-        startPage();
         List<AssetUpdateLog> list = updateLogService.operationLogList(assetProcess);
         return getDataTable(list);
     }

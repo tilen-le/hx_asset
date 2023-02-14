@@ -108,12 +108,12 @@
           <dict-tag :options="dict.type.asset_status" :value="scope.row.assetStatus"/>
         </template>
       </el-table-column>
-      <el-table-column label="资产编码" align="center" prop="assetCode">
+      <el-table-column label="资产编码" align="center" prop="assetCode" width="150px">
         <template slot-scope="scope">
           <el-link :underline="false" type="primary" @click="goDetail(scope.row)">{{ scope.row.assetCode }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="资产大类" align="center" prop="assetType" />
+      <el-table-column label="资产大类" align="center" prop="assetType"  :show-overflow-tooltip="true"/>
       <el-table-column label="资产中类" align="center" prop="assetCategory" />
       <el-table-column label="资产小类" align="center" prop="assetSubCategory" />
       <el-table-column label="资产名称" align="center" prop="assetName" />

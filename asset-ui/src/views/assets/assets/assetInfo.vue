@@ -5,19 +5,53 @@
       <div style="display: inline-block;margin-left: 50px;">
         <dict-tag :options="dict.type.asset_status" :value="info.assetStatus"/>
       </div>
+<!--
+      1在库 资产管理员：【派发】【盘亏】
+      4试用 资产管理员：【维修】【盘亏】财务会计：【转固】
+      6在用 资产管理员：【维修】【闲置】【报废】【外卖】【盘亏】
+      8维修 资产管理员：【已维修】【已退货】
+      2闲置 资产管理员：【派发】【盘亏】【转移】
+      7待外卖 财务会计：【已外卖】资产管理员：【盘亏】
+      9待报废 财务会计：【已报废】资产管理员：【盘亏】
+      10、3、11、5已外卖，已退回，已报废，盘亏（无按钮显示，不能再操作-->
       <div class="head_button">
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:receiveAsset']" @click="pai_fa">资产派发</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']" @click="zhuan_yi">资产转移</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainAsset']" @click="confirm_handle('维修')">维修</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:scrapAsset']" @click="confirm_handle('报废')">报废</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:waiteTakeOutAsset']" @click="confirm_handle('外卖')">外卖</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:scrapedAsset']" @click="status_handle('已报废')">已报废</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:takeOutAsset']" @click="status_handle('已外卖')">已外卖</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:returnAsset']" @click="status_handle('已退货')">已退货</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:inventoryLossAsset']" @click="status_handle('盘亏')">盘亏</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:unusedAsset']" @click="xian_zhi">闲置</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']" @click="zhuan_gu">转固</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainedAsset']" @click="yi_wei_xiu">已维修</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:receiveAsset']"
+                   v-if="info.assetStatus == '1' || info.assetStatus == '2'"
+                   @click="pai_fa">资产派发</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
+                   v-if="info.assetStatus == '2'"
+                   @click="zhuan_yi">资产转移</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainAsset']"
+                   v-if="info.assetStatus == '4' || info.assetStatus == '6'"
+                   @click="confirm_handle('维修')">维修</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:scrapAsset']"
+                   v-if="info.assetStatus == '6'"
+                   @click="confirm_handle('报废')">报废</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:waiteTakeOutAsset']"
+                   v-if="info.assetStatus == '6'"
+                   @click="confirm_handle('外卖')">外卖</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:scrapedAsset']"
+                   v-if="info.assetStatus == '9'"
+                   @click="status_handle('已报废')">已报废</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:takeOutAsset']"
+                   v-if="info.assetStatus == '7'"
+                   @click="status_handle('已外卖')">已外卖</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:returnAsset']"
+                   v-if="info.assetStatus == '8'"
+                   @click="status_handle('已退货')">已退货</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:inventoryLossAsset']"
+                   v-if="info.assetStatus == '1' || info.assetStatus == '4' || info.assetStatus == '6' || info.assetStatus == '2'
+                        || info.assetStatus == '7' || info.assetStatus == '9'"
+                   @click="status_handle('盘亏')">盘亏</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:unusedAsset']"
+                   v-if="info.assetStatus == '6'"
+                   @click="xian_zhi">闲置</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
+                   v-if="info.assetStatus == '4'"
+                   @click="zhuan_gu">转固</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainedAsset']"
+                   v-if="info.assetStatus == '8'"
+                   @click="yi_wei_xiu">已维修</el-button>
       </div>
     </div>
 
@@ -164,8 +198,8 @@
       </div>
     </el-dialog>
 
-    <div class="divMiddle divInfo">
-      <el-descriptions title="基础信息" border :column="3"  size="medium">
+    <div class="divMiddle divInfo" style="overflow-y: auto;">
+      <el-descriptions title="基础信息" border :column="3">
         <el-descriptions-item label="资产大类">{{ info.assetType }}</el-descriptions-item>
         <el-descriptions-item label="资产中类">{{ info.assetCategory }}</el-descriptions-item>
         <el-descriptions-item label="资产小类">{{ info.assetSubCategory }}</el-descriptions-item>
@@ -205,7 +239,7 @@
         <el-tab-pane label="工单记录" name="orderTab">
           <workLog :assetCode="assetCode"></workLog>
         </el-tab-pane>
-        <el-tab-pane label="操作日志" name="third">
+        <el-tab-pane label="操作日志" name="operateTab">
           <operationLog :assetCode="assetCode"></operationLog>
         </el-tab-pane>
       </el-tabs>
@@ -259,7 +293,12 @@
         common_users: [],
         dept_list: [],
         assetCode: '',
-        activeName: 'belongTab'
+        activeName: 'belongTab',
+        tabRefresh: {
+          belongTab: true,
+          orderTab: false,
+          operateTab: false
+        }
       }
     },
     created() {
@@ -275,7 +314,7 @@
     },
     methods: {
       tabClick(tab, event) {
-        console.log(tab, event);
+
       },
       getCommonUsers() {
         const userList = this.common_users
@@ -448,10 +487,18 @@
 </style>
 
 <style scoped>
+  .app-container {
+    padding: 5px;
+  }
+  .el-descriptions__header {
+    margin-bottom: 10px;
+  }
+
+
   .divInfo {
     margin: 5px;
     padding: 5px 10px 5px 10px;
-    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.05);
   }
 
   .divHead {

@@ -86,7 +86,6 @@ public class AssetController extends BaseController {
      * SAP初始资产信息导入
      */
     @ApiOperation("SAP初始资产信息导入")
-//    @PreAuthorize("@ss.hasPermi('asset:asset:import')")
     @PostMapping("/importData")
     public AjaxResult importData(MultipartFile file, boolean updateSupport) throws Exception {
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
@@ -95,6 +94,16 @@ public class AssetController extends BaseController {
         String operName = loginUser.getUsername();
         String message = assetService.importAsset(assetList, updateSupport, operName);
         return AjaxResult.success(message);
+    }
+
+    /**
+     * 资产导入模板下载
+     */
+    @ApiOperation("资产导入模板下载")
+    @GetMapping("/importTemplate")
+    public AjaxResult importTemplate() {
+        ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
+        return util.importTemplateExcel("资产信息导入模板");
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.hexing.asset.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -18,8 +19,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * 资产信息更新日志Service业务层处理
@@ -56,19 +56,8 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
             log.setProcessId(process.getId().toString());
             log.setProcessType(process.getProcessType());
         }
-        LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetUpdateLog::getAssetCode,log.getAssetCode());
-        wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
-        AssetUpdateLog updateLog = logService.list(wrapper).stream().findFirst().orElse(null);
-        if (ObjectUtil.isNotEmpty(updateLog)&&!updateLog.getResponsiblePersonCode().equals(log.getResponsiblePersonCode())){
-            updateLog.setUpdateTime(DateUtils.getNowDate());
-            updateLog.setUpdateBy(userCode);
-            assetUpdateLogMapper.updateById(updateLog);
-        }
         log.setCreateBy(userCode);
         log.setCreateTime(DateUtils.getNowDate());
-        log.setUpdateTime(null);
-        log.setUpdateBy("");
 
         return  assetUpdateLogMapper.insert(log);
     }
@@ -79,11 +68,26 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
-        AssetUpdateLog updateLog = logService.list(wrapper).stream().findFirst().orElse(null);
-        wrapper.isNotNull(AssetUpdateLog::getAssetCode);
         List<AssetUpdateLog> list = logService.list(wrapper);
-        list.add(updateLog);
-        return list;
+        List<AssetUpdateLog> paramsData = new ArrayList<>();
+        String personCode = "";
+        String deptCode = "";
+        for (AssetUpdateLog log : list) {
+            String responsiblePersonCode = log.getResponsiblePersonCode();
+            String responsiblePersonDept = log.getResponsiblePersonDept();
+            if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
+                if (paramsData.size()>0){
+                    AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
+                    if (Objects.nonNull(previous)) {
+                        previous.setEndTime(log.getCreateTime());
+                    }
+                }
+                paramsData.add(log);
+                personCode = responsiblePersonCode;
+                deptCode = responsiblePersonDept;
+            }
+        }
+        return paramsData;
     }
 
     //工单记录

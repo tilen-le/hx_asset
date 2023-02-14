@@ -3,6 +3,7 @@ package com.hexing.asset.domain;
 import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
@@ -32,9 +33,19 @@ public class AssetUpdateLog extends Asset
     private Long id;
 
     /** 主流程类型 */
+    @ApiModelProperty(value = "资产id")
     private String processType;
 
     /** 主流程id */
+    @ApiModelProperty(value = "资产id")
     private String processId;
+
+
+    /** 主流程id */
+    @ApiModelProperty(value = "结束时间")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @TableField(exist = false)
+    private Date endTime;
+
 
 }

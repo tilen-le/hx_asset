@@ -646,7 +646,7 @@ public class SysUserServiceImpl implements ISysUserService
             if (Objects.nonNull(deptDO)) {
                 deptDO.setDelFlag(unDelete);
                 deptDO.setDeptName(odoCodeDTO.getName());
-                deptDO.setCompleteName(odoCodeDTO.getComplete_name());
+                deptDO.setCompleteName("false".equals(odoCodeDTO.getComplete_name())?odoCodeDTO.getName():odoCodeDTO.getComplete_name());
                 if (StringUtils.isNotBlank(odoCodeDTO.getParent_code())) {
                     deptDO.setParentId(Long.parseLong(odoCodeDTO.getParent_code()));
                 }
@@ -657,7 +657,7 @@ public class SysUserServiceImpl implements ISysUserService
                     sysDept.setParentId(Long.parseLong(odoCodeDTO.getParent_code()));
                 }
                 sysDept.setDeptName(odoCodeDTO.getName());
-                sysDept.setCompleteName(odoCodeDTO.getComplete_name());
+                sysDept.setCompleteName("false".equals(odoCodeDTO.getComplete_name())?odoCodeDTO.getName():odoCodeDTO.getComplete_name());
                 deptMapper.insertDept(sysDept);
             }
         }
@@ -684,6 +684,7 @@ public class SysUserServiceImpl implements ISysUserService
                 userMapper.insertUser(sysUser);
             }
         }
+        return;
     }
 
 

@@ -93,6 +93,11 @@
         <el-button type="warning" plain icon="el-icon-download" size="mini" :loading="exportLoading"
                            @click="handleExport" v-hasPermi="['asset:asset:export']">导出</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button type="info" plain icon="el-icon-upload2" size="mini"
+          @click="handleImport" v-hasPermi="['asset:asset:import']"
+        >导入</el-button>
+      </el-col>
     </el-row>
 
     <el-table v-loading="loading" :data="assetList" tooltip-effect="light">
@@ -146,7 +151,27 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
-
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text"><em>将文件拖到此处,或点击上传</em></div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFileForm">确认</el-button>
+        <el-button @click="upload.open = false">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -157,6 +182,7 @@
   import { childTree } from '@/api/system/dept'
   import Treeselect from '@riophae/vue-treeselect'
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+  import { getToken } from '@/utils/auth'
 
   export default {
   name: "assets",
@@ -184,6 +210,21 @@
       // 是否显示弹出层
       open: false,
       deptOptions: [],
+      // 导入参数
+      upload: {
+        // 是否显示弹出层
+        open: false,
+        // 弹出层标题
+        title: "",
+        // 是否禁用上传
+        isUploading: false,
+        // 是否更新已经存在的用户数据
+        updateSupport: 0,
+        // 设置上传的请求头部
+        headers: { Authorization: "Bearer " + getToken() },
+        // 上传的地址
+        url: process.env.VUE_APP_BASE_API + "/asset/importData"
+      },
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -216,7 +257,11 @@
     this.getChildDeptTree();
   },
   methods: {
-    /** 查询成熟度流程列表 */
+    /** 导入按钮操作 */
+    handleImport() {
+      this.upload.title = '导入';
+      this.upload.open = true;
+    },
     getList() {
       this.loading = true;
       listAssets(this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange,"customize","capitalizationStartDate","capitalizationEndDate"))
@@ -299,7 +344,7 @@
     /** 导出按钮操作 */
     handleExport() {
       const queryParams = this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange,"customize","capitalizationStartDate","capitalizationEndDate");
-      this.$modal.confirm("提出", "确定", "取消", "是否确认导出所有符合条件数据项?").then(() => {
+      this.$modal.confirm("提示", "确定", "取消", "是否确认导出所有符合条件数据项?").then(() => {
         this.exportLoading = true;
         return exportData(queryParams);
       }).then(response => {
@@ -325,6 +370,22 @@
     goDetail(row) {
       this.$router.push('/asset/assetInfo/' + row.assetCode)
     },
+    // 文件上传中处理
+    handleFileUploadProgress(event, file, fileList) {
+      this.upload.isUploading = true;
+    },
+    // 文件上传成功处理
+    handleFileSuccess(response, file, fileList) {
+      this.upload.open = false;
+      this.upload.isUploading = false;
+      this.$refs.upload.clearFiles();
+      this.$alert(response.msg, '结果', { dangerouslyUseHTMLString: true });
+      this.getList();
+    },
+    // 提交上传文件
+    submitFileForm() {
+      this.$refs.upload.submit();
+    }
   }
 };
 </script>

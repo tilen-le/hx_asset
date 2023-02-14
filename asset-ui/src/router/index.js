@@ -165,12 +165,12 @@ export const constantRoutes = [
     ]
   },
   {
-    path: '/asset/assetInfo',
+    path: '/asset',
     component: Layout,
     hidden: true,
     children: [
       {
-        path: '/asset/assetInfo/:assetCode',
+        path: 'assetInfo/:assetCode',
         component: (resolve) => require(['@/views/assets/assets/assetInfo'], resolve),
         name: 'assetInfo',
         meta: { title: '资产详情'}

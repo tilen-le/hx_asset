@@ -5,6 +5,7 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 
 import java.util.List;
 
@@ -31,7 +32,7 @@ public interface IAssetUpdateLogService extends IService<AssetUpdateLog>
     /**
      * 查询工单记录
      */
-    List<AssetProcess> workLogList(AssetProcessParam assetProcess);
+    List<AssetProcessReturn> workLogList(AssetProcessParam assetProcess);
     /**
      * 查询操作记录
      */

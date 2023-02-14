@@ -11,18 +11,23 @@ import java.util.Date;
 @Data
 @EqualsAndHashCode
 @Accessors(chain = true)
-public class AssetProcessParam {
+public class AssetProcessReturn {
     private static final long serialVersionUID = 1L;
 
-    /**
-     * 流程总表id
-     */
-    private Long id;
-    /**
-     * 资产id
-     */
-    @ApiModelProperty(value = "资产id")
-    private String assetId;
+    @ApiModelProperty(value = "实例ID")
+    private String instanceId;
+
+    @ApiModelProperty(value = "用户ID")
+    private String userId;
+
+    @ApiModelProperty(value = "物料编码")
+    private String materialNum;
+
+    @ApiModelProperty(value = "流程id")
+    private String processId;
+
+    @ApiModelProperty(value = "流程类型")
+    private String processType;
     /**
      * 资产编码
      */
@@ -138,10 +143,6 @@ public class AssetProcessParam {
 
     @ApiModelProperty(value = "供应商名称")
     private String supplierName;
-
-    //闲置 是否清空资产保管人和保管部门，成本中心
-    @ApiModelProperty(value = "是否清空")
-    private Boolean isClear;
 
 
 }

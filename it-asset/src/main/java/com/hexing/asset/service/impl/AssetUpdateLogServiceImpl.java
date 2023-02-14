@@ -1,11 +1,13 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
@@ -16,6 +18,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -53,9 +56,19 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
             log.setProcessId(process.getId().toString());
             log.setProcessType(process.getProcessType());
         }
-
+        LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetUpdateLog::getAssetCode,log.getAssetCode());
+        wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
+        AssetUpdateLog updateLog = logService.list(wrapper).stream().findFirst().orElse(null);
+        if (ObjectUtil.isNotEmpty(updateLog)&&!updateLog.getResponsiblePersonCode().equals(log.getResponsiblePersonCode())){
+            updateLog.setUpdateTime(DateUtils.getNowDate());
+            updateLog.setUpdateBy(userCode);
+            assetUpdateLogMapper.updateById(updateLog);
+        }
         log.setCreateBy(userCode);
         log.setCreateTime(DateUtils.getNowDate());
+        log.setUpdateTime(null);
+        log.setUpdateBy("");
 
         return  assetUpdateLogMapper.insert(log);
     }
@@ -66,19 +79,25 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
-        return logService.list(wrapper);
+        AssetUpdateLog updateLog = logService.list(wrapper).stream().findFirst().orElse(null);
+        wrapper.isNotNull(AssetUpdateLog::getAssetCode);
+        List<AssetUpdateLog> list = logService.list(wrapper);
+        list.add(updateLog);
+        return list;
     }
 
     //工单记录
     @Override
-    public List<AssetProcess> workLogList(AssetProcessParam assetProcess) {
-        LambdaQueryWrapper<AssetProcess> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetProcess::getAssetCode,assetProcess.getAssetCode());
-        wrapper.orderByDesc(AssetProcess::getCreateTime);
-
+    public List<AssetProcessReturn> workLogList(AssetProcessParam assetProcess) {
+        List<AssetProcessReturn> domains = new ArrayList<>();
         AssetProcess process=new AssetProcess();
         process.setAssetCode(assetProcess.getAssetCode());
-        return processService.list(process);
+        List<AssetProcess> list = processService.list(process);
+        for (AssetProcess ap : list) {
+            AssetProcessReturn domain = processService.convertProcess(ap, new AssetProcessReturn());
+            domains.add(domain);
+        }
+        return domains;
     }
 
     //操作记录

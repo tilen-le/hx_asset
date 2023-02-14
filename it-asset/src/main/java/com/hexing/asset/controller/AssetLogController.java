@@ -6,6 +6,7 @@ import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
 import com.hexing.common.core.controller.BaseController;
@@ -33,7 +34,6 @@ public class AssetLogController extends BaseController
     @Autowired
     private IAssetUpdateLogService updateLogService;
 
-
     /**
      * 查询保管记录
      */
@@ -58,7 +58,7 @@ public class AssetLogController extends BaseController
     public TableDataInfo workLogList(AssetProcessParam assetProcess)
     {
         startPage();
-        List<AssetProcess> list = updateLogService.workLogList(assetProcess);
+        List<AssetProcessReturn> list = updateLogService.workLogList(assetProcess);
         return getDataTable(list);
     }
 

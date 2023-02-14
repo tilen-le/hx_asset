@@ -22,10 +22,9 @@
     </div>
 
     <el-dialog :title="dialogTitle" :visible.sync="pai_fa_open" width="550px" append-to-body>
-      <el-form ref="form" label-width="100px" :model="form">
+      <el-form ref="form" label-width="120px" :model="form">
         <el-form-item label="领用人" prop="responsiblePersonCode" :rules="required_rule">
-          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable
-                     style="width: 80%;">
+          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel"
                        :value="item.dictValue"/>
           </el-select>
@@ -47,7 +46,7 @@
           <el-input v-model="form.standard"/>
         </el-form-item>
         <el-form-item label="转固验收日期" prop="zxy" v-if="info.fixed == '0'" :rules="required_rule">
-          <el-date-picker clearable size="small"
+          <el-date-picker clearable style="width:100%"
                           v-model="form.zxy"
                           type="date"
                           value-format="yyyy-MM-dd">
@@ -69,13 +68,12 @@
     <el-dialog :title="dialogTitle" :visible.sync="zhuan_yi_open" width="550px" append-to-body>
       <el-form ref="form" label-width="100px" :model="form">
         <el-form-item label="接收公司" prop="company">
-          <el-select v-model="form.company" placeholder="请选择所属公司" clearable size="small">
+          <el-select v-model="form.company" placeholder="请选择所属公司" clearable style="width:100%">
             <el-option v-for="dict in dict.type.company" :key="dict.value" :label="dict.label" :value="dict.value"/>
           </el-select>
         </el-form-item>
         <el-form-item label="接收人" prop="responsiblePersonCode" :rules="required_rule">
-          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable
-                     style="width: 80%;">
+          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel"
                        :value="item.dictValue"/>
           </el-select>
@@ -95,15 +93,15 @@
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="pai_fa_submit">确定</el-button>
+        <el-button type="primary" @click="zhuan_yi_submit">确定</el-button>
         <el-button @click="zhuan_yi_open=false">取消</el-button>
       </div>
     </el-dialog>
 
     <el-dialog :title="dialogTitle" :visible.sync="zhuan_gu_open" width="550px" append-to-body>
-      <el-form ref="form" label-width="100px" :model="form">
+      <el-form ref="form" label-width="130px" :model="form">
         <el-form-item label="资产类型" prop="company">
-          <el-select v-model="form.assetType" placeholder="请选择资产类型" clearable size="small">
+          <el-select v-model="form.assetType" placeholder="请选择资产类型" clearable style="width:100%">
             <el-option v-for="dict in dict.type.sap_card_asset_category" :key="dict.value" :label="dict.label"
                        :value="dict.value"/>
           </el-select>
@@ -112,7 +110,7 @@
           <el-input v-model="form.costCenter"/>
         </el-form-item>
         <el-form-item label="保质期到期时间" prop="maturityTime" :rules="required_rule">
-          <el-date-picker clearable size="small"
+          <el-date-picker clearable style="width:100%"
                           v-model="form.maturityTime"
                           type="date"
                           value-format="yyyy-MM-dd">
@@ -147,6 +145,7 @@
               v-for="dict in dict.type.asset_status"
               :key="dict.value"
               :label="dict.value"
+              v-if="dict.label == '在库' || dict.label == '在用' || dict.label == '试用'"
             >{{dict.label}}
             </el-radio>
           </el-radio-group>
@@ -160,13 +159,13 @@
 
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="zhuan_gu_submit">确定</el-button>
-        <el-button @click="zhuan_gu_open=false">取消</el-button>
+        <el-button type="primary" @click="yi_wei_xiu_submit">确定</el-button>
+        <el-button @click="yi_wei_xiu_open=false">取消</el-button>
       </div>
     </el-dialog>
 
     <div class="divMiddle divInfo">
-      <el-descriptions title="基础信息">
+      <el-descriptions title="基础信息" border :column="3"  size="medium">
         <el-descriptions-item label="资产大类">{{ info.assetType }}</el-descriptions-item>
         <el-descriptions-item label="资产中类">{{ info.assetCategory }}</el-descriptions-item>
         <el-descriptions-item label="资产小类">{{ info.assetSubCategory }}</el-descriptions-item>
@@ -324,9 +323,18 @@
       },
       zhuan_yi_submit() {
         transferAsset(this.form).then(response => {
+          this.$modal.msgSuccess("操作成功");
+          this.$alert('xxxxx', '资产卡片编号', {
+            confirmButtonText: '确定',
+            callback: action => {
+              this.$message({
+                type: 'info',
+                message: `action: ${ action }`
+              });
+            }
+          });
           this.getInfo()
           this.zhuan_yi_open = false;
-          this.$modal.msgSuccess("操作成功");
         });
       },
       zhuan_gu() {

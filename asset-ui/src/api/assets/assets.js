@@ -18,6 +18,13 @@ export function exportData(query) {
   })
 }
 
+export function importTemplate() {
+  return request({
+    url: '/asset/importTemplate',
+    method: 'get'
+  })
+}
+
 export function getInfo(assetCode) {
   return request({
     url: '/asset/getInfo/' + assetCode,

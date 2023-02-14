@@ -166,6 +166,10 @@
       >
         <i class="el-icon-upload"></i>
         <div class="el-upload__text"><em>将文件拖到此处,或点击上传</em></div>
+        <div class="el-upload__tip text-center" slot="tip">
+          <span>{{$t('common_field.upload_format_excel')}}</span>
+          <el-link type="primary" :underline="false" style="font-size:12px;vertical-align: baseline;" @click="importTemplate">下载模板</el-link>
+        </div>
       </el-upload>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitFileForm">确认</el-button>
@@ -177,7 +181,7 @@
 
 <script>
 
-  import {exportData, listAssets} from "@/api/assets/assets";
+  import {exportData, listAssets, importTemplate } from "@/api/assets/assets";
   import {getAssetTypeTree} from "@/api/assets/common";
   import { childTree } from '@/api/system/dept'
   import Treeselect from '@riophae/vue-treeselect'
@@ -385,6 +389,11 @@
     // 提交上传文件
     submitFileForm() {
       this.$refs.upload.submit();
+    },
+    importTemplate() {
+      importTemplate().then(response => {
+        this.$download.name(response.msg);
+      });
     }
   }
 };

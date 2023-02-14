@@ -9,7 +9,7 @@
           <dict-tag :options="dict.type.asset_process" :value="scope.row.processType" />
         </template>
       </el-table-column>
-      <el-table-column label="操作时间" align="center" prop="createTime" width="180">
+      <el-table-column label="操作时间" align="center" prop="createTime">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>

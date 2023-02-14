@@ -127,7 +127,6 @@ public class AssetController extends BaseController {
      */
     @ApiOperation("SAP采购单同步接口")
     @PostMapping("/sapAdd")
-    @Transactional
     public AjaxResult sapAdd(@RequestBody SimpleOuterDTO<List<SapPurchaseOrder>> param) {
         List<SapPurchaseOrder> orderList = param.getData();
         if (CollectionUtil.isNotEmpty(orderList)) {

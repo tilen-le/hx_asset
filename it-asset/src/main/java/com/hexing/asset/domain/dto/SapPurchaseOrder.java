@@ -1,12 +1,9 @@
 package com.hexing.asset.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
-
-import java.util.Date;
 
 /**
  * SAP采购订单DTO类
@@ -29,7 +26,7 @@ public class SapPurchaseOrder {
      * 公司代码名称 BUTXT
      */
     @JsonProperty("BUTXT")
-    private String companyCodeName;
+    private String companyName;
 
     /**
      * 采购订单 EBELN
@@ -93,6 +90,12 @@ public class SapPurchaseOrder {
     private String priceUnit;
 
     /**
+     * 原值 NETPR2
+     */
+    @JsonProperty("NETPR2")
+    private Double originalValue;
+
+    /**
      * 币种 WAERS
      */
     @JsonProperty("WAERS")
@@ -102,7 +105,7 @@ public class SapPurchaseOrder {
      * 在建资产号（SAP资产编号） ANLN1
      */
     @JsonProperty("ANLN1")
-    private String assetSapCode;
+    private String sapAssetCode;
 
     /**
      * 到货日期 ZDHRQ

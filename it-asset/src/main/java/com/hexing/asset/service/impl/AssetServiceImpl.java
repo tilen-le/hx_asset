@@ -16,6 +16,7 @@ import com.hexing.asset.domain.AssetProcessVariable;
 import com.hexing.asset.domain.dto.*;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetQueryParam;
+import com.hexing.asset.domain.vo.AssetReceiveVO;
 import com.hexing.asset.domain.vo.AssetTransferVO;
 import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
@@ -547,6 +548,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         Set<String> assetCodeSet = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toSet());
         List<Asset> assetList = this.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeSet));
         if (CollectionUtil.isNotEmpty(assetList)) {
+            log.debug("==== SAP价值传输接口：开始同步价值信息 ====");
             Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getAssetCode, o -> o));
             for (SapValueDTO sapValueDTO : sapValueList) {
                 Asset asset = assetMap.get(sapValueDTO.getAssetCode());
@@ -564,6 +566,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     sapValueDTO.setReason(e.getMessage());
                 }
             }
+            log.debug("==== SAP价值传输接口：价值信息同步完成 ====");
         }
         return sapValueList;
     }
@@ -665,6 +668,24 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         //TODO set variables
         assetProcessService.saveOne(process);
+    }
+
+    /**
+     * 资产派发
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void receiveAsset(AssetReceiveVO vo) throws Exception {
+        JSONArray data = new JSONArray();
+        data.add(vo);
+        String responseBody = uipService.sendToSAP(data, null, "资产派发");
+        JSONObject responseBodyJO = JSONObject.parseObject(responseBody);
+        String sapResponseCode = responseBodyJO.getString("CODE");
+        if ("E".equals(sapResponseCode)) {
+            throw new Exception("SAP报错：" + responseBodyJO);
+        } else if ("S".equals(sapResponseCode)) {
+            log.debug("SAP资产派发成功：" + responseBodyJO);
+        }
     }
 
 }

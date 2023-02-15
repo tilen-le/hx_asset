@@ -157,7 +157,7 @@ public class Asset {
      * 资产原值(含税)
      */
     @ApiModelProperty(value = "资产原值(含税)")
-    @Excel(name = "资产原值(含税)")
+    @Excel(name = "资产原值")
     private String originalValue;
 
     /**

@@ -94,12 +94,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         if (ObjectUtil.isNotEmpty(asset)) {
             asset.setTransfer("0");
             LambdaQueryWrapper<AssetProcess> w = new LambdaQueryWrapper<>();
-            w.eq(AssetProcess::getAssetCode,asset.getAssetCode());
-            w.eq(AssetProcess::getProcessType,AssetProcessType.PROCESS_TRANSFORM.getCode()).
-                    or().eq(AssetProcess::getProcessType,AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode());
+            w.eq(AssetProcess::getAssetCode, asset.getAssetCode());
+            w.eq(AssetProcess::getProcessType, AssetProcessType.PROCESS_TRANSFORM.getCode()).
+                    or().eq(AssetProcess::getProcessType, AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode());
             w.orderByDesc(AssetProcess::getCreateTime);
-           AssetProcess process = assetProcessService.list(w).stream().findFirst().orElse(null);
-            if (ObjectUtil.isNotEmpty(process)&&process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
+            AssetProcess process = assetProcessService.list(w).stream().findFirst().orElse(null);
+            if (ObjectUtil.isNotEmpty(process) && process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())) {
                 asset.setTransfer("1");
             }
             // 资产管理员
@@ -133,22 +133,45 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Transactional
     public String importAsset(List<Asset> assetList, Boolean isUpdateSupport, String operName) {
         if (CollectionUtil.isEmpty(assetList)) {
-            throw new ServiceException("导入资产数据不能为空！");
+            throw new ServiceException("导入失败：导入资产数据不能为空！");
         }
         int successNum = 0;         /* 导入成功条数 */
         int failureNum = 0;         /* 导入失败条数 */
         StringBuilder message = new StringBuilder();
         for (int i = 0; i < assetList.size(); i++) {
             try {
-                JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
-                for (Asset asset : assetList) {
-                    MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
-                    asset.setAssetType(dto.getAssetType());
-                    asset.setAssetCategory(dto.getAssetCategory());
-                    asset.setAssetSubCategory(dto.getAssetSubCategory());
-                    save(asset);
-                    successNum++;
+                Asset asset = assetList.get(i);
+                if (StringUtils.isBlank(asset.getCurrentMaterialNum())) {
+                    throw new ServiceException("导入失败：正确的物料号字段缺失！导入失败");
                 }
+
+                LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Asset::getMaterialNum, asset.getCurrentMaterialNum())
+                        .orderByDesc(Asset::getSerialNum)
+                        .last("LIMIT 1");
+                Asset theLastOne = this.getOne(wrapper);
+                int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
+                DecimalFormat df = new DecimalFormat("0000");
+                String assetCode = asset.getCurrentMaterialNum() + df.format(nextNum);
+                asset.setAssetCode(assetCode);
+
+                JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
+
+                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                asset.setAssetType(dto.getAssetType());
+                asset.setAssetCategory(dto.getAssetCategory());
+                asset.setAssetSubCategory(dto.getAssetSubCategory());
+
+                // 资产管理员
+                asset = assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);
+
+                asset.setFixed("1");
+
+                asset.setCreateBy("system");
+                asset.setCreateTime(DateUtils.getNowDate());
+                save(asset);
+                successNum++;
+
             } catch (Exception e) {
                 failureNum++;
                 String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";

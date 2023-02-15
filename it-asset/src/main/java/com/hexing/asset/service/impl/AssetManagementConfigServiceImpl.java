@@ -74,7 +74,8 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
             AssetManagementConfig config = assetManagementConfigList.get(0);
             SysUser user = sysUserService.getUserByUserName(config.getAssetManager());
             SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
-            asset.setAssetManager(user.getNickName()).setAssetManagementDept(dept.getDeptName());
+            asset.setAssetManager(user.getNickName())
+                    .setAssetManagementDept(dept.getDeptName());
         }
         return asset;
     }

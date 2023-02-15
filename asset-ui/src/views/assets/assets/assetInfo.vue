@@ -206,13 +206,13 @@
         <el-descriptions-item label="资产名称">{{ info.assetName }}</el-descriptions-item>
         <el-descriptions-item label="规格型号">{{ info.standard }}</el-descriptions-item>
         <el-descriptions-item label="资产状态">
-          <dict-tag :options="dict.type.asset_status" :value="form.assetStatus"/>
+          <dict-tag :options="dict.type.asset_status" :value="info.assetStatus"/>
         </el-descriptions-item>
         <el-descriptions-item label="资产保管人">{{ info.responsiblePersonName }}</el-descriptions-item>
         <el-descriptions-item label="资产保管部门">{{ info.responsiblePersonDept }}</el-descriptions-item>
         <el-descriptions-item label="所在位置">{{ info.currentLocation }}</el-descriptions-item>
         <el-descriptions-item label="所属公司">
-          <dict-tag :options="dict.type.asset_company" :value="form.company"/>
+          <dict-tag :options="dict.type.asset_company" :value="info.company"/>
         </el-descriptions-item>
         <el-descriptions-item label="资产管理员">{{ info.assetManager }}</el-descriptions-item>
         <el-descriptions-item label="资产管理部门">{{ info.assetManagementDept }}</el-descriptions-item>
@@ -274,7 +274,7 @@
 
   export default {
     name: 'assetInfo',
-    dicts: ['asset_status', 'sap_card_asset_category'],
+    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company'],
     components: {Treeselect, custodyLog, workLog, operationLog},
     data() {
       return {

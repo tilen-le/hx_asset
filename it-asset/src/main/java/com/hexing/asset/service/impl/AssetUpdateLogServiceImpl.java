@@ -96,7 +96,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
                 if (paramsData.size()>0){
                     AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
                     if (Objects.nonNull(previous)) {
-                        previous.setEndTime(log.getCreateTime());
+                        log.setEndTime(previous.getCreateTime());
                     }
                 }
                 paramsData.add(log);
@@ -110,11 +110,9 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     //工单记录
     @Override
     public List<AssetProcess> workLogList(AssetProcessParam assetProcess) {
-        List<AssetProcessReturn> domains = new ArrayList<>();
         AssetProcess process=new AssetProcess();
         process.setAssetCode(assetProcess.getAssetCode());
         List<AssetProcess> list = processService.listByPage(process);
-
         return list;
     }
 

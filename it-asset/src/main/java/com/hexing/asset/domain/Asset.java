@@ -158,14 +158,14 @@ public class Asset {
      */
     @ApiModelProperty(value = "资产原值(含税)")
     @Excel(name = "资产原值(含税)")
-    private Double originalValue;
+    private String originalValue;
 
     /**
      * 资产净值
      */
     @ApiModelProperty(value = "资产净值")
     @Excel(name = "资产净值")
-    private Double netValue;
+    private String netValue;
 
     /**
      * 资产原值币制
@@ -319,6 +319,12 @@ public class Asset {
     @ApiModelProperty(value = "资产管理部门")
     @TableField(exist = false)
     private String assetManagementDept;
+
+    /**
+     * 折旧
+     */
+    @ApiModelProperty(value = "折旧")
+    private String depreciation;
 
 
 }

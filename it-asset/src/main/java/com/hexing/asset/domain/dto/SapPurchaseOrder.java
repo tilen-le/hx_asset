@@ -93,7 +93,7 @@ public class SapPurchaseOrder {
      * 原值 NETPR2
      */
     @JsonProperty("NETPR2")
-    private Double originalValue;
+    private String originalValue;
 
     /**
      * 币种 WAERS

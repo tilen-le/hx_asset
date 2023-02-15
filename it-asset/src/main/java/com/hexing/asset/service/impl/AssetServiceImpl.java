@@ -545,18 +545,19 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      */
     @Override
     public List<SapValueDTO> sapSyncValue(List<SapValueDTO> sapValueList) {
-        Set<String> assetCodeSet = sapValueList.stream().map(SapValueDTO::getAssetCode).collect(Collectors.toSet());
-        List<Asset> assetList = this.list(new LambdaQueryWrapper<Asset>().in(Asset::getAssetCode, assetCodeSet));
+        Set<String> sapCodeSet = sapValueList.stream().map(SapValueDTO::getSapCode).collect(Collectors.toSet());
+        List<Asset> assetList = this.list(new LambdaQueryWrapper<Asset>().in(Asset::getSapCode, sapCodeSet));
         if (CollectionUtil.isNotEmpty(assetList)) {
             log.debug("==== SAP价值传输接口：开始同步价值信息 ====");
-            Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getAssetCode, o -> o));
+            Map<String, Asset> assetMap = assetList.stream().collect(Collectors.toMap(Asset::getSapCode, o -> o));
             for (SapValueDTO sapValueDTO : sapValueList) {
-                Asset asset = assetMap.get(sapValueDTO.getAssetCode());
+                Asset asset = assetMap.get(sapValueDTO.getSapCode());
                 if (ObjectUtil.isNotEmpty(asset)) {
                     asset.setOriginalValue(sapValueDTO.getOriginalValue())
                             .setNetValue(sapValueDTO.getNetValue())
                             .setCanUseYears(sapValueDTO.getCanUseYears())
-                            .setCanUseMonths(sapValueDTO.getCanUseMonths());
+                            .setCanUseMonths(sapValueDTO.getCanUseMonths())
+                            .setDepreciation(sapValueDTO.getDepreciation());
                 }
                 try {
                     this.updateById(asset);
@@ -566,8 +567,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     sapValueDTO.setReason(e.getMessage());
                 }
             }
-            log.debug("==== SAP价值传输接口：价值信息同步完成 ====");
         }
+        log.debug("==== SAP价值传输接口：价值信息同步完成 ====");
         return sapValueList;
     }
 
@@ -674,11 +675,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * 资产派发
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void receiveAsset(AssetReceiveVO vo) throws Exception {
         JSONArray data = new JSONArray();
         data.add(vo);
-        String responseBody = uipService.sendToSAP(data, null, "资产派发");
+        String responseBody = uipService.sendToSAP(data, UIPCodeEnum.RECEIVE_ASSET_INTERFACE.getCode(), "资产派发");
         JSONObject responseBodyJO = JSONObject.parseObject(responseBody);
         String sapResponseCode = responseBodyJO.getString("CODE");
         if ("E".equals(sapResponseCode)) {

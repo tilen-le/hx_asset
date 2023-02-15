@@ -66,7 +66,7 @@
                        :value="item.dictValue"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="领用部门" prop="responsiblePersonDept">
+        <el-form-item label="领用部门" prop="responsiblePersonDept" :rules="required_rule">
           <treeselect v-model="form.responsiblePersonDept" :options="dept_list" :normalizer="normalizer"
                       :show-count="true" placeholder="选择领用部门"/>
         </el-form-item>
@@ -118,7 +118,7 @@
         </el-form-item>
         <el-form-item label="接收部门" prop="responsiblePersonDept" :rules="required_rule">
           <treeselect v-model="form.responsiblePersonDept" :options="dept_list" :normalizer="normalizer"
-                      :show-count="true" placeholder="选择领用部门" :disabled="zhuan_yi_type == '1'"/>
+                      :show-count="true" placeholder="选择接收部门" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
         <el-form-item label="接收人岗位" prop="responsiblePersonJob" :rules="required_rule">
           <el-input v-model="form.responsiblePersonJob" :disabled="zhuan_yi_type == '1'"/>

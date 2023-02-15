@@ -32,4 +32,8 @@ public class AssetReceiveVO {
      * 出厂编码
      */
     private String Znum;
+    /**
+     * 公司代码
+     */
+    private String BUKRS;
 }

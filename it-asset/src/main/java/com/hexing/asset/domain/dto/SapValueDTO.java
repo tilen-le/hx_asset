@@ -24,7 +24,7 @@ public class SapValueDTO {
      * SAP资产号码 ANLN1
      */
     @JsonProperty("ANLN1")
-    private String assetSapCode;
+    private String sapCode;
     /**
      * 平台资产号码 ZNUM
      */
@@ -44,7 +44,7 @@ public class SapValueDTO {
      * 原值 ZYZ
      */
     @JsonProperty("ZYZ")
-    private Double originalValue;
+    private String originalValue;
     /**
      * 折旧 ZZJ
      */
@@ -54,7 +54,7 @@ public class SapValueDTO {
      * 净值 ZJZ
      */
     @JsonProperty("ZJZ")
-    private Double netValue;
+    private String netValue;
     /**
      * 币种 WAERS
      */

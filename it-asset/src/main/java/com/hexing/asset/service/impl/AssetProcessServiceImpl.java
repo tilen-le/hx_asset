@@ -68,13 +68,17 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         process.setCreateTime(nowDate);
         processService.save(process);
         processParam.setId(process.getId());
+        SysUser user = sysUserService.getUserByUserName(processParam.getResponsiblePersonCode());
+        if (ObjectUtil.isNotEmpty(user)) {
+            processParam.setResponsiblePersonName(user.getNickName());
+        }
         //工单号
         String wokeCode = processParam.getWokeCode();
         //流程子表
         processService.saveProcess(processParam, type);
         int i = assetService.updateAsset(entity, process);
-        if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())){
-            AssetFixVO vo =new AssetFixVO();
+        if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
+            AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());
             vo.setCategory(processParam.getAssetType());
             vo.setCostCenterCode(processParam.getCostCenter());
@@ -83,21 +87,22 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setBelong(processParam.getProject());
             vo.setProvider(processParam.getSupplierName());
             vo.setUsage(processParam.getComment());
-            try{
+            try {
                 assetService.fixAsset(vo);
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new ServiceException("资产转固推送sap异常");
             }
-        }else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())){
-            AssetReceiveVO vo =new AssetReceiveVO();
-            vo.setRname(processParam.getResponsiblePersonCode());
+        } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())) {
+            AssetReceiveVO vo = new AssetReceiveVO();
+            vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
             vo.setPost(processParam.getResponsiblePersonDept());
             vo.setStage(processParam.getCurrentLocation());
-            vo.setAnln1(entity.getSapAssetCode());
+            vo.setAnln1(entity.getSapCode());
             vo.setZnum(processParam.getAssetType());
-            try{
+            vo.setBUKRS(entity.getCompany());
+            try {
                 assetService.receiveAsset(vo);
-            }catch (Exception e){
+            } catch (Exception e) {
                 throw new ServiceException("资产派发推送sap异常");
             }
         }
@@ -109,8 +114,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int receiveAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        if (!entity.getAssetStatus().equals(AssetStatus.IN_STORE.getCode())&&
-                !entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.IN_STORE.getCode()) &&
+                !entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())) {
             throw new ServiceException("非在库和闲置资产无权操作");
         }
         String responsiblePersonCode = assetProcess.getResponsiblePersonCode();
@@ -161,7 +166,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int transferAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        if (!entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())) {
             throw new ServiceException("非闲置资产无权操作");
         }
         if (StringUtils.isBlank(assetProcess.getCompany())) {
@@ -204,7 +209,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
  资产操作【退货】后，弹框确认是否退货，确认后【资产状态】变更为“已退货”页面样式参考图1-3
          * */
         if (!entity.getAssetStatus().equals(AssetStatus.MAINTAIN.getCode())
-        ){
+        ) {
             throw new ServiceException("非维修资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.RETURNED.getCode());
@@ -221,7 +226,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int fixationAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        if (!entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())) {
             throw new ServiceException("非试用资产无权操作");
         }
         if (StringUtils.isBlank(assetProcess.getAssetType())) {
@@ -253,8 +258,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
    资产操作【维修】后，弹框确认后，资产状态变更为【维修】；
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())&&
-                !entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode()) &&
+                !entity.getAssetStatus().equals(AssetStatus.USING.getCode())) {
             throw new ServiceException("非试用和在用资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.MAINTAIN.getCode());
@@ -277,7 +282,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
          是：资产状态变更为【闲置】，清空字段【资产保管人】，【资产保管部门】，【成本中心】；
          否：资产状态变更为【闲置】
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())) {
             throw new ServiceException("非在用资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.UNUSED.getCode());
@@ -312,7 +317,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
    资产操作【报废】后，弹框确认后，资产状态变更为【待报废】页面样式参考图1-3
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())) {
             throw new ServiceException("非在用资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.WAITING_SCRAP.getCode());
@@ -332,7 +337,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         /*
  资产操作【外卖】后，弹框确认是否外卖，确认后，资产状态变更为【待外卖】页面样式参考图1-3
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.USING.getCode())) {
             throw new ServiceException("非在用资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.WAITING_TAKE_OUT.getCode());
@@ -349,13 +354,13 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
     @Transactional
     public int inventoryLossAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        if (!entity.getAssetStatus().equals(AssetStatus.IN_STORE.getCode())&&
-                !entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode())&&
-                !entity.getAssetStatus().equals(AssetStatus.USING.getCode())&&
-                !entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())&&
-                !entity.getAssetStatus().equals(AssetStatus.WAITING_TAKE_OUT.getCode())&&
+        if (!entity.getAssetStatus().equals(AssetStatus.IN_STORE.getCode()) &&
+                !entity.getAssetStatus().equals(AssetStatus.TRIAL.getCode()) &&
+                !entity.getAssetStatus().equals(AssetStatus.USING.getCode()) &&
+                !entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode()) &&
+                !entity.getAssetStatus().equals(AssetStatus.WAITING_TAKE_OUT.getCode()) &&
                 !entity.getAssetStatus().equals(AssetStatus.WAITING_SCRAP.getCode())
-        ){
+        ) {
             throw new ServiceException("非在库、试用、在用、闲置、待外卖、待报废资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.INVENTORY_LOSE.getCode());
@@ -380,7 +385,7 @@ b."试用"，，资产状态变更为【试用】。 表示未转固的资产已
 c."在库"，清空该条资产“资产保管人，资产保管部门，成本中心”，资产状态变更为【在库】。表示资产已经维修完成且资产保管人不再使用该资产；
 页面样式参考图1-4；
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.MAINTAIN.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.MAINTAIN.getCode())) {
             throw new ServiceException("非维修资产无权操作");
         }
         if (assetProcess.getAssetStatus().equals(AssetStatus.USING.getCode())) {
@@ -422,7 +427,7 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         /*
  资产操作【已外卖】后，弹框确认是否已外卖，确认后，资产状态变更为【已外卖】页面样式参考图1-5
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.WAITING_TAKE_OUT.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.WAITING_TAKE_OUT.getCode())) {
             throw new ServiceException("非待外卖资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.TOKE_OUT.getCode());
@@ -442,7 +447,7 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         /*
  资产操作【已报废】后，弹框确认是否已报废，确认后，资产状态变更为【已报废】页面样式参考图1-5
          * */
-        if (!entity.getAssetStatus().equals(AssetStatus.WAITING_SCRAP.getCode())){
+        if (!entity.getAssetStatus().equals(AssetStatus.WAITING_SCRAP.getCode())) {
             throw new ServiceException("非待报废资产无权操作");
         }
         entity.setAssetStatus(AssetStatus.SCRAPED.getCode());

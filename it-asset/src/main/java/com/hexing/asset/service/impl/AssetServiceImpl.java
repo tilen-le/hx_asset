@@ -695,7 +695,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public JSONObject transferAsset(SapAssetTransferDTO dto) throws Exception {
         JSONArray data = new JSONArray();
         data.add(dto);
-        String responseBody = uipService.sendToSAP(data, null, "资产转移");
+        String responseBody = uipService.sendToSAP(data, UIPCodeEnum.TRANSFER_ASSET_INTERFACE.getCode(), "资产转移");
         JSONObject responseBodyJO = JSONObject.parseObject(responseBody);
         String sapResponseCode = responseBodyJO.getString("CODE");
         if ("E".equals(sapResponseCode)) {

@@ -301,6 +301,14 @@ public class Asset {
     private String materialNum;
 
     /**
+     * 正确的物料号
+     */
+    @ApiModelProperty(value = "正确的物料号")
+    @Excel(name = "正确的物料号")
+    @TableField(exist = false)
+    private String currentMaterialNum;
+
+    /**
      * 流水号
      */
     @ApiModelProperty(value = "流水号")
@@ -325,6 +333,35 @@ public class Asset {
      */
     @ApiModelProperty(value = "折旧")
     private String depreciation;
+
+    /**
+     * 责任成本中心
+     */
+    @ApiModelProperty(value = "责任成本中心")
+    @Excel(name = "责任成本中心")
+    private String responsibleCostCenter;
+
+    /**
+     * 责任成本中心描述
+     */
+    @ApiModelProperty(value = "责任成本中心描述")
+    @Excel(name = "责任成本中心描述")
+    private String responsibleCostCenterName;
+
+    /**
+     * 管理部门描述
+     */
+    @ApiModelProperty(value = "管理部门描述")
+    @Excel(name = "管理部门描述")
+    private String manageDeptName;
+
+    /**
+     * 出厂编号
+     */
+    @ApiModelProperty(value = "出厂编号")
+    @Excel(name = "出厂编号")
+    private String factoryNumber;
+
 
 
 }

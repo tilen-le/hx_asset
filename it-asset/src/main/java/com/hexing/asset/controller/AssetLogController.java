@@ -2,7 +2,6 @@ package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
-import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
@@ -25,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 资产日志Controller
@@ -55,8 +55,37 @@ public class AssetLogController extends BaseController
     @ApiOperationSupport(order = 14)
     public TableDataInfo custodyLogList(AssetProcessParam assetProcess)
     {
+        startPage();
         List<AssetUpdateLog> list = updateLogService.custodyLogList(assetProcess);
-        return getDataTable(list);
+        List<AssetUpdateLog> paramsData = new ArrayList<>();
+        String personCode = "";
+        String deptCode = "";
+        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        for (AssetUpdateLog log : list) {
+            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(log.getCreateBy())).findFirst().orElse(new SysUser());
+            log.setCreateBy(sysUser.getNickName());
+            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())){
+                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(log.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+                log.setResponsiblePersonDeptName(dept.getDeptName());
+            }
+            String responsiblePersonCode = log.getResponsiblePersonCode();
+            String responsiblePersonDept = log.getResponsiblePersonDept();
+            if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
+                if (paramsData.size()>0){
+                    AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
+                    if (Objects.nonNull(previous)) {
+                        log.setEndTime(previous.getCreateTime());
+                    }
+                }
+                paramsData.add(log);
+                personCode = responsiblePersonCode;
+                deptCode = responsiblePersonDept;
+            }
+        }
+        TableDataInfo dataTable = getDataTable(list);
+        dataTable.setRows(paramsData);
+        return dataTable;
     }
 
     /**

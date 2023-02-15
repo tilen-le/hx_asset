@@ -6,7 +6,6 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
-import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
@@ -77,34 +76,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         List<AssetUpdateLog> list = logService.list(wrapper);
-        startPage();
-        List<AssetUpdateLog> paramsData = new ArrayList<>();
-        String personCode = "";
-        String deptCode = "";
-        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
-        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
-        for (AssetUpdateLog log : list) {
-            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(log.getCreateBy())).findFirst().orElse(new SysUser());
-            log.setCreateBy(sysUser.getNickName());
-            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())){
-                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(log.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
-                log.setResponsiblePersonDeptName(dept.getDeptName());
-            }
-            String responsiblePersonCode = log.getResponsiblePersonCode();
-            String responsiblePersonDept = log.getResponsiblePersonDept();
-            if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
-                if (paramsData.size()>0){
-                    AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
-                    if (Objects.nonNull(previous)) {
-                        log.setEndTime(previous.getCreateTime());
-                    }
-                }
-                paramsData.add(log);
-                personCode = responsiblePersonCode;
-                deptCode = responsiblePersonDept;
-            }
-        }
-        return paramsData;
+        return list;
     }
 
     //工单记录

@@ -66,7 +66,7 @@ service.interceptors.response.use(res => {
           location.href = '/index';
         })
       }).catch(() => {});
-      return Promise.reject('The login status has expired')
+      return Promise.reject('登录状态已过期')
     } else if (code === 500) {
       Message({
         message: msg,

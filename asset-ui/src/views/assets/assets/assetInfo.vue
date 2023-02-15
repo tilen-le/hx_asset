@@ -79,9 +79,9 @@
         <el-form-item label="规格型号" prop="standard" v-if="info.fixed == '0'" :rules="required_rule">
           <el-input v-model="form.standard"/>
         </el-form-item>
-        <el-form-item label="转固验收日期" prop="zxy" v-if="info.fixed == '0'" :rules="required_rule">
+        <el-form-item label="转固验收日期" prop="fixedAcceptanceDate" v-if="info.fixed == '0'" :rules="required_rule">
           <el-date-picker clearable style="width:100%"
-                          v-model="form.zxy"
+                          v-model="form.fixedAcceptanceDate"
                           type="date"
                           value-format="yyyy-MM-dd">
           </el-date-picker>

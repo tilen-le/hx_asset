@@ -91,7 +91,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try {
                 assetService.fixAsset(vo);
             } catch (Exception e) {
-                throw new ServiceException("资产转固推送sap异常");
+                throw new ServiceException("资产转固推送sap异常: "+e.getMessage());
             }
         } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())) {
             AssetReceiveVO vo = new AssetReceiveVO();
@@ -104,7 +104,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try {
                 assetService.receiveAsset(vo);
             } catch (Exception e) {
-                throw new ServiceException("资产派发推送sap异常");
+                throw new ServiceException("资产派发推送sap异常: "+e.getMessage());
             }
         } else if (type.equals(AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode())) {
             SapAssetTransferDTO vo = new SapAssetTransferDTO();
@@ -118,7 +118,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try {
                 assetService.transferAsset(vo);
             } catch (Exception e) {
-                throw new ServiceException("资产账务转移推送sap异常");
+                throw new ServiceException("资产账务转移推送sap异常: "+e.getMessage());
             }
         }
         int i =0;
@@ -483,9 +483,6 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
     @Transactional
     public int accountTransferAsset(AssetProcessParam assetProcess) {
         Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
-        if (!entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())) {
-            throw new ServiceException("非闲置资产无权操作");
-        }
         if (StringUtils.isBlank(assetProcess.getCompany())) {
             throw new ServiceException("请选择接收公司");
         }

@@ -6,6 +6,7 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
@@ -76,16 +77,55 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         List<AssetUpdateLog> list = logService.list(wrapper);
-        return list;
+        List<AssetUpdateLog> paramsData = new ArrayList<>();
+        String personCode = "";
+        String deptCode = "";
+        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        for (AssetUpdateLog log : list) {
+            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(log.getCreateBy())).findFirst().orElse(new SysUser());
+            log.setCreateBy(sysUser.getNickName());
+            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())){
+                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(log.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+                log.setResponsiblePersonDeptName(dept.getDeptName());
+            }
+            String responsiblePersonCode = log.getResponsiblePersonCode();
+            String responsiblePersonDept = log.getResponsiblePersonDept();
+            if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
+                if (paramsData.size()>0){
+                    AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
+                    if (Objects.nonNull(previous)) {
+                        log.setEndTime(previous.getCreateTime());
+                    }
+                }
+                paramsData.add(log);
+                personCode = responsiblePersonCode;
+                deptCode = responsiblePersonDept;
+            }
+        }
+        return paramsData;
     }
 
     //工单记录
     @Override
-    public List<AssetProcess> workLogList(AssetProcessParam assetProcess) {
+    public List<AssetProcessReturn> workLogList(AssetProcessParam assetProcess) {
         AssetProcess process=new AssetProcess();
         process.setAssetCode(assetProcess.getAssetCode());
-        List<AssetProcess> list = processService.listByPage(process);
-        return list;
+        List<AssetProcess> list = processService.list(process);
+        List<AssetProcessReturn> domains = new ArrayList<>();
+        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
+        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
+        for (AssetProcess ap : list) {
+            AssetProcessReturn domain = processService.convertProcess(ap, new AssetProcessReturn());
+            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(domain.getCreateBy())).findFirst().orElse(new SysUser());
+            if (StringUtils.isNotBlank(domain.getResponsiblePersonDept())){
+                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(domain.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+                domain.setResponsiblePersonDeptName(dept.getDeptName());
+            }
+            domain.setCreateBy(sysUser.getNickName());
+            domains.add(domain);
+        }
+        return domains;
     }
 
     //操作记录

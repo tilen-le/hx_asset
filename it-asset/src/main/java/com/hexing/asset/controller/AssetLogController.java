@@ -12,7 +12,9 @@ import com.hexing.common.core.controller.BaseController;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.core.page.PageDomain;
 import com.hexing.common.core.page.TableDataInfo;
+import com.hexing.common.core.page.TableSupport;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.system.service.ISysDeptService;
 import com.hexing.system.service.impl.SysUserServiceImpl;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 资产日志Controller
@@ -55,36 +58,16 @@ public class AssetLogController extends BaseController
     @ApiOperationSupport(order = 14)
     public TableDataInfo custodyLogList(AssetProcessParam assetProcess)
     {
-        startPage();
         List<AssetUpdateLog> list = updateLogService.custodyLogList(assetProcess);
-        List<AssetUpdateLog> paramsData = new ArrayList<>();
-        String personCode = "";
-        String deptCode = "";
-        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
-        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
-        for (AssetUpdateLog log : list) {
-            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(log.getCreateBy())).findFirst().orElse(new SysUser());
-            log.setCreateBy(sysUser.getNickName());
-            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())){
-                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(log.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
-                log.setResponsiblePersonDeptName(dept.getDeptName());
-            }
-            String responsiblePersonCode = log.getResponsiblePersonCode();
-            String responsiblePersonDept = log.getResponsiblePersonDept();
-            if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
-                if (paramsData.size()>0){
-                    AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
-                    if (Objects.nonNull(previous)) {
-                        log.setEndTime(previous.getCreateTime());
-                    }
-                }
-                paramsData.add(log);
-                personCode = responsiblePersonCode;
-                deptCode = responsiblePersonDept;
-            }
+        PageDomain pageDomain = TableSupport.buildPageRequest();
+        Integer pageNum = pageDomain.getPageNum();
+        Integer pageSize = pageDomain.getPageSize();
+        List<AssetUpdateLog> collect =new ArrayList<>();
+        if (StringUtils.isNotNull(pageNum) && StringUtils.isNotNull(pageSize)) {
+            collect = list.stream().skip((pageNum - 1) * pageSize).limit(pageSize).collect(Collectors.toList());
         }
         TableDataInfo dataTable = getDataTable(list);
-        dataTable.setRows(paramsData);
+        dataTable.setRows(collect);
         return dataTable;
     }
 
@@ -97,23 +80,16 @@ public class AssetLogController extends BaseController
     @ApiOperationSupport(order = 14)
     public TableDataInfo workLogList(AssetProcessParam assetProcess)
     {
-        List<AssetProcess> list = updateLogService.workLogList(assetProcess);
-        List<AssetProcessReturn> domains = new ArrayList<>();
-        List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
-        List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
-        for (AssetProcess ap : list) {
-            AssetProcessReturn domain = processService.convertProcess(ap, new AssetProcessReturn());
-            SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(domain.getCreateBy())).findFirst().orElse(new SysUser());
-            if (StringUtils.isNotBlank(domain.getResponsiblePersonDept())){
-                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(domain.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
-                domain.setResponsiblePersonDeptName(dept.getDeptName());
-            }
-            domain.setCreateBy(sysUser.getNickName());
-            domains.add(domain);
+        List<AssetProcessReturn> list = updateLogService.workLogList(assetProcess);
+        PageDomain pageDomain = TableSupport.buildPageRequest();
+        Integer pageNum = pageDomain.getPageNum();
+        Integer pageSize = pageDomain.getPageSize();
+        List<AssetProcessReturn> collect =new ArrayList<>();
+        if (StringUtils.isNotNull(pageNum) && StringUtils.isNotNull(pageSize)) {
+            collect = list.stream().skip((pageNum - 1) * pageSize).limit(pageSize).collect(Collectors.toList());
         }
-
         TableDataInfo dataTable = getDataTable(list);
-        dataTable.setRows(domains);
+        dataTable.setRows(collect);
         return dataTable;
     }
 

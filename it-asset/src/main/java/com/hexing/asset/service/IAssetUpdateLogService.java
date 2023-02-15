@@ -32,7 +32,7 @@ public interface IAssetUpdateLogService extends IService<AssetUpdateLog>
     /**
      * 查询工单记录
      */
-    List<AssetProcess> workLogList(AssetProcessParam assetProcess);
+    List<AssetProcessReturn> workLogList(AssetProcessParam assetProcess);
     /**
      * 查询操作记录
      */

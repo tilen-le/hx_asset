@@ -78,10 +78,6 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         String wokeCode = processParam.getWokeCode();
         //流程子表
         processService.saveProcess(processParam, type);
-        int i =0;
-        if (!process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
-            i = assetService.updateAsset(entity, process);
-        }
         if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
             AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());
@@ -100,11 +96,11 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())) {
             AssetReceiveVO vo = new AssetReceiveVO();
             vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
-            vo.setPost(processParam.getResponsiblePersonDept());
+            vo.setPost(processParam.getResponsiblePersonJob());
             vo.setStage(processParam.getCurrentLocation());
             vo.setAnln1(entity.getSapCode());
             vo.setZnum(processParam.getAssetType());
-            vo.setBUKRS(entity.getCompany());
+            vo.setBUKRS(processParam.getCompany());
             try {
                 assetService.receiveAsset(vo);
             } catch (Exception e) {
@@ -112,16 +108,22 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             }
         } else if (type.equals(AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode())) {
             SapAssetTransferDTO vo = new SapAssetTransferDTO();
+            vo.setBUKRS(processParam.getCompany());
+            vo.setZBUKRS(entity.getCompany());
             vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
-            vo.setPost(processParam.getResponsiblePersonDept());
+            vo.setPost(processParam.getResponsiblePersonJob());
             vo.setStage(processParam.getCurrentLocation());
             vo.setAnln1(entity.getSapCode());
-            vo.setBUKRS(entity.getCompany());
+
             try {
                 assetService.transferAsset(vo);
             } catch (Exception e) {
-                throw new ServiceException("资产账务推送sap异常");
+                throw new ServiceException("资产账务转移推送sap异常");
             }
+        }
+        int i =0;
+        if (!process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
+            i = assetService.updateAsset(entity, process);
         }
         return i;
     }

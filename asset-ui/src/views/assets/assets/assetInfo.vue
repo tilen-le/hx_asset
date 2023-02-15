@@ -176,7 +176,6 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="yi_wei_xiu_open" width="550px" append-to-body>
       <el-form ref="form" label-width="100px" :model="form">
-
         <el-form-item label="资产状态" prop="assetStatus">
           <el-radio-group v-model="form.assetStatus">
             <el-radio
@@ -199,6 +198,28 @@
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="yi_wei_xiu_submit">确定</el-button>
         <el-button @click="yi_wei_xiu_open=false">取消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog :title="dialogTitle" :visible.sync="xian_zhi_open" width="400px" append-to-body top="30vh">
+      <div style="text-align: center;">
+        <i class="el-icon-warning" style="color: red;"></i>是否清空资产保管人，保管部门，成本中心？
+      </div>
+      <el-form ref="form" label-width="80px" :model="form" style="margin-top:10px;">
+        <el-form-item label="" prop="clearInfo">
+          <el-radio-group v-model="form.clearInfo">
+            <el-radio
+              v-for="dict in dict.type.confirm"
+              :key="dict.value"
+              :label="dict.value"
+            >{{dict.label}}
+            </el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="xian_zhi_submit">确定</el-button>
+        <el-button @click="xian_zhi_open=false">取消</el-button>
       </div>
     </el-dialog>
 
@@ -280,7 +301,7 @@
 
   export default {
     name: 'assetInfo',
-    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company'],
+    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'confirm'],
     components: {Treeselect, custodyLog, workLog, operationLog},
     data() {
       return {
@@ -296,6 +317,7 @@
         zhuan_yi_type: '0',
         zhuan_gu_open: false,
         yi_wei_xiu_open: false,
+        xian_zhi_open: false,
         required_rule: [{required: true, message: "此项必填", trigger: 'blur'}],
         common_users: [],
         dept_list: [],
@@ -422,6 +444,18 @@
           this.$modal.msgSuccess("操作成功");
         });
       },
+      xian_zhi() {
+        this.clearForm();
+        this.dialogTitle = '资产闲置';
+        this.xian_zhi_open = true;
+      },
+      xian_zhi_submit() {
+        unusedAsset(this.form).then(response => {
+          this.getInfo();
+          this.xian_zhi_open = false;
+          this.$modal.msgSuccess("操作成功");
+        });
+      },
       confirm_handle(type) {
         const content = "确定要" + type + "资产吗？";
         this.$modal.confirm("提示", "确定", "取消", content).then(() => {
@@ -468,17 +502,6 @@
         }).catch(() => {
         });
       },
-      xian_zhi() {
-        this.$modal.confirm("提示", "确定", "取消", "是否清空资产保管人，保管部门，成本中心？").then(() => {
-          this.clearForm();
-          return unusedAsset(this.form);
-        }).then(response => {
-          this.getInfo();
-          this.$modal.msgSuccess(type + "修改成功");
-        }).catch(() => {
-        });
-      },
-
       getChildDeptTree() {
         const dept_list = this.dept_list
         if (dept_list.length == 0) {

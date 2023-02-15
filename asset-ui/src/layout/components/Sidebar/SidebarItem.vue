@@ -98,3 +98,13 @@ export default {
   }
 }
 </script>
+<style scoped>
+
+  .el-menu-item.is-active {
+    color: #FFFFFF !important;
+  }
+  .el-menu-item:hover {
+    color: #FFFFFF !important;
+  }
+
+</style>

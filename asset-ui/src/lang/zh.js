@@ -173,7 +173,7 @@ export default {
   dict: {
     name: '字典名称',
     type: '字典类型',
-    inset: '添加字典类型',
+    insert: '添加字典类型',
     update: '修改字典类型',
     label: '数据标签',
     labelEn: '数据标签(En)',

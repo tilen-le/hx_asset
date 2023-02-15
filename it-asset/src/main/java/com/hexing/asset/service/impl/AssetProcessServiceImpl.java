@@ -6,8 +6,10 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.*;
+import com.hexing.asset.domain.dto.SapAssetTransferDTO;
 import com.hexing.asset.domain.vo.AssetFixVO;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.domain.vo.AssetReceiveVO;
 import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
@@ -76,7 +78,6 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         String wokeCode = processParam.getWokeCode();
         //流程子表
         processService.saveProcess(processParam, type);
-        int i = assetService.updateAsset(entity, process);
         if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
             AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());
@@ -95,16 +96,34 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())) {
             AssetReceiveVO vo = new AssetReceiveVO();
             vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
-            vo.setPost(processParam.getResponsiblePersonDept());
+            vo.setPost(processParam.getResponsiblePersonJob());
             vo.setStage(processParam.getCurrentLocation());
             vo.setAnln1(entity.getSapCode());
             vo.setZnum(processParam.getAssetType());
-            vo.setBUKRS(entity.getCompany());
+            vo.setBUKRS(processParam.getCompany());
             try {
                 assetService.receiveAsset(vo);
             } catch (Exception e) {
                 throw new ServiceException("资产派发推送sap异常");
             }
+        } else if (type.equals(AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode())) {
+            SapAssetTransferDTO vo = new SapAssetTransferDTO();
+            vo.setBUKRS(processParam.getCompany());
+            vo.setZBUKRS(entity.getCompany());
+            vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
+            vo.setPost(processParam.getResponsiblePersonJob());
+            vo.setStage(processParam.getCurrentLocation());
+            vo.setAnln1(entity.getSapCode());
+
+            try {
+                assetService.transferAsset(vo);
+            } catch (Exception e) {
+                throw new ServiceException("资产账务转移推送sap异常");
+            }
+        }
+        int i =0;
+        if (!process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
+            i = assetService.updateAsset(entity, process);
         }
         return i;
     }
@@ -459,6 +478,62 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.SCRAPED.getCode());
     }
 
+    //资产操作-账务转移
+    @Override
+    @Transactional
+    public int accountTransferAsset(AssetProcessParam assetProcess) {
+        Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        if (!entity.getAssetStatus().equals(AssetStatus.UNUSED.getCode())) {
+            throw new ServiceException("非闲置资产无权操作");
+        }
+        if (StringUtils.isBlank(assetProcess.getCompany())) {
+            throw new ServiceException("请选择接收公司");
+        }
+        if (StringUtils.isBlank(assetProcess.getResponsiblePersonCode())) {
+            throw new ServiceException("请选择接收人");
+        }
+        if (StringUtils.isBlank(assetProcess.getResponsiblePersonDept())) {
+            throw new ServiceException("请选择接收人部门");
+        }
+        if (StringUtils.isBlank(assetProcess.getCostCenter())) {
+            throw new ServiceException("请输入成本中心");
+        }
+        if (StringUtils.isBlank(assetProcess.getCurrentLocation())) {
+            throw new ServiceException("请输入所在位置");
+        }
+        entity.setCompany(assetProcess.getCompany());
+        entity.setResponsiblePersonCode(assetProcess.getResponsiblePersonCode());
+        entity.setCostCenter(assetProcess.getCostCenter());
+        entity.setCurrentLocation(assetProcess.getCurrentLocation());
+        if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
+            entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());
+        }
+        entity.setAssetStatus(AssetStatus.IN_STORE.getCode());
+        entity.setUpdateTime(DateUtils.getNowDate());
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+//        String userCode = "80010712";
+        entity.setUpdateBy(userCode);
+
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode());
+    }
+
+    //已报废
+    @Override
+    @Transactional
+    public AssetProcessReturn getTransferInfo(String assetProcess) {
+        AssetProcessReturn domain = new AssetProcessReturn();
+        AssetProcess process=new AssetProcess();
+        process.setAssetCode(assetProcess);
+        List<AssetProcess> list = processService.list(process);
+        for (AssetProcess process1 : list) {
+            if (process1.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
+                domain = processService.convertProcess(process1, new AssetProcessReturn());
+                break;
+            }
+        }
+     return domain;
+
+    }
     /**
      * 查询资产流程
      */

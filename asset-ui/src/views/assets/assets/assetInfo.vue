@@ -17,10 +17,13 @@
       <div class="head_button">
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:receiveAsset']"
                    v-if="info.assetStatus == '1' || info.assetStatus == '2'"
-                   @click="pai_fa">资产派发</el-button>
+                   @click="pai_fa">派发</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
                    v-if="info.assetStatus == '2'"
-                   @click="zhuan_yi">资产转移</el-button>
+                   @click="zhuan_yi('0', '资产转移')">转移</el-button>
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:accountTransferAsset']"
+                   v-if="info.transfer == '1'"
+                   @click="zhuan_yi('1', '资产账务转移')">账务转移</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainAsset']"
                    v-if="info.assetStatus == '4' || info.assetStatus == '6'"
                    @click="confirm_handle('维修')">维修</el-button>
@@ -101,29 +104,30 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="zhuan_yi_open" width="550px" append-to-body>
       <el-form ref="form" label-width="100px" :model="form">
-        <el-form-item label="接收公司" prop="company">
-          <el-select v-model="form.company" placeholder="请选择所属公司" clearable style="width:100%">
+        <el-form-item label="接收公司" prop="company" :rules="required_rule">
+          <el-select v-model="form.company" placeholder="请选择所属公司" clearable style="width:100%" :disabled="zhuan_yi_type == '1'">
             <el-option v-for="dict in dict.type.company" :key="dict.value" :label="dict.label" :value="dict.value"/>
           </el-select>
         </el-form-item>
         <el-form-item label="接收人" prop="responsiblePersonCode" :rules="required_rule">
-          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%">
+          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%"
+                     :disabled="zhuan_yi_type == '1'">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel"
                        :value="item.dictValue"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="接收部门" prop="responsiblePersonDept">
+        <el-form-item label="接收部门" prop="responsiblePersonDept" :rules="required_rule">
           <treeselect v-model="form.responsiblePersonDept" :options="dept_list" :normalizer="normalizer"
-                      :show-count="true" placeholder="选择领用部门"/>
+                      :show-count="true" placeholder="选择领用部门" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
         <el-form-item label="接收人岗位" prop="responsiblePersonJob" :rules="required_rule">
-          <el-input v-model="form.responsiblePersonJob"/>
+          <el-input v-model="form.responsiblePersonJob" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
         <el-form-item label="成本中心" prop="costCenter" :rules="required_rule">
-          <el-input v-model="form.costCenter"/>
+          <el-input v-model="form.costCenter" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
         <el-form-item label="所在位置" prop="currentLocation" :rules="required_rule">
-          <el-input v-model="form.currentLocation"/>
+          <el-input v-model="form.currentLocation" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -266,7 +270,9 @@
     takeOutAsset,
     transferAsset,
     waiteTakeOutAsset,
-    unusedAsset
+    unusedAsset,
+    getTransferInfo,
+    accountTransferAsset
   } from "@/api/assets/process";
   import {childTree} from '@/api/system/dept';
   import Treeselect from '@riophae/vue-treeselect'
@@ -287,6 +293,7 @@
         dialogTitle: '',
         pai_fa_open: false,
         zhuan_yi_open: false,
+        zhuan_yi_type: '0',
         zhuan_gu_open: false,
         yi_wei_xiu_open: false,
         required_rule: [{required: true, message: "此项必填", trigger: 'blur'}],
@@ -347,22 +354,50 @@
       },
       pai_fa_submit() {
         receiveAsset(this.form).then(response => {
-          this.getInfo()
+          this.getInfo();
           this.pai_fa_open = false;
           this.$modal.msgSuccess("操作成功");
         });
       },
-      zhuan_yi() {
+      zhuan_yi(type, title) {
+        this.zhuan_yi_type = type;
         this.clearForm();
-        this.dialogTitle = '资产转移';
+        this.dialogTitle = title;
         this.zhuan_yi_open = true;
         this.getCommonUsers();
         this.getChildDeptTree();
-
+        if ('1' == type) {
+          //获取转移信息
+          getTransferInfo(this.assetCode).then((response) => {
+            this.form = response.data
+          })
+        }
       },
       zhuan_yi_submit() {
-        transferAsset(this.form).then(response => {
+        let type = this.zhuan_yi_type;
+        if ('0' == type) {
+          transferAsset(this.form).then(response => {
+            this.$modal.msgSuccess("操作成功");
+            this.getInfo();
+            this.zhuan_yi_open = false;
+          });
+        } else {
+          accountTransferAsset(this.form).then(response => {
+            this.$modal.msgSuccess("操作成功");
+            this.getInfo();
+            this.zhuan_yi_open = false;
+          });
+        }
+      },
+      zhuan_gu() {
+        this.clearForm();
+        this.dialogTitle = '资产转固';
+        this.zhuan_gu_open = true;
+      },
+      zhuan_gu_submit() {
+        fixationAsset(this.form).then(response => {
           this.$modal.msgSuccess("操作成功");
+          this.getInfo();
           this.$alert('xxxxx', '资产卡片编号', {
             confirmButtonText: '确定',
             callback: action => {
@@ -372,20 +407,7 @@
               });
             }
           });
-          this.getInfo()
-          this.zhuan_yi_open = false;
-        });
-      },
-      zhuan_gu() {
-        this.clearForm();
-        this.dialogTitle = '资产转固';
-        this.zhuan_gu_open = true;
-      },
-      zhuan_gu_submit() {
-        fixationAsset(this.form).then(response => {
-          this.getInfo()
           this.zhuan_gu_open = false;
-          this.$modal.msgSuccess("操作成功");
         });
       },
       yi_wei_xiu() {
@@ -395,7 +417,7 @@
       },
       yi_wei_xiu_submit() {
         maintainedAsset(this.form).then(response => {
-          this.getInfo()
+          this.getInfo();
           this.yi_wei_xiu_open = false;
           this.$modal.msgSuccess("操作成功");
         });
@@ -416,7 +438,7 @@
             this.$modal.msgError("页面按钮配置类型错误");
           }
         }).then(response => {
-          this.getInfo()
+          this.getInfo();
           this.$modal.msgSuccess(type + "成功");
         }).catch(() => {
         });
@@ -441,7 +463,7 @@
             this.$modal.msgError("页面按钮配置类型错误");
           }
         }).then(response => {
-          this.getInfo()
+          this.getInfo();
           this.$modal.msgSuccess(type + "修改成功");
         }).catch(() => {
         });
@@ -451,7 +473,7 @@
           this.clearForm();
           return unusedAsset(this.form);
         }).then(response => {
-          this.getInfo()
+          this.getInfo();
           this.$modal.msgSuccess(type + "修改成功");
         }).catch(() => {
         });

@@ -18,6 +18,10 @@ public enum AssetProcessType {
      */
     PROCESS_TRANSFORM("201", "资产转移"),
     /**
+     * 账务资产转移
+     */
+    PROCESS_ACCOUNT_TRANSFORM("210", "账务资产转移"),
+    /**
      * 已退货
      */
     RETURNED("301", "已退货"),

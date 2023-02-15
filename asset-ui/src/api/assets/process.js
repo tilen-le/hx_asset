@@ -126,5 +126,20 @@ export function backAsset(data) {
   })
 }
 
+//获取转移详情
+export function getTransferInfo(assetCode) {
+  return request({
+    url: '/asset/process/getTransferInfo/' + assetCode,
+    method: 'get'
+  })
+}
 
+//账务转移
+export function accountTransferAsset(data) {
+  return request({
+    url: '/asset/process/accountTransferAsset',
+    method: 'put',
+    data: data
+  })
+}
 

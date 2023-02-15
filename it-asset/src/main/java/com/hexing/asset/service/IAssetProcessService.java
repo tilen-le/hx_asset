@@ -3,6 +3,7 @@ package com.hexing.asset.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 
 import java.util.List;
 
@@ -98,6 +99,18 @@ public interface IAssetProcessService extends IService<AssetProcess> {
      * @return 结果
      */
     int scrapedAsset(AssetProcessParam assetProcess);
+    /**
+     * 资产操作-账务转移
+     *
+     * @return 结果
+     */
+    int accountTransferAsset(AssetProcessParam assetProcess);
+    /**
+     * 获取转移详情
+     *
+     * @return 结果
+     */
+    AssetProcessReturn getTransferInfo(String assetCode);
 
     /**
      * 查询资产流程

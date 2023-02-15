@@ -1,7 +1,10 @@
 package com.hexing.asset.controller;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
+import com.hexing.asset.domain.AssetUpdateLog;
 import com.hexing.asset.domain.vo.AssetProcessParam;
+import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.common.annotation.Log;
 import com.hexing.common.core.controller.BaseController;
@@ -166,5 +169,29 @@ public class AssetProcessController extends BaseController {
         return toAjax(processService.scrapedAsset(assetProcess));
     }
 
+    /**
+     * 资产账务转移
+     */
+    @Log(title = "资产账务转移", businessType = BusinessType.UPDATE)
+    @PutMapping("/accountTransferAsset")
+    @PreAuthorize("@ss.hasPermi('asset:process:accountTransferAsset')")
+    @ApiOperation("资产账务转移")
+    @ApiOperationSupport(order = 12)
+    public AjaxResult accountTransferAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.accountTransferAsset(assetProcess));
+    }
 
+    /**
+     * 获取转移详情
+     */
+    @GetMapping("/getTransferInfo/{assetCode}")
+    @ApiOperation("获取转移详情")
+    @ApiOperationSupport(order = 13)
+    public AjaxResult getTransferInfo(@PathVariable("assetCode") String assetCode) {
+        AssetProcessReturn assetProcessReturn = processService.getTransferInfo(assetCode);
+        if (ObjectUtil.isEmpty(assetProcessReturn)) {
+            return AjaxResult.error("该资产转移记录不存在");
+        }
+        return AjaxResult.success(assetProcessReturn);
+    }
 }

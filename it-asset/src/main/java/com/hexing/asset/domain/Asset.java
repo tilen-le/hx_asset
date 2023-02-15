@@ -335,6 +335,13 @@ public class Asset {
     private String depreciation;
 
     /**
+     * 转移标识
+     */
+    @ApiModelProperty(value = "转移标识")
+    @TableField(exist = false)
+    private String transfer;
+
+    /**
      * 责任成本中心
      */
     @ApiModelProperty(value = "责任成本中心")

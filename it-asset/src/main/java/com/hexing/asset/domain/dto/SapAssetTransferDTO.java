@@ -1,6 +1,5 @@
 package com.hexing.asset.domain.dto;
 
-import javafx.stage.Stage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
@@ -18,7 +17,11 @@ public class SapAssetTransferDTO {
     /**
      * 资产编码
      */
-    private String assetCode;
+    private String ZNUM;
+    /**
+     * 原始公司代码
+     */
+    private String ZBUKRS;
     /**
      * 接收公司代码
      */

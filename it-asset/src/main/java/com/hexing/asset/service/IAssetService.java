@@ -1,8 +1,10 @@
 package com.hexing.asset.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
+import com.hexing.asset.domain.dto.SapAssetTransferDTO;
 import com.hexing.asset.domain.dto.SapPurchaseOrder;
 import com.hexing.asset.domain.dto.SapValueDTO;
 import com.hexing.asset.domain.dto.SimpleOuterDTO;
@@ -118,4 +120,9 @@ public interface IAssetService extends IService<Asset> {
      * 资产派发
      */
     void receiveAsset(AssetReceiveVO vo) throws Exception;
+
+    /**
+     * 资产账务转移
+     */
+    JSONObject transferAsset(SapAssetTransferDTO dto) throws Exception;
 }

@@ -688,4 +688,23 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
     }
 
+    /**
+     * 资产账务转移
+     */
+    @Override
+    public JSONObject transferAsset(SapAssetTransferDTO dto) throws Exception {
+        JSONArray data = new JSONArray();
+        data.add(dto);
+        String responseBody = uipService.sendToSAP(data, null, "资产转移");
+        JSONObject responseBodyJO = JSONObject.parseObject(responseBody);
+        String sapResponseCode = responseBodyJO.getString("CODE");
+        if ("E".equals(sapResponseCode)) {
+            throw new Exception("SAP报错：" + responseBodyJO);
+        } else if ("S".equals(sapResponseCode)) {
+            log.debug("SAP资产转移成功：" + responseBodyJO);
+            return responseBodyJO;
+        }
+        return null;
+    }
+
 }

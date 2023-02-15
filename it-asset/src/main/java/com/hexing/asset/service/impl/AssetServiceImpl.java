@@ -155,12 +155,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String assetCode = asset.getCurrentMaterialNum() + df.format(nextNum);
                 asset.setAssetCode(assetCode);
 
-                JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
-
-                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
-                asset.setAssetType(dto.getAssetType());
-                asset.setAssetCategory(dto.getAssetCategory());
-                asset.setAssetSubCategory(dto.getAssetSubCategory());
+                asset.setAssetType(asset.getCurrentMaterialNum().substring(0, 1));
+                asset.setAssetCategory(asset.getCurrentMaterialNum().substring(1, 3));
+                asset.setAssetSubCategory(asset.getCurrentMaterialNum().substring(3, 5));
 
                 // 资产管理员
                 asset = assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);

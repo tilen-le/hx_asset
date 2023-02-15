@@ -326,5 +326,12 @@ public class Asset {
     @ApiModelProperty(value = "折旧")
     private String depreciation;
 
+    /**
+     * 转移标识
+     */
+    @ApiModelProperty(value = "转移标识")
+    @TableField(exist = false)
+    private String transfer;
+
 
 }

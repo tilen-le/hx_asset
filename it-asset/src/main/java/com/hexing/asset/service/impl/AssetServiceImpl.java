@@ -92,6 +92,16 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         wrapper.eq(Asset::getAssetCode, assetCode);
         Asset asset = assetMapper.selectOne(wrapper);
         if (ObjectUtil.isNotEmpty(asset)) {
+            asset.setTransfer("0");
+            LambdaQueryWrapper<AssetProcess> w = new LambdaQueryWrapper<>();
+            w.eq(AssetProcess::getAssetCode,asset.getAssetCode());
+            w.eq(AssetProcess::getProcessType,AssetProcessType.PROCESS_TRANSFORM.getCode()).
+                    or().eq(AssetProcess::getProcessType,AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode());
+            w.orderByDesc(AssetProcess::getCreateTime);
+           AssetProcess process = assetProcessService.list(w).stream().findFirst().orElse(null);
+            if (ObjectUtil.isNotEmpty(process)&&process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
+                asset.setTransfer("1");
+            }
             // 资产管理员
             asset = assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);
             // 解析物料号返回资产大中小类

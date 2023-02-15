@@ -309,7 +309,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
 //        String userCode = "80010712";
         entity.setUpdateBy(userCode);
-        if (assetProcess.getIsClear()) {
+        if ("1".equals(assetProcess.getClearInfo())) {
             assetProcess.setResponsiblePersonCode("");
             assetProcess.setResponsiblePersonName("");
             assetProcess.setResponsiblePersonDept("");

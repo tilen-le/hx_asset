@@ -154,13 +154,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 DecimalFormat df = new DecimalFormat("0000");
                 String assetCode = asset.getCurrentMaterialNum() + df.format(nextNum);
                 asset.setAssetCode(assetCode);
+                // TODO 所属公司导入
+                asset.setCompany("3060");
 
-                JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
-
-                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
-                asset.setAssetType(dto.getAssetType());
-                asset.setAssetCategory(dto.getAssetCategory());
-                asset.setAssetSubCategory(dto.getAssetSubCategory());
+                asset.setAssetType(asset.getCurrentMaterialNum().substring(0, 1));
+                asset.setAssetCategory(asset.getCurrentMaterialNum().substring(1, 3));
+                asset.setAssetSubCategory(asset.getCurrentMaterialNum().substring(3, 5));
 
                 // 资产管理员
                 asset = assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);

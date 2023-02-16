@@ -114,14 +114,14 @@
           <el-link :underline="false" type="primary" @click="goDetail(scope.row)">{{ scope.row.assetCode }}</el-link>
         </template>
       </el-table-column>
-      <el-table-column label="资产大类" align="center" prop="assetType"  :show-overflow-tooltip="true"/>
+      <el-table-column label="资产大类" align="center" prop="assetType" :show-overflow-tooltip="true"/>
       <el-table-column label="资产中类" align="center" prop="assetCategory" />
       <el-table-column label="资产小类" align="center" prop="assetSubCategory" />
       <el-table-column label="资产名称" align="center" prop="assetName" />
-      <el-table-column label="规格型号" align="center" prop="standard" />
+      <el-table-column label="规格型号" align="center" prop="standard" :show-overflow-tooltip="true"/>
       <el-table-column label="资产保管人" align="center" prop="responsiblePersonName" />
       <el-table-column label="资产保管部门" align="center" prop="responsiblePersonDept" />
-      <el-table-column label="所在位置" align="center" prop="currentLocation" />
+      <el-table-column label="所在位置" align="center" prop="currentLocation" :show-overflow-tooltip="true" />
       <el-table-column label="转固状态" align="center" prop="fixed">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_fixed" :value="scope.row.fixed"/>

@@ -257,7 +257,7 @@
 
 
     <div class="divBottom divInfo">
-      <el-tabs v-model="activeName" type="card" @tab-click="tabClick">
+      <el-tabs v-model="activeName" @tab-click="tabClick">
         <el-tab-pane label="保管记录" name="belongTab">
           <custodyLog :assetCode="assetCode"></custodyLog>
         </el-tab-pane>

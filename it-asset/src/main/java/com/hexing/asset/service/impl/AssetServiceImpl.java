@@ -137,6 +137,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         StringBuilder message = new StringBuilder();
         AssetUpdateLog updateLog=new AssetUpdateLog();
         String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
         for (int i = 0; i < assetList.size(); i++) {
             try {
                 Asset asset = assetList.get(i);
@@ -170,6 +171,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 save(asset);
                 BeanUtils.copyProperties(asset, updateLog);
                 updateLog.setProcessType(type);
+                updateLog.setCreateBy(userCode);
+                updateLog.setCreateTime(DateUtils.getNowDate());
                 assetUpdateLogService.save(updateLog);
                 successNum++;
 
@@ -524,6 +527,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
         String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
+        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
         for (SapPurchaseOrder order : orderList) {
             int numberOfArrival = order.getNumberOfArrival().intValue();
             List<Asset> assetList = new ArrayList<>();
@@ -562,7 +566,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 assetList.add(asset);
                 AssetUpdateLog updateLog = new AssetUpdateLog();
                 BeanUtils.copyProperties(asset, updateLog);
+                updateLog.setCreateBy(userCode);
+                updateLog.setCreateTime(DateUtils.getNowDate());
                 updateLog.setProcessType(type);
+                logList.add(updateLog);
                 nextNum++;
             }
             this.saveBatch(assetList);

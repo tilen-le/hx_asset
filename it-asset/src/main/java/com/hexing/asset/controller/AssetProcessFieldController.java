@@ -46,14 +46,12 @@ public class AssetProcessFieldController extends BaseController {
         return getDataTable(list);
     }
 
-    @PreAuthorize("@ss.hasPermi('process:field:query')")
     @GetMapping(value = "/{id}")
     @ApiOperation("获取流程字段详细信息")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return AjaxResult.success(assetProcessFieldService.selectAssetProcessFieldById(id));
     }
 
-    @PreAuthorize("@ss.hasPermi('process:field:add')")
     @Log(title = "新增流程字段", businessType = BusinessType.INSERT)
     @PostMapping
     @ApiOperation("新增流程字段")
@@ -61,7 +59,6 @@ public class AssetProcessFieldController extends BaseController {
         return toAjax(assetProcessFieldService.insertAssetProcessField(assetProcessField));
     }
 
-    @PreAuthorize("@ss.hasPermi('process:field:edit')")
     @Log(title = "修改流程字段", businessType = BusinessType.UPDATE)
     @PutMapping
     @ApiOperation("修改流程字段")
@@ -69,7 +66,6 @@ public class AssetProcessFieldController extends BaseController {
         return toAjax(assetProcessFieldService.updateAssetProcessField(assetProcessField));
     }
 
-    @PreAuthorize("@ss.hasPermi('process:field:remove')")
     @Log(title = "删除流程字段", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     @ApiOperation("删除流程字段")

@@ -91,6 +91,13 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
             }
             String responsiblePersonCode = log.getResponsiblePersonCode();
             String responsiblePersonDept = log.getResponsiblePersonDept();
+            if (StringUtils.isBlank(responsiblePersonCode)){
+                responsiblePersonCode="";
+            }
+            if (StringUtils.isBlank(responsiblePersonDept)){
+                responsiblePersonDept="";
+            }
+
             if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
                 if (paramsData.size()>0){
                     AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);

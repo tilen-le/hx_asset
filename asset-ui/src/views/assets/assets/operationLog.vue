@@ -21,7 +21,6 @@
             size="mini"
             type="text"
             @click="searchInfo(scope.row)"
-            v-hasPermi="['asset:disposal:edit']"
           >查看详情</el-button>
         </template>
       </el-table-column>

@@ -106,7 +106,7 @@
       <el-form ref="form" label-width="100px" :model="form">
         <el-form-item label="接收公司" prop="company" :rules="required_rule">
           <el-select v-model="form.company" placeholder="请选择所属公司" clearable style="width:100%" :disabled="zhuan_yi_type == '1'">
-            <el-option v-for="dict in dict.type.company" :key="dict.value" :label="dict.label" :value="dict.value"/>
+            <el-option v-for="dict in dict.type.asset_company" :key="dict.value" :label="dict.label" :value="dict.value"/>
           </el-select>
         </el-form-item>
         <el-form-item label="接收人" prop="responsiblePersonCode" :rules="required_rule">

@@ -39,6 +39,10 @@ public class SapAssetTransferDTO {
      */
     private String KOSTL;
     /**
+     * 成本中心描述
+     */
+    private String LTEXT;
+    /**
      * 所在位置
      */
     private String Stage;

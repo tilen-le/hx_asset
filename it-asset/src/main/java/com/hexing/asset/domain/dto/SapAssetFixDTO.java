@@ -71,6 +71,10 @@ public class SapAssetFixDTO {
      */
     private String KOSTL;
     /**
+     * 成本中心描述
+     */
+    private String LTEXT;
+    /**
      * 责任成本中心编码
      */
     private String KOSTLV;

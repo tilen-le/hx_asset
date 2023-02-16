@@ -239,8 +239,14 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         // 用户数据查看权限判断
 //        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
 //        if (CollectionUtil.isEmpty(managementConfigList)) {
-//            return assetList;
+//
 //        }
+
+        // 超级管理员可查看到所有数据
+
+        // 财务会计（账务管理员） 支持查看所属公司资产数据
+
+        // 资产管理员 支持查看名下管理的资产数据
 
 //        boolean isAssetManager = false;
 //        boolean isFinancialManager = false;

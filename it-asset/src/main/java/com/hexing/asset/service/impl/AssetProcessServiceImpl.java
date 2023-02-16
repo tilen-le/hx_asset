@@ -100,7 +100,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setStage(processParam.getCurrentLocation());
             vo.setAnln1(entity.getSapCode());
             vo.setZnum(processParam.getAssetType());
-            vo.setBUKRS(processParam.getCompany());
+            vo.setBUKRS(entity.getCompany());
             try {
                 assetService.receiveAsset(vo);
             } catch (Exception e) {

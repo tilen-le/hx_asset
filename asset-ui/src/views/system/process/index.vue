@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form :model="queryParams" ref="queryForm" :inline="true" v-show="showSearch" label-width="102px">
       <el-form-item label="流程类型编号" prop="processType">
         <el-select v-model="queryParams.processType" placeholder="请选择流程类型编号" clearable size="small">
           <el-option v-for="dict in dict.type.asset_process" :key="dict.value" :label="dict.label"
@@ -15,16 +15,13 @@
 
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
-        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd"
-          v-hasPermi="['mature:field:add']">新增</el-button>
+        <el-button type="primary" plain icon="el-icon-plus" size="mini" @click="handleAdd">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
-          v-hasPermi="['mature:field:edit']">修改</el-button>
+        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate">修改</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete"
-          v-hasPermi="['mature:field:remove']">删除</el-button>
+        <el-button type="danger" plain icon="el-icon-delete" size="mini" :disabled="multiple" @click="handleDelete">删除</el-button>
       </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
@@ -39,44 +36,11 @@
       </el-table-column>
       <el-table-column label="字段键名" align="center" prop="fieldKey" />
       <el-table-column label="字段标签" align="center" prop="fieldLabel" />
-      <el-table-column label="字典" align="center" prop="dictType">
-        <template slot-scope="scope">
-          <router-link :to="'/system/dict-data/index/' + scope.row.dictType" class="link-type">
-            <span>{{ scope.row.dictType }}</span>
-          </router-link>
-        </template>
-      </el-table-column>
-      <el-table-column label="时间戳格式" align="center" prop="timeFormat" />
       <el-table-column label="排序" align="center" prop="orderNum" />
-      <el-table-column label="列宽" align="center" prop="width" />
       <el-table-column label="显示/隐藏" align="center" prop="visible">
         <template slot-scope="scope">
           <el-switch v-model="scope.row.visible" active-value="1" inactive-value="0"
             @change="handleStatusChange(scope.row, 'visible')"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否查询" align="center" prop="queryable">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.queryable" active-value="1" inactive-value="0"
-            @change="handleStatusChange(scope.row, 'queryable')"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否可编辑" align="center" prop="editable">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.editable" active-value="1" inactive-value="0"
-            @change="handleStatusChange(scope.row, 'editable')"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否多选" align="center" prop="status">
-        <template slot-scope="scope">
-          <el-switch v-model="scope.row.isMulti" active-value="1" inactive-value="0"
-            @change="handleStatusChange(scope.row, 'isMulti')"></el-switch>
-        </template>
-      </el-table-column>
-      <el-table-column label="是否存储" align="center" prop="status">
-        <template slot-scope="scope">
-          <el-tag v-if="scope.row.isSave">是</el-tag>
-          <el-tag v-else>否</el-tag>
         </template>
       </el-table-column>
       <el-table-column label="状态" align="center" prop="status">
@@ -88,10 +52,8 @@
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)"
-            v-hasPermi="['mature:field:edit']">修改</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)"
-            v-hasPermi="['mature:field:remove']">删除</el-button>
+          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
+          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
         </template>
       </el-table-column>
 
@@ -103,7 +65,7 @@
     <!-- 添加或修改【流程字段配置】对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="700px" @open.once="getTypeList">
       <div class="dialog-body">
-        <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+        <el-form ref="form" :model="form" :rules="rules" label-width="110px">
           <el-form-item label="流程类型编号" prop="processType">
             <el-select v-model="form.processType" placeholder="请选择流程类型编号">
               <el-option v-for="dict in dict.type.asset_process" :key="dict.value" :label="dict.label"
@@ -122,31 +84,9 @@
           <el-form-item label="显示/隐藏" prop="visible">
             <el-switch v-model="form.visible" active-value="1" inactive-value="0" />
           </el-form-item>
-          <el-form-item label="字典" prop="dictType">
-            <el-select v-model="form.dictType" placeholder="请选择字典" clearable>
-              <el-option v-for="item in typeOptions" :key="item.dictId" :label="item.dictName" :value="item.dictType" />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="时间戳格式" prop="timeFormat">
-            <el-input v-model="form.timeFormat" placeholder="请输入时间戳格式" clearable />
-          </el-form-item>
-          <el-form-item label="是否查询" prop="queryable">
-            <el-switch v-model="form.queryable" active-value="1" inactive-value="0" />
-          </el-form-item>
-          <el-form-item label="是否可编辑" prop="editable">
-            <el-switch v-model="form.editable" active-value="1" inactive-value="0" />
-          </el-form-item>
-          <el-form-item label="是否多选" prop="isMulti">
-            <el-switch v-model="form.isMulti" active-value="1" inactive-value="0" />
-          </el-form-item>
-          <el-form-item label="是否存储" prop="isSave">
-            <el-switch v-model="form.isSave" active-value="1" inactive-value="0" :disabled="inEdit" />
-          </el-form-item>
+
           <el-form-item label="排序" prop="orderNum">
             <el-input-number v-model="form.orderNum" :step="1" step-strictly />
-          </el-form-item>
-          <el-form-item label="列宽" prop="width">
-            <el-input v-model="form.width" placeholder="请输入列宽" type="number" />
           </el-form-item>
           <el-form-item label="备注" prop="remark">
             <el-input v-model="form.remark" placeholder="请输入备注" />

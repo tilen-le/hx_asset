@@ -309,7 +309,6 @@ public class SysDeptServiceImpl implements ISysDeptService
     }
 
     @Override
-    @DataScope(deptAlias = "d", dataType = "4")
     public List<SysDept> selectChildDeptList(SysDept sysDept) {
         return deptMapper.selectDeptList(sysDept);
     }

@@ -1,6 +1,7 @@
 <template>
   <div>
-    <el-table v-loading="loading" :data="workLogList" tooltip-effect="light" height="calc(38vh - 130px)">
+<!--    height="calc(38vh - 130px)"-->
+    <el-table v-loading="loading" :data="workLogList" tooltip-effect="light" >
       <el-table-column label="序号" type="index" align="center"/>
       <el-table-column label="工单号" align="center" prop="wokeCode"/>
       <el-table-column label="工单类型" align="center" prop="processType">

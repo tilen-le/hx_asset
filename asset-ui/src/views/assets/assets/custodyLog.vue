@@ -1,6 +1,7 @@
 <template>
   <div>
-    <el-table v-loading="loading" :data="logList" tooltip-effect="light" height="calc(38vh - 130px)">
+   <!-- height="calc(38vh - 130px)"-->
+    <el-table v-loading="loading" :data="logList" tooltip-effect="light">
       <el-table-column label="序号" type="index" align="center"/>
       <el-table-column label="资产保管人" align="center" prop="responsiblePersonName" />
       <el-table-column label="资产保管部门" align="center" prop="responsiblePersonDeptName" />

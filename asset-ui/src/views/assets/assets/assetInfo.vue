@@ -526,7 +526,7 @@
 
 <style>
   .el-tabs .el-tabs__content {
-    height: calc(38vh - 70px);
+    /*height: calc(38vh - 70px);*/
     overflow-y: auto;
   }
 </style>
@@ -539,7 +539,6 @@
     margin-bottom: 10px;
   }
 
-
   .divInfo {
     margin: 5px;
     padding: 5px 10px 5px 10px;
@@ -547,18 +546,18 @@
   }
 
   .divHead {
-    height: 5vh;
+    /*height: 5vh;*/
     display: flex;
     align-items: center;
   }
 
-  .divMiddle {
+/*  .divMiddle {
     height: 41vh;
   }
 
   .divBottom {
     height: 38vh;
-  }
+  }*/
 
   .head_title {
     font-size: 20px;

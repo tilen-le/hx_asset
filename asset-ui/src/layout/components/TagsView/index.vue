@@ -304,9 +304,13 @@ export default {
     }
   }
 }
+
 </style>
 
 <style lang="scss">
+  .el-scrollbar__wrap {
+    height: 100% !important;
+  }
 //reset element css of el-icon-close
 .tags-view-wrapper {
   .tags-view-item {

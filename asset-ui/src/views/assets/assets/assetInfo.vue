@@ -547,11 +547,18 @@
   }
 
   .divHead {
-    height: 6vh;
+    height: 5vh;
     display: flex;
     align-items: center;
   }
 
+  .divMiddle {
+    height: 41vh;
+  }
+
+  .divBottom {
+    height: 38vh;
+  }
 
   .head_title {
     font-size: 20px;
@@ -562,14 +569,6 @@
     right: 50px;
   }
 
-
-  .divMiddle {
-    height: 40vh;
-  }
-
-  .divBottom {
-    height: 38vh;
-  }
 
   .long_select {
     max-width: 100px;

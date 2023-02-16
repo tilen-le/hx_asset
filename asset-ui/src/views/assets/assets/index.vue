@@ -98,9 +98,10 @@
           @click="handleImport" v-hasPermi="['asset:asset:import']"
         >导入</el-button>
       </el-col>
+      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="assetList" tooltip-effect="light">
+    <el-table v-loading="loading" :data="assetList" tooltip-effect="light" height="calc(50vh)">
     <!--  <el-table-column type="selection" width="55" align="center" />-->
       <el-table-column label="序号" type="index" align="center" />
       <el-table-column label="资产状态" align="center" prop="assetStatus">

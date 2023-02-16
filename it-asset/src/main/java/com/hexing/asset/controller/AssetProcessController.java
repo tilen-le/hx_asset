@@ -70,7 +70,7 @@ public class AssetProcessController extends BaseController {
      */
     @Log(title = "转固资产", businessType = BusinessType.UPDATE)
     @PutMapping("/fixationAsset")
-    @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
+    @PreAuthorize("@ss.hasPermi('asset:process:fixationAsset')")
     @ApiOperation("转固资产")
     @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 4)

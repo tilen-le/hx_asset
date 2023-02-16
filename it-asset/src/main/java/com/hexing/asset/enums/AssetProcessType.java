@@ -1,7 +1,5 @@
 package com.hexing.asset.enums;
 
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.AssetProcessCountingDomain;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -9,6 +7,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum AssetProcessType {
 
+    /**
+     * 资产创建
+     */
+    PROCESS_ASSET_CREATE("111", "资产创建"),
     /**
      * 资产派发
      */

@@ -9,15 +9,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetManagementConfig;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.AssetProcessVariable;
+import com.hexing.asset.domain.*;
 import com.hexing.asset.domain.dto.*;
-import com.hexing.asset.domain.vo.AssetFixVO;
-import com.hexing.asset.domain.vo.AssetQueryParam;
-import com.hexing.asset.domain.vo.AssetReceiveVO;
-import com.hexing.asset.domain.vo.AssetTransferVO;
+import com.hexing.asset.domain.vo.*;
 import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
 import com.hexing.asset.enums.UIPCodeEnum;
@@ -40,6 +34,7 @@ import com.hexing.system.service.impl.SysUserServiceImpl;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.ast.Var;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -76,6 +71,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private IAssetProcessService assetProcessService;
     @Autowired
     private IUIPService uipService;
+    @Autowired
+    private IAssetProcessService processService;
 
     @Value("${uip.uipTransfer}")
     private String uipTransfer;
@@ -138,6 +135,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         int successNum = 0;         /* 导入成功条数 */
         int failureNum = 0;         /* 导入失败条数 */
         StringBuilder message = new StringBuilder();
+        AssetUpdateLog updateLog=new AssetUpdateLog();
+        String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
         for (int i = 0; i < assetList.size(); i++) {
             try {
                 Asset asset = assetList.get(i);
@@ -167,6 +166,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 asset.setCreateBy("system");
                 asset.setCreateTime(DateUtils.getNowDate());
                 save(asset);
+                BeanUtils.copyProperties(asset, updateLog);
+                updateLog.setProcessType(type);
+                assetUpdateLogService.save(updateLog);
                 successNum++;
 
             } catch (Exception e) {
@@ -510,6 +512,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public void sapAdd(List<SapPurchaseOrder> orderList) {
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
+        String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
         for (SapPurchaseOrder order : orderList) {
             int numberOfArrival = order.getNumberOfArrival().intValue();
             List<Asset> assetList = new ArrayList<>();
@@ -521,6 +524,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
             int nextNum = ObjectUtil.isNotEmpty(theLastOne) ? theLastOne.getSerialNum() + 1 : 1;
             DecimalFormat df = new DecimalFormat("0000");
+            List<AssetUpdateLog> logList = new ArrayList<>();
             for (int i = 1; i <= numberOfArrival; i++) {
                 Asset asset = new Asset();
                 String assetCode = order.getMaterialNumber() + df.format(nextNum);
@@ -545,9 +549,13 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .setFixed("0")
                         .setUnit(order.getUnit());
                 assetList.add(asset);
+                AssetUpdateLog updateLog = new AssetUpdateLog();
+                BeanUtils.copyProperties(asset, updateLog);
+                updateLog.setProcessType(type);
                 nextNum++;
             }
             this.saveBatch(assetList);
+            assetUpdateLogService.saveBatch(logList);
             totalNum += assetList.size();
         }
         log.debug("==== SAP采购单同步接口：资产信息新建成功，新增 " + totalNum + " 个资产 ====");

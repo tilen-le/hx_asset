@@ -19,7 +19,7 @@
                    v-if="info.assetStatus == '1' || info.assetStatus == '2'"
                    @click="pai_fa">派发</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
-                   v-if="info.assetStatus == '2'"
+                   v-if="info.assetStatus == '2' && info.transfer == '0'"
                    @click="zhuan_yi('0', '资产转移')">转移</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:accountTransferAsset']"
                    v-if="info.transfer == '1'"

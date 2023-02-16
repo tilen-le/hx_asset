@@ -5,7 +5,7 @@
       <el-table-column label="序号" type="index" align="center"/>
 
       <el-table-column label="操作人" align="center" prop="createBy" />
-      <el-table-column label="工单类型" align="center" prop="processType">
+      <el-table-column label="操作类型" align="center" prop="processType">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_process" :value="scope.row.processType" />
         </template>

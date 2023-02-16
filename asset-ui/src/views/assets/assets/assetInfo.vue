@@ -258,13 +258,13 @@
 
     <div class="divBottom divInfo">
       <el-tabs v-model="activeName" @tab-click="tabClick">
-        <el-tab-pane label="保管记录" name="belongTab">
+        <el-tab-pane label="保管记录" name="belongTab" v-if="checkPermi(['asset:log:custodyLogList'])">
           <custodyLog :assetCode="assetCode"></custodyLog>
         </el-tab-pane>
-        <el-tab-pane label="工单记录" name="orderTab">
+        <el-tab-pane label="工单记录" name="orderTab" v-if="checkPermi(['asset:log:workLogList'])">
           <workLog :assetCode="assetCode"></workLog>
         </el-tab-pane>
-        <el-tab-pane label="操作日志" name="operateTab">
+        <el-tab-pane label="操作日志" name="operateTab" v-if="checkPermi(['asset:log:operationLogList'])">
           <operationLog :assetCode="assetCode"></operationLog>
         </el-tab-pane>
       </el-tabs>
@@ -279,6 +279,7 @@
   import operationLog from "./operationLog";
   import {getDicts} from "@/api/system/dict/data";
   import {getInfo} from "@/api/assets/assets";
+  import { checkPermi } from '@/utils/permission'
   import {
     fixationAsset,
     inventoryLossAsset,
@@ -342,6 +343,7 @@
       }
     },
     methods: {
+      checkPermi,
       tabClick(tab, event) {
 
       },

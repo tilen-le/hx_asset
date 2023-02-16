@@ -154,6 +154,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String assetCode = asset.getCurrentMaterialNum() + df.format(nextNum);
                 asset.setAssetCode(assetCode);
 
+                asset.setSerialNum(nextNum);
+
                 asset.setAssetType(asset.getCurrentMaterialNum().substring(0, 1));
                 asset.setAssetCategory(asset.getCurrentMaterialNum().substring(1, 3));
                 asset.setAssetSubCategory(asset.getCurrentMaterialNum().substring(3, 5));
@@ -239,10 +241,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         List<Asset> assetList;
         String username = SecurityUtils.getUsername();
         // 用户数据查看权限判断
-//        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
-//        if (CollectionUtil.isEmpty(managementConfigList)) {
-//
-//        }
+        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
+        if (CollectionUtil.isEmpty(managementConfigList)) {
+
+        }
 
         // 超级管理员可查看到所有数据
 
@@ -250,18 +252,21 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         // 资产管理员 支持查看名下管理的资产数据
 
-//        boolean isAssetManager = false;
-//        boolean isFinancialManager = false;
-//        for (AssetManagementConfig managementConfig : managementConfigList) {
-//            if (StringUtils.isNotEmpty(managementConfig.getAssetManager()) && managementConfig.getAssetManager().contains(username)) {
-//                isAssetManager = true;
-//            }
-//            if (StringUtils.isNotEmpty(managementConfig.getFinancialManager()) && managementConfig.getFinancialManager().contains(username)) {
-//                isFinancialManager = true;
-//            }
-//        }
+        boolean isAssetManager = false;
+        boolean isFinancialManager = false;
+        for (AssetManagementConfig managementConfig : managementConfigList) {
+            if (StringUtils.isNotEmpty(managementConfig.getAssetManager()) && managementConfig.getAssetManager().contains(username)) {
+                isAssetManager = true;
+            }
+            if (StringUtils.isNotEmpty(managementConfig.getFinancialManager()) && managementConfig.getFinancialManager().contains(username)) {
+                isFinancialManager = true;
+            }
+        }
 
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+        if (isAssetManager) {
+//            wrapper.eq()
+        }
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }

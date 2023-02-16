@@ -78,8 +78,8 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         List<AssetUpdateLog> list = logService.list(wrapper);
         List<AssetUpdateLog> paramsData = new ArrayList<>();
-        String personCode = "";
-        String deptCode = "";
+        String personCode = "init";
+        String deptCode = "init";
         List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         for (AssetUpdateLog log : list) {

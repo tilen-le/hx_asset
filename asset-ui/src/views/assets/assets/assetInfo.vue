@@ -19,7 +19,7 @@
                    v-if="info.assetStatus == '1' || info.assetStatus == '2'"
                    @click="pai_fa">派发</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
-                   v-if="info.assetStatus == '2'"
+                   v-if="info.assetStatus == '2' && info.transfer == '0'"
                    @click="zhuan_yi('0', '资产转移')">转移</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:accountTransferAsset']"
                    v-if="info.transfer == '1'"
@@ -106,7 +106,7 @@
       <el-form ref="form" label-width="100px" :model="form">
         <el-form-item label="接收公司" prop="company" :rules="required_rule">
           <el-select v-model="form.company" placeholder="请选择所属公司" clearable style="width:100%" :disabled="zhuan_yi_type == '1'">
-            <el-option v-for="dict in dict.type.company" :key="dict.value" :label="dict.label" :value="dict.value"/>
+            <el-option v-for="dict in dict.type.asset_company" :key="dict.value" :label="dict.label" :value="dict.value"/>
           </el-select>
         </el-form-item>
         <el-form-item label="接收人" prop="responsiblePersonCode" :rules="required_rule">
@@ -123,8 +123,11 @@
         <el-form-item label="接收人岗位" prop="responsiblePersonJob" :rules="required_rule">
           <el-input v-model="form.responsiblePersonJob" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
-        <el-form-item label="成本中心" prop="costCenter" :rules="required_rule">
+        <el-form-item label="成本中心编码" prop="costCenter" :rules="required_rule">
           <el-input v-model="form.costCenter" :disabled="zhuan_yi_type == '1'"/>
+        </el-form-item>
+        <el-form-item label="成本中心描述" prop="costCenterName" :rules="required_rule">
+          <el-input v-model="form.costCenterName" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
         <el-form-item label="所在位置" prop="currentLocation" :rules="required_rule">
           <el-input v-model="form.currentLocation" :disabled="zhuan_yi_type == '1'"/>
@@ -146,6 +149,9 @@
         </el-form-item>
         <el-form-item label="成本中心编码" prop="costCenter" :rules="required_rule">
           <el-input v-model="form.costCenter"/>
+        </el-form-item>
+        <el-form-item label="成本中心描述" prop="costCenter" :rules="required_rule">
+          <el-input v-model="form.costCenterName"/>
         </el-form-item>
         <el-form-item label="保质期到期时间" prop="maturityTime" :rules="required_rule">
           <el-date-picker clearable style="width:100%"
@@ -258,13 +264,13 @@
 
     <div class="divBottom divInfo">
       <el-tabs v-model="activeName" @tab-click="tabClick">
-        <el-tab-pane label="保管记录" name="belongTab">
+        <el-tab-pane label="保管记录" name="belongTab" v-if="checkPermi(['asset:log:custodyLogList'])">
           <custodyLog :assetCode="assetCode"></custodyLog>
         </el-tab-pane>
-        <el-tab-pane label="工单记录" name="orderTab">
+        <el-tab-pane label="工单记录" name="orderTab" v-if="checkPermi(['asset:log:workLogList'])">
           <workLog :assetCode="assetCode"></workLog>
         </el-tab-pane>
-        <el-tab-pane label="操作日志" name="operateTab">
+        <el-tab-pane label="操作日志" name="operateTab" v-if="checkPermi(['asset:log:operationLogList'])">
           <operationLog :assetCode="assetCode"></operationLog>
         </el-tab-pane>
       </el-tabs>
@@ -279,6 +285,7 @@
   import operationLog from "./operationLog";
   import {getDicts} from "@/api/system/dict/data";
   import {getInfo} from "@/api/assets/assets";
+  import { checkPermi } from '@/utils/permission'
   import {
     fixationAsset,
     inventoryLossAsset,
@@ -342,6 +349,7 @@
       }
     },
     methods: {
+      checkPermi,
       tabClick(tab, event) {
 
       },
@@ -527,6 +535,7 @@
 <style>
   .el-tabs .el-tabs__content {
     /*height: calc(38vh - 70px);*/
+    height: 330px;
     overflow-y: auto;
   }
 </style>
@@ -554,10 +563,11 @@
 /*  .divMiddle {
     height: 41vh;
   }
+*/
 
   .divBottom {
-    height: 38vh;
-  }*/
+    height: 400px;
+  }
 
   .head_title {
     font-size: 20px;

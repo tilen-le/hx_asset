@@ -86,6 +86,6 @@ spring:
 ruoyi:
     profile: /data/it/file
 uip:
-    uipTransfer: http://uipprd.hxgroup.com:8080/UIP/uip/uipManage/dataOper
+    uipTransfer: http://192.168.3.158:8080/UIP/uip/uipManage/dataOper
 conf:
     assetCategoryConfFilePath: /data/it/conf/material_category.json

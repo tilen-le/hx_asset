@@ -27,5 +27,5 @@ public @interface RepeatSubmit
     /**
      * 提示消息
      */
-    public String message() default "Fast duplicate submission is prohibited. Please try again later";
+    public String message() default "禁止快速重复提交。请稍后再试";
 }

@@ -78,8 +78,8 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         List<AssetUpdateLog> list = logService.list(wrapper);
         List<AssetUpdateLog> paramsData = new ArrayList<>();
-        String personCode = "";
-        String deptCode = "";
+        String personCode = "init";
+        String deptCode = "init";
         List<SysDept> depts = sysDeptService.selectDeptList(new SysDept());
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         for (AssetUpdateLog log : list) {
@@ -91,6 +91,13 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
             }
             String responsiblePersonCode = log.getResponsiblePersonCode();
             String responsiblePersonDept = log.getResponsiblePersonDept();
+            if (StringUtils.isBlank(responsiblePersonCode)){
+                responsiblePersonCode="";
+            }
+            if (StringUtils.isBlank(responsiblePersonDept)){
+                responsiblePersonDept="";
+            }
+
             if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
                 if (paramsData.size()>0){
                     AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);

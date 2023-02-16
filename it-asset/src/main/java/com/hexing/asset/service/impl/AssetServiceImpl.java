@@ -107,12 +107,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             asset.setAssetType(dto.getAssetType());
             asset.setAssetCategory(dto.getAssetCategory());
             asset.setAssetSubCategory(dto.getAssetSubCategory());
-//             保管人和保管部门
-//            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
-//                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-//                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
-//                asset.setResponsiblePersonDept(dept.getDeptName());
-//            }
+            // 保管人和保管部门
+            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
+                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+                asset.setResponsiblePersonDept(dept.getDeptName());
+            }
 
         }
         return asset;
@@ -181,7 +181,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";
                 message.append(msg + e.getMessage());
                 log.error(msg, e);
-                throw new ServiceException("导入出错");
+                throw new ServiceException("导入出错：" + e);
             }
         }
         message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");

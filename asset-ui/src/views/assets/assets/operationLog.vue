@@ -1,7 +1,7 @@
 <template>
   <div>
 <!--    height="calc(38vh - 130px)"-->
-    <el-table v-loading="loading" :data="operationLogList" tooltip-effect="light" >
+    <el-table v-loading="loading" :data="operationLogList" tooltip-effect="light" height="270px">
       <el-table-column label="序号" type="index" align="center"/>
 
       <el-table-column label="操作人" align="center" prop="createBy" />

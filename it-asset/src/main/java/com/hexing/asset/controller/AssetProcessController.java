@@ -33,7 +33,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/receiveAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:receiveAsset')")
     @ApiOperation("资产派发")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 1)
     public AjaxResult receiveAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.receiveAsset(assetProcess));
@@ -46,7 +46,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/transferAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
     @ApiOperation("转固资产")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 2)
     public AjaxResult transferAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.transferAsset(assetProcess));
@@ -59,7 +59,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/returnAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:returnAsset')")
     @ApiOperation("资产退货")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 3)
     public AjaxResult returnAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.returnAsset(assetProcess));
@@ -72,7 +72,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/fixationAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
     @ApiOperation("转固资产")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 4)
     public AjaxResult fixationAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.fixationAsset(assetProcess));
@@ -85,7 +85,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/maintainAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:maintainAsset')")
     @ApiOperation("资产维修")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 5)
     public AjaxResult maintainAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.maintainAsset(assetProcess));
@@ -98,7 +98,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/unusedAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:unusedAsset')")
     @ApiOperation("资产闲置")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 6)
     public AjaxResult unusedAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.unusedAsset(assetProcess));
@@ -111,6 +111,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/scrapAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:scrapAsset')")
     @ApiOperation("资产报废")
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 7)
     public AjaxResult scrapAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.scrapAsset(assetProcess));
@@ -123,7 +124,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/waiteTakeOutAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:waiteTakeOutAsset')")
     @ApiOperation("资产待外卖")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 8)
     public AjaxResult waiteTakeOutAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.waiteTakeOutAsset(assetProcess));
@@ -136,7 +137,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/inventoryLossAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:inventoryLossAsset')")
     @ApiOperation("资产盘亏")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 9)
     public AjaxResult inventoryLossAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.inventoryLossAsset(assetProcess));
@@ -149,7 +150,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/maintainedAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:maintainedAsset')")
     @ApiOperation("资产已维修")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 10)
     public AjaxResult maintainedAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.maintainedAsset(assetProcess));
@@ -162,7 +163,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/takeOutAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:takeOutAsset')")
     @ApiOperation("已外卖资产")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 11)
     public AjaxResult takeOutAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.takeOutAsset(assetProcess));
@@ -175,7 +176,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/scrapedAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:scrapedAsset')")
     @ApiOperation("资产已报废")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 12)
     public AjaxResult scrapedAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.scrapedAsset(assetProcess));
@@ -188,7 +189,7 @@ public class AssetProcessController extends BaseController {
     @PutMapping("/accountTransferAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:accountTransferAsset')")
     @ApiOperation("资产账务转移")
-    @RepeatSubmit
+    @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 12)
     public AjaxResult accountTransferAsset(@RequestBody AssetProcessParam assetProcess) {
         return toAjax(processService.accountTransferAsset(assetProcess));

@@ -37,6 +37,7 @@ import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
+import com.sun.xml.internal.bind.v2.TODO;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.weaver.ast.Var;
@@ -154,8 +155,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 DecimalFormat df = new DecimalFormat("0000");
                 String assetCode = asset.getCurrentMaterialNum() + df.format(nextNum);
                 asset.setAssetCode(assetCode);
-                // TODO 所属公司导入
-                asset.setCompany("3060");
 
                 asset.setAssetType(asset.getCurrentMaterialNum().substring(0, 1));
                 asset.setAssetCategory(asset.getCurrentMaterialNum().substring(1, 3));

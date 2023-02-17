@@ -529,7 +529,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
         String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
-        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userCode = "sap";
         for (SapPurchaseOrder order : orderList) {
             int numberOfArrival = order.getNumberOfArrival().intValue();
             List<Asset> assetList = new ArrayList<>();

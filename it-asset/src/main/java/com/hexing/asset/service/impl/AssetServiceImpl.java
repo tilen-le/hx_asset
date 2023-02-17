@@ -391,7 +391,61 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public List<Asset> selectAllAsset(AssetQueryParam param) {
         List<Asset> assetList;
+
+        String username = SecurityUtils.getUsername();
+        SysUser user = sysUserService.getUserByUserName(username);
+        List<SysRole> roleList = sysRoleService.selectRolesByUserId(user.getUserId());
+
+        boolean isAdmin = false;
+        for (SysRole sysRole : roleList) {
+            if ("超级管理员".equals(sysRole.getRoleName())
+                    || "总务管理员".equals(sysRole.getRoleName())
+                    || "财务管理人员".equals(sysRole.getRoleName())) {
+                isAdmin = true;
+                break;
+            }
+        }
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
+
+        // 超级管理员可查看到所有数据
+        if (!isAdmin) {
+            boolean isAssetManager = false;
+            boolean isFinancialManager = false;
+
+            // 若为资产管理员
+            List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigService
+                    .selectManagementConfigListByAssetManager(username, ManagerType.ASSET_MANAGER.getType());
+            if (CollectionUtil.isNotEmpty(assetManagementConfigList)) {
+                isAssetManager = true;
+                wrapper.nested(i -> {
+                    for (AssetManagementConfig managementConfig : assetManagementConfigList) {
+                        i.or(ii -> {
+                            ii.eq(Asset::getAssetType, managementConfig.getAssetType())
+                                    .eq(Asset::getAssetCategory, managementConfig.getAssetCategory());
+                            if (StringUtils.isNotEmpty(managementConfig.getAssetSubCategory())) {
+                                // 子类拆分为列表
+                                List<String> subCategoryList = Arrays.asList(managementConfig.getAssetSubCategory().split(","));
+                                ii.in(Asset::getAssetSubCategory, subCategoryList);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 若为账务管理员
+            List<AssetManagementConfig> financialManagementConfigList = assetManagementConfigService
+                    .selectManagementConfigListByAssetManager(username, ManagerType.FINANCIAL_MANAGER.getType());
+            if (CollectionUtil.isNotEmpty(financialManagementConfigList)) {
+                isFinancialManager = true;
+                List<String> companyList = financialManagementConfigList.stream().map(AssetManagementConfig::getCompany).collect(Collectors.toList());
+                wrapper.in(Asset::getCompany, companyList);
+            }
+
+            if (!isAssetManager && !isFinancialManager) {
+                return new ArrayList<>();
+            }
+        }
+
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }

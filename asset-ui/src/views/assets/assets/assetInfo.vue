@@ -89,7 +89,7 @@
                           value-format="yyyy-MM-dd">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="资产出厂编号" prop="factoryNo" :rules="required_rule">
+        <el-form-item label="资产出厂编号" prop="factoryNo" v-if="info.fixed == '0'" :rules="required_rule">
           <el-input v-model="form.factoryNo"/>
         </el-form-item>
         <el-form-item label="领用说明" prop="comment">

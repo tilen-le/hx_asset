@@ -32,6 +32,16 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <el-dialog title="详情" :visible.sync="dialog_open" width="800px" append-to-body>
+      <el-descriptions title="表单信息" size="medium" border :column="3">
+        <el-descriptions-item label="暂无">暂无</el-descriptions-item>
+      </el-descriptions>
+      <el-descriptions title="资产信息" size="medium" border :column="3" style="margin-top: 25px;">
+        <el-descriptions-item label="暂无">暂无</el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
+
   </div>
 
 </template>
@@ -56,7 +66,9 @@
           pageSize: 10,
           assetCode: '',
         },
-        operationLogList: []
+        operationLogList: [],
+        dialog_open: false,
+        detail: {}
       };
     },
 /*    created() {
@@ -75,7 +87,8 @@
         });
       },
       searchInfo(row) {
-        this.$modal.msgWarning(row.id + "功能尚未设计开发...");
+        this.dialog_open = true;
+        // this.$modal.msgWarning(row.id + "功能尚未设计开发...");
       }
     }
   };

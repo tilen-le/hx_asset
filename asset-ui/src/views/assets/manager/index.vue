@@ -83,7 +83,7 @@
       <el-table-column label="资产大类" align="center" prop="assetType" />
       <el-table-column label="资产中类" align="center" prop="assetCategory" />
       <el-table-column label="资产小类" align="center" prop="assetSubCategory" :show-overflow-tooltip="true"/>
-      <el-table-column label="所属公司" align="center" prop="company">
+      <el-table-column label="所属公司" align="center" prop="company" :show-overflow-tooltip="true">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_company" :value="scope.row.company"/>
         </template>

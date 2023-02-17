@@ -119,7 +119,7 @@ public interface IAssetService extends IService<Asset> {
     /**
      * 资产派发
      */
-    void receiveAsset(AssetReceiveVO vo) throws Exception;
+    JSONObject receiveAsset(AssetReceiveVO vo) throws Exception;
 
     /**
      * 资产账务转移

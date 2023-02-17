@@ -25,6 +25,7 @@ import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
+import com.hexing.common.enums.UserType;
 import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.PageUtil;
@@ -45,6 +46,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import javax.swing.text.StyledEditorKit;
 import java.text.DecimalFormat;
 import java.util.*;
 import java.util.function.Consumer;
@@ -244,16 +246,22 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     @Override
     public List<Asset> selectAssetList(AssetQueryParam param) {
         List<Asset> assetList;
+
         String username = SecurityUtils.getUsername();
+        SysUser user = sysUserService.getUserByUserName(username);
 
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
 
         // 超级管理员可查看到所有数据
-        if (!"admin".equals(username)) {
+        if (!UserType.SYSTEM_USER.getCode().equals(user.getUserType())) {
+            boolean isAssetManager = false;
+            boolean isFinancialManager = false;
+
             // 若为资产管理员
             List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigService
                     .selectManagementConfigListByAssetManager(username, ManagerType.ASSET_MANAGER.getType());
             if (CollectionUtil.isNotEmpty(assetManagementConfigList)) {
+                isAssetManager = true;
                 wrapper.nested(i -> {
                     for (AssetManagementConfig managementConfig : assetManagementConfigList) {
                         i.or(ii -> {
@@ -273,8 +281,13 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             List<AssetManagementConfig> financialManagementConfigList = assetManagementConfigService
                     .selectManagementConfigListByAssetManager(username, ManagerType.FINANCIAL_MANAGER.getType());
             if (CollectionUtil.isNotEmpty(financialManagementConfigList)) {
+                isFinancialManager = true;
                 List<String> companyList = financialManagementConfigList.stream().map(AssetManagementConfig::getCompany).collect(Collectors.toList());
                 wrapper.in(Asset::getCompany, companyList);
+            }
+
+            if (!isAssetManager && !isFinancialManager) {
+                return new ArrayList<>();
             }
         }
 
@@ -753,7 +766,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * 资产派发
      */
     @Override
-    public void receiveAsset(AssetReceiveVO vo) throws Exception {
+    public JSONObject receiveAsset(AssetReceiveVO vo) throws Exception {
         JSONArray data = new JSONArray();
         data.add(vo);
         String responseBody = uipService.sendToSAP(data, UIPCodeEnum.RECEIVE_ASSET_INTERFACE.getCode(), "资产派发");
@@ -763,7 +776,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             throw new Exception("SAP报错：" + responseBodyJO);
         } else if ("S".equals(sapResponseCode)) {
             log.debug("SAP资产派发成功：" + responseBodyJO);
+            return responseBodyJO;
         }
+        return responseBodyJO;
     }
 
     /**

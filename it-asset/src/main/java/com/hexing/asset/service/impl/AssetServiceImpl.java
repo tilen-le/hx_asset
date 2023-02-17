@@ -24,6 +24,7 @@ import com.hexing.common.constant.HttpStatus;
 import com.hexing.common.core.domain.AjaxResult;
 import com.hexing.common.core.domain.Result;
 import com.hexing.common.core.domain.entity.SysDept;
+import com.hexing.common.core.domain.entity.SysRole;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.enums.UserType;
 import com.hexing.common.exception.ServiceException;
@@ -32,6 +33,7 @@ import com.hexing.common.utils.PageUtil;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.poi.ExcelUtil;
+import com.hexing.system.service.ISysRoleService;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import io.swagger.annotations.ApiOperation;
@@ -78,6 +80,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     private IUIPService uipService;
     @Autowired
     private IAssetProcessService processService;
+    @Autowired
+    private ISysRoleService sysRoleService;
+
 
     @Value("${uip.uipTransfer}")
     private String uipTransfer;
@@ -249,11 +254,21 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         String username = SecurityUtils.getUsername();
         SysUser user = sysUserService.getUserByUserName(username);
+        List<SysRole> roleList = sysRoleService.selectRolesByUserId(user.getUserId());
 
+        boolean isAdmin = false;
+        for (SysRole sysRole : roleList) {
+            if ("超级管理员".equals(sysRole.getRoleName())
+                    || "总务管理员".equals(sysRole.getRoleName())
+                    || "财务管理人员".equals(sysRole.getRoleName())) {
+                isAdmin = true;
+                break;
+            }
+        }
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
 
         // 超级管理员可查看到所有数据
-        if (!UserType.SYSTEM_USER.getCode().equals(user.getUserType())) {
+        if (!isAdmin) {
             boolean isAssetManager = false;
             boolean isFinancialManager = false;
 
@@ -618,23 +633,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     /**
-     * SAP资产转移数据更新
-     */
-//    @Override
-    public void sapAssetTransferUpdate(String sapCode) {
-        Asset asset = this.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getSapCode, sapCode));
-
-        AssetProcess param = new AssetProcess();
-        param.setProcessType(AssetProcessType.PROCESS_TRANSFORM.getCode());
-
-        AssetProcess process = assetProcessService.getOne(param);
-
-
-        return;
-    }
-
-
-    /**
      * SAP价值传输接口
      */
     @Override
@@ -712,57 +710,6 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     }
 
     /**
-     * 资产转移
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void transferAsset(AssetTransferVO vo) throws Exception {
-        Asset asset = this.selectAssetByAssetCode(vo.getAssetCode());
-        if (ObjectUtil.isEmpty(asset)) {
-            throw new Exception("无该资产信息");
-        }
-        // 推送SAP
-        SapAssetTransferDTO dto = new SapAssetTransferDTO();
-        dto.setBUKRS(vo.getReceiveCompany())
-                .setRname(vo.getReceiveEmployee())
-                .setPost(vo.getReceiverPosition())
-                .setKOSTL(vo.getCostCenter())
-                .setStage(vo.getNewLocation())
-                .setAnln1(asset.getSapCode());
-
-        JSONArray data = new JSONArray();
-        data.add(dto);
-        String responseBody = uipService.sendToSAP(data, null, "资产转移");
-
-        // 资产状态改为在用
-        this.updateById(asset.setAssetStatus(AssetStatus.USING.getCode()));
-
-        // 创建转移流程记录
-        AssetTransferProcessDTO process = new AssetTransferProcessDTO();
-        process.setProcessType(AssetProcessType.PROCESS_TRANSFORM.getCode());
-        process.setAssetCode(vo.getAssetCode());
-        process.setCreateBy(SecurityUtils.getLoginUser().getUser().getUserName());
-        process.setCreateTime(DateUtils.getNowDate());
-        process.setRemark(asset.getCompany() + "转移资产到" + vo.getReceiveCompany());
-        process.setSapAssetCode(asset.getSapCode());
-
-        process.setOldCompany(asset.getCompany());
-        process.setOldEmployee(asset.getResponsiblePersonCode());
-        process.setOldCostCenter(asset.getCostCenter());
-        process.setOldEmployeePosition(""); // ?
-        process.setOldLocation(asset.getCurrentLocation());
-
-        process.setNewCompany(vo.getReceiveCompany());
-        process.setNewEmployee(vo.getReceiveEmployee());
-        process.setNewCostCenter(vo.getCostCenter());
-        process.setNewEmployeePosition(vo.getReceiverPosition());
-        process.setNewLocation(vo.getNewLocation());
-
-        //TODO set variables
-        assetProcessService.saveOne(process);
-    }
-
-    /**
      * 资产派发
      */
     @Override
@@ -797,7 +744,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             log.debug("SAP资产转移成功：" + responseBodyJO);
             return responseBodyJO;
         }
-        return null;
+        return responseBodyJO;
     }
 
 }

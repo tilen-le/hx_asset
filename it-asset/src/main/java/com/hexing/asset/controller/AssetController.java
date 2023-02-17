@@ -163,40 +163,4 @@ public class AssetController extends BaseController {
         return AjaxResult.success(assetService.sapSyncValue(sapValueList));
     }
 
-//    /**
-//     * 资产转固
-//     */
-//    @ApiOperation("资产转固")
-//    @PreAuthorize("@ss.hasPermi('asset:asset:fixAsset')")
-//    @Log(title = "资产转固", businessType = BusinessType.OTHER)
-//    @PostMapping("/fixAsset")
-//    public AjaxResult fixAsset(AssetFixVO vo) {
-//        try {
-////            assetService.fixAsset(vo);
-//
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return AjaxResult.error("资产转固失败，请联系管理员排查原因\n错误信息：" + e.getMessage());
-//        }
-//        return AjaxResult.success("资产转固成功");
-//    }
-
-    /**
-     * 资产转移
-     */
-    @ApiOperation("资产转移")
-    @PreAuthorize("@ss.hasPermi('asset:asset:transferAsset')")
-    @Log(title = "资产转移", businessType = BusinessType.OTHER)
-    @PostMapping("/transferAsset")
-    public AjaxResult transferAsset(AssetTransferVO vo) {
-        try {
-            assetService.transferAsset(vo);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return AjaxResult.error("资产转移失败，请联系管理员排查原因\n错误信息：" + e.getMessage());
-        }
-        return AjaxResult.success("资产转移失败");
-    }
-
-
 }

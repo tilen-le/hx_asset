@@ -123,12 +123,6 @@
         <el-form-item label="接收人岗位" prop="responsiblePersonJob" :rules="required_rule">
           <el-input v-model="form.responsiblePersonJob" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
-        <el-form-item label="成本中心编码" prop="costCenter" :rules="required_rule">
-          <el-input v-model="form.costCenter" :disabled="zhuan_yi_type == '1'"/>
-        </el-form-item>
-        <el-form-item label="成本中心描述" prop="costCenterName" :rules="required_rule">
-          <el-input v-model="form.costCenterName" :disabled="zhuan_yi_type == '1'"/>
-        </el-form-item>
         <el-form-item label="所在位置" prop="currentLocation" :rules="required_rule">
           <el-input v-model="form.currentLocation" :disabled="zhuan_yi_type == '1'"/>
         </el-form-item>
@@ -146,12 +140,6 @@
             <el-option v-for="dict in dict.type.sap_card_asset_category" :key="dict.value" :label="dict.label"
                        :value="dict.value"/>
           </el-select>
-        </el-form-item>
-        <el-form-item label="成本中心编码" prop="costCenter" :rules="required_rule">
-          <el-input v-model="form.costCenter"/>
-        </el-form-item>
-        <el-form-item label="成本中心描述" prop="costCenter" :rules="required_rule">
-          <el-input v-model="form.costCenterName"/>
         </el-form-item>
         <el-form-item label="保质期到期时间" prop="maturityTime" :rules="required_rule">
           <el-date-picker clearable style="width:100%"

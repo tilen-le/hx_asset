@@ -76,8 +76,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());
             vo.setCategory(processParam.getAssetType());
-            vo.setCostCenterCode(processParam.getCostCenter());
-            vo.setCostCenterName(processParam.getCostCenterName());
+            vo.setResponsibilityCostCenterCode(processParam.getAssetType());
+            vo.setDEPS(entity.getResponsiblePersonDept());
             vo.setExpirationDate(processParam.getMaturityTime());
             vo.setResponsibilityCostCenterCode(processParam.getDutyCostCenter());
             vo.setBelong(processParam.getProject());
@@ -87,7 +87,11 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 JSONObject jsonObject = assetService.fixAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");
                 String sapCode = dataJO.getString("ANLN1");
+                String costCenter= dataJO.getString("KOSTL");
+                String costCenterName = dataJO.getString("LTEXT");
                 entity.setSapCode(sapCode);
+                entity.setCostCenter(costCenter);
+                entity.setCostCenterName(costCenterName);
             } catch (Exception e) {
                 throw new ServiceException("资产转固推送sap异常: "+e.getMessage());
             }
@@ -99,6 +103,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setAnln1(entity.getSapCode());
             vo.setZnum(processParam.getAssetType());
             vo.setBUKRS(entity.getCompany());
+            vo.setBUKRS(processParam.getResponsiblePersonDept());
             try {
                 JSONObject jsonObject = assetService.receiveAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");

@@ -64,4 +64,9 @@ public class AssetFixVO {
      */
     @ApiModelProperty(value = "用途")
     private String usage;
+    /**
+     * 部门
+     */
+    @ApiModelProperty(value = "部门")
+    private String DEPS;
 }

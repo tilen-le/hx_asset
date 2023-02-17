@@ -74,6 +74,11 @@ public class AssetProcessReturn {
     @ApiModelProperty(value = "成本中心")
     private String costCenter;
     /**
+     * 成本中心描述
+     */
+    @ApiModelProperty(value = "成本中心描述")
+    private String costCenterName;
+    /**
      * 所属公司
      */
     @ApiModelProperty(value = "所属公司")

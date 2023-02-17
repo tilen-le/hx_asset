@@ -15,45 +15,45 @@
       9待报废 财务会计：【已报废】资产管理员：【盘亏】
       10、3、11、5已外卖，已退回，已报废，盘亏（无按钮显示，不能再操作-->
       <div class="head_button">
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:receiveAsset']"
-                   v-if="info.assetStatus == '1' || info.assetStatus == '2'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '1' || info.assetStatus == '2') && checkPermi(['asset:process:receiveAsset'])"
                    @click="pai_fa">派发</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
-                   v-if="info.assetStatus == '2' && info.transfer == '0'"
+        <el-button size="mini" type="primary"
+                   v-if="info.assetStatus == '2' && info.transfer == '0' && checkPermi(['asset:process:transferAsset'])"
                    @click="zhuan_yi('0', '资产转移')">转移</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:accountTransferAsset']"
-                   v-if="info.transfer == '1'"
+        <el-button size="mini" type="primary"
+                   v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])"
                    @click="zhuan_yi('1', '资产账务转移')">账务转移</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainAsset']"
-                   v-if="info.assetStatus == '4' || info.assetStatus == '6'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '4' || info.assetStatus == '6') && checkPermi(['asset:process:maintainAsset'])"
                    @click="confirm_handle('维修')">维修</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:scrapAsset']"
-                   v-if="info.assetStatus == '6'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '6') && checkPermi(['asset:process:scrapAsset'])"
                    @click="confirm_handle('报废')">报废</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:waiteTakeOutAsset']"
-                   v-if="info.assetStatus == '6'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '6') && checkPermi(['asset:process:waiteTakeOutAsset'])"
                    @click="confirm_handle('外卖')">外卖</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:scrapedAsset']"
-                   v-if="info.assetStatus == '9'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '9') && checkPermi(['asset:process:scrapedAsset'])"
                    @click="status_handle('已报废')">已报废</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:takeOutAsset']"
-                   v-if="info.assetStatus == '7'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '7') && checkPermi(['asset:process:takeOutAsset'])"
                    @click="status_handle('已外卖')">已外卖</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:returnAsset']"
-                   v-if="info.assetStatus == '8'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '8') && checkPermi(['asset:process:returnAsset'])"
                    @click="status_handle('已退货')">已退货</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:inventoryLossAsset']"
-                   v-if="info.assetStatus == '1' || info.assetStatus == '4' || info.assetStatus == '6' || info.assetStatus == '2'
-                        || info.assetStatus == '7' || info.assetStatus == '9'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '1' || info.assetStatus == '4' || info.assetStatus == '6' || info.assetStatus == '2'
+                        || info.assetStatus == '7' || info.assetStatus == '9') && checkPermi(['asset:process:inventoryLossAsset'])"
                    @click="status_handle('盘亏')">盘亏</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:unusedAsset']"
-                   v-if="info.assetStatus == '6'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '6') && checkPermi(['asset:process:unusedAsset'])"
                    @click="xian_zhi">闲置</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:fixationAsset']"
-                   v-if="info.assetStatus == '4'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '4') && checkPermi(['asset:process:fixationAsset'])"
                    @click="zhuan_gu">转固</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainedAsset']"
-                   v-if="info.assetStatus == '8'"
+        <el-button size="mini" type="primary"
+                   v-if="(info.assetStatus == '8') && checkPermi(['asset:process:maintainedAsset'])"
                    @click="yi_wei_xiu">已维修</el-button>
       </div>
     </div>
@@ -408,9 +408,9 @@
       },
       pai_fa_submit() {
         receiveAsset(this.form).then(response => {
+          this.$modal.msgSuccess("操作成功");
           this.getInfo();
           this.pai_fa_open = false;
-          this.$modal.msgSuccess("操作成功");
         });
       },
       zhuan_yi(type, title) {
@@ -452,15 +452,6 @@
         fixationAsset(this.form).then(response => {
           this.$modal.msgSuccess("操作成功");
           this.getInfo();
-          this.$alert(this.info.sapCode, '资产卡片编号', {
-            confirmButtonText: '确定',
-            callback: action => {
-              this.$message({
-                type: 'info',
-                message: `action: ${ action }`
-              });
-            }
-          });
           this.zhuan_gu_open = false;
         });
       },
@@ -471,9 +462,9 @@
       },
       yi_wei_xiu_submit() {
         maintainedAsset(this.form).then(response => {
+          this.$modal.msgSuccess("操作成功");
           this.getInfo();
           this.yi_wei_xiu_open = false;
-          this.$modal.msgSuccess("操作成功");
         });
       },
       xian_zhi() {
@@ -483,9 +474,9 @@
       },
       xian_zhi_submit() {
         unusedAsset(this.form).then(response => {
+          this.$modal.msgSuccess("操作成功");
           this.getInfo();
           this.xian_zhi_open = false;
-          this.$modal.msgSuccess("操作成功");
         });
       },
       confirm_handle(type) {

@@ -208,7 +208,7 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="xian_zhi_open" width="400px" append-to-body top="30vh">
       <div style="text-align: center;">
-        <i class="el-icon-warning" style="color: red;"></i>是否清空资产保管人，保管部门，成本中心？
+        <i class="el-icon-warning" style="color: red;margin-right: 8px;"></i>是否清空资产保管人，保管部门，成本中心？
       </div>
       <el-form ref="form" label-width="80px" :model="form" style="margin-top:10px;">
         <el-form-item label="" prop="clearInfo" :rules="required_rule">

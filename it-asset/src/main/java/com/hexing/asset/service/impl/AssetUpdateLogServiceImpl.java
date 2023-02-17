@@ -4,13 +4,16 @@ import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
+import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
+import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.vo.AssetProcessParam;
 import com.hexing.asset.domain.vo.AssetProcessReturn;
 import com.hexing.asset.mapper.AssetUpdateLogMapper;
 import com.hexing.asset.service.IAssetProcessService;
 import com.hexing.asset.service.IAssetUpdateLogService;
+import com.hexing.asset.utils.CodeUtil;
 import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 import com.hexing.common.utils.DateUtils;
@@ -174,6 +177,14 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
             SysUser user = sysUserService.getUserByUserName(updateLog.getResponsiblePersonCode());
             updateLog.setResponsiblePersonName(user.getNickName());
         }
+        AssetManagementConfig config =new AssetManagementConfig();
+        config.setAssetType(updateLog.getAssetType());
+        config.setAssetCategory(updateLog.getAssetCategory());
+        config.setAssetSubCategory(updateLog.getAssetSubCategory());
+        MaterialCategorySimpleDTO dto = CodeUtil.getAssetTypeName(config);
+        updateLog.setAssetType(dto.getAssetType());
+        updateLog.setAssetCategory(dto.getAssetCategory());
+        updateLog.setAssetSubCategory(dto.getAssetSubCategory());
         AssetProcess process=new AssetProcess();
         process.setAssetCode(updateLog.getAssetCode());
         if (StringUtils.isNotBlank(updateLog.getProcessId())){

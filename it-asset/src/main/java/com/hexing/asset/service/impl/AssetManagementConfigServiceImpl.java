@@ -1,5 +1,6 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -8,6 +9,7 @@ import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetManagementConfig;
 import com.hexing.asset.domain.dto.AssetManagementConfigSearchDTO;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
+import com.hexing.asset.enums.ManagerType;
 import com.hexing.asset.mapper.AssetManagementConfigMapper;
 import com.hexing.asset.service.IAssetManagementConfigService;
 import com.hexing.asset.utils.CodeUtil;
@@ -17,6 +19,7 @@ import com.hexing.common.exception.ServiceException;
 import com.hexing.common.utils.DateUtils;
 import com.hexing.common.utils.SecurityUtils;
 import com.hexing.common.utils.StringUtils;
+import com.hexing.common.utils.spring.SpringUtils;
 import com.hexing.system.service.impl.SysDeptServiceImpl;
 import com.hexing.system.service.impl.SysUserServiceImpl;
 import org.apache.commons.lang3.ObjectUtils;
@@ -207,22 +210,41 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         return assetManagementConfigs;
     }
 
-    public List<AssetManagementConfig> selectManagementConfigListByAssetManager(String userName) {
-        List<AssetManagementConfig> result = new ArrayList<>();
+    /**
+     * 根据资产管理员查询资产人员配置列表
+     *
+     * @param userName 资产管理员工号
+     * @return
+     */
+    @Override
+    public List<AssetManagementConfig> selectManagementConfigListByAssetManager(String userName, String type) {
+//        List<AssetManagementConfig> result = new ArrayList<>();
 
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetManagementConfig::getAssetManager, userName);
-        List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigMapper.selectList(wrapper);
-
-        for (AssetManagementConfig managementConfig : assetManagementConfigList) {
-            String subCategory = managementConfig.getAssetSubCategory();
-            if (StringUtils.isNotEmpty(subCategory) && subCategory.contains(",")) {
-                String[] subCategoryList = subCategory.split(",");
-            }
-            result.add(managementConfig);
+        if (ManagerType.ASSET_MANAGER.getType().equals(type)) {
+            wrapper.eq(AssetManagementConfig::getAssetManager, userName);
+        } else if (ManagerType.FINANCIAL_MANAGER.getType().equals(type)) {
+            wrapper.eq(AssetManagementConfig::getFinancialManager, userName);
         }
+        return assetManagementConfigMapper.selectList(wrapper);
 
-        return result;
+//        for (AssetManagementConfig managementConfig : assetManagementConfigList) {
+//            String subCategory = managementConfig.getAssetSubCategory();
+//            // 小类拆分
+//            if (StringUtils.isNotEmpty(subCategory) && subCategory.contains(",")) {
+//                String[] subCategoryList = subCategory.split(",");
+//                for (String cate : subCategoryList) {
+//                    AssetManagementConfig config = new AssetManagementConfig();
+//                    BeanUtil.copyProperties(managementConfig, config);
+//                    config.setAssetSubCategory(cate);
+//                    result.add(config);
+//                }
+//                continue;
+//            }
+//            result.add(managementConfig);
+//        }
+
+//        return result;
     }
 
     /**

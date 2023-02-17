@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.support.spring.FastjsonSockJsMessageCodec;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -14,6 +15,7 @@ import com.hexing.asset.domain.dto.*;
 import com.hexing.asset.domain.vo.*;
 import com.hexing.asset.enums.AssetProcessType;
 import com.hexing.asset.enums.AssetStatus;
+import com.hexing.asset.enums.ManagerType;
 import com.hexing.asset.enums.UIPCodeEnum;
 import com.hexing.asset.mapper.AssetMapper;
 import com.hexing.asset.service.*;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -242,35 +245,39 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public List<Asset> selectAssetList(AssetQueryParam param) {
         List<Asset> assetList;
         String username = SecurityUtils.getUsername();
-        // 用户数据查看权限判断
-//        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
-//        if (CollectionUtil.isEmpty(managementConfigList)) {
-//
-//        }
-
-        // 超级管理员可查看到所有数据
-
-        // 财务会计（账务管理员） 支持查看所属公司资产数据
-
-        // 资产管理员 支持查看名下管理的资产数据
-
-//        boolean isAssetManager = false;
-//        boolean isFinancialManager = false;
-//        for (AssetManagementConfig managementConfig : managementConfigList) {
-//            if (StringUtils.isNotEmpty(managementConfig.getAssetManager()) && managementConfig.getAssetManager().contains(username)) {
-//                isAssetManager = true;
-//            }
-//            if (StringUtils.isNotEmpty(managementConfig.getFinancialManager()) && managementConfig.getFinancialManager().contains(username)) {
-//                isFinancialManager = true;
-//            }
-//        }
 
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-//        if (isFinancialManager) {
-//            SysDept company = sysUserService.getCompanyByUserName(username);
-//            String companyCode = String.valueOf(company.getDeptId()).substring(4);
-//            wrapper.eq(Asset::getCompany, companyCode);
-//        }
+
+        // 超级管理员可查看到所有数据
+        if (!"admin".equals(username)) {
+            // 若为资产管理员
+            List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigService
+                    .selectManagementConfigListByAssetManager(username, ManagerType.ASSET_MANAGER.getType());
+            if (CollectionUtil.isNotEmpty(assetManagementConfigList)) {
+                wrapper.nested(i -> {
+                    for (AssetManagementConfig managementConfig : assetManagementConfigList) {
+                        i.or(ii -> {
+                            ii.eq(Asset::getAssetType, managementConfig.getAssetType())
+                                    .eq(Asset::getAssetCategory, managementConfig.getAssetCategory());
+                            if (StringUtils.isNotEmpty(managementConfig.getAssetSubCategory())) {
+                                // 子类拆分为列表
+                                List<String> subCategoryList = Arrays.asList(managementConfig.getAssetSubCategory().split(","));
+                                ii.in(Asset::getAssetSubCategory, subCategoryList);
+                            }
+                        });
+                    }
+                });
+            }
+
+            // 若为账务管理员
+            List<AssetManagementConfig> financialManagementConfigList = assetManagementConfigService
+                    .selectManagementConfigListByAssetManager(username, ManagerType.FINANCIAL_MANAGER.getType());
+            if (CollectionUtil.isNotEmpty(financialManagementConfigList)) {
+                List<String> companyList = financialManagementConfigList.stream().map(AssetManagementConfig::getCompany).collect(Collectors.toList());
+                wrapper.in(Asset::getCompany, companyList);
+            }
+        }
+
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }

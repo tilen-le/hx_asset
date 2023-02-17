@@ -109,7 +109,7 @@ public interface IAssetService extends IService<Asset> {
     /**
      * 资产转固
      */
-    void fixAsset(AssetFixVO vo) throws Exception;
+    JSONObject fixAsset(AssetFixVO vo) throws Exception;
 
     /**
      * 资产转移

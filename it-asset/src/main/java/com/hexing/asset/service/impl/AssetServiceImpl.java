@@ -351,6 +351,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             wrapper.in(Asset::getResponsiblePersonCode, usernameList);
         }
 
+        wrapper.orderByDesc(Asset::getUpdateTime);
+
         PageUtil.startPage();
         assetList = assetMapper.selectList(wrapper);
 
@@ -665,6 +667,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .setProofOfMaterial(order.getProofOfMaterial())
                         .setCreateBy("SAP")
                         .setCreateTime(new Date())
+                        .setUpdateBy("SAP")
+                        .setUpdateTime(new Date())
                         .setAssetType(order.getMaterialNumber().substring(0, 1))
                         .setAssetCategory(order.getMaterialNumber().substring(1, 3))
                         .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))

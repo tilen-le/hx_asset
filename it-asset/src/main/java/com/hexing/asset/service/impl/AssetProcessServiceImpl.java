@@ -282,14 +282,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isBlank(assetProcess.getAssetType())) {
             throw new ServiceException("请选择资产类型");
         }
-        if (StringUtils.isBlank(assetProcess.getCostCenter())) {
-            throw new ServiceException("请输入成本中心编码");
-        }
         if (ObjectUtil.isEmpty(assetProcess.getMaturityTime())) {
             throw new ServiceException("请设置保质期到期时间");
         }
-        entity.setCostCenter(assetProcess.getCostCenter());
-        entity.setCostCenterName(assetProcess.getCostCenterName());
         entity.setAssetCategory(assetProcess.getAssetType());
         entity.setAssetStatus(AssetStatus.USING.getCode());
         entity.setFixed(AssetStatus.FIXED.getCode());

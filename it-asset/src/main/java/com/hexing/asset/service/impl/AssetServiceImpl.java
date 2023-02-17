@@ -107,12 +107,12 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             asset.setAssetType(dto.getAssetType());
             asset.setAssetCategory(dto.getAssetCategory());
             asset.setAssetSubCategory(dto.getAssetSubCategory());
-//             保管人和保管部门
-//            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
-//                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-//                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
-//                asset.setResponsiblePersonDept(dept.getDeptName());
-//            }
+            // 保管人和保管部门
+            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
+                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+                asset.setResponsiblePersonDept(dept.getDeptName());
+            }
 
         }
         return asset;
@@ -181,7 +181,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 String msg = "<br/>" + "错误：第 " + (i + 2) + "行出错";
                 message.append(msg + e.getMessage());
                 log.error(msg, e);
-                throw new ServiceException("导入出错");
+                throw new ServiceException("导入出错：" + e);
             }
         }
         message.insert(0, "数据导入完成，共 " + assetList.size() + " 条，成功导入 " + successNum + " 条，出错 " + failureNum + " 条，详情如下：");
@@ -267,9 +267,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
 
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-        if (isAssetManager) {
-//            wrapper.eq()
-        }
+//        if (isFinancialManager) {
+//            SysDept company = sysUserService.getCompanyByUserName(username);
+//            String companyCode = String.valueOf(company.getDeptId()).substring(4);
+//            wrapper.eq(Asset::getCompany, companyCode);
+//        }
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }
@@ -527,7 +529,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
         String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
-        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
+        String userCode = "sap";
         for (SapPurchaseOrder order : orderList) {
             int numberOfArrival = order.getNumberOfArrival().intValue();
             List<Asset> assetList = new ArrayList<>();

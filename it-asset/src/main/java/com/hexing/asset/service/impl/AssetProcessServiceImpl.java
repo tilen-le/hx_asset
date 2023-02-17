@@ -93,7 +93,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             } catch (Exception e) {
                 throw new ServiceException("资产转固推送sap异常: "+e.getMessage());
             }
-        } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())) {
+        } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())&&entity.getFixed().equals(AssetStatus.FIXED.getCode())) {
             AssetReceiveVO vo = new AssetReceiveVO();
             vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
             vo.setPost(processParam.getResponsiblePersonJob());
@@ -144,11 +144,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isBlank(assetProcess.getResponsiblePersonDept())) {
             throw new ServiceException("请选择领用部门");
         }
-
+        if (StringUtils.isBlank(assetProcess.getResponsiblePersonJob())) {
+            throw new ServiceException("请输入领用人岗位");
+        }
         if (StringUtils.isBlank(assetProcess.getCurrentLocation())) {
             throw new ServiceException("请输入所在位置");
         }
-        //岗位
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(responsiblePersonCode)).findFirst().orElse(new SysUser());
         entity.setResponsiblePersonCode(responsiblePersonCode);
@@ -166,11 +167,15 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             if (StringUtils.isBlank(assetProcess.getStandard())) {
                 throw new ServiceException("请输入规格型号");
             }
+            if (StringUtils.isBlank(assetProcess.getFactoryNo())) {
+                throw new ServiceException("请输入资产出厂编号");
+            }
             if (ObjectUtil.isEmpty(assetProcess.getFixedAcceptanceDate())) {
                 throw new ServiceException("请输入转固验收日期");
             }
             entity.setAssetName(assetProcess.getAssetName());
             entity.setStandard(assetProcess.getStandard());
+            entity.setFactoryNo(assetProcess.getFactoryNo());
         }
         entity.setUpdateTime(DateUtils.getNowDate());
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();

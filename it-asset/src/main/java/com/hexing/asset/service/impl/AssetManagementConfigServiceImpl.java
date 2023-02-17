@@ -68,7 +68,8 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
         LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetManagementConfig::getAssetType, asset.getAssetType())
                 .eq(AssetManagementConfig::getAssetCategory, asset.getAssetCategory())
-                .apply("(find_in_set( {0} , asset_sub_category ))", asset.getAssetSubCategory());
+                .apply("(find_in_set( {0} , asset_sub_category ))", asset.getAssetSubCategory())
+                .eq(AssetManagementConfig::getCompany, asset.getCompany());
         List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigMapper.selectList(wrapper);
         if (CollectionUtil.isNotEmpty(assetManagementConfigList)) {
             AssetManagementConfig config = assetManagementConfigList.get(0);
@@ -204,6 +205,24 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
             assetManagementConfigs = assetManagementConfigMapper.selectList(wrapper);
         }
         return assetManagementConfigs;
+    }
+
+    public List<AssetManagementConfig> selectManagementConfigListByAssetManager(String userName) {
+        List<AssetManagementConfig> result = new ArrayList<>();
+
+        LambdaQueryWrapper<AssetManagementConfig> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(AssetManagementConfig::getAssetManager, userName);
+        List<AssetManagementConfig> assetManagementConfigList = assetManagementConfigMapper.selectList(wrapper);
+
+        for (AssetManagementConfig managementConfig : assetManagementConfigList) {
+            String subCategory = managementConfig.getAssetSubCategory();
+            if (StringUtils.isNotEmpty(subCategory) && subCategory.contains(",")) {
+                String[] subCategoryList = subCategory.split(",");
+            }
+            result.add(managementConfig);
+        }
+
+        return result;
     }
 
     /**

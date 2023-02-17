@@ -71,14 +71,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         process.setCreateTime(nowDate);
         processService.save(process);
         processParam.setId(process.getId());
-        SysUser user = sysUserService.getUserByUserName(processParam.getResponsiblePersonCode());
-        if (ObjectUtil.isNotEmpty(user)) {
-            processParam.setResponsiblePersonName(user.getNickName());
-        }
-        //工单号
-        String wokeCode = processParam.getWokeCode();
-        //流程子表
-        processService.saveProcess(processParam, type);
+        //推送sap
         if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
             AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());
@@ -109,7 +102,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try {
                 JSONObject jsonObject = assetService.receiveAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");
+                String costCenter= dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
+                entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
             } catch (Exception e) {
                 throw new ServiceException("资产派发推送sap异常: "+e.getMessage());
@@ -132,13 +127,28 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setPost(processParam.getResponsiblePersonJob());
             vo.setStage(processParam.getCurrentLocation());
             vo.setAnln1(entity.getSapCode());
-
+            vo.setDEPS(processParam.getResponsiblePersonDept());
             try {
-                assetService.transferAsset(vo);
+                JSONObject jsonObject = assetService.transferAsset(vo);
+                JSONObject dataJO = jsonObject.getJSONObject("DATA");
+                String costCenter= dataJO.getString("KOSTL");
+                String costCenterName = dataJO.getString("LTEXT");
+                entity.setCostCenter(costCenter);
+                entity.setCostCenterName(costCenterName);
             } catch (Exception e) {
                 throw new ServiceException("资产账务转移推送sap异常: "+e.getMessage());
             }
         }
+        SysUser user = sysUserService.getUserByUserName(processParam.getResponsiblePersonCode());
+        if (ObjectUtil.isNotEmpty(user)) {
+            processParam.setResponsiblePersonName(user.getNickName());
+        }
+        //工单号
+        String wokeCode = processParam.getWokeCode();
+        processParam.setCostCenter(entity.getCostCenter());
+        processParam.setCostCenterName(entity.getCostCenterName());
+        //流程子表
+        processService.saveProcess(processParam, type);
         int i =1;
         if (!process.getProcessType().equals(AssetProcessType.PROCESS_TRANSFORM.getCode())){
             i = assetService.updateAsset(entity, process);
@@ -222,16 +232,11 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isBlank(assetProcess.getResponsiblePersonDept())) {
             throw new ServiceException("请选择接收人部门");
         }
-        if (StringUtils.isBlank(assetProcess.getCostCenter())) {
-            throw new ServiceException("请输入成本中心");
-        }
         if (StringUtils.isBlank(assetProcess.getCurrentLocation())) {
             throw new ServiceException("请输入所在位置");
         }
         entity.setCompany(assetProcess.getCompany());
         entity.setResponsiblePersonCode(responsiblePersonCode);
-        entity.setCostCenter(assetProcess.getCostCenter());
-        entity.setCostCenterName(assetProcess.getCostCenterName());
         entity.setCurrentLocation(assetProcess.getCurrentLocation());
         if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
             entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());
@@ -524,16 +529,11 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         if (StringUtils.isBlank(assetProcess.getResponsiblePersonDept())) {
             throw new ServiceException("请选择接收人部门");
         }
-        if (StringUtils.isBlank(assetProcess.getCostCenter())) {
-            throw new ServiceException("请输入成本中心");
-        }
         if (StringUtils.isBlank(assetProcess.getCurrentLocation())) {
             throw new ServiceException("请输入所在位置");
         }
         entity.setCompany(assetProcess.getCompany());
         entity.setResponsiblePersonCode(responsiblePersonCode);
-        entity.setCostCenter(assetProcess.getCostCenter());
-        entity.setCostCenterName(assetProcess.getCostCenterName());
         entity.setCurrentLocation(assetProcess.getCurrentLocation());
         if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
             entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());

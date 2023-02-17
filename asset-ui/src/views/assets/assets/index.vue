@@ -104,7 +104,7 @@
     <el-table v-loading="loading" :data="assetList" tooltip-effect="light" >
     <!--  <el-table-column type="selection" width="55" align="center" />-->
       <el-table-column label="序号" type="index" align="center" />
-      <el-table-column label="资产状态" align="center" prop="assetStatus">
+      <el-table-column label="资产状态" align="center" prop="assetStatus" width="100px;">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_status" :value="scope.row.assetStatus"/>
         </template>
@@ -117,12 +117,12 @@
       <el-table-column label="资产大类" align="center" prop="assetType" :show-overflow-tooltip="true"/>
       <el-table-column label="资产中类" align="center" prop="assetCategory" />
       <el-table-column label="资产小类" align="center" prop="assetSubCategory" />
-      <el-table-column label="资产名称" align="center" prop="assetName" />
+      <el-table-column label="资产名称" align="center" prop="assetName" :show-overflow-tooltip="true" />
       <el-table-column label="规格型号" align="center" prop="standard" :show-overflow-tooltip="true"/>
       <el-table-column label="资产保管人" align="center" prop="responsiblePersonName" />
       <el-table-column label="资产保管部门" align="center" prop="responsiblePersonDept" />
       <el-table-column label="所在位置" align="center" prop="currentLocation" :show-overflow-tooltip="true" />
-      <el-table-column label="转固状态" align="center" prop="fixed">
+      <el-table-column label="转固状态" align="center" prop="fixed" width="100px;">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.asset_fixed" :value="scope.row.fixed"/>
         </template>

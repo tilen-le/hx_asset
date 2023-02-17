@@ -49,7 +49,7 @@
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:unusedAsset']"
                    v-if="info.assetStatus == '6'"
                    @click="xian_zhi">闲置</el-button>
-        <el-button size="mini" type="primary" v-hasPermi="['asset:process:transferAsset']"
+        <el-button size="mini" type="primary" v-hasPermi="['asset:process:fixationAsset']"
                    v-if="info.assetStatus == '4'"
                    @click="zhuan_gu">转固</el-button>
         <el-button size="mini" type="primary" v-hasPermi="['asset:process:maintainedAsset']"
@@ -241,7 +241,7 @@
     </el-dialog>
 
     <div class="divMiddle divInfo" style="overflow-y: auto;">
-      <el-descriptions title="基础信息" border :column="3">
+      <el-descriptions title="基础信息" size="medium" border :column="3">
         <el-descriptions-item label="资产大类">{{ info.assetType }}</el-descriptions-item>
         <el-descriptions-item label="资产中类">{{ info.assetCategory }}</el-descriptions-item>
         <el-descriptions-item label="资产小类">{{ info.assetSubCategory }}</el-descriptions-item>
@@ -571,7 +571,7 @@
 <style>
   .el-tabs .el-tabs__content {
     /*height: calc(38vh - 70px);*/
-    height: 330px;
+    height: 290px;
     overflow-y: auto;
   }
 </style>
@@ -602,7 +602,7 @@
 */
 
   .divBottom {
-    height: 400px;
+    height: 360px;
   }
 
   .head_title {

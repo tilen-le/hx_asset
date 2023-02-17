@@ -93,7 +93,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             } catch (Exception e) {
                 throw new ServiceException("资产转固推送sap异常: "+e.getMessage());
             }
-        } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())) {
+        } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())&&entity.getFixed().equals(AssetStatus.FIXED.getCode())) {
             AssetReceiveVO vo = new AssetReceiveVO();
             vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
             vo.setPost(processParam.getResponsiblePersonJob());

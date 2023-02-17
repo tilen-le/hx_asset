@@ -103,7 +103,7 @@
     </el-dialog>
 
     <el-dialog :title="dialogTitle" :visible.sync="zhuan_yi_open" width="550px" append-to-body>
-      <el-form ref="form" label-width="100px" :model="form">
+      <el-form ref="form" label-width="120px" :model="form">
         <el-form-item label="接收公司" prop="company" :rules="required_rule">
           <el-select v-model="form.company" placeholder="请选择所属公司" clearable style="width:100%" :disabled="zhuan_yi_type == '1'">
             <el-option v-for="dict in dict.type.asset_company" :key="dict.value" :label="dict.label" :value="dict.value"/>
@@ -141,7 +141,7 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="zhuan_gu_open" width="550px" append-to-body>
       <el-form ref="form" label-width="130px" :model="form">
-        <el-form-item label="资产类型" prop="company">
+        <el-form-item label="资产类型" prop="company" :rules="required_rule">
           <el-select v-model="form.assetType" placeholder="请选择资产类型" clearable style="width:100%">
             <el-option v-for="dict in dict.type.sap_card_asset_category" :key="dict.value" :label="dict.label"
                        :value="dict.value"/>
@@ -182,15 +182,26 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="yi_wei_xiu_open" width="550px" append-to-body>
       <el-form ref="form" label-width="100px" :model="form">
-        <el-form-item label="资产状态" prop="assetStatus">
+        <el-form-item label="资产状态" prop="assetStatus" :rules="required_rule">
           <el-radio-group v-model="form.assetStatus">
-            <el-radio
-              v-for="dict in dict.type.asset_status"
-              :key="dict.value"
-              :label="dict.value"
-              v-if="dict.label == '在库' || dict.label == '在用' || dict.label == '试用'"
-            >{{dict.label}}
-            </el-radio>
+            <div v-if="info.fixed == '0'">
+              <el-radio
+                v-for="dict in dict.type.asset_status"
+                :key="dict.value"
+                :label="dict.value"
+                v-if="dict.label == '在库' || dict.label == '试用'"
+              >{{dict.label}}
+              </el-radio>
+            </div>
+            <div v-else>
+              <el-radio
+                v-for="dict in dict.type.asset_status"
+                :key="dict.value"
+                :label="dict.value"
+                v-if="dict.label == '在用'"
+              >{{dict.label}}
+              </el-radio>
+            </div>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="资产保管人">
@@ -212,7 +223,7 @@
         <i class="el-icon-warning" style="color: red;"></i>是否清空资产保管人，保管部门，成本中心？
       </div>
       <el-form ref="form" label-width="80px" :model="form" style="margin-top:10px;">
-        <el-form-item label="" prop="clearInfo">
+        <el-form-item label="" prop="clearInfo" :rules="required_rule">
           <el-radio-group v-model="form.clearInfo">
             <el-radio
               v-for="dict in dict.type.confirm"
@@ -239,6 +250,9 @@
         <el-descriptions-item label="资产状态">
           <dict-tag :options="dict.type.asset_status" :value="info.assetStatus"/>
         </el-descriptions-item>
+        <el-descriptions-item label="转固状态">
+          <dict-tag :options="dict.type.asset_fixed" :value="info.fixed"/>
+        </el-descriptions-item>
         <el-descriptions-item label="资产保管人">{{ info.responsiblePersonName }}</el-descriptions-item>
         <el-descriptions-item label="资产保管部门">{{ info.responsiblePersonDept }}</el-descriptions-item>
         <el-descriptions-item label="所在位置">{{ info.currentLocation }}</el-descriptions-item>
@@ -256,6 +270,7 @@
         <el-descriptions-item label="供应商">{{ info.providerName }}</el-descriptions-item>
         <el-descriptions-item label="出厂编码">{{ info.factoryNo }}</el-descriptions-item>
         <el-descriptions-item label="采购单号">{{ info.purchaseOrderNo }}</el-descriptions-item>
+        <el-descriptions-item label="资产卡片编号">{{ info.sapCode }}</el-descriptions-item>
         <el-descriptions-item label="入库日期">{{ info.storageDate }}</el-descriptions-item>
         <el-descriptions-item label="备注">{{ info.comment }}</el-descriptions-item>
       </el-descriptions>
@@ -265,13 +280,13 @@
     <div class="divBottom divInfo">
       <el-tabs v-model="activeName" @tab-click="tabClick">
         <el-tab-pane label="保管记录" name="belongTab" v-if="checkPermi(['asset:log:custodyLogList'])">
-          <custodyLog :assetCode="assetCode"></custodyLog>
+          <custodyLog :assetCode="assetCode" ref="belongTab"></custodyLog>
         </el-tab-pane>
         <el-tab-pane label="工单记录" name="orderTab" v-if="checkPermi(['asset:log:workLogList'])">
-          <workLog :assetCode="assetCode"></workLog>
+          <workLog :assetCode="assetCode" ref="orderTab"></workLog>
         </el-tab-pane>
         <el-tab-pane label="操作日志" name="operateTab" v-if="checkPermi(['asset:log:operationLogList'])">
-          <operationLog :assetCode="assetCode"></operationLog>
+          <operationLog :assetCode="assetCode" ref="operateTab"></operationLog>
         </el-tab-pane>
       </el-tabs>
     </div>
@@ -285,9 +300,11 @@
   import operationLog from "./operationLog";
   import {getDicts} from "@/api/system/dict/data";
   import {getInfo} from "@/api/assets/assets";
-  import { checkPermi } from '@/utils/permission'
+  import {checkPermi} from '@/utils/permission'
   import {
+    accountTransferAsset,
     fixationAsset,
+    getTransferInfo,
     inventoryLossAsset,
     maintainAsset,
     maintainedAsset,
@@ -297,10 +314,8 @@
     scrapedAsset,
     takeOutAsset,
     transferAsset,
-    waiteTakeOutAsset,
     unusedAsset,
-    getTransferInfo,
-    accountTransferAsset
+    waiteTakeOutAsset
   } from "@/api/assets/process";
   import {childTree} from '@/api/system/dept';
   import Treeselect from '@riophae/vue-treeselect'
@@ -308,7 +323,7 @@
 
   export default {
     name: 'assetInfo',
-    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'confirm'],
+    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'confirm', 'asset_fixed'],
     components: {Treeselect, custodyLog, workLog, operationLog},
     data() {
       return {
@@ -347,11 +362,21 @@
           this.loading = false
         })
       }
+      setTimeout(() => {
+        if (this.$auth.hasPermi("asset:log:custodyLogList")) {
+          this.getTabContent('belongTab');
+        } else if (this.$auth.hasPermi("asset:log:workLogList")) {
+          this.getTabContent('orderTab');
+        } else if (this.$auth.hasPermi("asset:log:operationLogList")) {
+          this.getTabContent('operateTab');
+        } else {}
+      }, 500);
+
     },
     methods: {
       checkPermi,
       tabClick(tab, event) {
-
+        this.getTabContent(tab.name);
       },
       getCommonUsers() {
         const userList = this.common_users
@@ -367,8 +392,19 @@
           getInfo(this.assetCode).then((response) => {
             this.info = response.data
             this.loading = false
+            this.getTabContent(this.activeName);
           })
-        }, 500)
+        }, 500);
+      },
+      getTabContent(tabName) {
+        if (tabName == 'belongTab') {
+          this.$refs.belongTab.getList();
+        } else if (tabName == 'orderTab') {
+          this.$refs.orderTab.getList();
+        } else if (tabName == 'operateTab') {
+          this.$refs.operateTab.getList();
+        } else {
+        }
       },
       clearForm() {
         this.form = {

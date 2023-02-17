@@ -60,7 +60,7 @@
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['assets:manager:add']"
+          v-hasPermi="['manage:config:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
@@ -71,7 +71,7 @@
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['assets:manager:delete']"
+          v-hasPermi="['manage:config:remove']"
         >删除
         </el-button>
       </el-col>
@@ -109,14 +109,14 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['assets:manager:edit']"
+            v-hasPermi="['manage:config:edit']"
           >修改</el-button>
           <el-button
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['assets:manager:delete']"
+            v-hasPermi="['manage:config:remove']"
           >删除</el-button>
         </template>
       </el-table-column>

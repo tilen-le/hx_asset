@@ -94,4 +94,8 @@ public class SapAssetFixDTO {
      * 制造商名称
      */
     private String NAME2;
+    /**
+     * 制造商名称
+     */
+    private String DEPS;
 }

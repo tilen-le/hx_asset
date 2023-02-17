@@ -254,7 +254,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         String username = SecurityUtils.getUsername();
         SysUser user = sysUserService.getUserByUserName(username);
-        List<SysRole> roleList = sysRoleService.selectRolesByUserId(user.getUserId());
+        List<SysRole> roleList = sysRoleService.selectUserRoleListByUserId(user.getUserId());
 
         boolean isAdmin = false;
         for (SysRole sysRole : roleList) {
@@ -396,7 +396,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         String username = SecurityUtils.getUsername();
         SysUser user = sysUserService.getUserByUserName(username);
-        List<SysRole> roleList = sysRoleService.selectRolesByUserId(user.getUserId());
+        List<SysRole> roleList = sysRoleService.selectUserRoleListByUserId(user.getUserId());
 
         boolean isAdmin = false;
         for (SysRole sysRole : roleList) {

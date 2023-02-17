@@ -108,12 +108,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             asset.setAssetCategory(dto.getAssetCategory());
             asset.setAssetSubCategory(dto.getAssetSubCategory());
             // 保管人和保管部门
-            if (StringUtils.isNotEmpty(asset.getResponsiblePersonCode())) {
-                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
-                SysDept dept = sysDeptService.selectDeptById(user.getDeptId());
+            if (StringUtils.isNotEmpty(asset.getResponsiblePersonDept())) {
+//                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
+                SysDept dept = sysDeptService.selectDeptById(Long.valueOf(asset.getResponsiblePersonDept()));
                 asset.setResponsiblePersonDept(dept.getDeptName());
             }
-
         }
         return asset;
     }
@@ -135,8 +134,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         int successNum = 0;         /* 导入成功条数 */
         int failureNum = 0;         /* 导入失败条数 */
         StringBuilder message = new StringBuilder();
-        AssetUpdateLog updateLog=new AssetUpdateLog();
-        String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
+        AssetUpdateLog updateLog = new AssetUpdateLog();
+        String type = AssetProcessType.PROCESS_ASSET_CREATE.getCode();
         String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
         for (int i = 0; i < assetList.size(); i++) {
             try {
@@ -244,10 +243,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         List<Asset> assetList;
         String username = SecurityUtils.getUsername();
         // 用户数据查看权限判断
-        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
-        if (CollectionUtil.isEmpty(managementConfigList)) {
-
-        }
+//        List<AssetManagementConfig> managementConfigList = assetManagementConfigService.listManagementConfig(username);
+//        if (CollectionUtil.isEmpty(managementConfigList)) {
+//
+//        }
 
         // 超级管理员可查看到所有数据
 
@@ -255,16 +254,16 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
 
         // 资产管理员 支持查看名下管理的资产数据
 
-        boolean isAssetManager = false;
-        boolean isFinancialManager = false;
-        for (AssetManagementConfig managementConfig : managementConfigList) {
-            if (StringUtils.isNotEmpty(managementConfig.getAssetManager()) && managementConfig.getAssetManager().contains(username)) {
-                isAssetManager = true;
-            }
-            if (StringUtils.isNotEmpty(managementConfig.getFinancialManager()) && managementConfig.getFinancialManager().contains(username)) {
-                isFinancialManager = true;
-            }
-        }
+//        boolean isAssetManager = false;
+//        boolean isFinancialManager = false;
+//        for (AssetManagementConfig managementConfig : managementConfigList) {
+//            if (StringUtils.isNotEmpty(managementConfig.getAssetManager()) && managementConfig.getAssetManager().contains(username)) {
+//                isAssetManager = true;
+//            }
+//            if (StringUtils.isNotEmpty(managementConfig.getFinancialManager()) && managementConfig.getFinancialManager().contains(username)) {
+//                isFinancialManager = true;
+//            }
+//        }
 
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
 //        if (isFinancialManager) {
@@ -330,17 +329,19 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 asset.setAssetSubCategory(dto.getAssetSubCategory());
             }
 
-//            Map<String, SysUser> responsiblePersonMap = sysUserService
-//                    .getUserByUserNames(assetList.stream().map(Asset::getResponsiblePersonCode).collect(Collectors.toSet()));
-//            Map<Long, SysDept> deptMap = sysDeptService
-//                    .selectDeptByIds(responsiblePersonMap.values().stream().map(SysUser::getDeptId).collect(Collectors.toList()));
-//            for (Asset a : assetList) {
-//                if (StringUtils.isNotEmpty(a.getResponsiblePersonCode())) {
-//                    SysUser responsiblePerson = responsiblePersonMap.get(a.getResponsiblePersonCode());
-//                    SysDept dept = deptMap.get(responsiblePerson.getDeptId());
-//                    a.setResponsiblePersonDept(dept.getDeptName());
-//                }
-//            }
+            List<Long> deptIdList = new ArrayList<>();
+            for (Asset asset : assetList) {
+                if (StringUtils.isNotEmpty(asset.getResponsiblePersonDept())) {
+                    deptIdList.add(Long.valueOf(asset.getResponsiblePersonDept()));
+                }
+            }
+            Map<Long, SysDept> deptMap = sysDeptService.selectDeptByIds(deptIdList);
+            for (Asset a : assetList) {
+                if (StringUtils.isNotEmpty(a.getResponsiblePersonDept())) {
+                    SysDept dept = deptMap.get(Long.valueOf(a.getResponsiblePersonDept()));
+                    a.setResponsiblePersonDept(dept.getDeptName());
+                }
+            }
         }
 
         return assetList;
@@ -412,6 +413,21 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 asset.setAssetCategory(dto.getAssetCategory());
                 asset.setAssetSubCategory(dto.getAssetSubCategory());
             }
+
+            List<Long> deptIdList = new ArrayList<>();
+            for (Asset asset : assetList) {
+                if (StringUtils.isNotEmpty(asset.getResponsiblePersonDept())) {
+                    deptIdList.add(Long.valueOf(asset.getResponsiblePersonDept()));
+                }
+            }
+            Map<Long, SysDept> deptMap = sysDeptService.selectDeptByIds(deptIdList);
+            for (Asset a : assetList) {
+                if (StringUtils.isNotEmpty(a.getResponsiblePersonDept())) {
+                    SysDept dept = deptMap.get(Long.valueOf(a.getResponsiblePersonDept()));
+                    a.setResponsiblePersonDept(dept.getDeptName());
+                }
+            }
+
         }
 
         return assetList;
@@ -528,7 +544,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
     public void sapAdd(List<SapPurchaseOrder> orderList) {
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
-        String type =AssetProcessType.PROCESS_ASSET_CREATE.getCode();
+        String type = AssetProcessType.PROCESS_ASSET_CREATE.getCode();
         String userCode = "sap";
         for (SapPurchaseOrder order : orderList) {
             int numberOfArrival = order.getNumberOfArrival().intValue();

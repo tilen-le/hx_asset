@@ -1,5 +1,6 @@
 package com.hexing.asset.service;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.hexing.asset.domain.Asset;
 import com.hexing.asset.domain.AssetProcess;
@@ -40,5 +41,5 @@ public interface IAssetUpdateLogService extends IService<AssetUpdateLog>
     /**
      * 获取资产操作记录详细信息
      */
-    AssetUpdateLog getOperationLogById(Long id);
+    JSONObject getOperationLogById(Long id);
 }

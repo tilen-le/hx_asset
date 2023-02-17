@@ -665,6 +665,18 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
     }
 
     @Override
+    public <T> T convertProcessGetLabel(AssetProcess process, T domain) {
+        List<AssetProcessVariable> variableList = process.getVariableList();
+        if (CollectionUtil.isNotEmpty(variableList)) {
+            for (AssetProcessVariable variable : variableList) {
+                BeanTool.setFieldValueThrowEx(domain, variable.getFieldLabel(), variable.getFieldValue());
+            }
+        }
+        process.setVariableList(null);
+        BeanUtil.copyProperties(process, domain);
+        return domain;
+    }
+    @Override
     public void saveOne(AssetProcess process) {
         List<AssetProcessField> processFields = commonService.getProcessFields();
         if (StringUtils.isEmpty(process.getProcessType())) {

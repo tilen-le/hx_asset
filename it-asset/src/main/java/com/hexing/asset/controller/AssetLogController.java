@@ -1,6 +1,7 @@
 package com.hexing.asset.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONObject;
 import com.github.xiaoymin.knife4j.annotations.ApiOperationSupport;
 import com.hexing.asset.domain.AssetProcess;
 import com.hexing.asset.domain.AssetUpdateLog;
@@ -113,10 +114,7 @@ public class AssetLogController extends BaseController
     @ApiOperation("获取资产操作记录详细信息")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
-        AssetUpdateLog updateLog = updateLogService.getOperationLogById(id);
-        if (ObjectUtil.isEmpty(updateLog)) {
-            return AjaxResult.error("该资产操作记录不存在");
-        }
+        JSONObject updateLog = updateLogService.getOperationLogById(id);
         return AjaxResult.success(updateLog);
     }
 

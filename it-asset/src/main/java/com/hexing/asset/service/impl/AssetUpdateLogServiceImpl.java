@@ -1,5 +1,6 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.Asset;
@@ -159,9 +160,34 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
 
     //操作记录详情
     @Override
-    public AssetUpdateLog getOperationLogById(Long id) {
+    public JSONObject getOperationLogById(Long id) {
+        JSONObject jsonObject=new JSONObject();
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetUpdateLog::getId,id);
-        return assetUpdateLogMapper.selectOne(wrapper);
+        AssetUpdateLog updateLog = assetUpdateLogMapper.selectOne(wrapper);
+        // 保管人和保管部门
+        if (StringUtils.isNotEmpty(updateLog.getResponsiblePersonDept())) {
+            SysDept dept = sysDeptService.selectDeptById(Long.valueOf(updateLog.getResponsiblePersonDept()));
+            updateLog.setResponsiblePersonDeptName(dept.getDeptName());
+        }
+        if (StringUtils.isNotEmpty(updateLog.getResponsiblePersonCode())) {
+            SysUser user = sysUserService.getUserByUserName(updateLog.getResponsiblePersonCode());
+            updateLog.setResponsiblePersonName(user.getNickName());
+        }
+        AssetProcess process=new AssetProcess();
+        process.setAssetCode(updateLog.getAssetCode());
+        if (StringUtils.isNotBlank(updateLog.getProcessId())){
+            process.setId(Long.valueOf(updateLog.getProcessId()));
+            List<AssetProcess> list = processService.list(process);
+            process = list.stream().findFirst().orElse(null);
+        }
+        jsonObject.putOnce("processLog",process);
+//        JSONObject domain =new JSONObject();
+//        if (Objects.nonNull(process)){
+//            domain = processService.convertProcessGetLabel(process, new JSONObject());
+//        }
+        jsonObject.putOnce("updateLog",updateLog);
+
+        return jsonObject;
     }
 }

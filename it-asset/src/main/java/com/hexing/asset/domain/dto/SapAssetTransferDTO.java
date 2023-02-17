@@ -35,6 +35,10 @@ public class SapAssetTransferDTO {
      */
     private String Post;
     /**
+     * 部门
+     */
+    private String DEPS;
+    /**
      * 成本中心编码
      */
     private String KOSTL;

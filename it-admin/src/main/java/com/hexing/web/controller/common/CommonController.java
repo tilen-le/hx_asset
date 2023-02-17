@@ -2,6 +2,8 @@ package com.hexing.web.controller.common;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+import cn.hutool.core.date.DateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ import com.hexing.common.utils.StringUtils;
 import com.hexing.common.utils.file.FileUploadUtils;
 import com.hexing.common.utils.file.FileUtils;
 import com.hexing.framework.config.ServerConfig;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 通用请求处理
@@ -46,7 +51,10 @@ public class CommonController
             {
                 throw new Exception(StringUtils.format("文件名称({})非法，不允许下载。 ", fileName));
             }
-            String realFileName = System.currentTimeMillis() + fileName.substring(fileName.indexOf("_") + 1);
+//            String realFileName = fileName.substring(fileName.indexOf("_") + 1) + System.currentTimeMillis();
+            // 自定义导出文件名称
+            String realFileName = fileName.substring(fileName.indexOf("_") + 1).split("\\.")[0]
+                    + "_" + DateUtil.format(new Date(), "yyyy-MM-dd_HH-mm-ss") + ".xlsx";
             String filePath = RuoYiConfig.getDownloadPath() + fileName;
 
             response.setContentType(MediaType.APPLICATION_OCTET_STREAM_VALUE);

@@ -79,7 +79,7 @@ public class AssetController extends BaseController {
     public AjaxResult export(AssetQueryParam param) {
         List<Asset> list = assetService.selectAllAsset(param);
         ExcelUtil<Asset> util = new ExcelUtil<>(Asset.class);
-        return util.exportExcel(list, "固定资产数据");
+        return util.exportExcel(list, "资产信息列表");
     }
 
     /**

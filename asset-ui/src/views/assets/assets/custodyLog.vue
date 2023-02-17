@@ -15,8 +15,6 @@
           <span>{{ parseTime(scope.row.endTime) }}</span>
         </template>
       </el-table-column>
-
-
     </el-table>
     <pagination
       v-show="total>0"
@@ -41,7 +39,7 @@
     data() {
       return {
         // 遮罩层
-        loading: true,
+        loading: false,
         total: 0,
         queryParams: {
           pageNum: 1,
@@ -51,14 +49,15 @@
         logList: []
       };
     },
-    created() {
+/*    created() {
       this.loading = true
       this.queryParams.assetCode = this.assetCode
       this.getList();
-    },
+    },*/
     methods: {
       getList() {
         this.loading = true;
+        this.queryParams.assetCode = this.assetCode
         custodyLogList(this.queryParams).then(response => {
           this.logList = response.rows;
           this.total = response.total;

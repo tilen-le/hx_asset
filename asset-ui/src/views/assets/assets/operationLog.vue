@@ -49,7 +49,7 @@
     data() {
       return {
         // 遮罩层
-        loading: true,
+        loading: false,
         total: 0,
         queryParams: {
           pageNum: 1,
@@ -59,14 +59,15 @@
         operationLogList: []
       };
     },
-    created() {
+/*    created() {
       this.loading = true
       this.queryParams.assetCode = this.assetCode
       this.getList();
-    },
+    },*/
     methods: {
       getList() {
         this.loading = true;
+        this.queryParams.assetCode = this.assetCode
         operationLogList(this.queryParams).then(response => {
           this.operationLogList = response.rows;
           this.total = response.total;

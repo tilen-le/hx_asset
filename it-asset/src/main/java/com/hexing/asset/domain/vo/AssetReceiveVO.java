@@ -36,4 +36,8 @@ public class AssetReceiveVO {
      * 公司代码
      */
     private String BUKRS;
+    /**
+     * SAP资产状态
+     */
+    private String ORD41;
 }

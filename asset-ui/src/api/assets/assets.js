@@ -58,3 +58,11 @@ export function operationLogList(query) {
     params: query
   })
 }
+
+//查询操作日志详情
+export function getLogDetail(id) {
+  return request({
+    url: '/asset/log/' + id,
+    method: 'get'
+  })
+}

@@ -83,6 +83,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setAssetCode(entity.getAssetCode());
             vo.setCategory(processParam.getAssetType());
             vo.setCostCenterCode(processParam.getCostCenter());
+            vo.setCostCenterName(processParam.getCostCenterName());
             vo.setExpirationDate(processParam.getMaturityTime());
             vo.setResponsibilityCostCenterCode(processParam.getDutyCostCenter());
             vo.setBelong(processParam.getProject());
@@ -105,6 +106,16 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 assetService.receiveAsset(vo);
             } catch (Exception e) {
                 throw new ServiceException("资产派发推送sap异常: "+e.getMessage());
+            }
+        }else if (type.equals(AssetProcessType.PROCESS_UNUSED.getCode())){
+            AssetReceiveVO vo = new AssetReceiveVO();
+            vo.setBUKRS(entity.getCompany());
+            vo.setAnln1(entity.getSapCode());
+            vo.setORD41(entity.getAssetStatus());
+            try {
+                assetService.receiveAsset(vo);
+            } catch (Exception e) {
+                throw new ServiceException("资产闲置推送sap异常: "+e.getMessage());
             }
         } else if (type.equals(AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode())) {
             SapAssetTransferDTO vo = new SapAssetTransferDTO();

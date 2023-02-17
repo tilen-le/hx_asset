@@ -45,7 +45,7 @@ public class AssetProcessController extends BaseController {
     @Log(title = "转移资产", businessType = BusinessType.UPDATE)
     @PutMapping("/transferAsset")
     @PreAuthorize("@ss.hasPermi('asset:process:transferAsset')")
-    @ApiOperation("转固资产")
+    @ApiOperation("转移资产")
     @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 2)
     public AjaxResult transferAsset(@RequestBody AssetProcessParam assetProcess) {

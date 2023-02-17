@@ -676,6 +676,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     .setZZANLU003("")
                     .setZZANLU004(asset.getResponsiblePersonCode())
                     .setKOSTL(vo.getCostCenterCode())
+                    .setLTEXT(vo.getCostCenterName())
                     .setKOSTLV(vo.getResponsibilityCostCenterCode())
                     .setRAUMN(asset.getResponsiblePersonName())
                     .setLIFNR(asset.getProvider())

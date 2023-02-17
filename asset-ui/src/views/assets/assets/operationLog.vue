@@ -1,7 +1,7 @@
 <template>
   <div>
 <!--    height="calc(38vh - 130px)"-->
-    <el-table v-loading="loading" :data="operationLogList" tooltip-effect="light" height="270px">
+    <el-table v-loading="loading" :data="operationLogList" tooltip-effect="light" height="230px">
       <el-table-column label="序号" type="index" align="center"/>
 
       <el-table-column label="操作人" align="center" prop="createBy" />
@@ -37,7 +37,7 @@
 </template>
 
 <script>
-  import {operationLogList} from "@/api/assets/assets";
+  import {operationLogList, getLogDetail} from "@/api/assets/assets";
 
   export default {
     props: {
@@ -75,7 +75,7 @@
         });
       },
       searchInfo(row) {
-        this.$modal.msgWarning("功能尚未设计开发...");
+        this.$modal.msgWarning(row.id + "功能尚未设计开发...");
       }
     }
   };

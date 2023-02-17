@@ -35,6 +35,11 @@ public class AssetFixVO {
     @ApiModelProperty(value = "成本中心编码")
     private String costCenterCode;
     /**
+     * 成本中心描述
+     */
+    @ApiModelProperty(value = "成本中心描述")
+    private String costCenterName;
+    /**
      * 保质期到期时间
      */
     @ApiModelProperty(value = "保质期到期时间")

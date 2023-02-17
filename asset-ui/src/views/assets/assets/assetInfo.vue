@@ -464,7 +464,7 @@
         fixationAsset(this.form).then(response => {
           this.$modal.msgSuccess("操作成功");
           this.getInfo();
-          this.$alert('xxxxx', '资产卡片编号', {
+          this.$alert(this.info.sapCode, '资产卡片编号', {
             confirmButtonText: '确定',
             callback: action => {
               this.$message({

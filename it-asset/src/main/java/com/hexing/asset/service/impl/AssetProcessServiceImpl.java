@@ -3,6 +3,7 @@ package com.hexing.asset.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.hexing.asset.domain.*;
@@ -90,7 +91,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setProvider(processParam.getSupplierName());
             vo.setUsage(processParam.getComment());
             try {
-                assetService.fixAsset(vo);
+                JSONObject jsonObject = assetService.fixAsset(vo);
+                JSONObject dataJO = jsonObject.getJSONObject("DATA");
+                String sapCode = dataJO.getString("ANLN1");
+                entity.setSapCode(sapCode);
             } catch (Exception e) {
                 throw new ServiceException("资产转固推送sap异常: "+e.getMessage());
             }
@@ -103,7 +107,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setZnum(processParam.getAssetType());
             vo.setBUKRS(entity.getCompany());
             try {
-                assetService.receiveAsset(vo);
+                JSONObject jsonObject = assetService.receiveAsset(vo);
+                JSONObject dataJO = jsonObject.getJSONObject("DATA");
+                String costCenterName = dataJO.getString("LTEXT");
+                entity.setCostCenterName(costCenterName);
             } catch (Exception e) {
                 throw new ServiceException("资产派发推送sap异常: "+e.getMessage());
             }
@@ -111,7 +118,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             AssetReceiveVO vo = new AssetReceiveVO();
             vo.setBUKRS(entity.getCompany());
             vo.setAnln1(entity.getSapCode());
-            vo.setORD41(entity.getAssetStatus());
+            vo.setORD41(AssetStatus.UNUSED.getName());
             try {
                 assetService.receiveAsset(vo);
             } catch (Exception e) {
@@ -165,6 +172,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(responsiblePersonCode)).findFirst().orElse(new SysUser());
         entity.setResponsiblePersonCode(responsiblePersonCode);
         entity.setResponsiblePersonDept(assetProcess.getResponsiblePersonDept());
+        entity.setCostCenter(assetProcess.getResponsiblePersonDept());
         entity.setResponsiblePersonName(sysUser.getNickName());
         assetProcess.setResponsiblePersonName(sysUser.getNickName());
         entity.setCurrentLocation(assetProcess.getCurrentLocation());

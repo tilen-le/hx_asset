@@ -267,9 +267,11 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         }
 
         LambdaQueryWrapper<Asset> wrapper = new LambdaQueryWrapper<>();
-        if (isAssetManager) {
-//            wrapper.eq()
-        }
+//        if (isFinancialManager) {
+//            SysDept company = sysUserService.getCompanyByUserName(username);
+//            String companyCode = String.valueOf(company.getDeptId()).substring(4);
+//            wrapper.eq(Asset::getCompany, companyCode);
+//        }
         if (StringUtils.isNotEmpty(param.getAssetCode())) {
             wrapper.like(Asset::getAssetCode, param.getAssetCode());
         }

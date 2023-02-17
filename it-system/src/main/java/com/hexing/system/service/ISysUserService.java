@@ -1,5 +1,6 @@
 package com.hexing.system.service;
 
+import com.hexing.common.core.domain.entity.SysDept;
 import com.hexing.common.core.domain.entity.SysUser;
 
 import java.util.List;
@@ -234,4 +235,11 @@ public interface ISysUserService
     // 获取用户名和昵称映射表
     Map<String, SysUser> getUsernameUserObjMap();
 
+    /**
+     * 通过工号获取员工所属公司
+     *
+     * @param userName 员工工号
+     * @return
+     */
+    SysDept getCompanyByUserName(String userName);
 }

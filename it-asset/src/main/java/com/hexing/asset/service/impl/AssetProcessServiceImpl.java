@@ -83,6 +83,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setAssetCode(entity.getAssetCode());
             vo.setCategory(processParam.getAssetType());
             vo.setCostCenterCode(processParam.getCostCenter());
+            vo.setCostCenterName(processParam.getCostCenterName());
             vo.setExpirationDate(processParam.getMaturityTime());
             vo.setResponsibilityCostCenterCode(processParam.getDutyCostCenter());
             vo.setBelong(processParam.getProject());

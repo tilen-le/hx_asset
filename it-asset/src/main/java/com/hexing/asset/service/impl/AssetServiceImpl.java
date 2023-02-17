@@ -657,7 +657,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * 资产转固
      */
     @Override
-    public void fixAsset(AssetFixVO vo) throws Exception {
+    public JSONObject fixAsset(AssetFixVO vo) throws Exception {
         SapAssetFixDTO sapAssetFixDTO = new SapAssetFixDTO();
         Asset asset = this.selectAssetByAssetCode(vo.getAssetCode());
         if (ObjectUtil.isNotEmpty(asset)) {
@@ -692,14 +692,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             if ("E".equals(sapResponseCode)) {
                 throw new Exception("SAP报错：" + responseBodyJO);
             } else if ("S".equals(sapResponseCode)) {
-                // 更新资产的SAP资产编码字段
-                JSONObject dataJO = responseBodyJO.getJSONObject("DATA");
-                String sapCode = dataJO.getString("ANLN1");
-                asset.setSapCode(sapCode);
-                this.updateById(asset);
+                return responseBodyJO;
             }
-
         }
+        return null;
     }
 
     /**

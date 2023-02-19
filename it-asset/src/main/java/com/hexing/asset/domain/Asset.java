@@ -244,8 +244,8 @@ public class Asset {
      */
     @ApiModelProperty(value = "入库日期")
     @Excel(name = "入库日期", dateFormat = "yyyy-MM-dd")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date storageDate;
+//    @JsonFormat(pattern = "yyyy-MM-dd")
+    private String storageDate;
 
     /**
      * 物料凭证
@@ -318,6 +318,7 @@ public class Asset {
      * 资产管理员
      */
     @ApiModelProperty(value = "资产管理员")
+    @Excel(name = "资产管理员")
     @TableField(exist = false)
     private String assetManager;
 
@@ -325,6 +326,7 @@ public class Asset {
      * 资产管理部门
      */
     @ApiModelProperty(value = "资产管理部门")
+    @Excel(name = "资产管理部门")
     @TableField(exist = false)
     private String assetManagementDept;
 

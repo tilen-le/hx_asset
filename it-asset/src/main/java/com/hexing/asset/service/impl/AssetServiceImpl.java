@@ -499,6 +499,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             // 解析物料号返回资产大中小类
             JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
             for (Asset asset : assetList) {
+                // 填充资产管理员和资产管理部门
+                assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);
+                // 资产类型解析
                 MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
                 asset.setAssetType(dto.getAssetType());
                 asset.setAssetCategory(dto.getAssetCategory());

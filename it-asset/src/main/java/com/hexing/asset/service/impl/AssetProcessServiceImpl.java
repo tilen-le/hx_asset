@@ -298,7 +298,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (ObjectUtil.isEmpty(assetProcess.getMaturityTime())) {
             throw new ServiceException("请设置保质期到期时间");
         }
-        entity.setAssetCategory(assetProcess.getAssetType());
+        //todo: 注释错误代码
+//        entity.setAssetCategory(assetProcess.getAssetType());
         entity.setAssetStatus(AssetStatus.USING.getCode());
         entity.setFixed(AssetStatus.FIXED.getCode());
         entity.setUpdateTime(DateUtils.getNowDate());

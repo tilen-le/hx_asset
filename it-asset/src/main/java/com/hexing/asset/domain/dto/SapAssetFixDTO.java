@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
+import java.util.Date;
+
 /**
  * 资产转固 DTO
  *
@@ -99,4 +101,20 @@ public class SapAssetFixDTO {
      */
     private String DEPS;
     // TODO 增加资本化日期、首次购置日期、资产管理分类
+
+    /**
+     * 资本化日期
+     */
+    private Date AKTIV;
+
+    /**
+     * 资产管理分类
+     */
+    private String ORD42;
+
+    /**
+     * 首次购置日期
+     */
+    private Date ZUGDT;
+
 }

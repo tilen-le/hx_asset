@@ -372,5 +372,4 @@ public class Asset {
     private String factoryNumber;
 
 
-
 }

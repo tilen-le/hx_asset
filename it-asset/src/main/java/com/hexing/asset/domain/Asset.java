@@ -244,8 +244,8 @@ public class Asset {
      */
     @ApiModelProperty(value = "入库日期")
     @Excel(name = "入库日期", dateFormat = "yyyy-MM-dd")
-//    @JsonFormat(pattern = "yyyy-MM-dd")
-    private String storageDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date storageDate;
 
     /**
      * 物料凭证

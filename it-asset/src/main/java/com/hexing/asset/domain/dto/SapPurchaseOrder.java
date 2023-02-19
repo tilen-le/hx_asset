@@ -41,8 +41,8 @@ public class SapPurchaseOrder {
      * 下单日期（入库日期） AEDAT
      */
     @JsonProperty("AEDAT")
-//    @JsonFormat(pattern = "yyyy-MM-dd")
-    private String orderDate;
+    @JsonFormat(pattern = "yyyyMMdd")
+    private Date orderDate;
 
     /**
      * 供应商 LIFNR

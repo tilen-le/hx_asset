@@ -112,7 +112,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 String costCenter= dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
                 if(StringUtils.isBlank(costCenter)||StringUtils.isBlank(costCenterName)){
-                    throw new ServiceException("资产转固推送sap,未返回成本中心");
+                    throw new ServiceException("资产派发推送sap,未返回成本中心");
                 }
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
@@ -144,7 +144,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 String costCenter= dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
                 if(StringUtils.isBlank(costCenter)||StringUtils.isBlank(costCenterName)){
-                    throw new ServiceException("资产转固推送sap,未返回成本中心");
+                    throw new ServiceException("资产账务转移推送sap,未返回成本中心");
                 }
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);

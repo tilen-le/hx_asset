@@ -402,7 +402,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         for (SysRole sysRole : roleList) {
             if ("超级管理员".equals(sysRole.getRoleName())
                     || "总务管理员".equals(sysRole.getRoleName())
-                    || "财务管理人员".equals(sysRole.getRoleName())) {
+                    || "财务管理员".equals(sysRole.getRoleName())) {
                 isAdmin = true;
                 break;
             }

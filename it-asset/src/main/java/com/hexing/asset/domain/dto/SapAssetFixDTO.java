@@ -98,4 +98,5 @@ public class SapAssetFixDTO {
      * 制造商名称
      */
     private String DEPS;
+    // TODO 增加资本化日期、首次购置日期、资产管理分类
 }

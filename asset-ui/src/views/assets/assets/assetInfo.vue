@@ -206,7 +206,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="dialogTitle" :visible.sync="xian_zhi_open" width="400px" append-to-body top="30vh">
+    <el-dialog :title="dialogTitle" :visible.sync="xian_zhi_open" width="550px" append-to-body top="30vh">
       <div style="text-align: center;">
         <i class="el-icon-warning" style="color: red;margin-right: 8px;"></i>是否清空资产保管人，保管部门，成本中心？
       </div>

@@ -34,11 +34,19 @@
     />
 
     <el-dialog title="详情" :visible.sync="dialog_open" width="1200px;" append-to-body>
-      <el-descriptions title="表单信息" size="medium" border :column="3">
-        <el-descriptions-item label="暂无">暂无</el-descriptions-item>
+      <el-descriptions title="表单信息" size="medium" border :column="3" v-if="processInfo != null" style="margin-bottom: 25px;">
+
+        <el-descriptions-item v-for="(item,index) in processInfo.variableList" :label="item.fieldLabel">
+          {{item.fieldValue}}
+        </el-descriptions-item>
+
+
+
+
+
       </el-descriptions>
-      <el-descriptions title="资产信息" size="small" border :column="3" style="margin-top: 25px;">
-        <el-descriptions-item label="资产大类">{{ historyInfo.assetType }}</el-descriptions-item>
+      <el-descriptions title="资产信息" size="small" border :column="3" >
+        <el-descriptions-item label="资产大类"></el-descriptions-item>
         <el-descriptions-item label="资产中类">{{ historyInfo.assetCategory }}</el-descriptions-item>
         <el-descriptions-item label="资产小类">{{ historyInfo.assetSubCategory }}</el-descriptions-item>
         <el-descriptions-item label="资产名称">{{ historyInfo.assetName }}</el-descriptions-item>
@@ -100,6 +108,7 @@
         operationLogList: [],
         dialog_open: false,
         historyInfo: {},
+        processInfo: {},
         detail: {}
       };
     },
@@ -123,6 +132,7 @@
         getLogDetail(id).then((response) => {
           this.detail = response.data
           this.historyInfo = this.detail.updateLog
+          this.processInfo = this.detail.processLog
           this.dialog_open = true;
         })
         // this.$modal.msgWarning(row.id + "功能尚未设计开发...");

@@ -9,6 +9,7 @@ import com.hexing.asset.domain.vo.AssetProcessParam;
 import com.hexing.asset.domain.vo.AssetProcessReturn;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 资产信息更新日志Service接口
@@ -41,5 +42,5 @@ public interface IAssetUpdateLogService extends IService<AssetUpdateLog>
     /**
      * 获取资产操作记录详细信息
      */
-    JSONObject getOperationLogById(Long id);
+    Map getOperationLogById(Long id);
 }

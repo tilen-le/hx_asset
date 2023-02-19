@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -114,7 +115,7 @@ public class AssetLogController extends BaseController
     @ApiOperation("获取资产操作记录详细信息")
     public AjaxResult getInfo(@PathVariable("id") Long id)
     {
-        JSONObject updateLog = updateLogService.getOperationLogById(id);
+        Map updateLog = updateLogService.getOperationLogById(id);
         return AjaxResult.success(updateLog);
     }
 

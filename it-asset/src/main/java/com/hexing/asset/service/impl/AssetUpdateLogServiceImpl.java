@@ -1,12 +1,11 @@
 package com.hexing.asset.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.hexing.asset.domain.Asset;
-import com.hexing.asset.domain.AssetManagementConfig;
-import com.hexing.asset.domain.AssetProcess;
-import com.hexing.asset.domain.AssetUpdateLog;
+import com.hexing.asset.domain.*;
 import com.hexing.asset.domain.dto.MaterialCategorySimpleDTO;
 import com.hexing.asset.domain.vo.AssetProcessParam;
 import com.hexing.asset.domain.vo.AssetProcessReturn;
@@ -163,19 +162,23 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
 
     //操作记录详情
     @Override
-    public JSONObject getOperationLogById(Long id) {
-        JSONObject jsonObject=new JSONObject();
+    public Map getOperationLogById(Long id) {
+        Map<String, Object> result = new HashMap<>();
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AssetUpdateLog::getId,id);
         AssetUpdateLog updateLog = assetUpdateLogMapper.selectOne(wrapper);
         // 保管人和保管部门
         if (StringUtils.isNotEmpty(updateLog.getResponsiblePersonDept())) {
             SysDept dept = sysDeptService.selectDeptById(Long.valueOf(updateLog.getResponsiblePersonDept()));
-            updateLog.setResponsiblePersonDeptName(dept.getDeptName());
+            if (Objects.nonNull(dept)) {
+                updateLog.setResponsiblePersonDeptName(dept.getDeptName());
+            }
         }
         if (StringUtils.isNotEmpty(updateLog.getResponsiblePersonCode())) {
             SysUser user = sysUserService.getUserByUserName(updateLog.getResponsiblePersonCode());
-            updateLog.setResponsiblePersonName(user.getNickName());
+            if (Objects.nonNull(user)) {
+                updateLog.setResponsiblePersonName(user.getNickName());
+            }
         }
         AssetManagementConfig config =new AssetManagementConfig();
         config.setAssetType(updateLog.getAssetType());
@@ -185,20 +188,42 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         updateLog.setAssetType(dto.getAssetType());
         updateLog.setAssetCategory(dto.getAssetCategory());
         updateLog.setAssetSubCategory(dto.getAssetSubCategory());
-        AssetProcess process=new AssetProcess();
-        process.setAssetCode(updateLog.getAssetCode());
+        AssetProcess process = null;
         if (StringUtils.isNotBlank(updateLog.getProcessId())){
+            process = new AssetProcess();
+            process.setAssetCode(updateLog.getAssetCode());
             process.setId(Long.valueOf(updateLog.getProcessId()));
             List<AssetProcess> list = processService.list(process);
             process = list.stream().findFirst().orElse(null);
+            handleVariable(process.getVariableList());
         }
-        jsonObject.putOnce("processLog",process);
+        result.put("processLog", process);
 //        JSONObject domain =new JSONObject();
 //        if (Objects.nonNull(process)){
 //            domain = processService.convertProcessGetLabel(process, new JSONObject());
 //        }
-        jsonObject.putOnce("updateLog",updateLog);
+        result.put("updateLog",updateLog);
 
-        return jsonObject;
+        return result;
+    }
+
+    private void handleVariable(List<AssetProcessVariable> variableList) {
+        //处理日期格式
+        if (CollectionUtil.isEmpty(variableList)) {
+            return;
+        }
+        for (AssetProcessVariable variable : variableList) {
+            String fieldValue = variable.getFieldValue();
+            if (StringUtils.isNotBlank(fieldValue)) {
+                try {
+                    String dateTime = DateUtil.formatDateTime(new Date(fieldValue));
+                    variable.setFieldValue(dateTime);
+                } catch (Exception e) {
+                    continue;
+                }
+            }
+        }
+
+
     }
 }

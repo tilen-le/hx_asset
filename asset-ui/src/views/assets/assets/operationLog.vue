@@ -33,12 +33,43 @@
       @pagination="getList"
     />
 
-    <el-dialog title="详情" :visible.sync="dialog_open" width="800px" append-to-body>
+    <el-dialog title="详情" :visible.sync="dialog_open" width="1200px;" append-to-body>
       <el-descriptions title="表单信息" size="medium" border :column="3">
         <el-descriptions-item label="暂无">暂无</el-descriptions-item>
       </el-descriptions>
-      <el-descriptions title="资产信息" size="medium" border :column="3" style="margin-top: 25px;">
-        <el-descriptions-item label="暂无">暂无</el-descriptions-item>
+      <el-descriptions title="资产信息" size="small" border :column="3" style="margin-top: 25px;">
+        <el-descriptions-item label="资产大类">{{ historyInfo.assetType }}</el-descriptions-item>
+        <el-descriptions-item label="资产中类">{{ historyInfo.assetCategory }}</el-descriptions-item>
+        <el-descriptions-item label="资产小类">{{ historyInfo.assetSubCategory }}</el-descriptions-item>
+        <el-descriptions-item label="资产名称">{{ historyInfo.assetName }}</el-descriptions-item>
+        <el-descriptions-item label="规格型号">{{ historyInfo.standard }}</el-descriptions-item>
+        <el-descriptions-item label="资产状态">
+          <dict-tag :options="dict.type.asset_status" :value="historyInfo.assetStatus"/>
+        </el-descriptions-item>
+        <el-descriptions-item label="转固状态">
+          <dict-tag :options="dict.type.asset_fixed" :value="historyInfo.fixed"/>
+        </el-descriptions-item>
+        <el-descriptions-item label="资产保管人">{{ historyInfo.responsiblePersonName }}</el-descriptions-item>
+        <el-descriptions-item label="资产保管部门">{{ historyInfo.responsiblePersonDept }}</el-descriptions-item>
+        <el-descriptions-item label="所在位置">{{ historyInfo.currentLocation }}</el-descriptions-item>
+        <el-descriptions-item label="所属公司">
+          <dict-tag :options="dict.type.asset_company" :value="historyInfo.company"/>
+        </el-descriptions-item>
+        <el-descriptions-item label="资产管理员">{{ historyInfo.assetManager }}</el-descriptions-item>
+        <el-descriptions-item label="资产管理部门">{{ historyInfo.assetManagementDept }}</el-descriptions-item>
+        <el-descriptions-item label="成本中心">{{ historyInfo.costCenterName }}</el-descriptions-item>
+        <el-descriptions-item label="资产原值(含税)">{{ historyInfo.originalValue }}</el-descriptions-item>
+        <el-descriptions-item label="资产净值">{{ historyInfo.netValue }}</el-descriptions-item>
+        <el-descriptions-item label="资产币制">{{ historyInfo.monetaryUnit }}</el-descriptions-item>
+        <el-descriptions-item label="资产化日期">{{ historyInfo.capitalizationDate }}</el-descriptions-item>
+        <el-descriptions-item label="保修期">{{ historyInfo.warranty }}</el-descriptions-item>
+        <el-descriptions-item label="供应商">{{ historyInfo.providerName }}</el-descriptions-item>
+        <el-descriptions-item label="出厂编码">{{ historyInfo.factoryNo }}</el-descriptions-item>
+        <el-descriptions-item label="采购单号">{{ historyInfo.purchaseOrderNo }}</el-descriptions-item>
+        <el-descriptions-item label="资产卡片编号">{{ historyInfo.sapCode }}</el-descriptions-item>
+        <el-descriptions-item label="入库日期">{{ historyInfo.storageDate }}</el-descriptions-item>
+        <el-descriptions-item label="备注">{{ historyInfo.comment }}</el-descriptions-item>
+
       </el-descriptions>
     </el-dialog>
 
@@ -55,7 +86,7 @@
         type: String
       }
     },
-    dicts: ['asset_process'],
+    dicts: ['asset_process','asset_status', 'asset_company',  'asset_fixed'],
     data() {
       return {
         // 遮罩层
@@ -68,6 +99,7 @@
         },
         operationLogList: [],
         dialog_open: false,
+        historyInfo: {},
         detail: {}
       };
     },
@@ -87,7 +119,12 @@
         });
       },
       searchInfo(row) {
-        this.dialog_open = true;
+        let id = row.id
+        getLogDetail(id).then((response) => {
+          this.detail = response.data
+          this.historyInfo = this.detail.updateLog
+          this.dialog_open = true;
+        })
         // this.$modal.msgWarning(row.id + "功能尚未设计开发...");
       }
     }

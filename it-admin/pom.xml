@@ -117,7 +117,7 @@
                 </configuration>
            </plugin>
         </plugins>
-        <finalName>asset_admin_${project.version}</finalName>
+        <finalName>asset-admin-${project.version}</finalName>
     </build>
 
 </project>

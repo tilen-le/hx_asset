@@ -89,6 +89,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 String sapCode = dataJO.getString("ANLN1");
                 String costCenter= dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
+                if(StringUtils.isBlank(sapCode)||StringUtils.isBlank(costCenter)||StringUtils.isBlank(costCenterName)){
+                    throw new ServiceException("资产转固推送sap,未返回成本中心或sap资产编码");
+                }
                 entity.setSapCode(sapCode);
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
@@ -98,17 +101,19 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         } else if (type.equals(AssetProcessType.PROCESS_RECEIVE.getCode())&&entity.getFixed().equals(AssetStatus.FIXED.getCode())) {
             AssetReceiveVO vo = new AssetReceiveVO();
             vo.setRname(processParam.getResponsiblePersonName() + "-" + processParam.getResponsiblePersonCode());
-            vo.setPost(processParam.getResponsiblePersonJob());
+            vo.setPost(processParam.getResponsiblePersonDept());
             vo.setStage(processParam.getCurrentLocation());
             vo.setAnln1(entity.getSapCode());
             vo.setZnum(processParam.getAssetType());
             vo.setBUKRS(entity.getCompany());
-            vo.setBUKRS(processParam.getResponsiblePersonDept());
             try {
                 JSONObject jsonObject = assetService.receiveAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");
                 String costCenter= dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
+                if(StringUtils.isBlank(costCenter)||StringUtils.isBlank(costCenterName)){
+                    throw new ServiceException("资产转固推送sap,未返回成本中心");
+                }
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
             } catch (Exception e) {
@@ -138,6 +143,9 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");
                 String costCenter= dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
+                if(StringUtils.isBlank(costCenter)||StringUtils.isBlank(costCenterName)){
+                    throw new ServiceException("资产转固推送sap,未返回成本中心");
+                }
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
             } catch (Exception e) {

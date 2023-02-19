@@ -260,7 +260,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         for (SysRole sysRole : roleList) {
             if ("超级管理员".equals(sysRole.getRoleName())
                     || "总务管理员".equals(sysRole.getRoleName())
-                    || "财务管理人员".equals(sysRole.getRoleName())) {
+                    || "财务管理员".equals(sysRole.getRoleName())) {
                 isAdmin = true;
                 break;
             }
@@ -673,7 +673,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .setAssetCategory(order.getMaterialNumber().substring(1, 3))
                         .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
                         .setFixed("0")
-                        .setUnit(order.getUnit());
+                        .setUnit(order.getUnit())
+                        .setStorageDate(order.getOrderDate());
                 assetList.add(asset);
                 AssetUpdateLog updateLog = new AssetUpdateLog();
                 BeanUtils.copyProperties(asset, updateLog);

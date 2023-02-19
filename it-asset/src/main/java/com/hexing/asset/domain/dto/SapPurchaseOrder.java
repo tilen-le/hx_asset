@@ -1,9 +1,12 @@
 package com.hexing.asset.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 /**
  * SAP采购订单DTO类
@@ -35,11 +38,11 @@ public class SapPurchaseOrder {
     private String purchaseOrder;
 
     /**
-     * 下单日期 AEDAT
+     * 下单日期（入库日期） AEDAT
      */
     @JsonProperty("AEDAT")
-//    @JsonFormat(pattern = "yyyy-MM-dd")
-    private String orderDate;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date orderDate;
 
     /**
      * 供应商 LIFNR

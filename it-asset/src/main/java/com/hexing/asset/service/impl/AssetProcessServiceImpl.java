@@ -145,13 +145,17 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try {
                 JSONObject jsonObject = assetService.transferAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");
+                String sapCode = dataJO.getString("ANLN1");
                 String costCenter = dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
                 if (StringUtils.isBlank(costCenter) || StringUtils.isBlank(costCenterName)) {
                     throw new ServiceException("资产账务转移推送sap,未返回成本中心");
                 }
+                entity.setCompany(processParam.getCompany());
+                entity.setSapCode(sapCode);
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
+                processParam.setSapCode(sapCode);
                 processParam.setCostCenter(entity.getCostCenter());
                 processParam.setCostCenterName(entity.getCostCenterName());
             } catch (Exception e) {
@@ -261,7 +265,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
             entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());
         }
-        entity.setAssetStatus(AssetStatus.USING.getCode());
+        entity.setAssetStatus(AssetStatus.UNUSED.getCode());
         assetProcess.setAssetStatus(entity.getAssetStatus());
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_TRANSFORM.getCode());
     }
@@ -349,6 +353,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             entity.setResponsiblePersonDept("");
             entity.setCostCenter("");
             entity.setCostCenterName("");
+        }else {
+            assetProcess.setResponsiblePersonCode(entity.getResponsiblePersonCode());
+            assetProcess.setResponsiblePersonName(entity.getResponsiblePersonName());
+            assetProcess.setResponsiblePersonDept(entity.getResponsiblePersonDept());
+            assetProcess.setCostCenter(entity.getCostCenter());
+            assetProcess.setCostCenterName(entity.getCostCenterName());
         }
         assetProcess.setAssetStatus(entity.getAssetStatus());
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_UNUSED.getCode());
@@ -503,7 +513,6 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         if (StringUtils.isBlank(currentLocation)) {
             throw new ServiceException("请输入所在位置");
         }
-        entity.setCompany(company);
         entity.setResponsiblePersonCode(responsiblePersonCode);
         SysUser sysUser = sysUserService.selectUserByUserName(responsiblePersonCode);
         if (Objects.nonNull(sysUser)) {
@@ -515,7 +524,7 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
             entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());
         }
-        entity.setAssetStatus(AssetStatus.IN_STORE.getCode());
+        entity.setAssetStatus(AssetStatus.USING.getCode());
         assetProcess.setAssetStatus(entity.getAssetStatus());
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode());
     }

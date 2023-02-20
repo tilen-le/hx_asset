@@ -34,6 +34,11 @@ public class AssetProcessReturn {
     @ApiModelProperty(value = "资产编码")
     private String assetCode;
     /**
+     * sap资产编码
+     */
+    @ApiModelProperty(value = "sap资产编码")
+    private String sapCode;
+    /**
      * 资产名称
      */
     @ApiModelProperty(value = "资产名称")

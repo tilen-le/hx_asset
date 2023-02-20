@@ -5,6 +5,11 @@
       <div style="display: inline-block;margin-left: 50px;">
         <dict-tag :options="dict.type.asset_status" :value="info.assetStatus"/>
       </div>
+      <div style="display: inline-block;margin-left: 25px;" v-if="info.transfer == '1'">
+        <el-tag type="warning">资产转移中</el-tag>
+      </div>
+
+
 <!--
       1在库 资产管理员：【派发】【盘亏】
       4试用 资产管理员：【维修】【盘亏】财务会计：【转固】

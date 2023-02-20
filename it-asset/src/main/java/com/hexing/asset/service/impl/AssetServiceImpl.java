@@ -677,7 +677,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
                         .setFixed("0")
                         .setUnit(order.getUnit())
-                        .setStorageDate(order.getOrderDate())
+                        .setStorageDate(order.getArrivalDate())
                         .setBuyDate(order.getOrderDate());
                 assetList.add(asset);
                 AssetUpdateLog updateLog = new AssetUpdateLog();

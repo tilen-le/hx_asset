@@ -114,8 +114,8 @@ public class SapPurchaseOrder {
      * 到货日期 ZDHRQ
      */
     @JsonProperty("ZDHRQ")
-//    @JsonFormat(pattern = "yyyy-MM-dd")
-    private String arrivalDate;
+    @JsonFormat(pattern = "yyyyMMdd")
+    private Date arrivalDate;
 
     /**
      * 到货数量 ZDHSL

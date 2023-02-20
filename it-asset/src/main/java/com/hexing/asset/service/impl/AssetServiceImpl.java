@@ -677,7 +677,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                         .setAssetSubCategory(order.getMaterialNumber().substring(3, 5))
                         .setFixed("0")
                         .setUnit(order.getUnit())
-                        .setStorageDate(order.getOrderDate());
+                        .setStorageDate(order.getOrderDate())
+                        .setBuyDate(order.getOrderDate());
                 assetList.add(asset);
                 AssetUpdateLog updateLog = new AssetUpdateLog();
                 BeanUtils.copyProperties(asset, updateLog);
@@ -754,9 +755,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     .setLIFNR(asset.getProvider())
                     .setNAME1(asset.getProviderName())
                     .setNAME2(vo.getProvider())
-                    .setAKTIV(asset.getCapitalizationDate())
-                    .setORD42(vo.getCategory())
-                    .setZUGDT(asset.getBuyDate());
+//                    .setORD42(vo.getCategory())
+                    ;
 
             JSONArray data = new JSONArray();
             data.add(sapAssetFixDTO);

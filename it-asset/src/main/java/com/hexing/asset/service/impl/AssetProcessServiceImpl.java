@@ -151,6 +151,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
                 if (StringUtils.isBlank(costCenter) || StringUtils.isBlank(costCenterName)) {
                     throw new ServiceException("资产账务转移推送sap,未返回成本中心");
                 }
+                entity.setCompany(processParam.getCompany());
                 entity.setSapCode(sapCode);
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);

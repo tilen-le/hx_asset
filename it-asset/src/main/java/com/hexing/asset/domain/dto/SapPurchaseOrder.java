@@ -38,7 +38,7 @@ public class SapPurchaseOrder {
     private String purchaseOrder;
 
     /**
-     * 下单日期（入库日期） AEDAT
+     * 下单日期 AEDAT
      */
     @JsonProperty("AEDAT")
     @JsonFormat(pattern = "yyyyMMdd")

@@ -512,7 +512,6 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         if (StringUtils.isBlank(currentLocation)) {
             throw new ServiceException("请输入所在位置");
         }
-        entity.setCompany(company);
         entity.setResponsiblePersonCode(responsiblePersonCode);
         SysUser sysUser = sysUserService.selectUserByUserName(responsiblePersonCode);
         if (Objects.nonNull(sysUser)) {

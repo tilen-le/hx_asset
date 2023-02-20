@@ -261,7 +261,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
             entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());
         }
-        entity.setAssetStatus(AssetStatus.USING.getCode());
+        entity.setAssetStatus(AssetStatus.UNUSED.getCode());
         assetProcess.setAssetStatus(entity.getAssetStatus());
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_TRANSFORM.getCode());
     }
@@ -515,7 +515,7 @@ c."在库"，清空该条资产“资产保管人，资产保管部门，成本�
         if (StringUtils.isNotBlank(assetProcess.getPurchaseOrderNo())) {
             entity.setPurchaseOrderNo(assetProcess.getPurchaseOrderNo());
         }
-        entity.setAssetStatus(AssetStatus.IN_STORE.getCode());
+        entity.setAssetStatus(AssetStatus.USING.getCode());
         assetProcess.setAssetStatus(entity.getAssetStatus());
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_ACCOUNT_TRANSFORM.getCode());
     }

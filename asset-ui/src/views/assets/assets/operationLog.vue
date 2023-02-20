@@ -40,10 +40,6 @@
           {{item.fieldValue}}
         </el-descriptions-item>
 
-
-
-
-
       </el-descriptions>
       <el-descriptions title="资产信息" size="small" border :column="3" >
         <el-descriptions-item label="资产大类"></el-descriptions-item>

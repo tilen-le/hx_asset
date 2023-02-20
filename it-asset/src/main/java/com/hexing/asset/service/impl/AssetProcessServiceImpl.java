@@ -145,13 +145,16 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             try {
                 JSONObject jsonObject = assetService.transferAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");
+                String sapCode = dataJO.getString("ANLN1");
                 String costCenter = dataJO.getString("KOSTL");
                 String costCenterName = dataJO.getString("LTEXT");
                 if (StringUtils.isBlank(costCenter) || StringUtils.isBlank(costCenterName)) {
                     throw new ServiceException("资产账务转移推送sap,未返回成本中心");
                 }
+                entity.setSapCode(sapCode);
                 entity.setCostCenter(costCenter);
                 entity.setCostCenterName(costCenterName);
+                processParam.setSapCode(sapCode);
                 processParam.setCostCenter(entity.getCostCenter());
                 processParam.setCostCenterName(entity.getCostCenterName());
             } catch (Exception e) {
@@ -349,6 +352,12 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             entity.setResponsiblePersonDept("");
             entity.setCostCenter("");
             entity.setCostCenterName("");
+        }else {
+            assetProcess.setResponsiblePersonCode(entity.getResponsiblePersonCode());
+            assetProcess.setResponsiblePersonName(entity.getResponsiblePersonName());
+            assetProcess.setResponsiblePersonDept(entity.getResponsiblePersonDept());
+            assetProcess.setCostCenter(entity.getCostCenter());
+            assetProcess.setCostCenterName(entity.getCostCenterName());
         }
         assetProcess.setAssetStatus(entity.getAssetStatus());
         return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.PROCESS_UNUSED.getCode());

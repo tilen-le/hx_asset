@@ -82,7 +82,7 @@ public class AssetProcessParam {
      * 是否转固
      */
     @ApiModelProperty(value = "是否转固")
-    private Boolean fixed;
+    private String fixed;
     /**
      * 采购单号
      */
@@ -93,6 +93,11 @@ public class AssetProcessParam {
      */
     @ApiModelProperty(value = "工单号")
     private String wokeCode;
+    /**
+     * sap资产编码
+     */
+    @ApiModelProperty(value = "sap资产编码")
+    private String sapCode;
 
     //转固（用途） 派发（领用说明）
     @ApiModelProperty(value = "转固（用途）;派发（领用说明）")

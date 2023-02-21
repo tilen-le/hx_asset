@@ -755,8 +755,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                     .setLIFNR(asset.getProvider())
                     .setNAME1(asset.getProviderName())
                     .setNAME2(asset.getFactoryNo())
-//                    .setORD42(vo.getCategory())
-            ;
+                    .setORD42(vo.getAssetManagementCategory());
 
             JSONArray data = new JSONArray();
             data.add(sapAssetFixDTO);

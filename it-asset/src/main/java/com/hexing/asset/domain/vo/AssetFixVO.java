@@ -69,4 +69,9 @@ public class AssetFixVO {
      */
     @ApiModelProperty(value = "部门")
     private String DEPS;
+    /**
+     * 资产管理分类
+     */
+    @ApiModelProperty(value = "资产管理分类")
+    private String assetManagementCategory;
 }

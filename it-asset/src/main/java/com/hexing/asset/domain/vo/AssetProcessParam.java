@@ -89,6 +89,12 @@ public class AssetProcessParam {
     @ApiModelProperty(value = "采购单号")
     private String purchaseOrderNo;
     /**
+     * 资产管理分类
+     */
+    @ApiModelProperty(value = "资产管理分类")
+    private String assetManagementCategory;
+
+    /**
      * 工单号
      */
     @ApiModelProperty(value = "工单号")

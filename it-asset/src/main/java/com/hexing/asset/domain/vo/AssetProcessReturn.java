@@ -158,6 +158,10 @@ public class AssetProcessReturn {
 
     @ApiModelProperty(value = "供应商名称")
     private String supplierName;
-
+    /**
+     * 资产管理分类
+     */
+    @ApiModelProperty(value = "资产管理分类")
+    private String assetManagementCategory;
 
 }

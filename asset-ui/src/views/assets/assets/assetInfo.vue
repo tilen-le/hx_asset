@@ -53,7 +53,7 @@
                    @click="status_handle('盘亏')">盘亏</el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '6') && checkPermi(['asset:process:unusedAsset'])"
-                   @click="xian_zhi">闲置</el-button>
+                   @click="confirm_handle('闲置')">闲置</el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '4') && checkPermi(['asset:process:fixationAsset'])"
                    @click="zhuan_gu">转固</el-button>
@@ -64,7 +64,7 @@
     </div>
 
     <el-dialog :title="dialogTitle" :visible.sync="pai_fa_open" width="550px" append-to-body>
-      <el-form ref="form" label-width="120px" :model="form">
+      <el-form ref="form" label-width="110px" :model="form">
         <el-form-item label="领用人" prop="responsiblePersonCode" :rules="required_rule">
           <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel"
@@ -87,7 +87,7 @@
         <el-form-item label="规格型号" prop="standard" v-if="info.fixed == '0'" :rules="required_rule">
           <el-input v-model="form.standard"/>
         </el-form-item>
-        <el-form-item label="转固验收日期" prop="fixedAcceptanceDate" v-if="info.fixed == '0'" :rules="required_rule">
+        <el-form-item label="计划转固验收日期" prop="fixedAcceptanceDate" v-if="info.fixed == '0'" :rules="required_rule">
           <el-date-picker clearable style="width:100%"
                           v-model="form.fixedAcceptanceDate"
                           type="date"
@@ -156,11 +156,11 @@
         <el-form-item label="责任成本中心编码" prop="dutyCostCenter">
           <el-input v-model="form.dutyCostCenter"/>
         </el-form-item>
-        <el-form-item label="归属项目" prop="project">
-          <el-input v-model="form.project"/>
-        </el-form-item>
         <el-form-item label="供应商名称" prop="supplierName">
           <el-input v-model="form.supplierName"/>
+        </el-form-item>
+        <el-form-item label="归属项目" prop="project">
+          <el-input v-model="form.project"/>
         </el-form-item>
         <el-form-item label="用途" prop="comment">
           <el-input v-model="form.comment"/>
@@ -208,28 +208,6 @@
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="yi_wei_xiu_submit">确定</el-button>
         <el-button @click="yi_wei_xiu_open=false">取消</el-button>
-      </div>
-    </el-dialog>
-
-    <el-dialog :title="dialogTitle" :visible.sync="xian_zhi_open" width="400px" append-to-body top="30vh">
-      <div style="text-align: center;">
-        <i class="el-icon-warning" style="color: red;margin-right: 8px;"></i>是否清空资产保管人，保管部门，成本中心？
-      </div>
-      <el-form ref="form" label-width="100px" :model="form" style="margin-top:10px;">
-        <el-form-item label="" prop="clearInfo" :rules="required_rule">
-          <el-radio-group v-model="form.clearInfo">
-            <el-radio
-              v-for="dict in dict.type.confirm"
-              :key="dict.value"
-              :label="dict.value"
-            >{{dict.label}}
-            </el-radio>
-          </el-radio-group>
-        </el-form-item>
-      </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="xian_zhi_submit">确定</el-button>
-        <el-button @click="xian_zhi_open=false">取消</el-button>
       </div>
     </el-dialog>
 
@@ -316,7 +294,7 @@
 
   export default {
     name: 'assetInfo',
-    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'confirm', 'asset_fixed'],
+    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'asset_fixed'],
     components: {Treeselect, custodyLog, workLog, operationLog},
     data() {
       return {
@@ -332,7 +310,6 @@
         zhuan_yi_type: '0',
         zhuan_gu_open: false,
         yi_wei_xiu_open: false,
-        xian_zhi_open: false,
         required_rule: [{required: true, message: "此项必填", trigger: 'blur'}],
         common_users: [],
         dept_list: [],
@@ -472,18 +449,6 @@
           this.yi_wei_xiu_open = false;
         });
       },
-      xian_zhi() {
-        this.clearForm();
-        this.dialogTitle = '资产闲置';
-        this.xian_zhi_open = true;
-      },
-      xian_zhi_submit() {
-        unusedAsset(this.form).then(response => {
-          this.$modal.msgSuccess("操作成功");
-          this.getInfo();
-          this.xian_zhi_open = false;
-        });
-      },
       confirm_handle(type) {
         const content = "确定要" + type + "资产吗？";
         this.$modal.confirm("提示", "确定", "取消", content).then(() => {
@@ -496,6 +461,10 @@
           } else if (type === '外卖') {
             this.clearForm();
             return waiteTakeOutAsset(this.form);
+          } else if (type === '闲置') {
+            this.clearForm();
+            this.form.clearInfo = '0';
+            return unusedAsset(this.form);
           } else {
             this.$modal.msgError("页面按钮配置类型错误");
           }

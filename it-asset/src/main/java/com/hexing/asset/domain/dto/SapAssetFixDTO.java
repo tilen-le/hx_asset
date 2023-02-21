@@ -101,9 +101,9 @@ public class SapAssetFixDTO {
      */
     private String DEPS;
 
-//    /**
-//     * 资产管理分类
-//     */
-//    private String ORD42;
+    /**
+     * 资产管理分类
+     */
+    private String ORD42;
 
 }

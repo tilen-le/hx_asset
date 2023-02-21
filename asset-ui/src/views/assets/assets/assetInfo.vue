@@ -66,7 +66,7 @@
     <el-dialog :title="dialogTitle" :visible.sync="pai_fa_open" width="550px" append-to-body>
       <el-form ref="form" label-width="110px" :model="form">
         <el-form-item label="领用人" prop="responsiblePersonCode" :rules="required_rule">
-          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%">
+          <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%"  @change="personChange">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel"
                        :value="item.dictValue"/>
           </el-select>
@@ -116,7 +116,7 @@
         </el-form-item>
         <el-form-item label="接收人" prop="responsiblePersonCode" :rules="required_rule">
           <el-select popper-class="long_select" v-model="form.responsiblePersonCode" placeholder="请选择领用人" filterable style="width:100%"
-                     :disabled="zhuan_yi_type == '1'">
+                     :disabled="zhuan_yi_type == '1'" @change="personChange">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel"
                        :value="item.dictValue"/>
           </el-select>
@@ -516,6 +516,14 @@
           label: node.label,
           children: node.children
         }
+      },
+      personChange(value) {
+        this.common_users.forEach(user => {
+          if (user.dictValue == value) {
+            this.form.responsiblePersonDept = user.comment;
+            return;
+          }
+        });
       },
     }
   }

@@ -56,6 +56,16 @@ public class SysDictData extends BaseEntity
     @Excel(name = "状态", readConverterExp = "0=正常,1=停用")
     private String status;
 
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    private String comment;
+
     public Long getDictCode()
     {
         return dictCode;
@@ -174,6 +184,7 @@ public class SysDictData extends BaseEntity
             .append("dictLabel", getDictLabel())
             .append("dictLabelEn", getDictLabelEn())
             .append("dictValue", getDictValue())
+            .append("comment", getComment())
             .append("dictType", getDictType())
             .append("cssClass", getCssClass())
             .append("listClass", getListClass())

@@ -88,6 +88,7 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
                 sysDictData.setDictValue(sysUser.getUserName());
                 sysDictData.setDictLabel(sysUser.getNickName() + "(" + sysUser.getUserName() + ")");
                 sysDictData.setListClass("");
+                sysDictData.setComment(String.valueOf(sysUser.getDeptId()));
                 dictDatas.add(sysDictData);
             }
             return dictDatas;

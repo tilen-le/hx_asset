@@ -140,9 +140,15 @@
 
     <el-dialog :title="dialogTitle" :visible.sync="zhuan_gu_open" width="550px" append-to-body>
       <el-form ref="form" label-width="130px" :model="form">
-        <el-form-item label="资产类型" prop="company" :rules="required_rule">
+        <el-form-item label="资产类型" prop="assetType" :rules="required_rule">
           <el-select v-model="form.assetType" placeholder="请选择资产类型" clearable style="width:100%">
             <el-option v-for="dict in dict.type.sap_card_asset_category" :key="dict.value" :label="dict.label"
+                       :value="dict.value"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资产管理分类" prop="assetManagementCategory" :rules="required_rule">
+          <el-select v-model="form.assetManagementCategory" placeholder="请选择资产管理分类" clearable style="width:100%">
+            <el-option v-for="dict in dict.type.asset_management_category" :key="dict.value" :label="dict.label"
                        :value="dict.value"/>
           </el-select>
         </el-form-item>
@@ -294,7 +300,7 @@
 
   export default {
     name: 'assetInfo',
-    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'asset_fixed'],
+    dicts: ['asset_status', 'sap_card_asset_category', 'asset_company', 'asset_fixed', 'asset_management_category'],
     components: {Treeselect, custodyLog, workLog, operationLog},
     data() {
       return {

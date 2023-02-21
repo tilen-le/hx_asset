@@ -82,6 +82,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             vo.setBelong(processParam.getProject());
             vo.setProvider(processParam.getSupplierName());
             vo.setUsage(processParam.getComment());
+            vo.setAssetManagementCategory(processParam.getAssetManagementCategory());
             try {
                 JSONObject jsonObject = assetService.fixAsset(vo);
                 JSONObject dataJO = jsonObject.getJSONObject("DATA");

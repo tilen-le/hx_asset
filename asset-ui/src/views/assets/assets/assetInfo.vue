@@ -162,11 +162,11 @@
         <el-form-item label="责任成本中心编码" prop="dutyCostCenter">
           <el-input v-model="form.dutyCostCenter"/>
         </el-form-item>
-        <el-form-item label="供应商名称" prop="supplierName">
-          <el-input v-model="form.supplierName"/>
-        </el-form-item>
         <el-form-item label="归属项目" prop="project">
           <el-input v-model="form.project"/>
+        </el-form-item>
+        <el-form-item label="供应商名称" prop="supplierName">
+          <el-input v-model="form.supplierName"/>
         </el-form-item>
         <el-form-item label="用途" prop="comment">
           <el-input v-model="form.comment"/>
@@ -242,8 +242,8 @@
         <el-descriptions-item label="资产原值(含税)">{{ info.originalValue }}</el-descriptions-item>
         <el-descriptions-item label="资产净值">{{ info.netValue }}</el-descriptions-item>
         <el-descriptions-item label="资产币制">{{ info.monetaryUnit }}</el-descriptions-item>
-        <el-descriptions-item label="资产化日期">{{ info.capitalizationDate }}</el-descriptions-item>
-        <el-descriptions-item label="保修期">{{ info.warranty }}</el-descriptions-item>
+        <el-descriptions-item label="资本化日期">{{ info.capitalizationDate }}</el-descriptions-item>
+        <el-descriptions-item label="质保到期时间">{{ info.warranty }}</el-descriptions-item>
         <el-descriptions-item label="供应商">{{ info.providerName }}</el-descriptions-item>
         <el-descriptions-item label="出厂编码">{{ info.factoryNo }}</el-descriptions-item>
         <el-descriptions-item label="采购单号">{{ info.purchaseOrderNo }}</el-descriptions-item>

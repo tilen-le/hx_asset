@@ -1,9 +1,12 @@
 package com.hexing.asset.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.util.Date;
 
 /**
  * SAP价值传输DTO类
@@ -72,6 +75,12 @@ public class SapValueDTO {
      */
     @JsonProperty("NDPER")
     private String canUseMonths;
+    /**
+     * 资本化日期 AKTIV
+     */
+    @JsonProperty("AKTIV")
+    @JsonFormat(pattern = "yyyyMMdd")
+    private Date capitalizationDate;
     /**
      * 是否更新成功
      */

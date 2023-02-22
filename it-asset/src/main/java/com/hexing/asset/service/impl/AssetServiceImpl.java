@@ -635,7 +635,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * SAP采购单同步接口
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
+    @Transactional(isolation = Isolation.READ_UNCOMMITTED)
     public void sapAdd(List<SapPurchaseOrder> orderList) {
         log.debug("==== SAP采购单同步接口：开始新建资产信息 ====");
         int totalNum = 0;
@@ -687,9 +687,10 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 updateLog.setCreateTime(DateUtils.getNowDate());
                 updateLog.setProcessType(type);
                 logList.add(updateLog);
+                this.save(asset);
                 nextNum++;
             }
-            this.saveBatch(assetList);
+//            this.saveBatch(assetList);
             assetUpdateLogService.saveBatch(logList);
             totalNum += assetList.size();
         }

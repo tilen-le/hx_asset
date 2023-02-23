@@ -201,6 +201,7 @@ public class Asset {
      */
     @ApiModelProperty(value = "质保期到期时间")
     @Excel(name = "质保期到期时间")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date warranty;
 
     /**

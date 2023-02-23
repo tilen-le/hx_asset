@@ -226,7 +226,8 @@ public class AssetUpdateLog
      */
     @ApiModelProperty(value = "保修期")
     @Excel(name = "保修期")
-    private Integer warranty;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date warranty;
 
     /**
      * 供应商

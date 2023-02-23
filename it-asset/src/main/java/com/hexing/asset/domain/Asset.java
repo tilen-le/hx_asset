@@ -197,11 +197,11 @@ public class Asset {
     private String canUseMonths;
 
     /**
-     * 保修期
+     * 质保期到期时间
      */
-    @ApiModelProperty(value = "保修期")
-    @Excel(name = "保修期")
-    private Integer warranty;
+    @ApiModelProperty(value = "质保期到期时间")
+    @Excel(name = "质保期到期时间")
+    private Date warranty;
 
     /**
      * 供应商

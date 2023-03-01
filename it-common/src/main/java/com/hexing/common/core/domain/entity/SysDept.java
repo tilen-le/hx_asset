@@ -45,6 +45,9 @@ public class SysDept extends BaseEntity
     /** 邮箱 */
     private String email;
 
+    /** 资产管理员 */
+    private String assetManager;
+
     /** 部门状态:0正常,1停用 */
     private String status;
 
@@ -191,6 +194,14 @@ public class SysDept extends BaseEntity
         this.completeName = completeName;
     }
 
+    public String getAssetManager() {
+        return assetManager;
+    }
+
+    public void setAssetManager(String assetManager) {
+        this.assetManager = assetManager;
+    }
+
     @Override
     public String toString() {
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
@@ -203,6 +214,7 @@ public class SysDept extends BaseEntity
             .append("leader", getLeader())
             .append("phone", getPhone())
             .append("email", getEmail())
+            .append("assetManager", getAssetManager())
             .append("status", getStatus())
             .append("delFlag", getDelFlag())
             .append("createBy", getCreateBy())

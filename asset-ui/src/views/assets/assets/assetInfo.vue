@@ -165,9 +165,6 @@
         <el-form-item label="归属项目" prop="project">
           <el-input v-model="form.project"/>
         </el-form-item>
-        <el-form-item label="供应商名称" prop="supplierName">
-          <el-input v-model="form.supplierName"/>
-        </el-form-item>
         <el-form-item label="用途" prop="comment">
           <el-input v-model="form.comment"/>
         </el-form-item>

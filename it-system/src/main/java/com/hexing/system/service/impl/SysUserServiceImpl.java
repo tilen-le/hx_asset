@@ -600,7 +600,7 @@ public class SysUserServiceImpl implements ISysUserService {
         }
         if (!CollectionUtils.isEmpty(currentDeptList)) {
             for (SysDept sysDept : currentDeptList) {
-                deptMapper.updateDept(sysDept);
+                deptMapper.updateDept2(sysDept);
             }
         }
         List<OdoCodeDTO> odoUserList = JSON.parseArray(dataObj.getString("user_data"), OdoCodeDTO.class);

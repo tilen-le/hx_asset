@@ -103,6 +103,8 @@ public interface SysDeptMapper
      */
     public int updateDept(SysDept dept);
 
+    public int updateDept2(SysDept dept);
+
     /**
      * 修改所在部门正常状态
      *

@@ -59,16 +59,32 @@
     >
       <el-table-column prop="deptName" :label="$t('dept.name')" width="260"></el-table-column>
       <el-table-column prop="orderNum" :label="$t('common_field.sort')" width="200"></el-table-column>
+
       <el-table-column prop="status" :label="$t('common_field.status')" width="100">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_normal_disable" :value="scope.row.status"/>
         </template>
       </el-table-column>
+
+      <el-table-column label="资产管理员" align="center" prop="assetManager" width="200">
+        <template slot-scope="scope">
+          <div v-if="scope.row.assetManager != null && scope.row.assetManager != ''">
+            <div v-for="item in common_users">
+              <span
+                v-if="scope.row.assetManager == item.dictValue"
+                :key="item.dictValue"
+              >{{ item.dictLabel }}&emsp;</span>
+            </div>
+          </div>
+        </template>
+      </el-table-column>
+
       <el-table-column :label="$t('common_field.create_time')" align="center" prop="createTime" width="200">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.createTime) }}</span>
         </template>
       </el-table-column>
+
       <el-table-column :label="$t('common_field.operate')" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -98,8 +114,8 @@
     </el-table>
 
     <!-- 添加或修改部门对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="600px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+    <el-dialog :title="title" :visible.sync="open" width="700px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="90px">
         <el-row>
           <el-col :span="24" v-if="form.parentId !== 0">
             <el-form-item :label="$t('dept.parent')" prop="parentId">
@@ -112,8 +128,8 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item :label="$t('common_field.sort')" prop="orderNum">
-              <el-input-number v-model="form.orderNum" controls-position="right" :min="0" />
+            <el-form-item :label="$t('common_field.sort')" prop="orderNum" >
+              <el-input-number v-model="form.orderNum" controls-position="right" :min="0" style="width: 100%;"/>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -142,6 +158,13 @@
               </el-radio-group>
             </el-form-item>
           </el-col>
+          <el-col :span="12">
+            <el-form-item label="资产管理员" prop="assetManager">
+              <el-select popper-class="long_select" v-model="form.assetManager" placeholder="请选择资产管理员" filterable clearable style="width: 100%;" >
+                <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel" :value="item.dictValue"/>
+              </el-select>
+            </el-form-item>
+          </el-col>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -156,7 +179,7 @@
 import { listDept, getDept, delDept, addDept, updateDept, listDeptExcludeChild } from "@/api/system/dept";
 import Treeselect from "@riophae/vue-treeselect";
 import "@riophae/vue-treeselect/dist/vue-treeselect.css";
-
+import {getDicts} from "@/api/system/dict/data";
 export default {
   name: "Dept",
   dicts: ['sys_normal_disable'],
@@ -213,10 +236,12 @@ export default {
             trigger: "blur"
           }
         ]
-      }
+      },
+      common_users: []
     };
   },
   created() {
+    this.getCommonUsers();
     this.getList();
   },
   methods: {
@@ -270,6 +295,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd(row) {
       this.reset();
+      this.getCommonUsers();
       if (row != undefined) {
         this.form.parentId = row.deptId;
       }
@@ -278,6 +304,14 @@ export default {
       listDept().then(response => {
 	        this.deptOptions = this.handleTree(response.data, "deptId");
       });
+    },
+    getCommonUsers() {
+      const userList = this.common_users
+      if (userList.length == 0) {
+        getDicts("common_users").then(res => {
+          this.common_users = res.data
+        })
+      }
     },
     /** 展开/折叠操作 */
     toggleExpandAll() {
@@ -290,6 +324,7 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
+      this.getCommonUsers();
       getDept(row.deptId).then(response => {
         this.form = response.data;
         this.open = true;

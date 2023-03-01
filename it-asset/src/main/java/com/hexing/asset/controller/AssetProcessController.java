@@ -31,7 +31,7 @@ public class AssetProcessController extends BaseController {
      */
     @Log(title = "资产编辑", businessType = BusinessType.UPDATE)
     @PutMapping("/editAsset")
-    @PreAuthorize("@ss.hasPermi('asset:process:editAsset')")
+    @PreAuthorize("@ss.hasPermi('asset:process:edit')")
     @ApiOperation("资产编辑")
     @RepeatSubmit(interval = 3000)
     @ApiOperationSupport(order = 1)

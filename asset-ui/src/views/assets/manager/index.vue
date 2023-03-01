@@ -131,8 +131,8 @@
     />
 
     <!-- 添加或修改对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body :close-on-click-modal="false">
-      <el-form ref="form" :model="form" :rules="rules" label-width="100px">
+    <el-dialog :title="title" :visible.sync="open" width="550px" append-to-body :close-on-click-modal="false">
+      <el-form ref="form" :model="form" :rules="rules" label-width="120px">
         <el-form-item label="资产大类" prop="assetType">
           <el-select v-model="form.assetType" placeholder="请选择资产大类" clearable size="small" style="width: 80%" @change="typeAddChange">
             <el-option v-for="dict in asset_types" :key="dict.value" :label="dict.label" :value="dict.value" />
@@ -157,6 +157,10 @@
           <el-select popper-class="long_select" v-model="form.assetManager" placeholder="请选择资产管理员" filterable style="width: 80%;">
             <el-option v-for="item in common_users" :key="item.dictValue" :label="item.dictLabel" :value="item.dictValue"/>
           </el-select>
+        </el-form-item>
+        <el-form-item label="资产管理部门" prop="assetManageDept">
+          <treeselect v-model="form.assetManageDept" :options="dept_list" :normalizer="normalizer" style="width: 80%;"
+                      :show-count="true" placeholder="选择资产管理部门"/>
         </el-form-item>
         <el-form-item label="财务管理员" prop="financialManager">
           <el-select popper-class="long_select" v-model="form.financialManager" placeholder="请选择财务管理员" filterable style="width: 80%;" >
@@ -183,10 +187,14 @@
   } from "@/api/assets/manager";
   import {getAssetTypeTree} from "@/api/assets/common";
   import {getDicts} from "@/api/system/dict/data";
+  import {childTree} from '@/api/system/dept';
+  import Treeselect from '@riophae/vue-treeselect'
+  import '@riophae/vue-treeselect/dist/vue-treeselect.css'
 
   export default {
   name: "assets_manager",
   dicts: ['asset_company'],
+  components: {Treeselect},
   data() {
     return {
       // 遮罩层
@@ -236,9 +244,13 @@
         ],
         financialManager: [
           { required: true, message: "该项必填", trigger: "blur" }
+        ],
+        assetManageDept: [
+          { required: true, message: "该项必填", trigger: "blur" }
         ]
       },
       common_users: [],
+      dept_list: [],
       asset_type_tree: null,
       asset_types: [],
       asset_category_options: [],
@@ -251,10 +263,8 @@
     this.getAssetTree();
     this.getCommonUsers();
     this.getList();
-
   },
   methods: {
-    /** 查询成熟度流程列表 */
     getList() {
       this.loading = true;
       listAssetManager(this.queryParams).then(response => {
@@ -263,6 +273,24 @@
         this.loading = false;
       });
 
+    },
+    getChildDeptTree() {
+      const dept_list = this.dept_list
+      if (dept_list.length == 0) {
+        childTree().then(response => {
+          this.dept_list = response.data
+        })
+      }
+    },
+    normalizer(node) {
+      if (node.children && !node.children.length) {
+        delete node.children
+      }
+      return {
+        id: node.id,
+        label: node.label,
+        children: node.children
+      }
     },
     getAssetTree() {
         getAssetTypeTree().then(response => {
@@ -413,6 +441,7 @@
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.getChildDeptTree();
       this.open = true;
       this.title = "添加资产管理人员";
       this.asset_category_add_options = [];
@@ -421,6 +450,7 @@
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
+      this.getChildDeptTree();
       this.asset_category_add_options = [];
       this.asset_sub_category_add_options = [];
       getAssetManager(row.id).then(response => {

@@ -275,6 +275,7 @@
         <el-descriptions-item label="采购单号">{{ info.purchaseOrderNo }}</el-descriptions-item>
         <el-descriptions-item label="资产卡片编号">{{ info.sapCode }}</el-descriptions-item>
         <el-descriptions-item label="入库日期">{{ info.storageDate }}</el-descriptions-item>
+        <el-descriptions-item label="资产管理员(部门)">{{ info.assetManagerDept }}</el-descriptions-item>
         <el-descriptions-item label="备注">{{ info.comment }}</el-descriptions-item>
       </el-descriptions>
     </div>

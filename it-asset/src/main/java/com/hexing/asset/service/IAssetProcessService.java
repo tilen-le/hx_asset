@@ -16,6 +16,15 @@ import java.util.List;
 public interface IAssetProcessService extends IService<AssetProcess> {
 
     /**
+     * 资产操作-编辑
+     *
+     * @param assetProcess 资产表
+     * @return 结果
+     */
+    int editAsset(AssetProcessParam assetProcess);
+
+
+    /**
      * 资产操作-派发
      *
      * @param assetProcess 资产表

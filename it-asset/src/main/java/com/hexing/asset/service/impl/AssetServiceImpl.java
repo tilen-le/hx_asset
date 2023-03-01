@@ -551,7 +551,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
      * @return 结果
      */
     @Override
-    public int updateAsset(Asset asset, AssetProcess process) {
+    public int  updateAsset(Asset asset, AssetProcess process) {
         // 资产更新日志记录
         assetUpdateLogService.saveLog(asset, process);
         // 更新资产信息

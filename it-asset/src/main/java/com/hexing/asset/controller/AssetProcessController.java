@@ -27,6 +27,19 @@ public class AssetProcessController extends BaseController {
     private IAssetProcessService processService;
 
     /**
+     * 资产编辑
+     */
+    @Log(title = "资产编辑", businessType = BusinessType.UPDATE)
+    @PutMapping("/editAsset")
+    @PreAuthorize("@ss.hasPermi('asset:process:editAsset')")
+    @ApiOperation("资产编辑")
+    @RepeatSubmit(interval = 3000)
+    @ApiOperationSupport(order = 1)
+    public AjaxResult editAsset(@RequestBody AssetProcessParam assetProcess) {
+        return toAjax(processService.editAsset(assetProcess));
+    }
+
+    /**
      * 资产派发
      */
     @Log(title = "资产派发", businessType = BusinessType.UPDATE)

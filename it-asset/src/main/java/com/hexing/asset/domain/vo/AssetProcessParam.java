@@ -139,8 +139,6 @@ public class AssetProcessParam {
     //转移字段 接收公司 接收人 接收人部门 接收人岗位 成本中心 所在位置
 
     //转固字段 资产类型 成本中心编码  保质期到期时间  责任成本中心编码  归属项目 供应商名称 用途
-    @ApiModelProperty(value = "资产类型")
-    private String assetType;
 
     @ApiModelProperty(value = "责任成本中心编码")
     private String dutyCostCenter;
@@ -158,6 +156,15 @@ public class AssetProcessParam {
     //闲置 是否清空资产保管人和保管部门，成本中心
     @ApiModelProperty(value = "是否清空")
     private String clearInfo;
+
+    @ApiModelProperty(value = "资产大类")
+    private String assetType;
+
+    @ApiModelProperty(value = "资产中类")
+    private String assetCategory;
+
+    @ApiModelProperty(value = "资产小类")
+    private String assetSubCategory;
 
 
 }

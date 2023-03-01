@@ -172,6 +172,21 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         return i;
     }
 
+    /**
+     * 资产操作-编辑
+     * @param assetProcess 资产表
+     * @return
+     */
+    @Override
+    @Transactional
+    public int editAsset(AssetProcessParam assetProcess) {
+        Asset entity = assetService.getOne(new LambdaQueryWrapper<Asset>().eq(Asset::getAssetCode, assetProcess.getAssetCode()));
+        entity.setAssetType(assetProcess.getAssetType());
+        entity.setAssetCategory(assetProcess.getAssetCategory());
+        entity.setAssetSubCategory(assetProcess.getAssetSubCategory());
+        return updateAssetAndCreateLog(entity, assetProcess, AssetProcessType.ASSET_MODIFIED.getCode());
+    }
+
     //资产操作-派发
     @Override
     @Transactional

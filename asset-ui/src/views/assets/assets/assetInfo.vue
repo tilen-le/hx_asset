@@ -80,7 +80,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="资产小类" prop="assetSubCategory" :rules="required_rule">
-          <el-select v-model="form.assetSubCategory" placeholder="请选择资产小类" clearable size="small" style="width: 80%">
+          <el-select v-model="form.assetSubCategory" placeholder="请选择资产小类" clearable size="small" style="width: 80%" @change="forceUpdate" >
             <el-option v-for="dict in asset_sub_category_add_options" :key="dict.value" :label="dict.label" :value="dict.value" />
           </el-select>
         </el-form-item>
@@ -644,6 +644,11 @@
           }
         }
       },
+      forceUpdate(val) {
+        this.$nextTick(() => {
+          this.$forceUpdate()
+        })
+      }
     }
   }
 </script>

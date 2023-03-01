@@ -123,9 +123,16 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             asset.setAssetSubCategory(dto.getAssetSubCategory());
             // 保管人和保管部门
             if (StringUtils.isNotEmpty(asset.getResponsiblePersonDept())) {
-//                SysUser user = sysUserService.getUserByUserName(asset.getResponsiblePersonCode());
                 SysDept dept = sysDeptService.selectDeptById(Long.valueOf(asset.getResponsiblePersonDept()));
                 asset.setResponsiblePersonDept(dept.getDeptName());
+                // 资产管理员（部门）
+                while (StringUtils.isEmpty(dept.getAssetManager()) && dept.getParentId() != 0L) {
+                    dept = sysDeptService.selectDeptById(dept.getParentId());
+                }
+                if (StringUtils.isNotEmpty(dept.getAssetManager())) {
+                    SysUser manager = sysUserService.getUserByUserName(dept.getAssetManager());
+                    asset.setAssetManagerDept(manager.getNickName());
+                }
             }
         }
         return asset;

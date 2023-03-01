@@ -390,5 +390,11 @@ public class Asset {
     @Excel(name = "出厂编号")
     private String factoryNumber;
 
+    /**
+     * 资产管理员(部门)
+     */
+    @ApiModelProperty(value = "资产管理员(部门)")
+    @TableField(exist = false)
+    private String assetManagerDept;
 
 }

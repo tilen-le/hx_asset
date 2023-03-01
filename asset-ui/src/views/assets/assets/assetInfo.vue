@@ -60,8 +60,37 @@
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '8') && checkPermi(['asset:process:maintainedAsset'])"
                    @click="yi_wei_xiu">已维修</el-button>
+        <el-button size="mini" type="primary"
+                   v-if="checkPermi(['asset:process:edit'])"
+                   @click="handleUpdate">编辑</el-button>
       </div>
     </div>
+
+
+    <el-dialog :title="dialogTitle" :visible.sync="edit_open" width="550px" append-to-body :close-on-click-modal="false">
+      <el-form ref="form" :model="form"  label-width="80px">
+        <el-form-item label="资产大类" prop="assetType" :rules="required_rule">
+          <el-select v-model="form.assetType" placeholder="请选择资产大类" clearable size="small" style="width: 80%" @change="typeAddChange">
+            <el-option v-for="dict in asset_types" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资产中类" prop="assetCategory" :rules="required_rule">
+          <el-select v-model="form.assetCategory" placeholder="请选择资产中类" clearable size="small" style="width: 80%" @change="categoryAddChange">
+            <el-option v-for="dict in asset_category_add_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资产小类" prop="assetSubCategory" :rules="required_rule">
+          <el-select v-model="form.assetSubCategory" placeholder="请选择资产小类" clearable size="small" style="width: 80%">
+            <el-option v-for="dict in asset_sub_category_add_options" :key="dict.value" :label="dict.label" :value="dict.value" />
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="editSubmit">确 定</el-button>
+        <el-button @click="edit_open=false">取 消</el-button>
+      </div>
+    </el-dialog>
+
 
     <el-dialog :title="dialogTitle" :visible.sync="pai_fa_open" width="550px" append-to-body>
       <el-form ref="form" label-width="110px" :model="form">
@@ -289,11 +318,12 @@
     takeOutAsset,
     transferAsset,
     unusedAsset,
-    waiteTakeOutAsset
+    waiteTakeOutAsset,editAsset
   } from "@/api/assets/process";
   import {childTree} from '@/api/system/dept';
   import Treeselect from '@riophae/vue-treeselect'
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
+  import {getAssetTypeTree} from "@/api/assets/common"
 
   export default {
     name: 'assetInfo',
@@ -313,6 +343,7 @@
         zhuan_yi_type: '0',
         zhuan_gu_open: false,
         yi_wei_xiu_open: false,
+        edit_open: false,
         required_rule: [{required: true, message: "此项必填", trigger: 'blur'}],
         common_users: [],
         dept_list: [],
@@ -322,7 +353,11 @@
           belongTab: true,
           orderTab: false,
           operateTab: false
-        }
+        },
+        asset_type_tree: null,
+        asset_types: [],
+        asset_category_add_options: [],
+        asset_sub_category_add_options: []
       }
     },
     created() {
@@ -335,6 +370,7 @@
           this.loading = false
         })
       }
+      this.getAssetTree()
       setTimeout(() => {
         if (this.$auth.hasPermi("asset:log:custodyLogList")) {
           this.getTabContent('belongTab');
@@ -527,6 +563,85 @@
             return;
           }
         });
+      },
+      handleUpdate() {
+        this.clearForm();
+        this.asset_category_add_options = [];
+        this.asset_sub_category_add_options = [];
+        this.form.assetType = this.info.assetTypeCode
+        this.form.assetCategory = this.info.assetCategoryCode
+        this.form.assetSubCategory = this.info.assetSubCategoryCode
+        this.getAssetAddCategory(this.form.assetType);
+        this.getAssetAddSubCategory(this.form.assetCategory);
+        this.dialogTitle = '编辑';
+        this.edit_open = true;
+      },
+      editSubmit() {
+        editAsset(this.form).then(response => {
+          this.$modal.msgSuccess("操作成功");
+          this.getInfo();
+          this.edi_open = false;
+        });
+      },
+      getAssetTree() {
+        getAssetTypeTree().then(response => {
+          const tree = response.data;
+          this.asset_type_tree = tree;
+          for (const item of tree) {
+            const it = {
+              "value": item.code,
+              "label": item.description,
+              "child": item.child,
+              "raw": {
+                "listClass": ""
+              }
+            }
+            this.asset_types.push(it);
+          }
+        });
+      },
+      typeAddChange(value) {
+        this.form.assetCategory = null;
+        this.form.assetSubCategory = null;
+        this.asset_category_add_options = [];
+        this.asset_sub_category_add_options = [];
+        this.getAssetAddCategory(value)
+      },
+      categoryAddChange(value) {
+        this.form.assetSubCategory = null;
+        this.asset_sub_category_add_options = [];
+        this.getAssetAddSubCategory(value)
+      },
+      getAssetAddCategory(code) {
+        const tree = this.asset_types;
+        for (const item of tree) {
+          if (code == item.value) {
+            for (const category of item.child) {
+              const it = {
+                "value": category.code,
+                "label": category.description,
+                "child": category.child,
+              }
+              this.asset_category_add_options.push(it);
+            }
+            break;
+          }
+        }
+      },
+      getAssetAddSubCategory(code) {
+        const tree = this.asset_category_add_options;
+        for (const item of tree) {
+          if (code == item.value) {
+            for (const subCategory of item.child) {
+              const it = {
+                "value": subCategory.code,
+                "label": subCategory.description,
+              }
+              this.asset_sub_category_add_options.push(it);
+            }
+            break;
+          }
+        }
       },
     }
   }

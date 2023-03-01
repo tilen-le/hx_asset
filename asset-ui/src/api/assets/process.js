@@ -143,3 +143,13 @@ export function accountTransferAsset(data) {
   })
 }
 
+//编辑
+export function editAsset(data) {
+  return request({
+    url: '/asset/process/editAsset',
+    method: 'put',
+    data: data
+  })
+}
+
+

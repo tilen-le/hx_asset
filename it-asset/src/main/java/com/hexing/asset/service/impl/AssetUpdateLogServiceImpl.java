@@ -51,7 +51,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     /**
      * 创建资产信息更新日志
      *
-     * @param asset 资产旧信息
+     * @param asset   资产旧信息
      * @param process 主流程
      * @return
      */
@@ -59,25 +59,22 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     public int saveLog(Asset asset, AssetProcess process) {
         AssetUpdateLog log = new AssetUpdateLog();
         BeanUtils.copyProperties(asset, log);
-        String userCode = SecurityUtils.getLoginUser().getUser().getUserName();
-        String userName = SecurityUtils.getLoginUser().getUser().getNickName();
-//        String userCode = "80010712";
-//        String userName = "PFC";
-        if (StringUtils.isNotBlank(process.getId().toString())) {
-            log.setProcessId(process.getId().toString());
+        SysUser user = SecurityUtils.getLoginUser().getUser();
+        String processId = String.valueOf(process.getId());
+        if (StringUtils.isNotBlank(processId)) {
+            log.setProcessId(processId);
             log.setProcessType(process.getProcessType());
         }
-        log.setCreateBy(userCode);
+        log.setCreateBy(user.getUserName());
         log.setCreateTime(DateUtils.getNowDate());
-
-        return  assetUpdateLogMapper.insert(log);
+        return assetUpdateLogMapper.insert(log);
     }
 
     //保管记录
     @Override
     public List<AssetUpdateLog> custodyLogList(AssetProcessParam assetProcess) {
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
+        wrapper.eq(AssetUpdateLog::getAssetCode, assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         List<AssetUpdateLog> list = logService.list(wrapper);
         List<AssetUpdateLog> paramsData = new ArrayList<>();
@@ -88,21 +85,21 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         for (AssetUpdateLog log : list) {
             SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(log.getCreateBy())).findFirst().orElse(new SysUser());
             log.setCreateBy(sysUser.getNickName());
-            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())){
+            if (StringUtils.isNotBlank(log.getResponsiblePersonDept())) {
                 SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(log.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
                 log.setResponsiblePersonDeptName(dept.getDeptName());
             }
             String responsiblePersonCode = log.getResponsiblePersonCode();
             String responsiblePersonDept = log.getResponsiblePersonDept();
-            if (StringUtils.isBlank(responsiblePersonCode)){
-                responsiblePersonCode="";
+            if (StringUtils.isBlank(responsiblePersonCode)) {
+                responsiblePersonCode = "";
             }
-            if (StringUtils.isBlank(responsiblePersonDept)){
-                responsiblePersonDept="";
+            if (StringUtils.isBlank(responsiblePersonDept)) {
+                responsiblePersonDept = "";
             }
 
-            if (!responsiblePersonCode.equals(personCode)||!responsiblePersonDept.equals(deptCode)) {
-                if (paramsData.size()>0){
+            if (!responsiblePersonCode.equals(personCode) || !responsiblePersonDept.equals(deptCode)) {
+                if (paramsData.size() > 0) {
                     AssetUpdateLog previous = paramsData.get(paramsData.size() - 1);
                     if (Objects.nonNull(previous)) {
                         log.setEndTime(previous.getCreateTime());
@@ -119,7 +116,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     //工单记录
     @Override
     public List<AssetProcessReturn> workLogList(AssetProcessParam assetProcess) {
-        AssetProcess process=new AssetProcess();
+        AssetProcess process = new AssetProcess();
         process.setAssetCode(assetProcess.getAssetCode());
         List<AssetProcess> list = processService.list(process);
         List<AssetProcessReturn> domains = new ArrayList<>();
@@ -128,7 +125,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         for (AssetProcess ap : list) {
             AssetProcessReturn domain = processService.convertProcess(ap, new AssetProcessReturn());
             SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(domain.getCreateBy())).findFirst().orElse(new SysUser());
-            if (StringUtils.isNotBlank(domain.getResponsiblePersonDept())){
+            if (StringUtils.isNotBlank(domain.getResponsiblePersonDept())) {
                 SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(domain.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
                 domain.setResponsiblePersonDeptName(dept.getDeptName());
             }
@@ -142,7 +139,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     @Override
     public List<AssetUpdateLog> operationLogList(AssetProcessParam assetProcess) {
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetUpdateLog::getAssetCode,assetProcess.getAssetCode());
+        wrapper.eq(AssetUpdateLog::getAssetCode, assetProcess.getAssetCode());
         wrapper.orderByDesc(AssetUpdateLog::getCreateTime);
         startPage();
         List<AssetUpdateLog> list = logService.list(wrapper);
@@ -150,10 +147,10 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         List<SysUser> sysUsers = sysUserService.selectUserList(new SysUser());
         for (AssetUpdateLog updateLog : list) {
             SysUser sysUser = sysUsers.stream().filter(x -> x.getUserName().equals(updateLog.getCreateBy())).findFirst().orElse(new SysUser());
-           if (StringUtils.isNotBlank(updateLog.getResponsiblePersonDept())){
-               SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(updateLog.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
-               updateLog.setResponsiblePersonDeptName(dept.getDeptName());
-           }
+            if (StringUtils.isNotBlank(updateLog.getResponsiblePersonDept())) {
+                SysDept dept = depts.stream().filter(x -> x.getDeptId().equals(Long.valueOf(updateLog.getResponsiblePersonDept()))).findFirst().orElse(new SysDept());
+                updateLog.setResponsiblePersonDeptName(dept.getDeptName());
+            }
             updateLog.setCreateBy(sysUser.getNickName());
         }
 
@@ -165,7 +162,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
     public Map getOperationLogById(Long id) {
         Map<String, Object> result = new HashMap<>();
         LambdaQueryWrapper<AssetUpdateLog> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(AssetUpdateLog::getId,id);
+        wrapper.eq(AssetUpdateLog::getId, id);
         AssetUpdateLog updateLog = assetUpdateLogMapper.selectOne(wrapper);
         // 保管人和保管部门
         if (StringUtils.isNotEmpty(updateLog.getResponsiblePersonDept())) {
@@ -180,7 +177,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
                 updateLog.setResponsiblePersonName(user.getNickName());
             }
         }
-        AssetManagementConfig config =new AssetManagementConfig();
+        AssetManagementConfig config = new AssetManagementConfig();
         config.setAssetType(updateLog.getAssetType());
         config.setAssetCategory(updateLog.getAssetCategory());
         config.setAssetSubCategory(updateLog.getAssetSubCategory());
@@ -189,7 +186,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
         updateLog.setAssetCategory(dto.getAssetCategory());
         updateLog.setAssetSubCategory(dto.getAssetSubCategory());
         AssetProcess process = null;
-        if (StringUtils.isNotBlank(updateLog.getProcessId())){
+        if (StringUtils.isNotBlank(updateLog.getProcessId())) {
             process = new AssetProcess();
             process.setAssetCode(updateLog.getAssetCode());
             process.setId(Long.valueOf(updateLog.getProcessId()));
@@ -202,7 +199,7 @@ public class AssetUpdateLogServiceImpl extends ServiceImpl<AssetUpdateLogMapper,
 //        if (Objects.nonNull(process)){
 //            domain = processService.convertProcessGetLabel(process, new JSONObject());
 //        }
-        result.put("updateLog",updateLog);
+        result.put("updateLog", updateLog);
 
         return result;
     }

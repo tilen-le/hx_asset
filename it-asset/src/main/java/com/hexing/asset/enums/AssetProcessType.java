@@ -66,8 +66,12 @@ public enum AssetProcessType {
     /**
      * 资产盘点流程
      */
-    COUNTING_PROCESS("100", "资产盘点流程");
-
+    COUNTING_PROCESS("100", "资产盘点流程"),
+    /**
+     * 资产编辑
+     */
+    ASSET_MODIFIED("110", "资产编辑"),
+    ;
 
     private final String code;
     private final String name;

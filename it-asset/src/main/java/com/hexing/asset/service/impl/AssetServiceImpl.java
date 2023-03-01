@@ -115,6 +115,9 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             // 解析物料号返回资产大中小类
             JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
             MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+            asset.setAssetTypeCode(asset.getAssetType());
+            asset.setAssetCategoryCode(asset.getAssetCategory());
+            asset.setAssetSubCategoryCode(asset.getAssetSubCategory());
             asset.setAssetType(dto.getAssetType());
             asset.setAssetCategory(dto.getAssetCategory());
             asset.setAssetSubCategory(dto.getAssetSubCategory());
@@ -553,11 +556,7 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
         assetUpdateLogService.saveLog(asset, process);
         // 更新资产信息
         asset.setUpdateTime(DateUtils.getNowDate());
-        int changed = assetMapper.updateById(asset);
-
-        // TODO 若SAP指定的字段发生修改则后同步给SAP
-
-        return changed;
+        return assetMapper.updateById(asset);
     }
 
     /**

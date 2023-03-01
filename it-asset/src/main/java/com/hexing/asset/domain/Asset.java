@@ -84,6 +84,24 @@ public class Asset {
     private String assetSubCategory;
 
     /**
+     * 资产大类编号
+     */
+    @TableField(exist = false)
+    private String assetTypeCode;
+
+    /**
+     * 资产中类编号
+     */
+    @TableField(exist = false)
+    private String assetCategoryCode;
+
+    /**
+     * 资产小类编号
+     */
+    @TableField(exist = false)
+    private String assetSubCategoryCode;
+
+    /**
      * 规格型号
      */
     @ApiModelProperty(value = "规格型号")

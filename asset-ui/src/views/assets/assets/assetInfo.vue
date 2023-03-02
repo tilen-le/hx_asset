@@ -265,6 +265,7 @@
         <el-descriptions-item label="资产管理员">{{ info.assetManager }}</el-descriptions-item>
         <el-descriptions-item label="资产管理部门">{{ info.assetManagementDept }}</el-descriptions-item>
         <el-descriptions-item label="成本中心">{{ info.costCenterName }}</el-descriptions-item>
+        <el-descriptions-item label="资产管理员(部门)">{{ info.assetManagerDept }}</el-descriptions-item>
         <el-descriptions-item label="资产原值(含税)">{{ info.originalValue }}</el-descriptions-item>
         <el-descriptions-item label="资产净值">{{ info.netValue }}</el-descriptions-item>
         <el-descriptions-item label="资产币制">{{ info.monetaryUnit }}</el-descriptions-item>
@@ -275,7 +276,6 @@
         <el-descriptions-item label="采购单号">{{ info.purchaseOrderNo }}</el-descriptions-item>
         <el-descriptions-item label="资产卡片编号">{{ info.sapCode }}</el-descriptions-item>
         <el-descriptions-item label="入库日期">{{ info.storageDate }}</el-descriptions-item>
-        <el-descriptions-item label="资产管理员(部门)">{{ info.assetManagerDept }}</el-descriptions-item>
         <el-descriptions-item label="备注">{{ info.comment }}</el-descriptions-item>
       </el-descriptions>
     </div>
@@ -581,7 +581,7 @@
         editAsset(this.form).then(response => {
           this.$modal.msgSuccess("操作成功");
           this.getInfo();
-          this.edi_open = false;
+          this.edit_open = false;
         });
       },
       getAssetTree() {

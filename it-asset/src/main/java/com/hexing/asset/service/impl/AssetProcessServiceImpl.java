@@ -71,7 +71,10 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         processService.save(process);
         processParam.setId(process.getId());
         //推送sap
-        if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
+        if (type.equals(AssetProcessType.ASSET_MODIFIED.getCode())) {
+            int i = assetService.updateAsset(entity, process);
+            return i;
+        } else if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
             AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());
             vo.setCategory(processParam.getAssetType());
@@ -174,6 +177,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
 
     /**
      * 资产操作-编辑
+     *
      * @param assetProcess 资产表
      * @return
      */
@@ -370,7 +374,7 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
             entity.setResponsiblePersonDept("");
             entity.setCostCenter("");
             entity.setCostCenterName("");
-        }else {
+        } else {
             assetProcess.setResponsiblePersonCode(entity.getResponsiblePersonCode());
             assetProcess.setResponsiblePersonName(entity.getResponsiblePersonName());
             assetProcess.setResponsiblePersonDept(entity.getResponsiblePersonDept());

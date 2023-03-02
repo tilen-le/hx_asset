@@ -72,7 +72,8 @@ public class AssetProcessServiceImpl extends ServiceImpl<AssetProcessMapper, Ass
         processParam.setId(process.getId());
         //推送sap
         if (type.equals(AssetProcessType.ASSET_MODIFIED.getCode())) {
-            assetService.updateAsset(entity, process);
+            int i = assetService.updateAsset(entity, process);
+            return i;
         } else if (type.equals(AssetProcessType.PROCESS_FIXED.getCode())) {
             AssetFixVO vo = new AssetFixVO();
             vo.setAssetCode(entity.getAssetCode());

@@ -87,7 +87,6 @@ public class AssetManagementConfig
 
     /** 资产管理部门 */
     @Excel(name = "资产管理部门")
-    @TableField(exist = false)
     @ApiModelProperty(value = "资产管理部门")
     private String assetManageDept;
 

@@ -124,7 +124,7 @@ public class AssetManagementConfigServiceImpl extends ServiceImpl<AssetManagemen
             SysUser assetManagerUser = getUserByUserCode(sysUsers, assetManagementConfig.getAssetManager());
             SysUser financialManagerUser = getUserByUserCode(sysUsers, assetManagementConfig.getFinancialManager());
             //获取部门名称
-            SysDept assetManagerDeptName = getDeptCompleteNameByDeptCode(sysDept, assetManagerUser.getDeptId());
+            SysDept assetManagerDeptName = getDeptCompleteNameByDeptCode(sysDept, Long.valueOf(assetManagementConfig.getAssetManageDept()));
             SysDept financialManagerDeptName = getDeptCompleteNameByDeptCode(sysDept, financialManagerUser.getDeptId());
             assetManagementConfig.setAssetManageDept(assetManagerDeptName.getCompleteName());
             assetManagementConfig.setFinancialManageDept(financialManagerDeptName.getCompleteName());

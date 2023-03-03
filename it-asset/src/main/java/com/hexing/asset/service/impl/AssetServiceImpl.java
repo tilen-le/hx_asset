@@ -372,7 +372,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
             // 解析物料号返回资产大中小类
             JSONObject assetCategoryTree = CodeUtil.getAssetCategoryTree().getJSONObject(0);
             for (Asset asset : assetList) {
-                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                String materialNum = asset.getAssetType() + asset.getAssetCategory() + asset.getAssetSubCategory();
+                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(materialNum, assetCategoryTree);
                 asset.setAssetType(dto.getAssetType());
                 asset.setAssetCategory(dto.getAssetCategory());
                 asset.setAssetSubCategory(dto.getAssetSubCategory());
@@ -514,7 +515,8 @@ public class AssetServiceImpl extends ServiceImpl<AssetMapper, Asset> implements
                 // 填充资产管理员和资产管理部门
                 assetManagementConfigService.selectAssetManagementConfigByCategoryInfo(asset);
                 // 资产类型解析
-                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(asset.getMaterialNum(), assetCategoryTree);
+                String materialNum = asset.getAssetType() + asset.getAssetCategory() + asset.getAssetSubCategory();
+                MaterialCategorySimpleDTO dto = CodeUtil.parseMaterialNumber(materialNum, assetCategoryTree);
                 asset.setAssetType(dto.getAssetType());
                 asset.setAssetCategory(dto.getAssetCategory());
                 asset.setAssetSubCategory(dto.getAssetSubCategory());

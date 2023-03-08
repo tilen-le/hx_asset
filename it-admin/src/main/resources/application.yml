@@ -42,17 +42,17 @@ spring:
     basename: i18n/messages
     encoding: utf-8
   profiles:
-#    active: prod
-#    active: druid
-    active: test
-#    active: @environment@
+    #    active: prod
+    active: druid
+  #    active: test
+  #    active: @environment@
   # 文件上传
   servlet:
-     multipart:
-       # 单个文件大小
-       max-file-size:  50MB
-       # 设置总上传的文件大小
-       max-request-size:  50MB
+    multipart:
+      # 单个文件大小
+      max-file-size: 50MB
+      # 设置总上传的文件大小
+      max-request-size: 50MB
   # 服务模块
   devtools:
     restart:

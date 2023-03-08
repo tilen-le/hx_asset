@@ -181,7 +181,6 @@
 </template>
 
 <script>
-
   import {exportData, listAssets, importTemplate } from "@/api/assets/assets";
   import {getAssetTypeTree} from "@/api/assets/common";
   import { childTree } from '@/api/system/dept'
@@ -373,7 +372,11 @@
       })
     },
     goDetail(row) {
-      this.$router.push('/asset/assetInfo/' + row.assetCode)
+      // this.$router.push('/asset/assetInfo/' + row.assetCode)
+      this.$router.push({
+        name: 'assetInfo',
+        params: {assetCode: row.assetCode, flag: false}
+      })
     },
     // 文件上传中处理
     handleFileUploadProgress(event, file, fileList) {

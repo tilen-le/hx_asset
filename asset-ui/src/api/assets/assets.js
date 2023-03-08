@@ -9,6 +9,15 @@ export function listAssets(query) {
   })
 }
 
+//获取待办列表
+export function backloglistAssets(query) {
+  return request({
+    url: '/asset/backloglist',
+    method: 'get',
+    params: query
+  })
+}
+
 
 export function exportData(query) {
   return request({

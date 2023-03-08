@@ -27,7 +27,7 @@
                    v-if="info.assetStatus == '2' && info.transfer == '0' && checkPermi(['asset:process:transferAsset'])"
                    @click="zhuan_yi('0', '资产转移')">转移</el-button>
         <el-button size="mini" type="primary"
-                   v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])"
+                   v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag"
                    @click="zhuan_yi('1', '资产账务转移')">账务转移</el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '4' || info.assetStatus == '6') && checkPermi(['asset:process:maintainAsset'])"
@@ -163,6 +163,10 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="zhuan_yi_submit">确定</el-button>
+        <el-button v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])"
+                   type="danger"
+                   @click="zhuan_yi_reject">驳回
+        </el-button>
         <el-button @click="zhuan_yi_open=false">取消</el-button>
       </div>
     </el-dialog>
@@ -358,17 +362,21 @@
         asset_type_tree: null,
         asset_types: [],
         asset_category_add_options: [],
-        asset_sub_category_add_options: []
+        asset_sub_category_add_options: [],
+        backlogFlag: false
       }
     },
     created() {
       this.loading = true
-      const assetCode = this.$route.params && this.$route.params.assetCode;
+      const assetCode = this.$route.params.assetCode;
+      this.backlogFlag = this.$route.params.flag;
+      console.log(this.backlogFlag)
       if (assetCode) {
         this.assetCode = assetCode;
         getInfo(this.assetCode).then((response) => {
           this.info = response.data
           this.loading = false
+          console.log(this.info)
         })
       }
       this.getAssetTree()
@@ -464,6 +472,9 @@
             this.zhuan_yi_open = false;
           });
         }
+      },
+      zhuan_yi_reject() {
+
       },
       zhuan_gu() {
         this.clearForm();
@@ -653,12 +664,12 @@
   }
 </script>
 
-<style>
-  .el-tabs .el-tabs__content {
-    /*height: calc(38vh - 70px);*/
-    height: 290px;
-    overflow-y: auto;
-  }
+<style scoped>
+.el-tabs .el-tabs__content {
+  /*height: calc(38vh - 70px);*/
+  height: 290px;
+  overflow-y: auto;
+}
 </style>
 
 <style scoped>

@@ -66,7 +66,7 @@ export default {
   methods: {
     getList() {
       this.loading = true;
-      backloglistAssets(this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange, "customize", "capitalizationStartDate", "capitalizationEndDate"))
+      listAssets(this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange, "customize", "capitalizationStartDate", "capitalizationEndDate"))
         .then(response => {
           this.assetList = response.rows;
           this.total = response.total;

@@ -2,8 +2,10 @@
   <div class="app-main">
     <!--    <div>{{ $t('homepage.content') }}</div>-->
     <div class="backlog">
-      <span class="head-text">待办</span>
-      <el-tabs v-model="activeName" style="">
+      <div style="border-left:5px solid #0D6DEA; height: 40px;line-height: 50px;position: relative;margin-top: 10px">
+        <span class="head-text">待办</span>
+      </div>
+      <el-tabs v-model="activeName" class="backlogContent" type="card">
         <el-tab-pane v-if="checkPermi(['asset:log:custodyLogList'])" label="资产转移" name="assetTab">
           <Assetsbacklog ref="assetTab"></Assetsbacklog>
         </el-tab-pane>
@@ -16,11 +18,17 @@
       </el-tabs>
     </div>
 
-    <div class="two"></div>
+    <div class="two">
+      <el-empty description="正在设计中。。。"></el-empty>
+    </div>
 
-    <div class="three"></div>
+    <div class="three">
+      <el-empty description="正在设计中。。。"></el-empty>
+    </div>
 
-    <div class="four"></div>
+    <div class="four">
+      <el-empty description="正在设计中。。。"></el-empty>
+    </div>
 
   </div>
 </template>
@@ -78,7 +86,7 @@ export default {
 </script>
 <style scoped>
 .backlog {
-  height: 500px;
+  height: 450px;
   width: 49%;
   float: left;
   margin-left: 18px;
@@ -87,8 +95,16 @@ export default {
   background-color: #fbfbfc;
 }
 
+.backlogContent {
+  position: relative;
+  height: 450px;
+  width: 95%;
+  margin-left: 20px;
+  margin-top: 20px;
+}
+
 .two {
-  height: 500px;
+  height: 450px;
   width: 49%;
   float: right;
   margin-top: 18px;
@@ -96,7 +112,7 @@ export default {
 }
 
 .three {
-  height: 500px;
+  height: 450px;
   width: 49%;
   margin-left: 18px;
   margin-top: 18px;
@@ -106,7 +122,7 @@ export default {
 }
 
 .four {
-  height: 500px;
+  height: 450px;
   width: 49%;
   margin-top: 18px;
   float: bottom;
@@ -119,12 +135,14 @@ export default {
 }
 
 .head-text {
-  position: absolute;
-  padding-top: 20px;
+  /*position: absolute;*/
+  /*padding-top: 20px;*/
   padding-left: 10px;
   font-size: xx-large;
   font-family: "微软雅黑 Light";
   font-weight: bold;
+  font-size: 20px;
 }
+
 </style>
 

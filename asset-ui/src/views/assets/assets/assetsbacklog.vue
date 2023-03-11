@@ -10,12 +10,12 @@
       <el-table-column align="center" label="资产中类" prop="assetCategory"/>
       <el-table-column align="center" label="资产小类" prop="assetSubCategory"/>
       <el-table-column :show-overflow-tooltip="true" align="center" label="资产名称" prop="assetName"/>
-      <el-table-column align="center" label="提交人" prop="responsiblePersonName"/>
-      <el-table-column align="center" label="提交时间" prop="capitalizationDate">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.capitalizationDate, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
+      <el-table-column align="center" label="提交人" prop="submitter"/>
+      <el-table-column align="center" label="提交时间" prop="createTime"/>
+      <!--        <template slot-scope="scope">-->
+      <!--          <span>{{ parseTime(scope.row.capitalizationDate, '{y}-{m}-{d}') }}</span>-->
+      <!--        </template>-->
+      <!--      </el-table-column>-->
     </el-table>
     <pagination
       v-show="total>0"
@@ -30,7 +30,7 @@
 
 <script>
 import {listAssets} from "@/api/assets/assets";
-import {backloglistAssets} from "../../../api/assets/assets";
+import {backloglistAssets} from "@/api/assets/assets";
 
 export default {
   name: "assetsbacklog",
@@ -66,10 +66,10 @@ export default {
   methods: {
     getList() {
       this.loading = true;
-      listAssets(this.addDateRange(this.queryParams, this.queryParams.capitalizationDateRange, "customize", "capitalizationStartDate", "capitalizationEndDate"))
+      backloglistAssets({type: "ZCZY"})
         .then(response => {
-          this.assetList = response.rows;
-          this.total = response.total;
+          this.assetList = response.data;
+          // this.total = response.total;
           this.loading = false;
         });
     },

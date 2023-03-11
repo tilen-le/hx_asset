@@ -1,43 +1,69 @@
 <template>
   <div class="app-container">
     <div class="divHead divInfo">
-      <span class="head_title">资产编码：{{assetCode}}</span>
+      <span class="head_title">资产编码：{{ assetCode }}</span>
       <div style="display: inline-block;margin-left: 50px;">
         <dict-tag :options="dict.type.asset_status" :value="info.assetStatus"/>
       </div>
-      <div style="display: inline-block;margin-left: 25px;" v-if="info.transfer == '1'">
+      <div v-if="info.transferStatus == '1'||info.transferStatus == '2'"
+           style="display: inline-block;margin-left: 25px;">
         <el-tag type="warning">资产转移中</el-tag>
       </div>
+      <div v-if="info.transferStatus == '3'" style="display: inline-block;margin-left: 25px;">
+        <el-tag type="danger">驳回</el-tag>
+      </div>
+      <!--transferStatus
+          0资产转移
+          1资产转出公司待办
+          2资产转入公司待办
+          3驳回-->
 
-
-<!--
-      1在库 资产管理员：【派发】【盘亏】
-      4试用 资产管理员：【维修】【盘亏】财务会计：【转固】
-      6在用 资产管理员：【维修】【闲置】【报废】【外卖】【盘亏】
-      8维修 资产管理员：【已维修】【已退货】
-      2闲置 资产管理员：【派发】【盘亏】【转移】
-      7待外卖 财务会计：【已外卖】资产管理员：【盘亏】
-      9待报废 财务会计：【已报废】资产管理员：【盘亏】
-      10、3、11、5已外卖，已退回，已报废，盘亏（无按钮显示，不能再操作-->
+      <!--
+            1在库 资产管理员：【派发】【盘亏】
+            4试用 资产管理员：【维修】【盘亏】财务会计：【转固】
+            6在用 资产管理员：【维修】【闲置】【报废】【外卖】【盘亏】
+            8维修 资产管理员：【已维修】【已退货】
+            2闲置 资产管理员：【派发】【盘亏】【转移】
+            7待外卖 财务会计：【已外卖】资产管理员：【盘亏】
+            9待报废 财务会计：【已报废】资产管理员：【盘亏】
+            10、3、11、5已外卖，已退回，已报废，盘亏（无按钮显示，不能再操作-->
       <div class="head_button">
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '1' || info.assetStatus == '2') && checkPermi(['asset:process:receiveAsset'])"
                    @click="pai_fa">派发</el-button>
+        <!--        <el-button size="mini" type="primary"-->
+        <!--                   v-if="info.assetStatus == '2' && info.transfer == '0' && checkPermi(['asset:process:transferAsset'])"-->
+        <!--                   @click="zhuan_yi('0', '资产转移')">转移</el-button>-->
+        <!--        <el-button size="mini" type="primary"-->
+        <!--                   v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag"-->
+        <!--                   @click="zhuan_yi('1', '资产账务转移')">账务转移</el-button>-->
+        <!--      transferStatus=0 或者 = 4（驳回）   -->
         <el-button size="mini" type="primary"
-                   v-if="info.assetStatus == '2' && info.transfer == '0' && checkPermi(['asset:process:transferAsset'])"
-                   @click="zhuan_yi('0', '资产转移')">转移</el-button>
+                   v-if="info.assetStatus == '2' && (info.transferStatus == '0'||info.transferStatus == '3') && checkPermi(['asset:process:transferAsset'])"
+                   @click="zhuan_yi('0', '资产转移')">转移
+        </el-button>
+        <!--     transferStatus=1 转出公司财务会计确认   -->
         <el-button size="mini" type="primary"
-                   v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag"
-                   @click="zhuan_yi('1', '资产账务转移')">账务转移</el-button>
+                   v-if="(info.transferStatus == '1' ||info.transferStatus == '2') && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag&&(currentUserFlag == '0'||currentUserFlag == '1')"
+                   @click="zhuan_yi('1', '资产账务转移')">账务转移
+        </el-button>
+        <!--     transferStatus=2 接收公司财务会计确认   -->
+        <el-button v-if="(info.transferStatus == '2' ||info.transferStatus == '2') && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag&& (currentUserFlag == '0'||currentUserFlag == '2')" size="mini"
+                   type="primary"
+                   @click="zhuan_yi('1', '资产账务转移')">账务转移
+        </el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '4' || info.assetStatus == '6') && checkPermi(['asset:process:maintainAsset'])"
-                   @click="confirm_handle('维修')">维修</el-button>
+                   @click="confirm_handle('维修')">维修
+        </el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '6') && checkPermi(['asset:process:scrapAsset'])"
-                   @click="confirm_handle('报废')">报废</el-button>
+                   @click="confirm_handle('报废')">报废
+        </el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '6') && checkPermi(['asset:process:waiteTakeOutAsset'])"
-                   @click="confirm_handle('外卖')">外卖</el-button>
+                   @click="confirm_handle('外卖')">外卖
+        </el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '9') && checkPermi(['asset:process:scrapedAsset'])"
                    @click="status_handle('已报废')">已报废</el-button>
@@ -163,9 +189,10 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="zhuan_yi_submit">确定</el-button>
-        <el-button v-if="info.transfer == '1' && checkPermi(['asset:process:accountTransferAsset'])"
-                   type="danger"
-                   @click="zhuan_yi_reject">驳回
+        <el-button
+          v-if="info.transferStatus == '1'||info.transferStatus == '2' && checkPermi(['asset:process:accountTransferAsset'])"
+          type="danger"
+          @click="zhuan_yi_reject">驳回
         </el-button>
         <el-button @click="zhuan_yi_open=false">取消</el-button>
       </div>
@@ -303,22 +330,23 @@
 </template>
 
 <script>
-  import custodyLog from "./custodyLog";
-  import workLog from "./workLog";
-  import operationLog from "./operationLog";
-  import {getDicts} from "@/api/system/dict/data";
-  import {getInfo} from "@/api/assets/assets";
-  import {checkPermi} from '@/utils/permission'
-  import {
-    accountTransferAsset,
-    fixationAsset,
-    getTransferInfo,
-    inventoryLossAsset,
-    maintainAsset,
-    maintainedAsset,
-    receiveAsset,
-    returnAsset,
-    scrapAsset,
+import custodyLog from "./custodyLog";
+import workLog from "./workLog";
+import operationLog from "./operationLog";
+import {getDicts} from "@/api/system/dict/data";
+import {getInfo} from "@/api/assets/assets";
+import {checkPermi} from '@/utils/permission';
+import {getUser} from "@/api/system/user";
+import {
+  accountTransferAsset,
+  fixationAsset,
+  getTransferInfo,
+  inventoryLossAsset,
+  maintainAsset,
+  maintainedAsset,
+  receiveAsset,
+  returnAsset,
+  scrapAsset,
     scrapedAsset,
     takeOutAsset,
     transferAsset,
@@ -328,7 +356,8 @@
   import {childTree} from '@/api/system/dept';
   import Treeselect from '@riophae/vue-treeselect'
   import '@riophae/vue-treeselect/dist/vue-treeselect.css'
-  import {getAssetTypeTree} from "@/api/assets/common"
+import {getAssetTypeTree} from "@/api/assets/common"
+import {accountTransferAssetReject} from "../../../api/assets/process";
 
   export default {
     name: 'assetInfo',
@@ -363,7 +392,8 @@
         asset_types: [],
         asset_category_add_options: [],
         asset_sub_category_add_options: [],
-        backlogFlag: false
+        backlogFlag: false,
+        currentUserFlag: false
       }
     },
     created() {
@@ -375,8 +405,8 @@
         this.assetCode = assetCode;
         getInfo(this.assetCode).then((response) => {
           this.info = response.data
+          this.currentUserFlag = response.data.currentUserFlag
           this.loading = false
-          console.log(this.info)
         })
       }
       this.getAssetTree()
@@ -389,7 +419,6 @@
           this.getTabContent('operateTab');
         } else {}
       }, 500);
-
     },
     methods: {
       checkPermi,
@@ -450,7 +479,7 @@
         this.zhuan_yi_open = true;
         this.getCommonUsers();
         this.getChildDeptTree();
-        if ('1' == type) {
+        if ('1' == type || '2' == type || '3' == this.info.transferStatus) {
           //获取转移信息
           getTransferInfo(this.assetCode).then((response) => {
             this.form = response.data
@@ -474,7 +503,9 @@
         }
       },
       zhuan_yi_reject() {
-
+        accountTransferAssetReject(this.form).then(response => {
+          console.log("资产转移驳回")
+        })
       },
       zhuan_gu() {
         this.clearForm();

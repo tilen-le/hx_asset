@@ -143,6 +143,15 @@ export function accountTransferAsset(data) {
   })
 }
 
+//账务驳回
+export function accountTransferAssetReject(data) {
+  return request({
+    url: '/asset/process/accountTransferAssetReject',
+    method: 'put',
+    data: data
+  })
+}
+
 //编辑
 export function editAsset(data) {
   return request({

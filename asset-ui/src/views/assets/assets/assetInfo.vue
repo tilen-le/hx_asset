@@ -505,9 +505,14 @@ import {accountTransferAssetReject} from "../../../api/assets/process";
       },
       zhuan_yi_reject() {
         accountTransferAssetReject(this.form).then(response => {
-          this.zhuan_yi_open = false;
-          this.$modal.msgSuccess("操作成功");
-          console.log("资产转移驳回")
+          if (response.data.code == 200) {
+            this.zhuan_yi_open = false;
+            this.$modal.msgSuccess("操作成功");
+            this.reload()
+          } else {
+            this.zhuan_yi_open = false;
+            this.$modal.msgSuccess("操作失败");
+          }
         })
       },
       zhuan_gu() {

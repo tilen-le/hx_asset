@@ -504,14 +504,16 @@ import {accountTransferAssetReject} from "../../../api/assets/process";
         }
       },
       zhuan_yi_reject() {
+        this.loading = true
         accountTransferAssetReject(this.form).then(response => {
           if (response.data.code == 200) {
             this.zhuan_yi_open = false;
             this.$modal.msgSuccess("操作成功");
-            this.reload()
+            this.loading = false
           } else {
             this.zhuan_yi_open = false;
             this.$modal.msgSuccess("操作失败");
+            this.loading = false
           }
         })
       },

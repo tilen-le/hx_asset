@@ -1,20 +1,13 @@
 <template>
-  <div class="app-main">
-    <!--    <div>{{ $t('homepage.content') }}</div>-->
+  <div class="homepage">
     <div class="backlog">
       <div style="border-left:5px solid #0D6DEA; height: 40px;line-height: 50px;position: relative;margin-top: 10px">
         <span class="head-text">待办</span>
       </div>
       <el-tabs v-model="activeName" class="backlogContent" type="card">
-        <el-tab-pane v-if="checkPermi(['asset:log:custodyLogList'])" label="资产转移" name="assetTab">
-          <Assetsbacklog ref="assetTab"></Assetsbacklog>
+        <el-tab-pane label="资产转移" name="transferTabTodo">
+          <Assetsbacklog ref="transferTabTodo"></Assetsbacklog>
         </el-tab-pane>
-        <!--        <el-tab-pane label="xxxxx" name="orderTab" v-if="checkPermi(['asset:log:workLogList'])">-->
-        <!--          <div>暂无内容</div>-->
-        <!--        </el-tab-pane>-->
-        <!--        <el-tab-pane label="xxxx" name="operateTab" v-if="checkPermi(['asset:log:operationLogList'])">-->
-        <!--          <div>暂无内容</div>-->
-        <!--        </el-tab-pane>-->
       </el-tabs>
     </div>
 
@@ -42,27 +35,13 @@ export default {
   components: {Assetsbacklog},
   data() {
     return {
-      activeName: 'assetTab',
-      tabRefresh: {
-        assetTab: true,
-        orderTab: false,
-        operateTab: false
-      },
+      activeName: 'transferTabTodo'
     };
   },
   created() {
     this.loading = true;
     setTimeout(() => {
-      if (this.$auth.hasPermi("asset:log:custodyLogList")) {
-        this.getTabContent('assetTab');
-        this.loading = false;
-      } else if (this.$auth.hasPermi("asset:log:workLogList")) {
-        this.getTabContent('orderTab');
-      } else if (this.$auth.hasPermi("asset:log:operationLogList")) {
-        this.getTabContent('operateTab');
-      } else {
-      }
-
+      this.getTabContent('transferTabTodo');
     }, 500);
 
   },
@@ -72,13 +51,8 @@ export default {
       this.getTabContent(tab.name);
     },
     getTabContent(tabName) {
-      if (tabName == 'assetTab') {
-        this.$refs.assetTab.getList();
-      } else if (tabName == 'orderTab') {
-        this.$refs.orderTab.getList();
-      } else if (tabName == 'operateTab') {
-        this.$refs.operateTab.getList();
-      } else {
+      if (tabName == 'transferTabTodo') {
+        this.$refs.transferTabTodo.getList();
       }
     },
   },
@@ -86,7 +60,7 @@ export default {
 </script>
 <style scoped>
 .backlog {
-  height: 450px;
+  height: 400px;
   width: 49%;
   float: left;
   margin-left: 18px;
@@ -97,14 +71,14 @@ export default {
 
 .backlogContent {
   position: relative;
-  height: 450px;
+  height: 400px;
   width: 95%;
   margin-left: 20px;
   margin-top: 20px;
 }
 
 .two {
-  height: 450px;
+  height: 400px;
   width: 49%;
   float: right;
   margin-top: 18px;
@@ -112,7 +86,7 @@ export default {
 }
 
 .three {
-  height: 450px;
+  height: 400px;
   width: 49%;
   margin-left: 18px;
   margin-top: 18px;
@@ -122,7 +96,7 @@ export default {
 }
 
 .four {
-  height: 450px;
+  height: 400px;
   width: 49%;
   margin-top: 18px;
   float: bottom;
@@ -130,7 +104,7 @@ export default {
   background-color: #fbfbfc;
 }
 
-.app-main {
+.homepage {
   background-color: #e8e8e8;
 }
 

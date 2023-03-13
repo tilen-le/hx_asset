@@ -400,7 +400,6 @@ import {accountTransferAssetReject} from "../../../api/assets/process";
       this.loading = true
       const assetCode = this.$route.params.assetCode;
       this.backlogFlag = this.$route.params.flag;
-      console.log(this.backlogFlag)
       if (assetCode) {
         this.assetCode = assetCode;
         getInfo(this.assetCode).then((response) => {

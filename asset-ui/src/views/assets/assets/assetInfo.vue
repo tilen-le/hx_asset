@@ -10,7 +10,7 @@
         <el-tag type="warning">资产转移中</el-tag>
       </div>
       <div v-if="info.transferStatus == '3'" style="display: inline-block;margin-left: 25px;">
-        <el-tag type="warning">资产驳回</el-tag>
+        <el-tag type="warning">资产转移驳回</el-tag>
       </div>
       <!--transferStatus
           0资产转移

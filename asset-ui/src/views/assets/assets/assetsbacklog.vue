@@ -12,10 +12,6 @@
       <el-table-column align="center" label="资产名称" prop="assetName" :show-overflow-tooltip="true"/>
       <el-table-column align="center" label="提交人" prop="submitter"/>
       <el-table-column align="center" label="提交时间" prop="createTime"/>
-      <!--        <template slot-scope="scope">-->
-      <!--          <span>{{ parseTime(scope.row.capitalizationDate, '{y}-{m}-{d}') }}</span>-->
-      <!--        </template>-->
-      <!--      </el-table-column>-->
     </el-table>
     <pagination
       v-show="total>0"
@@ -70,10 +66,11 @@ export default {
         });
     },
     goDetail(row) {
-      // this.$router.push('/asset/assetInfo/' + row.assetCode)
+      // const flag = true;
+      // this.$router.push('/asset/assetInfo/' + row.assetCode+flag)
       this.$router.push({
         name: 'assetInfo',
-        params: {assetCode: row.assetCode, flag: true}
+        query: {assetCode: row.assetCode, flag: 1}
       })
     },
   },

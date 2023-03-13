@@ -10,7 +10,7 @@
         <el-tag type="warning">资产转移中</el-tag>
       </div>
       <div v-if="info.transferStatus == '3'" style="display: inline-block;margin-left: 25px;">
-        <el-tag type="danger">驳回</el-tag>
+        <el-tag type="warning">资产驳回</el-tag>
       </div>
       <!--transferStatus
           0资产转移
@@ -44,13 +44,15 @@
         </el-button>
         <!--     transferStatus=1 转出公司财务会计确认   -->
         <el-button size="mini" type="primary"
-                   v-if="(info.transferStatus == '1' ||info.transferStatus == '2') && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag&&(currentUserFlag == '0'||currentUserFlag == '1')"
+                   v-if="(info.transferStatus == '1' ) && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag&&(currentUserFlag == '0'||currentUserFlag == '1')"
                    @click="zhuan_yi('1', '资产账务转移')">账务转移
         </el-button>
         <!--     transferStatus=2 接收公司财务会计确认   -->
-        <el-button v-if="(info.transferStatus == '2' ||info.transferStatus == '2') && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag&& (currentUserFlag == '0'||currentUserFlag == '2')" size="mini"
-                   type="primary"
-                   @click="zhuan_yi('1', '资产账务转移')">账务转移
+        <el-button
+          v-if="(info.transferStatus == '2' ) && checkPermi(['asset:process:accountTransferAsset'])&& backlogFlag&& (currentUserFlag == '0'||currentUserFlag == '2')"
+          size="mini"
+          type="primary"
+          @click="zhuan_yi('1', '资产账务转移')">账务转移
         </el-button>
         <el-button size="mini" type="primary"
                    v-if="(info.assetStatus == '4' || info.assetStatus == '6') && checkPermi(['asset:process:maintainAsset'])"
@@ -398,8 +400,8 @@ import {accountTransferAssetReject} from "../../../api/assets/process";
     },
     created() {
       this.loading = true
-      const assetCode = this.$route.params.assetCode;
-      this.backlogFlag = this.$route.params.flag;
+      const assetCode = this.$route.query.assetCode;
+      this.backlogFlag = this.$route.query.flag;
       if (assetCode) {
         this.assetCode = assetCode;
         getInfo(this.assetCode).then((response) => {
@@ -503,6 +505,8 @@ import {accountTransferAssetReject} from "../../../api/assets/process";
       },
       zhuan_yi_reject() {
         accountTransferAssetReject(this.form).then(response => {
+          this.zhuan_yi_open = false;
+          this.$modal.msgSuccess("操作成功");
           console.log("资产转移驳回")
         })
       },

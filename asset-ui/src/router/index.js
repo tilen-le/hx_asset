@@ -170,10 +170,10 @@ export const constantRoutes = [
     hidden: true,
     children: [
       {
-        path: 'assetInfo/:assetCode',
+        path: 'assetInfo/:assetCode/:flag',
         component: (resolve) => require(['@/views/assets/assets/assetInfo'], resolve),
         name: 'assetInfo',
-        meta: { title: '资产详情'}
+        meta: {title: '资产详情'}
       }
     ]
   }

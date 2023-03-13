@@ -70,7 +70,7 @@ export default {
       // this.$router.push('/asset/assetInfo/' + row.assetCode+flag)
       this.$router.push({
         name: 'assetInfo',
-        query: {assetCode: row.assetCode, flag: 1}
+        params: {assetCode: row.assetCode, flag: true}
       })
     },
   },

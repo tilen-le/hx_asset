@@ -73,7 +73,7 @@
         <treeselect style="width:215px;" v-model="queryParams.responsiblePersonDept" :options="deptOptions" :normalizer="normalizer"
                     :show-count="true" placeholder="请选择资产保管部门"/>
       </el-form-item>
-      <el-form-item label="资产化日期" prop="capitalizationDateRange" label-width="82px">
+      <el-form-item label="资本化日期" label-width="82px" prop="capitalizationDateRange">
         <div class="block">
           <el-date-picker size="small" v-model="queryParams.capitalizationDateRange"
                           start-placeholder="开始日期"
@@ -127,7 +127,7 @@
           <dict-tag :options="dict.type.asset_fixed" :value="scope.row.fixed"/>
         </template>
       </el-table-column>
-      <el-table-column label="资产化日期" align="center" prop="capitalizationDate">
+      <el-table-column align="center" label="资本化日期" prop="capitalizationDate">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.capitalizationDate, '{y}-{m}-{d}') }}</span>
         </template>
